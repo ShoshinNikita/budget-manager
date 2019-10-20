@@ -39,7 +39,7 @@ func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 		return nil, ErrDataBaseIsDown
 	}
 
-	log = log.WithPrefix("database")
+	log = log.WithPrefix("[database]")
 
 	return &DB{db: db, log: log}, nil
 }
