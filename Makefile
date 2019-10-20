@@ -1,5 +1,15 @@
-run: run_pg run_local
-run_local:
-	./scripts/run_local.sh
-run_pg:
-	./scripts/run_pg.sh
+DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
+
+run: run_docker
+run_docker: clear
+	docker-compose -f ${DOCKER_COMPOSE} up --build
+run_local: clear
+	# Run Postgres
+	./scripts/local/postgres.sh
+	./scripts/local/run.sh
+clear:
+	# Stop local
+
+	# Stop compose
+	docker-compose -f ${DOCKER_COMPOSE} stop
+	docker-compose -f ${DOCKER_COMPOSE} rm
