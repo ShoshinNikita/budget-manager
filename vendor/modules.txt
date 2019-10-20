@@ -1,5 +1,7 @@
 # github.com/ShoshinNikita/go-clog/v3 v3.1.0
 github.com/ShoshinNikita/go-clog/v3
+# github.com/caarlos0/env/v6 v6.1.0
+github.com/caarlos0/env/v6
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
 # github.com/go-pg/pg/v9 v9.0.0-beta.15
