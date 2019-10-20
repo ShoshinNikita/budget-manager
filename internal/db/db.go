@@ -16,6 +16,7 @@ type DB struct {
 	log *clog.Logger
 }
 
+// NewDBOptions contains options for NewDB function
 type NewDBOptions struct {
 	Host string
 	Port string
@@ -25,6 +26,7 @@ type NewDBOptions struct {
 	Database string
 }
 
+// NewDB creates a new connection to the db and pings it
 func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 	db := pg.Connect(&pg.Options{
 		Addr:     opts.Host + ":" + opts.Port,
@@ -42,6 +44,9 @@ func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 	return &DB{db: db, log: log}, nil
 }
 
+// Prepare prepares the database:
+//   - create tables
+//
 func (db *DB) Prepare() error {
 	db.log.Debug("create tables")
 
@@ -62,6 +67,7 @@ func (db *DB) Prepare() error {
 	return err
 }
 
+// Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
 	db.log.Debug("close database connection")
 
