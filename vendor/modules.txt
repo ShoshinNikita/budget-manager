@@ -1,0 +1,36 @@
+# github.com/ShoshinNikita/go-clog/v3 v3.1.0
+github.com/ShoshinNikita/go-clog/v3
+# github.com/fatih/color v1.7.0
+github.com/fatih/color
+# github.com/go-pg/pg/v9 v9.0.0-beta.15
+github.com/go-pg/pg/v9
+github.com/go-pg/pg/v9/internal
+github.com/go-pg/pg/v9/internal/parser
+github.com/go-pg/pg/v9/internal/pool
+github.com/go-pg/pg/v9/orm
+github.com/go-pg/pg/v9/types
+# github.com/go-pg/urlstruct v0.2.5
+github.com/go-pg/urlstruct
+github.com/go-pg/urlstruct/internal
+# github.com/go-pg/zerochecker v0.1.1
+github.com/go-pg/zerochecker
+# github.com/gorilla/mux v1.7.3
+github.com/gorilla/mux
+# github.com/jinzhu/inflection v1.0.0
+github.com/jinzhu/inflection
+# github.com/mattn/go-colorable v0.1.4
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.10
+github.com/mattn/go-isatty
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
+# github.com/vmihailenco/tagparser v0.1.0
+github.com/vmihailenco/tagparser
+github.com/vmihailenco/tagparser/internal
+github.com/vmihailenco/tagparser/internal/parser
+# golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
+golang.org/x/crypto/pbkdf2
+# golang.org/x/sys v0.0.0-20191018095205-727590c5006e
+golang.org/x/sys/unix
+# mellium.im/sasl v0.2.1
+mellium.im/sasl
