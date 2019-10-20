@@ -55,7 +55,7 @@ func main() {
 	go func() {
 		log.Info("start Server")
 		if err := server.ListenAndServer(); err != nil {
-			log.Errorf("server fatal error: %s\n", err)
+			log.Errorf("server fatal error: %s", err)
 			close(serverError)
 		}
 	}()
