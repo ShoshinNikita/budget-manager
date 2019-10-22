@@ -52,9 +52,13 @@ func (db *DB) Prepare() error {
 
 	err := createTables(
 		db.db,
+
+		&Month{}, &orm.CreateTableOptions{IfNotExists: true},
 		&Income{}, &orm.CreateTableOptions{IfNotExists: true},
-		&Spend{}, &orm.CreateTableOptions{IfNotExists: true},
 		&MonthlyPayment{}, &orm.CreateTableOptions{IfNotExists: true},
+
+		&Day{}, &orm.CreateTableOptions{IfNotExists: true},
+		&Spend{}, &orm.CreateTableOptions{IfNotExists: true},
 		&SpendType{}, &orm.CreateTableOptions{IfNotExists: true},
 	)
 

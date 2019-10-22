@@ -8,12 +8,39 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Income contains information about incomes (salary, gifts and etc.)
-type Income struct {
-	ID uint `pg:",pk"`
+type Month struct {
+	ID uint
 
 	Year  int
 	Month time.Month
+
+	Incomes         []*Income         `pg:"fk:month_id"`
+	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
+
+	// DailyBudget is a (Sum of Incomes - Cost of Monthly Payments) / Number of Days
+	// multiplied by 100
+	DailyBudget int64
+	Days        []*Day `pg:"fk:month_id"`
+}
+
+type Day struct {
+	// MonthID is a foreign key to Monthes table
+	MonthID uint
+
+	ID uint
+
+	Day int
+	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
+	Saldo  int64
+	Spends []*Spend `pg:"fk:day_id"`
+}
+
+// Income contains information about incomes (salary, gifts and etc.)
+type Income struct {
+	// MonthID is a foreign key to Monthes table
+	MonthID uint
+
+	ID uint `pg:",pk"`
 
 	Title  string
 	Notes  string
@@ -23,13 +50,6 @@ type Income struct {
 var _ orm.BeforeInsertHook = (*Income)(nil)
 
 func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Skip Year
-
-	// Check Month
-	if !(time.January <= in.Month && in.Month <= time.December) {
-		return ctx, errors.Errorf("invalid month: '%d'", in.Month)
-	}
-
 	// Check Title
 	if in.Title == "" {
 		return ctx, errors.New("title can't be empty")
@@ -47,11 +67,10 @@ func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
 
 // Spend contains information about spends
 type Spend struct {
-	ID uint `pg:",pk"`
+	// MonthID is a foreign key to Days table
+	DayID uint
 
-	Year  int
-	Month time.Month
-	Day   int16
+	ID uint `pg:",pk"`
 
 	Title  string
 	TypeID uint
@@ -63,18 +82,6 @@ type Spend struct {
 var _ orm.BeforeInsertHook = (*Spend)(nil)
 
 func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Skip Year
-
-	// Check Month
-	if !(time.January <= in.Month && in.Month <= time.December) {
-		return ctx, errors.Errorf("invalid month: '%d'", in.Month)
-	}
-
-	// Check Day
-	if !(0 < in.Day && int(in.Day) <= daysInMonth(in.Month)) {
-		return ctx, errors.Errorf("invalid day: '%d'", in.Day)
-	}
-
 	// Check Title
 	if in.Title == "" {
 		return ctx, errors.New("title can't be empty")
@@ -94,10 +101,10 @@ func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
 
 // MonthlyPayment contains information about monthly payments (rent, Patreon and etc.)
 type MonthlyPayment struct {
-	ID uint `pg:",pk"`
+	// MonthID is a foreign key to Monthes table
+	MonthID uint
 
-	Year  int
-	Month time.Month
+	ID uint `pg:",pk"`
 
 	Title  string
 	TypeID uint
@@ -109,13 +116,6 @@ type MonthlyPayment struct {
 var _ orm.BeforeInsertHook = (*MonthlyPayment)(nil)
 
 func (in *MonthlyPayment) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Skip Year
-
-	// Check Month
-	if !(time.January <= in.Month && in.Month <= time.December) {
-		return ctx, errors.Errorf("invalid month: '%d'", in.Month)
-	}
-
 	// Check Title
 	if in.Title == "" {
 		return ctx, errors.New("title can't be empty")
