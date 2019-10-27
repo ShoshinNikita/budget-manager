@@ -11,5 +11,6 @@ require (
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/robfig/cron/v3 v3.0.0
+	github.com/stretchr/testify v1.4.0
 	golang.org/x/sys v0.0.0-20191018095205-727590c5006e // indirect
 )
