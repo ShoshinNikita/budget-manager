@@ -1,17 +1,43 @@
 package db
 
 import (
+	"context"
+
 	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 )
 
-var (
-	errBeginTransaction = "can't begin a new transaction"
-	errCommitChanges    = "can't commit changes"
-)
+var _ orm.BeforeInsertHook = (*Income)(nil)
 
-// -----------------------------------------------------------------------------
-// Income
+// Income contains information about incomes (salary, gifts and etc.)
+type Income struct {
+	// MonthID is a foreign key to Monthes table
+	MonthID uint
+
+	ID uint `pg:",pk"`
+
+	Title  string
+	Notes  string
+	Income int64 // multiplied by 100
+}
+
+func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
+	// Check Title
+	if in.Title == "" {
+		return ctx, errors.New("title can't be empty")
+	}
+
+	// Skip Notes
+
+	// Check Income
+	if in.Income <= 0 {
+		return ctx, errors.Errorf("invalid income: '%d'", in.Income)
+	}
+
+	return ctx, nil
+}
+
 // -----------------------------------------------------------------------------
 
 type AddIncomeArgs struct {
@@ -40,7 +66,7 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 	}
 
 	// Recompute Month budget
-	err = recomputeMonth(tx, args.MonthID)
+	err = db.recomputeMonth(tx, args.MonthID)
 	if err != nil {
 		err = errors.Wrap(err, "can't recompute month budget")
 		db.log.Error(err)
@@ -115,7 +141,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 	}
 
 	// Recompute Month budget
-	err = recomputeMonth(tx, in.MonthID)
+	err = db.recomputeMonth(tx, in.MonthID)
 	if err != nil {
 		err = errors.Wrap(err, "can't recompute month budget")
 		db.log.Error(err)
@@ -185,7 +211,7 @@ func (db DB) RemoveIncome(id uint) error {
 	}
 
 	// Recompute Month budget
-	err = recomputeMonth(tx, monthID)
+	err = db.recomputeMonth(tx, monthID)
 	if err != nil {
 		err = errors.Wrap(err, "can't recompute month budget")
 		db.log.Error(err)
@@ -206,102 +232,4 @@ func (db DB) RemoveIncome(id uint) error {
 func (_ DB) removeIncome(tx *pg.Tx, id uint) error {
 	in := &Income{ID: id}
 	return tx.Delete(in)
-}
-
-// -----------------------------------------------------------------------------
-// Monthly Payments
-// -----------------------------------------------------------------------------
-
-func (db DB) AddMonthlyPayment() {}
-
-func (db DB) EditMonthlyPayment() {}
-
-func (db DB) RemoveMonthlyPayment() {}
-
-// -----------------------------------------------------------------------------
-// Spends
-// -----------------------------------------------------------------------------
-
-func (db DB) AddSpend() {}
-
-func (db DB) EditSpend() {}
-
-func (db DB) RemoveSpend() {}
-
-// -----------------------------------------------------------------------------
-// Spend Types
-// -----------------------------------------------------------------------------
-
-func (db DB) AddSpendType() {}
-
-func (db DB) EditSpendType() {}
-
-func (db DB) RemoveSpendType() {}
-
-// -----------------------------------------------------------------------------
-
-func (db DB) GetMonthID(year, month int) (uint, error) {
-	m := &Month{}
-	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
-	if err != nil {
-		if err == pg.ErrNoRows {
-			return 0, errors.New("there is no such month")
-		}
-
-		return 0, errors.Wrap(err, "can't select Month with passed year and month")
-	}
-
-	return m.ID, nil
-}
-
-// -----------------------------------------------------------------------------
-
-func recomputeMonth(tx *pg.Tx, monthID uint) error {
-	m := &Month{ID: monthID}
-	err := tx.Model(m).
-		Relation("Incomes").
-		Relation("MonthlyPayments").
-		Relation("Days").
-		Select()
-
-	if err != nil {
-		return errors.Wrap(err, "can't select month")
-	}
-
-	newDailyBudget := func() int64 {
-		var monthlyBudget int64
-
-		for _, in := range m.Incomes {
-			monthlyBudget += in.Income
-		}
-		for _, p := range m.MonthlyPayments {
-			monthlyBudget -= p.Cost
-		}
-
-		return monthlyBudget / int64(daysInMonth(m.Month))
-	}()
-
-	// deltaDailyBudget is used to update saldo. deltaDailyBudget can be negative
-	deltaDailyBudget := newDailyBudget - m.DailyBudget
-
-	// Update daily budget
-	m.DailyBudget = newDailyBudget
-
-	// Update Saldo
-	for _, day := range m.Days {
-		day.Saldo += deltaDailyBudget
-	}
-
-	// Update Month
-	err = tx.Update(m)
-	if err != nil {
-		return errors.Wrap(err, "can't update month")
-	}
-
-	_, err = tx.Model(&m.Days).Update()
-	if err != nil {
-		return errors.Wrap(err, "can't update days")
-	}
-
-	return nil
 }
