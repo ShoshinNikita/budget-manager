@@ -10,6 +10,7 @@ import (
 var (
 	errBeginTransaction = "can't begin a new transaction"
 	errCommitChanges    = "can't commit changes"
+	errRecomputeBudget  = "can't recompute month budget"
 )
 
 type Month struct {

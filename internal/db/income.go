@@ -76,7 +76,7 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 	// Recompute Month budget
 	err = db.recomputeMonth(tx, args.MonthID)
 	if err != nil {
-		err = errors.Wrap(err, "can't recompute month budget")
+		err = errors.Wrap(err, errRecomputeBudget)
 		db.log.Error(err)
 		return 0, err
 	}
@@ -151,7 +151,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 	// Recompute Month budget
 	err = db.recomputeMonth(tx, in.MonthID)
 	if err != nil {
-		err = errors.Wrap(err, "can't recompute month budget")
+		err = errors.Wrap(err, errRecomputeBudget)
 		db.log.Error(err)
 		return err
 	}
@@ -221,7 +221,7 @@ func (db DB) RemoveIncome(id uint) error {
 	// Recompute Month budget
 	err = db.recomputeMonth(tx, monthID)
 	if err != nil {
-		err = errors.Wrap(err, "can't recompute month budget")
+		err = errors.Wrap(err, errRecomputeBudget)
 		db.log.Error(err)
 		return err
 	}
