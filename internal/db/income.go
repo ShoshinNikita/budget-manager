@@ -8,11 +8,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-var _ orm.BeforeInsertHook = (*Income)(nil)
+var (
+	_ orm.BeforeInsertHook = (*Income)(nil)
+	_ orm.BeforeUpdateHook = (*Income)(nil)
+)
 
 // Income contains information about incomes (salary, gifts and etc.)
 type Income struct {
-	// MonthID is a foreign key to Monthes table
+	// MonthID is a foreign key to Months table
 	MonthID uint
 
 	ID uint `pg:",pk"`
@@ -36,6 +39,11 @@ func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
 	}
 
 	return ctx, nil
+}
+
+func (in *Income) BeforeUpdate(ctx context.Context) (context.Context, error) {
+	// Can use BeforeInsert hook
+	return in.BeforeInsert(ctx)
 }
 
 // -----------------------------------------------------------------------------
