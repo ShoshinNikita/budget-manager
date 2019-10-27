@@ -5,6 +5,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	errBeginTransaction = "can't begin a new transaction"
+	errCommitChanges    = "can't commit changes"
+)
+
 // -----------------------------------------------------------------------------
 // Income
 // -----------------------------------------------------------------------------
@@ -20,7 +25,9 @@ type AddIncomeArgs struct {
 func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 	tx, err := db.db.Begin()
 	if err != nil {
-		return 0, errors.Wrap(err, "can't start a new transaction")
+		err = errors.Wrap(err, errBeginTransaction)
+		db.log.Error(err)
+		return 0, err
 	}
 	defer tx.Rollback()
 
@@ -35,13 +42,17 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 	// Recompute Month budget
 	err = recomputeMonth(tx, args.MonthID)
 	if err != nil {
-		return 0, errors.Wrap(err, "can't recompute month budget")
+		err = errors.Wrap(err, "can't recompute month budget")
+		db.log.Error(err)
+		return 0, err
 	}
 
 	// Commit changes
 	err = tx.Commit()
 	if err != nil {
-		return 0, errors.Wrap(err, "can't commit changes")
+		err = errors.Wrap(err, errCommitChanges)
+		db.log.Error(err)
+		return 0, err
 	}
 
 	return id, nil
@@ -76,7 +87,9 @@ type EditIncomeArgs struct {
 func (db DB) EditIncome(args EditIncomeArgs) error {
 	tx, err := db.db.Begin()
 	if err != nil {
-		return errors.Wrap(err, "can't start a new transaction")
+		err = errors.Wrap(err, errBeginTransaction)
+		db.log.Error(err)
+		return err
 	}
 	defer tx.Rollback()
 
@@ -85,27 +98,36 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 	err = tx.Select(in)
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return errors.New("wrong id")
+			err = errors.New("wrong id")
+		} else {
+			err = errors.Wrapf(err, "can't select Income with passed id '%d'", args.ID)
 		}
-		return errors.Wrapf(err, "can't select Income with passed id '%d'", args.ID)
+		db.log.Error(err)
+		return err
 	}
 
 	// Edit Income
 	err = db.editIncome(tx, in, args)
 	if err != nil {
-		return errors.Wrap(err, "can't edit Income")
+		err = errors.Wrap(err, "can't edit Income")
+		db.log.Error(err)
+		return err
 	}
 
 	// Recompute Month budget
 	err = recomputeMonth(tx, in.MonthID)
 	if err != nil {
-		return errors.Wrap(err, "can't recompute month budget")
+		err = errors.Wrap(err, "can't recompute month budget")
+		db.log.Error(err)
+		return err
 	}
 
 	// Commit changes
 	err = tx.Commit()
 	if err != nil {
-		return errors.Wrap(err, "can't commit changes")
+		err = errors.Wrap(err, errCommitChanges)
+		db.log.Error(err)
+		return err
 	}
 
 	return nil
@@ -134,7 +156,8 @@ func (_ DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 func (db DB) RemoveIncome(id uint) error {
 	tx, err := db.db.Begin()
 	if err != nil {
-		return errors.Wrap(err, "can't start a new transaction")
+		err = errors.Wrap(err, errBeginTransaction)
+		return err
 	}
 	defer tx.Rollback()
 
@@ -148,25 +171,33 @@ func (db DB) RemoveIncome(id uint) error {
 		return in.MonthID, nil
 	}()
 	if err != nil {
-		return errors.Wrap(err, "can't select Income with passed id")
+		err = errors.Wrap(err, "can't select Income with passed id")
+		db.log.Error(err)
+		return err
 	}
 
 	// Remove income
 	err = db.removeIncome(tx, id)
 	if err != nil {
-		return errors.Wrap(err, "can't remove Income with passed id")
+		err = errors.Wrap(err, "can't remove Income with passed id")
+		db.log.Error(err)
+		return err
 	}
 
 	// Recompute Month budget
 	err = recomputeMonth(tx, monthID)
 	if err != nil {
-		return errors.Wrap(err, "can't recompute month budget")
+		err = errors.Wrap(err, "can't recompute month budget")
+		db.log.Error(err)
+		return err
 	}
 
 	// Commit changes
 	err = tx.Commit()
 	if err != nil {
-		return errors.Wrap(err, "can't commit changes")
+		err = errors.Wrap(err, errCommitChanges)
+		db.log.Error(err)
+		return err
 	}
 
 	return nil
