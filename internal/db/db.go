@@ -7,6 +7,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
+	"github.com/robfig/cron/v3"
 )
 
 var (
@@ -14,8 +15,11 @@ var (
 )
 
 type DB struct {
-	db  *pg.DB
-	log *clog.Logger
+	db   *pg.DB
+	cron *cron.Cron
+	log  *clog.Logger
+
+	stopped chan struct{}
 }
 
 // NewDBOptions contains options for NewDB function
@@ -43,12 +47,15 @@ func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 
 	log = log.WithPrefix("[database]")
 
-	return &DB{db: db, log: log}, nil
+	cron := cron.New(cron.WithLogger(cronLogger{log: log.WithPrefix("[cron]")}))
+
+	return &DB{db: db, log: log, cron: cron}, nil
 }
 
 // Prepare prepares the database:
 //   - create tables
 //   - init tables (add days for current month if needed)
+//   - run some subproccess
 //
 func (db *DB) Prepare() error {
 	db.log.Debug("create tables")
@@ -73,10 +80,38 @@ func (db *DB) Prepare() error {
 	}
 
 	// Init tables if needed
+	if err = db.initCurrentMonth(); err != nil {
+		return err
+	}
+
+	// Init a new month monthly at 00:00
+	_, err = db.cron.AddFunc("@monthly", func() {
+		err = db.initCurrentMonth()
+		if err != nil {
+			db.log.Errorf("can't init the new month: %v", err)
+		}
+	})
+	if err != nil {
+		err = errors.Wrap(err, "can't add function to cron")
+		db.log.Error(err)
+		return err
+	}
+
+	// Start cron
+	db.cron.Start()
+
+	return nil
+}
+
+func (db *DB) initCurrentMonth() error {
 	year, month, _ := time.Now().Date()
-	err = db.db.Model(&Month{}).Column("id").Where("year = ? AND month = ?", year, month).Select()
+	err := db.db.Model(&Month{}).
+		Column("id").
+		Where("year = ? AND month = ?", year, month).
+		Select()
+
 	if err == pg.ErrNoRows {
-		// Database is empty. We have to init the current month
+		// We have to init the current month
 
 		// Add current month
 		db.log.Debug("init the current month")
@@ -112,7 +147,13 @@ func (db *DB) Prepare() error {
 
 // Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
-	db.log.Debug("close database connection")
+	// cron
+	db.log.Debug("wait to stop cron jobs...")
+	ctx := db.cron.Stop()
+	<-ctx.Done()
+	db.log.Debug("all cron jobs were stopped")
 
+	// Database connection
+	db.log.Debug("close database connection")
 	return db.db.Close()
 }
