@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	clog "github.com/ShoshinNikita/go-clog/v3"
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
@@ -46,10 +48,12 @@ func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 
 // Prepare prepares the database:
 //   - create tables
+//   - init tables (add days for current month if needed)
 //
 func (db *DB) Prepare() error {
 	db.log.Debug("create tables")
 
+	// Create tables If Not Exists
 	err := createTables(
 		db.db,
 
@@ -63,12 +67,47 @@ func (db *DB) Prepare() error {
 	)
 
 	err = errors.Wrap(err, "couldn't create tables")
-
 	if err != nil {
 		db.log.Error(err)
+		return err
 	}
 
-	return err
+	// Init tables if needed
+	year, month, _ := time.Now().Date()
+	err = db.db.Model(&Month{}).Column("id").Where("year = ? AND month = ?", year, month).Select()
+	if err == pg.ErrNoRows {
+		// Database is empty. We have to init the current month
+
+		// Add current month
+		db.log.Debug("init the current month")
+
+		currentMonth := &Month{Year: year, Month: month}
+		err = db.db.Insert(currentMonth)
+		if err != nil {
+			err = errors.Wrap(err, "can't init current month")
+			db.log.Error(err)
+			return err
+		}
+
+		monthID := currentMonth.ID
+		db.log.Debugf("current month id: '%d'", monthID)
+
+		// Add days for the current month
+		daysNumber := daysInMonth(month)
+		days := make([]*Day, daysNumber)
+		for i := range days {
+			days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
+		}
+
+		err = db.db.Insert(&days)
+		if err != nil {
+			err = errors.Wrap(err, "can't insert days for current month")
+			db.log.Error(err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Shutdown closes the connection to the db
