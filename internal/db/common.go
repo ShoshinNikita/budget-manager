@@ -29,18 +29,26 @@ const (
 // -----------------------------------------------------------------------------
 
 type Month struct {
-	ID uint
-
+	ID    uint
 	Year  int
 	Month time.Month
 
-	Incomes         []*Income         `pg:"fk:month_id"`
-	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
+	// Incomes
 
-	// DailyBudget is a (Sum of Incomes - Cost of Monthly Payments) / Number of Days
+	Incomes     []*Income `pg:"fk:month_id"`
+	TotalIncome int64
+	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
 	// multiplied by 100
 	DailyBudget int64
-	Days        []*Day `pg:"fk:month_id"`
+
+	// Spends
+
+	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
+	Days            []*Day            `pg:"fk:month_id"`
+	TotalSpend      int64             // must be negative or zero
+
+	// Result is TotalIncome - TotalSpend
+	Result int64
 }
 
 type Day struct {
@@ -79,32 +87,53 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 		Relation("Incomes").
 		Relation("MonthlyPayments").
 		Relation("Days").
+		Relation("Days.Spends").
 		WherePK().
 		Select()
 	if err != nil {
 		return errors.Wrap(err, "can't select month")
 	}
 
-	newDailyBudget := func() int64 {
-		var monthlyBudget int64
+	// Update Total Income
+	var totalIncome int64
+	for _, in := range m.Incomes {
+		totalIncome += in.Income
+	}
+	m.TotalIncome = totalIncome
 
-		for _, in := range m.Incomes {
-			monthlyBudget += in.Income
+	// Update Total Spends
+
+	var monthlyPaymentsCost int64
+	for _, mp := range m.MonthlyPayments {
+		monthlyPaymentsCost -= mp.Cost
+	}
+
+	var allSpendsCost int64
+	for _, day := range m.Days {
+		if day == nil {
+			continue
 		}
-		for _, p := range m.MonthlyPayments {
-			monthlyBudget -= p.Cost
+		for _, spend := range day.Spends {
+			if spend == nil {
+				continue
+			}
+			monthlyPaymentsCost -= spend.Cost
 		}
+	}
 
-		return monthlyBudget / int64(daysInMonth(m.Month))
-	}()
+	m.TotalSpend = monthlyPaymentsCost + allSpendsCost
 
-	// deltaDailyBudget is used to update saldo. deltaDailyBudget can be negative
-	deltaDailyBudget := newDailyBudget - m.DailyBudget
+	// Update Daily Budget
 
-	// Update daily budget
+	oldDailyBudget := m.DailyBudget
+	// Use '+' because monthlyPaymentsCost is negative
+	newDailyBudget := (totalIncome + monthlyPaymentsCost) / int64(daysInMonth(m.Month))
 	m.DailyBudget = newDailyBudget
 
 	// Update Saldo
+
+	// deltaDailyBudget is used to update saldo. deltaDailyBudget can be negative
+	deltaDailyBudget := newDailyBudget - oldDailyBudget
 	for _, day := range m.Days {
 		day.Saldo += deltaDailyBudget
 	}
@@ -115,6 +144,7 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 		return errors.Wrap(err, "can't update month")
 	}
 
+	// Update Days
 	_, err = tx.Model(&m.Days).Update()
 	if err != nil {
 		return errors.Wrap(err, "can't update days")
