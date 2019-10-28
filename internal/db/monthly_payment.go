@@ -61,6 +61,10 @@ type AddMonthlyPaymentArgs struct {
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) {
+	if !db.checkMonth(args.MonthID) {
+		return 0, ErrMonthNotExist
+	}
+
 	tx, err := db.db.Begin()
 	if err != nil {
 		err = errors.Wrap(err, errBeginTransaction)
@@ -124,6 +128,10 @@ type EditMonthlyPaymentArgs struct {
 
 // EditMonthlyPayment modifies existing Monthly Payment
 func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
+	if !db.checkMonthlyPayment(args.ID) {
+		return ErrMonthlyPaymentNotExist
+	}
+
 	tx, err := db.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, errBeginTransaction)
@@ -188,7 +196,12 @@ func (_ DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPa
 	return errors.Wrap(err, "can't update Monthly Payment")
 }
 
+// RemoveMonthlyPayment removes Monthly Payment with passed id
 func (db DB) RemoveMonthlyPayment(id uint) error {
+	if !db.checkMonthlyPayment(id) {
+		return ErrMonthlyPaymentNotExist
+	}
+
 	tx, err := db.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, errBeginTransaction)

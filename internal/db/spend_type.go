@@ -48,6 +48,10 @@ func (db DB) AddSpendType(name string) (typeID uint, err error) {
 
 // EditSpendType modifies existing Spend Type
 func (db DB) EditSpendType(id uint, newName string) error {
+	if !db.checkSpendType(id) {
+		return ErrSpendTypeNotExist
+	}
+
 	spendType := &SpendType{ID: id, Name: newName}
 	err := db.db.Update(spendType)
 	if err != nil {
@@ -61,6 +65,10 @@ func (db DB) EditSpendType(id uint, newName string) error {
 
 // RemoveSpendType removes Spend Type with passed id
 func (db DB) RemoveSpendType(id uint) error {
+	if !db.checkSpendType(id) {
+		return ErrSpendTypeNotExist
+	}
+
 	spendType := &SpendType{ID: id}
 	err := db.db.Delete(spendType)
 	if err != nil {

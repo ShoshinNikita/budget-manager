@@ -57,6 +57,10 @@ type AddIncomeArgs struct {
 
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
+	if !db.checkMonth(args.MonthID) {
+		return 0, ErrMonthNotExist
+	}
+
 	tx, err := db.db.Begin()
 	if err != nil {
 		err = errors.Wrap(err, errBeginTransaction)
@@ -119,6 +123,10 @@ type EditIncomeArgs struct {
 
 // EditIncome edits income with passed id, nil args are ignored
 func (db DB) EditIncome(args EditIncomeArgs) error {
+	if !db.checkIncome(args.ID) {
+		return ErrIncomeNotExist
+	}
+
 	tx, err := db.db.Begin()
 	if err != nil {
 		err = errors.Wrap(err, errBeginTransaction)
@@ -188,6 +196,10 @@ func (_ DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 
 // RemoveIncome removes income with passed id
 func (db DB) RemoveIncome(id uint) error {
+	if !db.checkIncome(id) {
+		return ErrIncomeNotExist
+	}
+
 	tx, err := db.db.Begin()
 	if err != nil {
 		err = errors.Wrap(err, errBeginTransaction)

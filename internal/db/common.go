@@ -7,11 +7,26 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Errors
+
+// Checks
 var (
+	ErrMonthNotExist          = errors.New("month with passed id doesn't exist")
+	ErrDayNotExist            = errors.New("day with passed id doesn't exist")
+	ErrIncomeNotExist         = errors.New("income with passed id doesn't exist")
+	ErrMonthlyPaymentNotExist = errors.New("monthly payment with passed id doesn't exist")
+	ErrSpendNotExist          = errors.New("spend with passed id doesn't exist")
+	ErrSpendTypeNotExist      = errors.New("spend type with passed id doesn't exist")
+)
+
+// Transaction (wrap messages)
+const (
 	errBeginTransaction = "can't begin a new transaction"
 	errCommitChanges    = "can't commit changes"
 	errRecomputeBudget  = "can't recompute month budget"
 )
+
+// -----------------------------------------------------------------------------
 
 type Month struct {
 	ID uint
@@ -106,4 +121,51 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	}
 
 	return nil
+}
+
+// Checks
+
+// checkMonth checks if Month with passed id exists
+func (db DB) checkMonth(id uint) (ok bool) {
+	m := &Month{ID: id}
+	return db.checkModel(m)
+}
+
+// checkDay checks if Dat with passed id exists
+func (db DB) checkDay(id uint) (ok bool) {
+	d := &Day{ID: id}
+	return db.checkModel(d)
+}
+
+// checkSpendType checks if Spend Type with passed id exists
+func (db DB) checkIncome(id uint) (ok bool) {
+	st := &Income{ID: id}
+	return db.checkModel(st)
+}
+
+// checkSpendType checks if Spend Type with passed id exists
+func (db DB) checkMonthlyPayment(id uint) (ok bool) {
+	st := &MonthlyPayment{ID: id}
+	return db.checkModel(st)
+}
+
+// checkSpendType checks if Spend Type with passed id exists
+func (db DB) checkSpend(id uint) (ok bool) {
+	st := &Spend{ID: id}
+	return db.checkModel(st)
+}
+
+// checkSpendType checks if Spend Type with passed id exists
+func (db DB) checkSpendType(id uint) (ok bool) {
+	st := &SpendType{ID: id}
+	return db.checkModel(st)
+}
+
+// checkModel checks if model with primary key exists
+func (db DB) checkModel(model interface{}) (ok bool) {
+	c, err := db.db.Model(model).WherePK().Count()
+	if c == 0 || err != nil {
+		return false
+	}
+	return true
 }
