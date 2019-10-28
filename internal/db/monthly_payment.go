@@ -209,7 +209,15 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 	defer tx.Rollback()
 
 	// Remove Monthly Payment
+
 	mp := &MonthlyPayment{ID: id}
+	err = tx.Model(mp).Column("month_id").WherePK().Select()
+	if err != nil {
+		err = errors.Wrap(err, "can't select Monthly Payment with passed id")
+		db.log.Error(err)
+		return err
+	}
+
 	err = db.db.Delete(mp)
 	if err != nil {
 		err = errors.Wrapf(err, "can't remove Monthly Payment with id '%d'", id)

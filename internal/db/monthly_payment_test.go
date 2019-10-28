@@ -353,7 +353,7 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 			MonthlyPayment: MonthlyPayment{
 				ID: 4, MonthID: monthID, Title: "title 4", Notes: "1233215", Cost: 28 * 29 * 30 * 31,
 			},
-			shouldDelete: true,
+			shouldDelete: false,
 		},
 	}
 

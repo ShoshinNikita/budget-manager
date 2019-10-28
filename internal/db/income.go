@@ -209,7 +209,7 @@ func (db DB) RemoveIncome(id uint) error {
 
 	monthID, err := func() (uint, error) {
 		in := &Income{ID: id}
-		err = tx.Model(in).Column("month_id").WherePK().Select(in)
+		err = tx.Model(in).Column("month_id").WherePK().Select()
 		if err != nil {
 			return 0, err
 		}

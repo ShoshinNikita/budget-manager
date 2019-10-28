@@ -79,8 +79,8 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 		Relation("Incomes").
 		Relation("MonthlyPayments").
 		Relation("Days").
+		WherePK().
 		Select()
-
 	if err != nil {
 		return errors.Wrap(err, "can't select month")
 	}
