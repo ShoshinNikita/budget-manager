@@ -105,47 +105,58 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	}
 
 	// Update Total Income
-	var totalIncome int64
-	for _, in := range m.Incomes {
-		totalIncome += in.Income
-	}
-	m.TotalIncome = totalIncome
+	m.TotalIncome = func() int64 {
+		var income int64
+		for _, in := range m.Incomes {
+			income += in.Income
+		}
+		return income
+	}()
 
-	// Update Total Spends
+	// Update Total Spends and Daily Budget
 
-	var monthlyPaymentsCost int64
-	for _, mp := range m.MonthlyPayments {
-		monthlyPaymentsCost -= mp.Cost
-	}
+	monthlyPaymentCost := func() int64 {
+		var cost int64
+		for _, mp := range m.MonthlyPayments {
+			cost -= mp.Cost
+		}
+		return cost
+	}()
+	spendCost := func() int64 {
+		var cost int64
+		for _, day := range m.Days {
+			if day == nil {
+				continue
+			}
+			for _, spend := range day.Spends {
+				if spend == nil {
+					continue
+				}
+				cost -= spend.Cost
+			}
+		}
+		return cost
+	}()
 
-	var allSpendsCost int64
-	for _, day := range m.Days {
-		if day == nil {
+	m.TotalSpend = monthlyPaymentCost + spendCost
+	// Use '+' because monthlyPaymentsCost is negative
+	m.DailyBudget = (m.TotalIncome + m.TotalSpend) / int64(daysInMonth(m.Month))
+
+	// Update Saldos (it is accumulated)
+	saldo := m.DailyBudget
+	for i := range m.Days {
+		if m.Days[i] == nil {
 			continue
 		}
-		for _, spend := range day.Spends {
+
+		m.Days[i].Saldo = saldo
+		for _, spend := range m.Days[i].Spends {
 			if spend == nil {
 				continue
 			}
-			monthlyPaymentsCost -= spend.Cost
+			m.Days[i].Saldo -= spend.Cost
 		}
-	}
-
-	m.TotalSpend = monthlyPaymentsCost + allSpendsCost
-
-	// Update Daily Budget
-
-	oldDailyBudget := m.DailyBudget
-	// Use '+' because monthlyPaymentsCost is negative
-	newDailyBudget := (totalIncome + monthlyPaymentsCost) / int64(daysInMonth(m.Month))
-	m.DailyBudget = newDailyBudget
-
-	// Update Saldo
-
-	// deltaDailyBudget is used to update saldo. deltaDailyBudget can be negative
-	deltaDailyBudget := newDailyBudget - oldDailyBudget
-	for _, day := range m.Days {
-		day.Saldo += deltaDailyBudget
+		saldo = m.Days[i].Saldo + m.DailyBudget
 	}
 
 	// Update Month
