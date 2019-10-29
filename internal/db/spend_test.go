@@ -100,36 +100,61 @@ func TestEditSpend(t *testing.T) {
 		isError bool
 	}{
 		{
-			origin: Spend{ID: 1, DayID: 10, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited: &Spend{ID: 1, DayID: 10, Title: "123456", TypeID: 12, Notes: "test notes", Cost: 15500},
+			origin: Spend{
+				ID: 1, DayID: 10, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000,
+			},
+			edited: &Spend{
+				ID: 1, DayID: 10, Title: "123456", TypeID: 12, Notes: "test notes", Cost: 15500,
+			},
 		},
 		{
-			origin: Spend{ID: 2, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited: &Spend{ID: 2, DayID: 1, Title: "123", TypeID: 1, Notes: "", Cost: 150},
+			origin: Spend{
+				ID: 2, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000,
+			},
+			edited: &Spend{
+				ID: 2, DayID: 1, Title: "123", TypeID: 1, Notes: "", Cost: 150,
+			},
 		},
 		{
-			origin: Spend{ID: 3, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited: &Spend{ID: 3, DayID: 1, Title: "123", TypeID: 0, Notes: "", Cost: 150},
+			origin: Spend{
+				ID: 3, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000,
+			},
+			edited: &Spend{
+				ID: 3, DayID: 1, Title: "123", TypeID: 0, Notes: "", Cost: 150,
+			},
 		},
 		// With errors
 		{
-			origin:  Spend{ID: 4, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited:  &Spend{ID: 4, DayID: 10, Title: "", TypeID: 12, Notes: "test notes", Cost: 15500},
+			origin: Spend{
+				ID: 4, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000,
+			},
+			edited: &Spend{
+				ID: 4, DayID: 10, Title: "", TypeID: 12, Notes: "test notes", Cost: 15500,
+			},
 			isError: true,
 		},
 		{
-			origin:  Spend{ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited:  &Spend{ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 0},
+			origin: Spend{
+				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
+			edited: &Spend{
+				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 0,
+			},
 			isError: true,
 		},
 		{
-			origin:  Spend{ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited:  &Spend{ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: -50},
+			origin: Spend{
+				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
+			edited: &Spend{
+				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: -50,
+			},
 			isError: true,
 		},
 		{
-			origin:  Spend{ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited:  &Spend{ID: 200, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
+			origin: Spend{
+				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
+			edited: &Spend{
+				ID: 200, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000,
+			},
 			isError: true,
 		},
 	}

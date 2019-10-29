@@ -21,57 +21,35 @@ func TestAddIncome(t *testing.T) {
 	}{
 		{
 			Income: Income{
-				ID:      1,
-				MonthID: monthID,
-				Title:   "Salary",
-				Notes:   "Not very big :(",
-				Income:  30000,
+				ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not big :(", Income: 30000,
 			},
 		},
 		{
 			Income: Income{
-				ID:      2,
-				MonthID: monthID,
-				Title:   "Birthdate gifts",
-				Notes:   "From parents",
-				Income:  5000,
+				ID: 2, MonthID: monthID, Title: "Gifts", Notes: "From parents", Income: 5000,
 			},
 		},
 		{
 			Income: Income{
-				ID:      3,
-				MonthID: monthID,
-				Title:   "Another birthdate gifts",
-				Income:  3000,
+				ID: 3, MonthID: monthID, Title: "Another birthdate gifts", Income: 3000,
 			},
 		},
 		// With errors
 		{
 			Income: Income{
-				ID:      0,
-				MonthID: monthID,
-				Title:   "",
-				Notes:   "From friends",
-				Income:  3000,
+				ID: 0, MonthID: monthID, Title: "", Notes: "From friends", Income: 3000,
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID:      0,
-				MonthID: monthID,
-				Title:   "Birthdate gifts",
-				Income:  0,
+				ID: 0, MonthID: monthID, Title: "Birthdate gifts", Income: 0,
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID:      0,
-				MonthID: monthID,
-				Title:   "Birthdate gifts",
-				Notes:   "From friends",
-				Income:  -50,
+				ID: 0, MonthID: monthID, Title: "Gifts 2", Notes: "From friends", Income: -50,
 			},
 			isError: true,
 		},
@@ -131,19 +109,8 @@ func TestEditIncome(t *testing.T) {
 	defer db.Shutdown()
 
 	incomes := []Income{
-		{
-			ID:      1,
-			MonthID: monthID,
-			Title:   "Salary",
-			Income:  15000,
-		},
-		{
-			ID:      2,
-			MonthID: monthID,
-			Title:   "Birthdate gifts",
-			Notes:   "From parents",
-			Income:  5000,
-		},
+		{ID: 1, MonthID: monthID, Title: "Salary", Income: 15000},
+		{ID: 2, MonthID: monthID, Title: "Birthdate gifts", Notes: "From parents", Income: 5000},
 	}
 
 	editedIncomes := []struct {
@@ -152,54 +119,36 @@ func TestEditIncome(t *testing.T) {
 	}{
 		{
 			Income: Income{
-				ID:      1,
-				MonthID: monthID,
-				Title:   "Salary++",
-				Income:  20000,
+				ID: 1, MonthID: monthID, Title: "Salary++", Income: 20000,
 			},
 		},
 		{
 			Income: Income{
-				ID:      2,
-				MonthID: monthID,
-				Title:   "Birthdate gifts from parents",
-				Income:  5000,
+				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: 5000,
 			},
 		},
 		// With errors
 		{
 			Income: Income{
-				ID:      100,
-				MonthID: monthID,
-				Title:   "Valid title",
-				Income:  5000,
+				ID: 100, MonthID: monthID, Title: "Valid title", Income: 5000,
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID:      1,
-				MonthID: monthID,
-				Title:   "",
-				Income:  5000,
+				ID: 1, MonthID: monthID, Title: "", Income: 5000,
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID:      2,
-				MonthID: monthID,
-				Title:   "Birthdate gifts from parents",
-				Income:  0,
+				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: 0,
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID:      2,
-				MonthID: monthID,
-				Title:   "Birthdate gifts from parents",
-				Income:  -100,
+				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: -100,
 			},
 			isError: true,
 		},
@@ -266,27 +215,9 @@ func TestRemoveIncome(t *testing.T) {
 	defer db.Shutdown()
 
 	incomes := []Income{
-		{
-			ID:      1,
-			MonthID: monthID,
-			Title:   "Salary",
-			Notes:   "Not very big :(",
-			Income:  30000,
-		},
-		{
-			ID:      2,
-			MonthID: monthID,
-			Title:   "Birthdate gifts",
-			Notes:   "From parents",
-			Income:  5000,
-		},
-		{
-			ID:      3,
-			MonthID: monthID,
-			Title:   "Birthdate gifts",
-			Notes:   "From friends",
-			Income:  3000,
-		},
+		{ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not very big :(", Income: 30000},
+		{ID: 2, MonthID: monthID, Title: "Birthdate gifts", Notes: "From parents", Income: 5000},
+		{ID: 3, MonthID: monthID, Title: "Birthdate gifts", Notes: "From friends", Income: 3000},
 	}
 
 	// Add Incomes

@@ -19,23 +19,14 @@ func TestAddSpendType(t *testing.T) {
 		isError bool
 	}{
 		{
-			SpendType: SpendType{
-				ID:   1,
-				Name: "first type",
-			},
+			SpendType: SpendType{ID: 1, Name: "first type"},
 		},
 		{
-			SpendType: SpendType{
-				ID:   2,
-				Name: "второй тип",
-			},
+			SpendType: SpendType{ID: 2, Name: "второй тип"},
 		},
 		{
-			SpendType: SpendType{
-				ID:   0,
-				Name: "",
-			},
-			isError: true,
+			SpendType: SpendType{ID: 0, Name: ""},
+			isError:   true,
 		},
 	}
 
