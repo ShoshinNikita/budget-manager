@@ -79,6 +79,16 @@ func (db DB) GetMonthID(year, month int) (uint, error) {
 	return m.ID, nil
 }
 
+func (db DB) GetMonthIDByDay(dayID uint) (uint, error) {
+	day := &Day{ID: dayID}
+	err := db.db.Model(day).Column("month_id").WherePK().Select()
+	if err != nil {
+		return 0, errors.Wrap(err, "can't select day with passed id")
+	}
+
+	return day.MonthID, nil
+}
+
 // Internal methods
 
 func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
