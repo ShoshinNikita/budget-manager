@@ -51,6 +51,24 @@ type Month struct {
 	Result int64
 }
 
+func (db DB) GetMonth(id uint) (*Month, error) {
+	m := &Month{ID: id}
+	err := db.db.Model(m).
+		Relation("Incomes").
+		Relation("MonthlyPayments").
+		Relation("Days").
+		Relation("Days.Spends").
+		WherePK().Select()
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return nil, ErrMonthNotExist
+		}
+		return nil, errors.Wrap(err, "can't select month with passed id")
+	}
+
+	return m, nil
+}
+
 type Day struct {
 	// MonthID is a foreign key to Monthes table
 	MonthID uint
@@ -61,6 +79,22 @@ type Day struct {
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
 	Saldo  int64
 	Spends []*Spend `pg:"fk:day_id"`
+}
+
+func (db DB) GetDay(id uint) (*Day, error) {
+	d := &Day{ID: id}
+	err := db.db.Model(d).
+		Relation("Spends").
+		WherePK().
+		Select()
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return nil, ErrDayNotExist
+		}
+		return nil, errors.Wrap(err, "can't select day with passed id")
+	}
+
+	return d, nil
 }
 
 // -----------------------------------------------------------------------------
