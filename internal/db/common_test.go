@@ -24,7 +24,7 @@ func initDB(require *require.Assertions) *DB {
 		Database: dbDatabase,
 	}
 
-	log := clog.NewProdConfig().Build()
+	log := clog.NewProdConfig().SetLevel(clog.LevelWarn).Build()
 	db, err := NewDB(opts, log)
 	require.Nil(err)
 
