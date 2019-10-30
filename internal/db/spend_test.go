@@ -11,7 +11,10 @@ func TestAddSpend(t *testing.T) {
 	require := require.New(t)
 
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	spends := []struct {
 		Spend
@@ -92,7 +95,10 @@ func TestEditSpend(t *testing.T) {
 	require := require.New(t)
 
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	spends := []struct {
 		origin  Spend
@@ -236,7 +242,10 @@ func TestDeleteSpend(t *testing.T) {
 	require := require.New(t)
 
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	spends := []struct {
 		Spend

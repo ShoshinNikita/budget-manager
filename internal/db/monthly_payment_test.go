@@ -11,7 +11,10 @@ func TestAddMonthlyPayment(t *testing.T) {
 	require := require.New(t)
 
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	// Prepare
 	const income = 50000
@@ -116,7 +119,10 @@ func TestEditMonthlyPayment(t *testing.T) {
 	require := require.New(t)
 
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	// Prepare
 	const income = 50000
@@ -254,7 +260,10 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 	require := require.New(t)
 
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	payments := []struct {
 		MonthlyPayment

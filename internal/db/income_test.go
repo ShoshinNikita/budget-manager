@@ -13,7 +13,10 @@ func TestAddIncome(t *testing.T) {
 
 	// Init db
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	incomes := []struct {
 		Income
@@ -106,7 +109,10 @@ func TestEditIncome(t *testing.T) {
 
 	// Init db
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	incomes := []Income{
 		{ID: 1, MonthID: monthID, Title: "Salary", Income: 15000},
@@ -212,7 +218,10 @@ func TestRemoveIncome(t *testing.T) {
 
 	// Init db
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	incomes := []Income{
 		{ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not very big :(", Income: 30000},

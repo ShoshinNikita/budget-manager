@@ -12,7 +12,10 @@ func TestAddSpendType(t *testing.T) {
 
 	// Init db
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	spendTypes := []struct {
 		SpendType
@@ -58,7 +61,10 @@ func TestEditSpendType(t *testing.T) {
 
 	// Init db
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	spendTypes := []struct {
 		origin  SpendType
@@ -111,7 +117,10 @@ func TestDeleteSpendType(t *testing.T) {
 
 	// Init db
 	db := initDB(require)
-	defer db.Shutdown()
+	defer func() {
+		dropDB(db, require)
+		db.Shutdown()
+	}()
 
 	spendTypes := []SpendType{
 		{ID: 1, Name: "first type"},
