@@ -76,7 +76,7 @@ func TestAddSpend(t *testing.T) {
 	}
 
 	// Check Total Spend
-	checkTotalSpend(db.db, require, func() int64 {
+	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
 			if sp.isError {
@@ -175,7 +175,7 @@ func TestEditSpend(t *testing.T) {
 
 	// Check Total Spend
 
-	checkTotalSpend(db.db, require, func() int64 {
+	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
 			totalSpend -= sp.origin.Cost
@@ -219,7 +219,7 @@ func TestEditSpend(t *testing.T) {
 
 	// Check Total Spend
 
-	checkTotalSpend(db.db, require, func() int64 {
+	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
 			if sp.edited == nil || sp.isError {
@@ -277,7 +277,7 @@ func TestDeleteSpend(t *testing.T) {
 	}
 
 	// Check Total Spend
-	checkTotalSpend(db.db, require, func() int64 {
+	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
 			totalSpend -= sp.Cost
@@ -309,7 +309,7 @@ func TestDeleteSpend(t *testing.T) {
 	}
 
 	// Check Total Spend
-	checkTotalSpend(db.db, require, func() int64 {
+	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
 			if !sp.shouldDelete || sp.isError {
@@ -320,15 +320,13 @@ func TestDeleteSpend(t *testing.T) {
 	})
 }
 
-func checkTotalSpend(db *pg.DB, require *require.Assertions, f func() int64) {
+func checkTotalSpend(db *DB, require *require.Assertions, f func() int64) {
 	totalSpend := f()
 	if totalSpend > 0 {
 		totalSpend = -totalSpend
 	}
 
-	m := &Month{ID: monthID}
-	err := db.Select(m)
+	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-
 	require.Equal(totalSpend, m.TotalSpend)
 }

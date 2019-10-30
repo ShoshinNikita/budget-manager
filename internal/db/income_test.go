@@ -96,8 +96,8 @@ func TestAddIncome(t *testing.T) {
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
-	m := &Month{ID: monthID}
-	db.db.Model(m).Column("daily_budget").WherePK().Select()
+	m, err := db.GetMonth(monthID)
+	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget)
 }
 
@@ -202,8 +202,8 @@ func TestEditIncome(t *testing.T) {
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
-	m := &Month{ID: monthID}
-	db.db.Model(m).Column("daily_budget").WherePK().Select()
+	m, err := db.GetMonth(monthID)
+	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget)
 }
 
@@ -250,8 +250,8 @@ func TestRemoveIncome(t *testing.T) {
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
-	m := &Month{ID: monthID}
-	db.db.Model(m).Column("daily_budget").WherePK().Select()
+	m, err := db.GetMonth(monthID)
+	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget)
 
 	// Try to remove Income with invalid id

@@ -107,10 +107,8 @@ func TestAddMonthlyPayment(t *testing.T) {
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
-	m := Month{ID: monthID}
-	err = db.db.Select(&m)
+	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-
 	require.Equal(dailyBudget, m.DailyBudget)
 }
 
@@ -241,10 +239,8 @@ func TestEditMonthlyPayment(t *testing.T) {
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
-	m := Month{ID: monthID}
-	err = db.db.Select(&m)
+	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-
 	require.Equal(dailyBudget, m.DailyBudget)
 
 	// Try to edit Monthly Payment with invalid id
@@ -327,9 +323,7 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
-	m := Month{ID: monthID}
-	err = db.db.Select(&m)
+	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-
 	require.Equal(dailyBudget, m.DailyBudget)
 }
