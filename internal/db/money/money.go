@@ -60,3 +60,14 @@ func (m Money) SubInt(sub int64) Money {
 func (m Money) SubFloat(sub float64) Money {
 	return m - FromFloat(sub)
 }
+
+// Divide divides Money by n (if n <= 0, it panics)
+func (m Money) Divide(n int64) Money {
+	if n <= 0 {
+		panic("n must be greater than zero")
+	}
+
+	// Don't use Money.ToInt for better precision
+	money := int64(m)
+	return Money(money / n)
+}

@@ -206,3 +206,26 @@ func TestSub(t *testing.T) {
 		require.Equal(tt.resFloat, resFloat)
 	}
 }
+
+func TestDivide(t *testing.T) {
+	require := require.New(t)
+
+	tests := []struct {
+		origin   Money
+		n        int64
+		res      Money
+		resInt   int64
+		resFloat float64
+	}{
+		{origin: FromInt(1500), n: 1, res: Money(150000), resInt: 1500, resFloat: 1500},
+		{origin: FromInt(1500), n: 5, res: Money(30000), resInt: 300, resFloat: 300},
+		{origin: FromInt(1500), n: 7, res: Money(21428), resInt: 214, resFloat: 214.28},
+	}
+
+	for _, tt := range tests {
+		res := tt.origin.Divide(tt.n)
+		require.Equal(tt.res, res)
+		require.Equal(tt.resInt, res.ToInt())
+		require.Equal(tt.resFloat, res.ToFloat())
+	}
+}
