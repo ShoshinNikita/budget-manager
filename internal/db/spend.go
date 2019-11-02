@@ -6,6 +6,8 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
+
+	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 )
 
 var (
@@ -24,7 +26,7 @@ type Spend struct {
 	TypeID uint
 	Type   *SpendType `pg:"fk:type_id"`
 	Notes  string
-	Cost   int64 // multiplied by 100
+	Cost   money.Money // multiplied by 100
 }
 
 func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
@@ -56,7 +58,7 @@ type AddSpendArgs struct {
 	Title  string
 	TypeID uint   // optional
 	Notes  string // optional
-	Cost   int64
+	Cost   money.Money
 }
 
 // AddSpend adds a new Spend
@@ -128,7 +130,7 @@ type EditSpendArgs struct {
 	Title  *string
 	TypeID *uint
 	Notes  *string
-	Cost   *int64
+	Cost   *money.Money
 }
 
 // EditSpend edits existeng Spend

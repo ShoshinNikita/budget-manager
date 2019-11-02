@@ -6,6 +6,8 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
+
+	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 )
 
 var (
@@ -22,7 +24,7 @@ type Income struct {
 
 	Title  string
 	Notes  string
-	Income int64 // multiplied by 100
+	Income money.Money // multiplied by 100
 }
 
 func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
@@ -52,7 +54,7 @@ type AddIncomeArgs struct {
 	MonthID uint
 	Title   string
 	Notes   string
-	Income  int64
+	Income  money.Money
 }
 
 // AddIncome adds a new income with passed params
@@ -118,7 +120,7 @@ type EditIncomeArgs struct {
 	ID     uint
 	Title  *string
 	Notes  *string
-	Income *int64
+	Income *money.Money
 }
 
 // EditIncome edits income with passed id, nil args are ignored
