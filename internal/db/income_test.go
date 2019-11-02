@@ -6,6 +6,8 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 )
 
 func TestAddIncome(t *testing.T) {
@@ -24,35 +26,35 @@ func TestAddIncome(t *testing.T) {
 	}{
 		{
 			Income: Income{
-				ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not big :(", Income: 30000,
+				ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not big :(", Income: money.FromInt(30000),
 			},
 		},
 		{
 			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Gifts", Notes: "From parents", Income: 5000,
+				ID: 2, MonthID: monthID, Title: "Gifts", Notes: "From parents", Income: money.FromInt(5000),
 			},
 		},
 		{
 			Income: Income{
-				ID: 3, MonthID: monthID, Title: "Another birthdate gifts", Income: 3000,
+				ID: 3, MonthID: monthID, Title: "Another birthdate gifts", Income: money.FromInt(3000),
 			},
 		},
 		// With errors
 		{
 			Income: Income{
-				ID: 0, MonthID: monthID, Title: "", Notes: "From friends", Income: 3000,
+				ID: 0, MonthID: monthID, Title: "", Notes: "From friends", Income: money.FromInt(3000),
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID: 0, MonthID: monthID, Title: "Birthdate gifts", Income: 0,
+				ID: 0, MonthID: monthID, Title: "Birthdate gifts", Income: money.FromInt(0),
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID: 0, MonthID: monthID, Title: "Gifts 2", Notes: "From friends", Income: -50,
+				ID: 0, MonthID: monthID, Title: "Gifts 2", Notes: "From friends", Income: money.FromInt(-500),
 			},
 			isError: true,
 		},
@@ -94,14 +96,14 @@ func TestAddIncome(t *testing.T) {
 			if in.isError {
 				continue
 			}
-			b += in.Income.Income
+			b += in.Income.Income.ToInt()
 		}
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
 	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget)
+	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 }
 
 func TestEditIncome(t *testing.T) {
@@ -115,8 +117,8 @@ func TestEditIncome(t *testing.T) {
 	}()
 
 	incomes := []Income{
-		{ID: 1, MonthID: monthID, Title: "Salary", Income: 15000},
-		{ID: 2, MonthID: monthID, Title: "Birthdate gifts", Notes: "From parents", Income: 5000},
+		{ID: 1, MonthID: monthID, Title: "Salary", Income: money.FromInt(15000)},
+		{ID: 2, MonthID: monthID, Title: "Birthdate gifts", Notes: "From parents", Income: money.FromInt(5000)},
 	}
 
 	editedIncomes := []struct {
@@ -125,36 +127,36 @@ func TestEditIncome(t *testing.T) {
 	}{
 		{
 			Income: Income{
-				ID: 1, MonthID: monthID, Title: "Salary++", Income: 20000,
+				ID: 1, MonthID: monthID, Title: "Salary++", Income: money.FromInt(20000),
 			},
 		},
 		{
 			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: 5000,
+				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(5000),
 			},
 		},
 		// With errors
 		{
 			Income: Income{
-				ID: 100, MonthID: monthID, Title: "Valid title", Income: 5000,
+				ID: 100, MonthID: monthID, Title: "Valid title", Income: money.FromInt(5000),
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID: 1, MonthID: monthID, Title: "", Income: 5000,
+				ID: 1, MonthID: monthID, Title: "", Income: money.FromInt(5000),
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: 0,
+				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(0),
 			},
 			isError: true,
 		},
 		{
 			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: -100,
+				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(-100),
 			},
 			isError: true,
 		},
@@ -203,14 +205,14 @@ func TestEditIncome(t *testing.T) {
 			if in.isError {
 				continue
 			}
-			b += in.Income.Income
+			b += in.Income.Income.ToInt()
 		}
 		return b / int64(daysInMonth(time.Now().Month()))
 	}()
 
 	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget)
+	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 }
 
 func TestRemoveIncome(t *testing.T) {
@@ -224,9 +226,9 @@ func TestRemoveIncome(t *testing.T) {
 	}()
 
 	incomes := []Income{
-		{ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not very big :(", Income: 30000},
-		{ID: 2, MonthID: monthID, Title: "Birthdate gifts", Notes: "From parents", Income: 5000},
-		{ID: 3, MonthID: monthID, Title: "Birthdate gifts", Notes: "From friends", Income: 3000},
+		{ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not very big :(", Income: money.FromInt(30000)},
+		{ID: 2, MonthID: monthID, Title: "gifts", Notes: "From parents", Income: money.FromInt(5000)},
+		{ID: 3, MonthID: monthID, Title: "gifts", Notes: "From friends", Income: money.FromInt(3000)},
 	}
 
 	// Add Incomes
@@ -253,7 +255,7 @@ func TestRemoveIncome(t *testing.T) {
 			if in.ID == 1 {
 				continue
 			}
-			b += in.Income
+			b += in.Income.ToInt()
 		}
 
 		return b / int64(daysInMonth(time.Now().Month()))
@@ -261,7 +263,7 @@ func TestRemoveIncome(t *testing.T) {
 
 	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget)
+	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 
 	// Try to remove Income with invalid id
 	err = db.RemoveIncome(100)
