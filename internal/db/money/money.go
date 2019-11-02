@@ -26,3 +26,37 @@ func (m Money) ToInt() int64 {
 func (m Money) ToFloat() float64 {
 	return float64(m) / precision
 }
+
+// Add functions
+
+// Add returns sum of original and passed Moneys
+func (m Money) Add(add Money) Money {
+	return m + add
+}
+
+// AddInt returns sum of original money and passed int64
+func (m Money) AddInt(add int64) Money {
+	return m + FromInt(add)
+}
+
+// AddFloat returns sum of original money and passed float64
+func (m Money) AddFloat(add float64) Money {
+	return m + FromFloat(add)
+}
+
+// Sub functions
+
+// Sub returns remainder after substraction
+func (m Money) Sub(sub Money) Money {
+	return m - sub
+}
+
+// SubInt returns remainder after substraction
+func (m Money) SubInt(sub int64) Money {
+	return m - FromInt(sub)
+}
+
+// SubFloat returns remainder after substraction
+func (m Money) SubFloat(sub float64) Money {
+	return m - FromFloat(sub)
+}
