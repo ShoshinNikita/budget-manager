@@ -3,6 +3,7 @@ package db
 import (
 	"testing"
 
+	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
 )
@@ -21,29 +22,29 @@ func TestAddSpend(t *testing.T) {
 		isError bool
 	}{
 		{
-			Spend: Spend{ID: 1, DayID: 1, Title: "first spend", Notes: "123", Cost: 5000},
+			Spend: Spend{ID: 1, DayID: 1, Title: "first spend", Notes: "123", Cost: money.FromInt(5000)},
 		},
 		{
-			Spend: Spend{ID: 2, DayID: 15, Title: "another spend", Cost: 15},
+			Spend: Spend{ID: 2, DayID: 15, Title: "another spend", Cost: money.FromInt(15)},
 		},
 		{
-			Spend: Spend{ID: 3, DayID: 22, Title: "ывоаыоварод", Cost: 1},
+			Spend: Spend{ID: 3, DayID: 22, Title: "ывоаыоварод", Cost: money.FromInt(1)},
 		},
 		// With errors
 		{
-			Spend:   Spend{ID: 4, DayID: 22, Title: "", Cost: 1},
+			Spend:   Spend{ID: 4, DayID: 22, Title: "", Cost: money.FromInt(1)},
 			isError: true,
 		},
 		{
-			Spend:   Spend{ID: 5, DayID: 22, Title: "123", Cost: 0},
+			Spend:   Spend{ID: 5, DayID: 22, Title: "123", Cost: money.FromInt(0)},
 			isError: true,
 		},
 		{
-			Spend:   Spend{ID: 6, DayID: 22, Title: "456", Cost: -50},
+			Spend:   Spend{ID: 6, DayID: 22, Title: "456", Cost: money.FromInt(-50)},
 			isError: true,
 		},
 		{
-			Spend:   Spend{ID: 7, DayID: 4000, Title: "first spend", Notes: "123", Cost: 5000},
+			Spend:   Spend{ID: 7, DayID: 4000, Title: "first spend", Notes: "123", Cost: money.FromInt(5000)},
 			isError: true,
 		},
 	}
@@ -85,7 +86,7 @@ func TestAddSpend(t *testing.T) {
 			if sp.isError {
 				continue
 			}
-			totalSpend -= sp.Cost
+			totalSpend -= sp.Cost.ToInt()
 		}
 		return totalSpend
 	})
@@ -107,59 +108,59 @@ func TestEditSpend(t *testing.T) {
 	}{
 		{
 			origin: Spend{
-				ID: 1, DayID: 10, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000,
+				ID: 1, DayID: 10, Title: "123", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
-				ID: 1, DayID: 10, Title: "123456", TypeID: 12, Notes: "test notes", Cost: 15500,
+				ID: 1, DayID: 10, Title: "123456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(15500),
 			},
 		},
 		{
 			origin: Spend{
-				ID: 2, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000,
+				ID: 2, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
-				ID: 2, DayID: 1, Title: "123", TypeID: 1, Notes: "", Cost: 150,
+				ID: 2, DayID: 1, Title: "123", TypeID: 1, Notes: "", Cost: money.FromInt(150),
 			},
 		},
 		{
 			origin: Spend{
-				ID: 3, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: 155000,
+				ID: 3, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
-				ID: 3, DayID: 1, Title: "123", TypeID: 0, Notes: "", Cost: 150,
+				ID: 3, DayID: 1, Title: "123", TypeID: 0, Notes: "", Cost: money.FromInt(150),
 			},
 		},
 		// With errors
 		{
 			origin: Spend{
-				ID: 4, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000,
+				ID: 4, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
-				ID: 4, DayID: 10, Title: "", TypeID: 12, Notes: "test notes", Cost: 15500,
-			},
-			isError: true,
-		},
-		{
-			origin: Spend{
-				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
-			edited: &Spend{
-				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 0,
+				ID: 4, DayID: 10, Title: "", TypeID: 12, Notes: "test notes", Cost: money.FromInt(15500),
 			},
 			isError: true,
 		},
 		{
 			origin: Spend{
-				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
+				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000)},
 			edited: &Spend{
-				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: -50,
+				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(0),
 			},
 			isError: true,
 		},
 		{
 			origin: Spend{
-				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000},
+				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000)},
 			edited: &Spend{
-				ID: 200, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: 155000,
+				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(-50),
+			},
+			isError: true,
+		},
+		{
+			origin: Spend{
+				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000)},
+			edited: &Spend{
+				ID: 200, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			isError: true,
 		},
@@ -184,7 +185,7 @@ func TestEditSpend(t *testing.T) {
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			totalSpend -= sp.origin.Cost
+			totalSpend -= sp.origin.Cost.ToInt()
 		}
 		return totalSpend
 	})
@@ -229,10 +230,10 @@ func TestEditSpend(t *testing.T) {
 		var totalSpend int64
 		for _, sp := range spends {
 			if sp.edited == nil || sp.isError {
-				totalSpend -= sp.origin.Cost
+				totalSpend -= sp.origin.Cost.ToInt()
 				continue
 			}
-			totalSpend -= sp.edited.Cost
+			totalSpend -= sp.edited.Cost.ToInt()
 		}
 		return totalSpend
 	})
@@ -253,19 +254,19 @@ func TestDeleteSpend(t *testing.T) {
 		isError      bool
 	}{
 		{
-			Spend: Spend{ID: 1, DayID: 1, Title: "first spend", Notes: "123", Cost: 5000},
+			Spend: Spend{ID: 1, DayID: 1, Title: "first spend", Notes: "123", Cost: money.FromInt(5000)},
 		},
 		{
-			Spend:        Spend{ID: 2, DayID: 15, Title: "another spend", Cost: 15},
+			Spend:        Spend{ID: 2, DayID: 15, Title: "another spend", Cost: money.FromInt(15)},
 			shouldDelete: true,
 		},
 		{
-			Spend:        Spend{ID: 3, DayID: 22, Title: "ывоаыоварод", Cost: 2000},
+			Spend:        Spend{ID: 3, DayID: 22, Title: "ывоаыоварод", Cost: money.FromInt(2000)},
 			shouldDelete: true,
 		},
 		// With errors
 		{
-			Spend:        Spend{ID: 25, DayID: 22, Title: "ывоаыоварод", Cost: 2000},
+			Spend:        Spend{ID: 25, DayID: 22, Title: "ывоаыоварод", Cost: money.FromInt(2000)},
 			shouldDelete: true,
 			isError:      true,
 		},
@@ -289,7 +290,7 @@ func TestDeleteSpend(t *testing.T) {
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			totalSpend -= sp.Cost
+			totalSpend -= sp.Cost.ToInt()
 		}
 		return totalSpend
 	})
@@ -322,7 +323,7 @@ func TestDeleteSpend(t *testing.T) {
 		var totalSpend int64
 		for _, sp := range spends {
 			if !sp.shouldDelete || sp.isError {
-				totalSpend -= sp.Cost
+				totalSpend -= sp.Cost.ToInt()
 			}
 		}
 		return totalSpend
@@ -337,5 +338,5 @@ func checkTotalSpend(db *DB, require *require.Assertions, f func() int64) {
 
 	m, err := db.GetMonth(monthID)
 	require.Nil(err)
-	require.Equal(totalSpend, m.TotalSpend)
+	require.Equal(totalSpend, m.TotalSpend.ToInt())
 }

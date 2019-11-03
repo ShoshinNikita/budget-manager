@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
+
+	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 )
 
 // Errors
@@ -36,19 +38,18 @@ type Month struct {
 	// Incomes
 
 	Incomes     []*Income `pg:"fk:month_id"`
-	TotalIncome int64
+	TotalIncome money.Money
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
-	// multiplied by 100
-	DailyBudget int64
+	DailyBudget money.Money
 
 	// Spends
 
 	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
 	Days            []*Day            `pg:"fk:month_id"`
-	TotalSpend      int64             // must be negative or zero
+	TotalSpend      money.Money       // must be negative or zero
 
 	// Result is TotalIncome - TotalSpend
-	Result int64
+	Result money.Money
 }
 
 func (db DB) GetMonth(id uint) (*Month, error) {
@@ -77,7 +78,7 @@ type Day struct {
 
 	Day int
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
-	Saldo  int64
+	Saldo  money.Money
 	Spends []*Spend `pg:"fk:day_id"`
 }
 
@@ -139,25 +140,25 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	}
 
 	// Update Total Income
-	m.TotalIncome = func() int64 {
-		var income int64
+	m.TotalIncome = func() money.Money {
+		var income money.Money
 		for _, in := range m.Incomes {
-			income += in.Income
+			income = income.Add(in.Income)
 		}
 		return income
 	}()
 
 	// Update Total Spends and Daily Budget
 
-	monthlyPaymentCost := func() int64 {
-		var cost int64
+	monthlyPaymentCost := func() money.Money {
+		var cost money.Money
 		for _, mp := range m.MonthlyPayments {
-			cost -= mp.Cost
+			cost = cost.Sub(mp.Cost)
 		}
 		return cost
 	}()
-	spendCost := func() int64 {
-		var cost int64
+	spendCost := func() money.Money {
+		var cost money.Money
 		for _, day := range m.Days {
 			if day == nil {
 				continue
@@ -166,15 +167,15 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 				if spend == nil {
 					continue
 				}
-				cost -= spend.Cost
+				cost = cost.Sub(spend.Cost)
 			}
 		}
 		return cost
 	}()
 
-	m.TotalSpend = monthlyPaymentCost + spendCost
-	// Use '+' because monthlyPaymentsCost is negative
-	m.DailyBudget = (m.TotalIncome + m.TotalSpend) / int64(daysInMonth(m.Month))
+	m.TotalSpend = monthlyPaymentCost.Add(spendCost)
+	// Use "Add" because TotalSpend is negative
+	m.DailyBudget = m.TotalIncome.Add(m.TotalSpend).Divide(int64(daysInMonth(m.Month)))
 
 	// Update Saldos (it is accumulated)
 	saldo := m.DailyBudget
@@ -188,7 +189,7 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 			if spend == nil {
 				continue
 			}
-			m.Days[i].Saldo -= spend.Cost
+			m.Days[i].Saldo = m.Days[i].Saldo.Sub(spend.Cost)
 		}
 		saldo = m.Days[i].Saldo + m.DailyBudget
 	}
