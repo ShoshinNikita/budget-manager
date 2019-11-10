@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/money"
@@ -57,7 +58,9 @@ func (db DB) GetMonth(id uint) (*Month, error) {
 	err := db.db.Model(m).
 		Relation("Incomes").
 		Relation("MonthlyPayments").
-		Relation("Days").
+		Relation("Days", func(q *orm.Query) (*orm.Query, error) {
+			return q.Order("day ASC"), nil
+		}).
 		Relation("Days.Spends").
 		WherePK().Select()
 	if err != nil {
