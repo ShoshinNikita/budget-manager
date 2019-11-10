@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,14 +47,27 @@ func TestAddSpendType(t *testing.T) {
 
 	// Check Spend Types
 	for _, t := range spendTypes {
-		spendType := &SpendType{ID: t.ID}
-		err := db.db.Select(spendType)
+		spendType, err := db.GetSpendType(t.ID)
 		if t.isError {
-			require.Equal(pg.ErrNoRows, err)
+			require.NotNil(pg.ErrNoRows, errors.Cause(err))
 			continue
 		}
 		require.Nil(err)
+		require.Equal(t.SpendType, *spendType)
 	}
+
+	var allSpendTypes []SpendType
+	for _, t := range spendTypes {
+		if t.isError {
+			continue
+		}
+
+		allSpendTypes = append(allSpendTypes, t.SpendType)
+	}
+
+	dbSpendTypes, err := db.GetSpendTypes()
+	require.Nil(err)
+	require.ElementsMatch(allSpendTypes, dbSpendTypes)
 }
 
 func TestEditSpendType(t *testing.T) {
@@ -101,8 +115,7 @@ func TestEditSpendType(t *testing.T) {
 
 	// Check Spend Types
 	for _, t := range spendTypes {
-		spendType := &SpendType{ID: t.origin.ID}
-		err := db.db.Select(spendType)
+		spendType, err := db.GetSpendType(t.origin.ID)
 		if t.isError {
 			require.Equal(t.origin, *spendType)
 			continue
@@ -141,9 +154,8 @@ func TestDeleteSpendType(t *testing.T) {
 
 	// Check Spend Types
 	for _, t := range spendTypes {
-		spendType := &SpendType{ID: t.ID}
-		err := db.db.Select(spendType)
-		require.Equal(pg.ErrNoRows, err)
+		_, err := db.GetSpendType(t.ID)
+		require.Equal(pg.ErrNoRows, errors.Cause(err))
 	}
 
 	// Try to delete Spend Type with invalid id

@@ -33,6 +33,32 @@ func (in *SpendType) BeforeUpdate(ctx context.Context) (context.Context, error) 
 
 // -----------------------------------------------------------------------------
 
+// GetSpendType returns Spend Type with passed id
+func (db DB) GetSpendType(id uint) (*SpendType, error) {
+	spendType := &SpendType{ID: id}
+	err := db.db.Select(spendType)
+	if err != nil {
+		err = errors.Wrapf(err, "can't select Spend Type with id '%d'", id)
+		db.log.Error(err)
+		return nil, err
+	}
+
+	return spendType, nil
+}
+
+// GetSpendTypes returns all Spend Types
+func (db DB) GetSpendTypes() ([]SpendType, error) {
+	spendTypes := []SpendType{}
+	err := db.db.Model(&spendTypes).Select()
+	if err != nil {
+		err = errors.Wrap(err, "can't select Spend Types")
+		db.log.Error(err)
+		return nil, err
+	}
+
+	return spendTypes, nil
+}
+
 // AddSpendType adds new Spend Type
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &SpendType{Name: name}
