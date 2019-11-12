@@ -21,7 +21,7 @@ type SpendType struct {
 func (in *SpendType) BeforeInsert(ctx context.Context) (context.Context, error) {
 	// Check Name
 	if in.Name == "" {
-		return ctx, errors.Errorf("name can't be empty")
+		return ctx, badRequestError(errors.Errorf("name can't be empty"))
 	}
 
 	return ctx, nil
@@ -38,7 +38,7 @@ func (db DB) GetSpendType(id uint) (*SpendType, error) {
 	spendType := &SpendType{ID: id}
 	err := db.db.Select(spendType)
 	if err != nil {
-		err = errors.Wrapf(err, "can't select Spend Type with id '%d'", id)
+		err = errorWrapf(err, "can't select Spend Type with id '%d'", id)
 		db.log.Error(err)
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (db DB) GetSpendTypes() ([]SpendType, error) {
 	spendTypes := []SpendType{}
 	err := db.db.Model(&spendTypes).Select()
 	if err != nil {
-		err = errors.Wrap(err, "can't select Spend Types")
+		err = errorWrap(err, "can't select Spend Types")
 		db.log.Error(err)
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &SpendType{Name: name}
 	err = db.db.Insert(spendType)
 	if err != nil {
-		err = errors.Wrap(err, "can't insert a new Spend Type")
+		err = errorWrap(err, "can't insert a new Spend Type")
 		db.log.Error(err)
 		return 0, err
 	}
@@ -81,7 +81,7 @@ func (db DB) EditSpendType(id uint, newName string) error {
 	spendType := &SpendType{ID: id, Name: newName}
 	err := db.db.Update(spendType)
 	if err != nil {
-		err = errors.Wrap(err, "can't insert a new Spend Type")
+		err = errorWrap(err, "can't insert a new Spend Type")
 		db.log.Error(err)
 		return err
 	}
@@ -98,7 +98,7 @@ func (db DB) RemoveSpendType(id uint) error {
 	spendType := &SpendType{ID: id}
 	err := db.db.Delete(spendType)
 	if err != nil {
-		err = errors.Wrapf(err, "can't delete spend type with id '%d'", id)
+		err = errorWrapf(err, "can't delete spend type with id '%d'", id)
 		db.log.Error(err)
 		return err
 	}

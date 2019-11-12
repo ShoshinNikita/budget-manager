@@ -14,20 +14,30 @@ import (
 
 // Checks
 var (
-	ErrMonthNotExist          = errors.New("month with passed id doesn't exist")
-	ErrDayNotExist            = errors.New("day with passed id doesn't exist")
-	ErrIncomeNotExist         = errors.New("income with passed id doesn't exist")
-	ErrMonthlyPaymentNotExist = errors.New("monthly payment with passed id doesn't exist")
-	ErrSpendNotExist          = errors.New("spend with passed id doesn't exist")
-	ErrSpendTypeNotExist      = errors.New("spend type with passed id doesn't exist")
+	ErrMonthNotExist          = badRequestError(errors.New("month with passed id doesn't exist"))
+	ErrDayNotExist            = badRequestError(errors.New("day with passed id doesn't exist"))
+	ErrIncomeNotExist         = badRequestError(errors.New("income with passed id doesn't exist"))
+	ErrMonthlyPaymentNotExist = badRequestError(errors.New("monthly payment with passed id doesn't exist"))
+	ErrSpendNotExist          = badRequestError(errors.New("spend with passed id doesn't exist"))
+	ErrSpendTypeNotExist      = badRequestError(errors.New("spend type with passed id doesn't exist"))
 )
 
-// Transaction (wrap messages)
-const (
-	errBeginTransaction = "can't begin a new transaction"
-	errCommitChanges    = "can't commit changes"
-	errRecomputeBudget  = "can't recompute month budget"
-)
+// Common errors
+
+func errBeginTransaction(err error) error {
+	const msg = "can't begin a new transaction"
+	return internalErrorWrap(err, msg)
+}
+
+func errCommitChanges(err error) error {
+	const msg = "can't commit changes"
+	return internalErrorWrap(err, msg)
+}
+
+func errRecomputeBudget(err error) error {
+	const msg = "can't recompute month budget"
+	return internalErrorWrap(err, msg)
+}
 
 // -----------------------------------------------------------------------------
 
@@ -67,7 +77,7 @@ func (db DB) GetMonth(id uint) (*Month, error) {
 		if err == pg.ErrNoRows {
 			return nil, ErrMonthNotExist
 		}
-		return nil, errors.Wrap(err, "can't select month with passed id")
+		return nil, internalErrorWrap(err, "can't select month with passed id")
 	}
 
 	return m, nil
@@ -95,7 +105,7 @@ func (db DB) GetDay(id uint) (*Day, error) {
 		if err == pg.ErrNoRows {
 			return nil, ErrDayNotExist
 		}
-		return nil, errors.Wrap(err, "can't select day with passed id")
+		return nil, internalErrorWrap(err, "can't select day with passed id")
 	}
 
 	return d, nil
@@ -108,10 +118,10 @@ func (db DB) GetMonthID(year, month int) (uint, error) {
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return 0, errors.New("there is no such month")
+			return 0, ErrMonthNotExist
 		}
 
-		return 0, errors.Wrap(err, "can't select Month with passed year and month")
+		return 0, internalErrorWrap(err, "can't select Month with passed year and month")
 	}
 
 	return m.ID, nil
@@ -121,7 +131,11 @@ func (db DB) GetMonthIDByDay(dayID uint) (uint, error) {
 	day := &Day{ID: dayID}
 	err := db.db.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {
-		return 0, errors.Wrap(err, "can't select day with passed id")
+		if err == pg.ErrNoRows {
+			return 0, ErrDayNotExist
+		}
+
+		return 0, internalErrorWrap(err, "can't select day with passed id")
 	}
 
 	return day.MonthID, nil
@@ -139,7 +153,7 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 		WherePK().
 		Select()
 	if err != nil {
-		return errors.Wrap(err, "can't select month")
+		return internalErrorWrap(err, "can't select month")
 	}
 
 	// Update Total Income
@@ -200,13 +214,13 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	// Update Month
 	err = tx.Update(m)
 	if err != nil {
-		return errors.Wrap(err, "can't update month")
+		return errorWrap(err, "can't update month")
 	}
 
 	// Update Days
 	_, err = tx.Model(&m.Days).Update()
 	if err != nil {
-		return errors.Wrap(err, "can't update days")
+		return errorWrap(err, "can't update days")
 	}
 
 	return nil
