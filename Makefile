@@ -31,7 +31,7 @@ clear-local:
 test: test-integ
 
 test-unit:
-	go test -v ./...
+	go test -mod vendor -v ./...
 
 test-integ:
 	# Run Postgres
@@ -39,14 +39,14 @@ test-integ:
 	echo "Wait fot DB..."
 	sleep 5
 	# Run integration tests
-	go test --tags=integration -v ./...
+	go test -mod vendor --tags=integration -v ./...
 	# Stop and remove DB
 	docker stop budget_manager_postgres
 
 # Other
 
 build:
-	go build -o bin/budget_manager cmd/budget_manager/main.go
+	go build -mod vendor -o bin/budget_manager cmd/budget_manager/main.go
 
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
