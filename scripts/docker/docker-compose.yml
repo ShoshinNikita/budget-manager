@@ -1,18 +1,39 @@
-version: "3"
+version: "3.7"
+
 services:
   budget_manager:
     build:
       context: ../..
       dockerfile: ./scripts/docker/Dockerfile
+    container_name: budget_manager_app
+    environment:
+      DEBUG: "true"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_DATABASE: postgres
+      SERVER_PORT: ":8080"
+    ports:
+      - "8080:8080"
 
   postgres:
     image: postgres
-    container_name: postgres
+    container_name: budget_manager_postgres
     environment:
       POSTGRES_USER: postgres
       # Empty password
       # POSTGRES_PASSWORD
       POSTGRES_DB: postgres
     volumes:
-      - "./var/pg-data:/var/lib/postgresql/data"
+      # Use this volume to not store data
+      - type: volume
+        source: pg_volume
+        target: /var/lib/postgresql/data
+      # Use this volume to store data in ./var/pg_data directory
+      # - type: bind
+      #   source: ./var/pg_data
+      #   target: /var/lib/postgresql/data
     command: -c "log_statement=all"
+
+volumes:
+  pg_volume:
