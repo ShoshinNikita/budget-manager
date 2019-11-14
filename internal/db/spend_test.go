@@ -1,11 +1,14 @@
+// +build integration
+
 package db
 
 import (
 	"testing"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ShoshinNikita/budget_manager/internal/db/money"
 )
 
 func TestAddSpend(t *testing.T) {
