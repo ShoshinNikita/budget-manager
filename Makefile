@@ -56,4 +56,7 @@ lint:
 	#
 	# More installation options: https://github.com/golangci/golangci-lint#binary-release
 	#
-	golangci-lint run
+	golangci-lint run \
+		--exclude="Error return value of \`tx.Rollback\` is not checked" \
+		--max-issues-per-linter=0 \
+		--max-same-issues=0
