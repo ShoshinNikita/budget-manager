@@ -18,8 +18,6 @@ type DB struct {
 	db   *pg.DB
 	cron *cron.Cron
 	log  *clog.Logger
-
-	stopped chan struct{}
 }
 
 // NewDBOptions contains options for NewDB function
