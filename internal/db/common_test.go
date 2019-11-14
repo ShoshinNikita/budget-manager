@@ -4,7 +4,6 @@ package db
 
 import (
 	clog "github.com/ShoshinNikita/go-clog/v3"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,20 +38,6 @@ func initDB(require *require.Assertions) *DB {
 }
 
 func dropDB(db *DB, require *require.Assertions) {
-	var err error
-
-	opts := &orm.DropTableOptions{IfExists: true}
-
-	err = db.db.DropTable(&Month{}, opts)
-	require.Nil(err)
-	err = db.db.DropTable(&Income{}, opts)
-	require.Nil(err)
-	err = db.db.DropTable(&MonthlyPayment{}, opts)
-	require.Nil(err)
-	err = db.db.DropTable(&Day{}, opts)
-	require.Nil(err)
-	err = db.db.DropTable(&Spend{}, opts)
-	require.Nil(err)
-	err = db.db.DropTable(&SpendType{}, opts)
+	err := db.DropDB()
 	require.Nil(err)
 }

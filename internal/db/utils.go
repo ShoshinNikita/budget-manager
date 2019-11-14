@@ -46,6 +46,40 @@ func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 	return nil
 }
 
+// dropTables drops table according to passed models and options. It returns the first encountered error
+//
+// Example:
+//   dropTable(
+//     db,
+//     &firstModel{}, &orm.DropTableOptions{...},
+//     &secondModel{}, nil,
+//   )
+//
+func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
+	if len(modelsAndOpts)%2 != 0 {
+		return errors.New("invalid numbers of arguments")
+	}
+
+	for i := 0; i < len(modelsAndOpts); i += 2 {
+		model := modelsAndOpts[i]
+		opts, ok := modelsAndOpts[i+1].(*orm.DropTableOptions)
+		if !ok {
+			if modelsAndOpts[i+1] != nil {
+				return errors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
+			}
+
+			opts = nil
+		}
+
+		err := db.DropTable(model, opts)
+		if err != nil {
+			errors.Wrap(err, "can't drop table")
+		}
+	}
+
+	return nil
+}
+
 // ping checks the connection to the database
 func ping(db *pg.DB) (ok bool) {
 	_, err := db.Exec("SELECT 1")
