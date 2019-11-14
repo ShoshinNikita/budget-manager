@@ -60,7 +60,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusInternalServerError, err)
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -106,7 +106,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusInternalServerError, err)
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -143,7 +143,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusInternalServerError, err)
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -200,5 +200,5 @@ func (s Server) DeleteSpendType(w http.ResponseWriter, r *http.Request) {
 // -------------------------------------------------
 
 func notImplementedYet(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("not implemented yet"))
+	w.Write([]byte("not implemented yet")) //nolint:errcheck
 }

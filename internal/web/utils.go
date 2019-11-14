@@ -21,7 +21,7 @@ func (s Server) processError(w http.ResponseWriter, respMsg string, code int, in
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	resp := models.Response{Success: false, Error: respMsg}
-	json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(resp) //nolint:errcheck
 }
 
 const prefixForTrim = "github.com/ShoshinNikita/budget_manager/"
