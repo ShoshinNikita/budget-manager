@@ -39,7 +39,7 @@ func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 
 		err := db.CreateTable(model, opts)
 		if err != nil {
-			errors.Wrap(err, "can't create table")
+			return errors.Wrap(err, "can't create table")
 		}
 	}
 

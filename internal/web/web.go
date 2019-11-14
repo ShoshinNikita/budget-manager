@@ -29,6 +29,7 @@ type NewServerOptions struct {
 }
 
 func NewServer(opts NewServerOptions, db *db.DB, log *clog.Logger) *Server {
+	//nolint:gosimple
 	return &Server{
 		db:  db,
 		log: log.WithPrefix("[server]"),
