@@ -74,9 +74,9 @@ func NewProdLogger() *Logger {
 // WithPrefix returns cloned Logger with added prefix (prefix + ": ").
 //
 // Example:
-//   - l.prefix == "old prefix"
-//   - l.WithPrefix("new prefix")
-//   - l.prefix == "new prefix: old prefix"
+//   - l.prefix == "[old prefix]: "
+//   - l.WithPrefix("[new prefix]")
+//   - l.prefix == "[old prefix]: [new prefix]: "
 //
 func (l Logger) WithPrefix(prefix string) *Logger {
 	if prefix == "" {
@@ -86,8 +86,19 @@ func (l Logger) WithPrefix(prefix string) *Logger {
 	log := l.clone()
 
 	prefix = prefix + ": "
-	log.customPrefix = append([]byte(prefix), log.customPrefix...)
+	log.customPrefix = append(log.customPrefix, []byte(prefix)...)
 
+	return log
+}
+
+// SetPrefix returns cloned Logger with overwritten prefix
+func (l Logger) SetPrefix(prefix string) *Logger {
+	if prefix == "" {
+		return l.clone()
+	}
+
+	log := l.clone()
+	log.customPrefix = []byte(prefix)
 	return log
 }
 
