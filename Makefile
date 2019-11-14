@@ -42,3 +42,18 @@ test-integ:
 	go test --tags=integration -v ./...
 	# Stop and remove DB
 	docker stop budget_manager_postgres
+
+# Other
+
+build:
+	go build -o bin/budget_manager cmd/budget_manager/main.go
+
+lint:
+	# golangci-lint - https://github.com/golangci/golangci-lint
+	#
+	# golangci-lint can be installed with:
+	#   curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.20.0
+	#
+	# More installation options: https://github.com/golangci/golangci-lint#binary-release
+	#
+	golangci-lint run
