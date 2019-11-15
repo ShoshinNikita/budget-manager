@@ -24,7 +24,7 @@ type Income struct {
 
 	Title  string
 	Notes  string
-	Income money.Money // multiplied by 100
+	Income money.Money
 }
 
 func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
@@ -63,39 +63,33 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 		return 0, ErrMonthNotExist
 	}
 
-	tx, err := db.db.Begin()
-	if err != nil {
-		err = errBeginTransaction(err)
-		db.log.Error(err)
-		return 0, err
-	}
-	defer tx.Rollback()
+	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		// Add a new Income
+		incomeID, err = db.addIncome(tx, args)
+		if err != nil {
+			err = errorWrap(err, "can't add income")
+			db.log.Error(err)
+			return err
+		}
 
-	// Add a new Income
-	id, err := db.addIncome(tx, args)
-	if err != nil {
-		err = errorWrap(err, "can't add income")
-		db.log.Error(err)
-		return 0, err
-	}
+		// Recompute Month budget
+		err = db.recomputeMonth(tx, args.MonthID)
+		if err != nil {
+			err = errRecomputeBudget(err)
+			db.log.Error(err)
+			return err
+		}
 
-	// Recompute Month budget
-	err = db.recomputeMonth(tx, args.MonthID)
+		return nil
+	})
 	if err != nil {
-		err = errRecomputeBudget(err)
-		db.log.Error(err)
-		return 0, err
-	}
-
-	// Commit changes
-	err = tx.Commit()
-	if err != nil {
-		err = errCommitChanges(err)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return 0, internalError(err)
+		}
 		return 0, err
 	}
 
-	return id, nil
+	return incomeID, nil
 }
 
 func (_ DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
@@ -129,48 +123,42 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		return ErrIncomeNotExist
 	}
 
-	tx, err := db.db.Begin()
-	if err != nil {
-		err = errBeginTransaction(err)
-		db.log.Error(err)
-		return err
-	}
-	defer tx.Rollback()
-
-	// Select Income
-	in := &Income{ID: args.ID}
-	err = tx.Select(in)
-	if err != nil {
-		if err == pg.ErrNoRows {
-			err = ErrIncomeNotExist
-		} else {
-			err = errorWrapf(err, "can't select Income with passed id '%d'", args.ID)
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		// Select Income
+		in := &Income{ID: args.ID}
+		err = tx.Select(in)
+		if err != nil {
+			if err == pg.ErrNoRows {
+				err = ErrIncomeNotExist
+			} else {
+				err = errorWrapf(err, "can't select Income with passed id '%d'", args.ID)
+			}
+			db.log.Error(err)
+			return err
 		}
-		db.log.Error(err)
-		return err
-	}
 
-	// Edit Income
-	err = db.editIncome(tx, in, args)
-	if err != nil {
-		err = errorWrap(err, "can't edit Income")
-		db.log.Error(err)
-		return err
-	}
+		// Edit Income
+		err = db.editIncome(tx, in, args)
+		if err != nil {
+			err = errorWrap(err, "can't edit Income")
+			db.log.Error(err)
+			return err
+		}
 
-	// Recompute Month budget
-	err = db.recomputeMonth(tx, in.MonthID)
-	if err != nil {
-		err = errRecomputeBudget(err)
-		db.log.Error(err)
-		return err
-	}
+		// Recompute Month budget
+		err = db.recomputeMonth(tx, in.MonthID)
+		if err != nil {
+			err = errRecomputeBudget(err)
+			db.log.Error(err)
+			return err
+		}
 
-	// Commit changes
-	err = tx.Commit()
+		return nil
+	})
 	if err != nil {
-		err = errCommitChanges(err)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return internalError(err)
+		}
 		return err
 	}
 
@@ -202,49 +190,44 @@ func (db DB) RemoveIncome(id uint) error {
 		return ErrIncomeNotExist
 	}
 
-	tx, err := db.db.Begin()
-	if err != nil {
-		err = errBeginTransaction(err)
-		return err
-	}
-	defer tx.Rollback()
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		monthID, err := func() (uint, error) {
+			in := &Income{ID: id}
+			err = tx.Model(in).Column("month_id").WherePK().Select()
+			if err != nil {
+				return 0, err
+			}
 
-	monthID, err := func() (uint, error) {
-		in := &Income{ID: id}
-		err = tx.Model(in).Column("month_id").WherePK().Select()
+			return in.MonthID, nil
+		}()
 		if err != nil {
-			return 0, err
+			err = errorWrap(err, "can't select Income with passed id")
+			db.log.Error(err)
+			return err
 		}
 
-		return in.MonthID, nil
-	}()
-	if err != nil {
-		err = errorWrap(err, "can't select Income with passed id")
-		db.log.Error(err)
-		return err
-	}
+		// Remove income
+		err = db.removeIncome(tx, id)
+		if err != nil {
+			err = errorWrap(err, "can't remove Income with passed id")
+			db.log.Error(err)
+			return err
+		}
 
-	// Remove income
-	err = db.removeIncome(tx, id)
-	if err != nil {
-		err = errorWrap(err, "can't remove Income with passed id")
-		db.log.Error(err)
-		return err
-	}
+		// Recompute Month budget
+		err = db.recomputeMonth(tx, monthID)
+		if err != nil {
+			err = errRecomputeBudget(err)
+			db.log.Error(err)
+			return err
+		}
 
-	// Recompute Month budget
-	err = db.recomputeMonth(tx, monthID)
+		return nil
+	})
 	if err != nil {
-		err = errRecomputeBudget(err)
-		db.log.Error(err)
-		return err
-	}
-
-	// Commit changes
-	err = tx.Commit()
-	if err != nil {
-		err = errCommitChanges(err)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return internalError(err)
+		}
 		return err
 	}
 
