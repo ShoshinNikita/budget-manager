@@ -26,7 +26,7 @@ type MonthlyPayment struct {
 	TypeID uint
 	Type   *SpendType `pg:"fk:type_id"`
 	Notes  string
-	Cost   money.Money // multiplied by 100
+	Cost   money.Money
 }
 
 func (in *MonthlyPayment) BeforeInsert(ctx context.Context) (context.Context, error) {
@@ -67,35 +67,29 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 		return 0, ErrMonthNotExist
 	}
 
-	tx, err := db.db.Begin()
-	if err != nil {
-		err = errBeginTransaction(err)
-		db.log.Error(err)
-		return 0, err
-	}
-	defer tx.Rollback()
+	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		// Add Monthly Payment
+		id, err = db.addMonthlyPayment(tx, args)
+		if err != nil {
+			err = errorWrap(err, "can't add new MonthlyPayment")
+			db.log.Error(err)
+			return err
+		}
 
-	// Add Monthly Payment
-	id, err = db.addMonthlyPayment(tx, args)
-	if err != nil {
-		err = errorWrap(err, "can't add new MonthlyPayment")
-		db.log.Error(err)
-		return 0, err
-	}
+		// Recompute month budget
+		err = db.recomputeMonth(tx, args.MonthID)
+		if err != nil {
+			err = errRecomputeBudget(err)
+			db.log.Error(err)
+			return err
+		}
 
-	// Recompute month budget
-	err = db.recomputeMonth(tx, args.MonthID)
+		return nil
+	})
 	if err != nil {
-		err = errRecomputeBudget(err)
-		db.log.Error(err)
-		return 0, err
-	}
-
-	// Commit changes
-	err = tx.Commit()
-	if err != nil {
-		err = errCommitChanges(err)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return 0, internalError(err)
+		}
 		return 0, err
 	}
 
@@ -134,46 +128,41 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
-	tx, err := db.db.Begin()
-	if err != nil {
-		return errBeginTransaction(err)
-	}
-	defer tx.Rollback()
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		mp := &MonthlyPayment{ID: args.ID}
+		err = tx.Select(mp)
+		if err != nil {
+			if err == pg.ErrNoRows {
+				err = ErrMonthlyPaymentNotExist
+			} else {
+				err = errorWrap(err, "can't get Monthly Payment with passed id")
+			}
 
-	mp := &MonthlyPayment{ID: args.ID}
-	err = tx.Select(mp)
-	if err != nil {
-		if err == pg.ErrNoRows {
-			err = ErrMonthlyPaymentNotExist
-		} else {
-			err = errorWrap(err, "can't get Monthly Payment with passed id")
+			db.log.Error(err)
+			return err
 		}
 
-		db.log.Error(err)
-		return err
-	}
+		// Edit Monthly Payment
+		err = db.editMonthlyPayment(tx, mp, args)
+		if err != nil {
+			err = errorWrapf(err, "can't edit Monthly Payment with id '%d'", args.ID)
+			db.log.Error(err)
+			return err
+		}
 
-	// Edit Monthly Payment
-	err = db.editMonthlyPayment(tx, mp, args)
+		// Recompute month budget
+		err = db.recomputeMonth(tx, mp.MonthID)
+		if err != nil {
+			err = errRecomputeBudget(err)
+			db.log.Error(err)
+			return err
+		}
+		return nil
+	})
 	if err != nil {
-		err = errorWrapf(err, "can't edit Monthly Payment with id '%d'", args.ID)
-		db.log.Error(err)
-		return err
-	}
-
-	// Recompute month budget
-	err = db.recomputeMonth(tx, mp.MonthID)
-	if err != nil {
-		err = errRecomputeBudget(err)
-		db.log.Error(err)
-		return err
-	}
-
-	// Commit changes
-	err = tx.Commit()
-	if err != nil {
-		err = errCommitChanges(err)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return internalError(err)
+		}
 		return err
 	}
 
@@ -204,42 +193,39 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
-	tx, err := db.db.Begin()
-	if err != nil {
-		return errBeginTransaction(err)
-	}
-	defer tx.Rollback()
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 
-	// Remove Monthly Payment
+		// Remove Monthly Payment
 
-	mp := &MonthlyPayment{ID: id}
-	err = tx.Model(mp).Column("month_id").WherePK().Select()
-	if err != nil {
-		err = errorWrap(err, "can't select Monthly Payment with passed id")
-		db.log.Error(err)
-		return err
-	}
+		mp := &MonthlyPayment{ID: id}
+		err = tx.Model(mp).Column("month_id").WherePK().Select()
+		if err != nil {
+			err = errorWrap(err, "can't select Monthly Payment with passed id")
+			db.log.Error(err)
+			return err
+		}
 
-	err = db.db.Delete(mp)
-	if err != nil {
-		err = errorWrapf(err, "can't remove Monthly Payment with id '%d'", id)
-		db.log.Error(err)
-		return err
-	}
+		err = db.db.Delete(mp)
+		if err != nil {
+			err = errorWrapf(err, "can't remove Monthly Payment with id '%d'", id)
+			db.log.Error(err)
+			return err
+		}
 
-	// Recompute month budget
-	err = db.recomputeMonth(tx, mp.MonthID)
-	if err != nil {
-		err = errRecomputeBudget(err)
-		db.log.Error(err)
-		return err
-	}
+		// Recompute month budget
+		err = db.recomputeMonth(tx, mp.MonthID)
+		if err != nil {
+			err = errRecomputeBudget(err)
+			db.log.Error(err)
+			return err
+		}
 
-	// Commit changes
-	err = tx.Commit()
+		return nil
+	})
 	if err != nil {
-		err = errCommitChanges(err)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return internalError(err)
+		}
 		return err
 	}
 
