@@ -28,7 +28,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 
 	// Decode
 	req := &models.AddIncomeReq{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
@@ -74,7 +74,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 
 	// Decode
 	req := &models.EditIncomeReq{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
@@ -120,7 +120,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 
 	// Decode
 	req := &models.RemoveIncomeReq{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
@@ -161,7 +161,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 
 	// Decode
 	req := &models.AddMonthlyPaymentReq{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
@@ -208,7 +208,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 
 	// Decode
 	req := &models.EditMonthlyPaymentReq{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
@@ -255,7 +255,7 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 
 	// Decode
 	req := &models.RemoveMonthlyPaymentReq{}
-	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
