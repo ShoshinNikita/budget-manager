@@ -45,3 +45,39 @@ type RemoveIncomeReq struct {
 
 	ID uint `json:"id"`
 }
+
+// -------------------------------------------------
+// Monthly Payment
+// -------------------------------------------------
+
+type AddMonthlyPaymentReq struct {
+	Request
+
+	MonthID uint `json:"month_id"`
+
+	Title  string `json:"title"`
+	TypeID uint   `json:"type_id,omitempty"`
+	Notes  string `json:"notes,omitempty"`
+	Cost   int64  `json:"cost"`
+}
+type AddMonthlyPaymentResp struct {
+	Response
+
+	ID uint `json:"id"`
+}
+
+type EditMonthlyPaymentReq struct {
+	Request
+
+	ID     uint    `json:"id"`
+	Title  *string `json:"title,omitempty"`
+	TypeID *uint   `json:"type_id,omitempty"`
+	Notes  *string `json:"notes,omitempty"`
+	Cost   *int64  `json:"cost,omitempty"`
+}
+
+type RemoveMonthlyPaymentReq struct {
+	Request
+
+	ID uint `json:"id"`
+}

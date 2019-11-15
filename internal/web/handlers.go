@@ -46,7 +46,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 		case db.IsBadRequestError(err):
 			s.processError(w, "bad params", http.StatusBadRequest, err)
 		default:
-			s.processError(w, "can't add new income", http.StatusInternalServerError, err)
+			s.processError(w, "can't add new Income", http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -95,7 +95,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 		case db.IsBadRequestError(err):
 			s.processError(w, "bad params", http.StatusBadRequest, err)
 		default:
-			s.processError(w, "can't edit income", http.StatusInternalServerError, err)
+			s.processError(w, "can't edit Income", http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -132,7 +132,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 		case db.IsBadRequestError(err):
 			s.processError(w, "bad params", http.StatusBadRequest, err)
 		default:
-			s.processError(w, "can't remove income", http.StatusInternalServerError, err)
+			s.processError(w, "can't remove Income", http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -151,16 +151,135 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 // Monthly Payment
 // -------------------------------------------------
 
+// POST /api/monthly-payments
+//
+// Request: models.AddMonthlyPaymentReq
+// Response models.AddMonthlyPaymentResp or models.Response
+//
 func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.AddMonthlyPaymentReq{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	args := db.AddMonthlyPaymentArgs{
+		MonthID: req.MonthID,
+		Title:   req.Title,
+		TypeID:  req.TypeID,
+		Notes:   req.Notes,
+		Cost:    money.FromInt(req.Cost),
+	}
+	id, err := s.db.AddMonthlyPayment(args)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't add new Monthly Payment", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.AddMonthlyPaymentResp{
+		Response: models.Response{
+			Success: true,
+		},
+		ID: id,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
+// PUT /api/monthly-payments
+//
+// Request: models.EditMonthlyPaymentReq
+// Response models.Response
+//
 func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.EditMonthlyPaymentReq{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	args := db.EditMonthlyPaymentArgs{
+		ID:     req.ID,
+		Title:  req.Title,
+		Notes:  req.Notes,
+		TypeID: req.TypeID,
+	}
+	if req.Cost != nil {
+		cost := money.FromInt(*req.Cost)
+		args.Cost = &cost
+	}
+	err := s.db.EditMonthlyPayment(args)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't edit Monthly Payment", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.Response{
+		Success: true,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
-func (s Server) DeleteMonthlyPayment(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+// DELETE /api/monthly-payments
+//
+// Request: models.DeleteMonthlyPaymentReq
+// Response models.Response
+//
+func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.RemoveMonthlyPaymentReq{}
+	if err := json.NewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	err := s.db.RemoveMonthlyPayment(req.ID)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't remove Monthly Payment", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.Response{
+		Success: true,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
 // -------------------------------------------------
