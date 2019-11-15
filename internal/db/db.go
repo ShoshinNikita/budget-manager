@@ -20,6 +20,11 @@ type DB struct {
 	log  *clog.Logger
 }
 
+const (
+	connectRetries      = 5
+	connectRetryTimeout = time.Second
+)
+
 // NewDBOptions contains options for NewDB function
 type NewDBOptions struct {
 	Host string
@@ -39,11 +44,21 @@ func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 		Database: opts.Database,
 	})
 
-	if !ping(db) {
-		return nil, ErrDataBaseIsDown
-	}
-
 	log = log.WithPrefix("[database]")
+
+	// Try to ping the DB
+	for i := 0; i < connectRetries; i++ {
+		log.Debugf("ping DB, try #%d", i+1)
+		if ping(db) {
+			break
+		}
+		log.Debug("couldn't ping DB")
+		if i+1 == connectRetries {
+			return nil, ErrDataBaseIsDown
+		}
+
+		time.Sleep(connectRetryTimeout)
+	}
 
 	cron := cron.New(cron.WithLogger(cronLogger{log: log.WithPrefix("[cron]")}))
 

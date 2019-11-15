@@ -40,7 +40,7 @@ func main() {
 	// Parse config
 	var cnf config
 	if err := env.Parse(&cnf); err != nil {
-		log.Fatalf("can't parse config: %s\n", err)
+		log.Fatalf("can't parse config: %s", err)
 	}
 
 	// Setup logger. Use prod config by default
@@ -63,7 +63,7 @@ func main() {
 	}
 	db, err := db.NewDB(dbOpts, log)
 	if err != nil {
-		log.Fatal("couldn't connect to the db", "error", err)
+		log.Fatalf("couldn't connect to the db: %s", err)
 	}
 
 	log.Info("connection was successful")
@@ -73,7 +73,7 @@ func main() {
 
 	err = db.Prepare()
 	if err != nil {
-		log.Fatal("couldn't prepare the db", "error", err)
+		log.Fatalf("couldn't prepare the db: %s", err)
 	}
 
 	log.Info("preparations were successful")
@@ -121,7 +121,7 @@ func main() {
 	log.Info("shutdown the database")
 	err = db.Shutdown()
 	if err != nil {
-		log.Errorf("can't shutdown the db gracefully: %s\n", err)
+		log.Errorf("can't shutdown the db gracefully: %s", err)
 	}
 
 	log.Info("shutdowns are completed")
