@@ -25,7 +25,6 @@ type AddIncomeReq struct {
 	Notes   string `json:"notes,omitempty"`
 	Income  int64  `json:"income"`
 }
-
 type AddIncomeResp struct {
 	Response
 
@@ -35,7 +34,7 @@ type AddIncomeResp struct {
 type EditIncomeReq struct {
 	Request
 
-	ID     uint
+	ID     uint    `json:"id"`
 	Title  *string `json:"title,omitempty"`
 	Notes  *string `json:"notes,omitempty"`
 	Income *int64  `json:"income,omitempty"`
@@ -44,5 +43,5 @@ type EditIncomeReq struct {
 type RemoveIncomeReq struct {
 	Request
 
-	ID uint
+	ID uint `json:"id"`
 }
