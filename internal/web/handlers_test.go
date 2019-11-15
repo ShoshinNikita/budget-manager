@@ -28,7 +28,7 @@ const (
 func TestHandlers_Income(t *testing.T) {
 	requireGlobal := require.New(t)
 	server := initServer(requireGlobal)
-	defer stopServer(requireGlobal, server)
+	defer cleanUp(requireGlobal, server)
 
 	t.Run("AddIncome", func(t *testing.T) {
 		tests := []struct {
@@ -320,7 +320,7 @@ func TestHandlers_Income(t *testing.T) {
 func TestHandlers_MonthlyPayment(t *testing.T) {
 	requireGlobal := require.New(t)
 	server := initServer(requireGlobal)
-	defer stopServer(requireGlobal, server)
+	defer cleanUp(requireGlobal, server)
 
 	t.Run("AddMonthlyPayment", func(t *testing.T) {
 		tests := []struct {
@@ -641,8 +641,11 @@ func initServer(require *require.Assertions) *Server {
 	return server
 }
 
-func stopServer(require *require.Assertions, server *Server) {
-	err := server.db.Shutdown()
+func cleanUp(require *require.Assertions, server *Server) {
+	err := server.db.DropDB()
+	require.Nil(err)
+
+	err = server.db.Shutdown()
 	require.Nil(err)
 
 	// There's nothing to shutdown
