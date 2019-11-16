@@ -421,16 +421,118 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 // Spend Types
 // -------------------------------------------------
 
+// POST /api/spend-types
+//
+// Request: models.AddSpendTypeReq
+// Response: models.AddSpendTypeResp or models.Response
+//
 func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.AddSpendTypeReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	id, err := s.db.AddSpendType(req.Name)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't add new Spend Type", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.AddSpendTypeResp{
+		Response: models.Response{
+			Success: true,
+		},
+		ID: id,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
+// PUT /api/spend-types
+//
+// Request: models.EditSpendTypeReq
+// Response: models.Response
+//
 func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.EditSpendTypeReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	err := s.db.EditSpendType(req.ID, req.Name)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't edit Spend Type", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.Response{
+		Success: true,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
-func (s Server) DeleteSpendType(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+// DELETE /api/spend-types
+//
+// Request: models.RemoveSpendTypeReq
+// Response: models.Response
+//
+func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.RemoveSpendTypeReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	err := s.db.RemoveSpendType(req.ID)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't remove Spend Type", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.Response{
+		Success: true,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
 // -------------------------------------------------

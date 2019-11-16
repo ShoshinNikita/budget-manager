@@ -117,3 +117,31 @@ type RemoveSpendReq struct {
 
 	ID uint `json:"id"`
 }
+
+// -------------------------------------------------
+// Spend Type
+// -------------------------------------------------
+
+type AddSpendTypeReq struct {
+	Request
+
+	Name string `json:"name"`
+}
+type AddSpendTypeResp struct {
+	Response
+
+	ID uint `json:"id"`
+}
+
+type EditSpendTypeReq struct {
+	Request
+
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}
+
+type RemoveSpendTypeReq struct {
+	Request
+
+	ID uint `json:"id"`
+}
