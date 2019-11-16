@@ -1,6 +1,7 @@
 package money_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -228,4 +229,98 @@ func TestDivide(t *testing.T) {
 		require.Equal(tt.resInt, res.ToInt())
 		require.Equal(tt.resFloat, res.ToFloat())
 	}
+}
+
+func TestJSON(t *testing.T) {
+	type testStruct struct {
+		Money Money `json:"money"`
+	}
+
+	t.Run("Marshal", func(t *testing.T) {
+		require := require.New(t)
+
+		tests := []struct {
+			input testStruct
+			want  string
+		}{
+			{
+				input: testStruct{
+					Money: FromInt(357),
+				},
+				want: `{"money":357}`,
+			},
+			{
+				input: testStruct{
+					Money: FromFloat(154.30),
+				},
+				want: `{"money":154.30}`,
+			},
+			{
+				input: testStruct{
+					Money: FromFloat(0.07),
+				},
+				want: `{"money":0.07}`,
+			},
+			{
+				input: testStruct{
+					Money: FromFloat(15.073),
+				},
+				want: `{"money":15.07}`,
+			},
+			{
+				input: testStruct{
+					Money: FromFloat(15.078),
+				},
+				want: `{"money":15.07}`,
+			},
+		}
+
+		for _, tt := range tests {
+			data, err := json.Marshal(tt.input)
+			require.Nil(err)
+			require.Equal(tt.want, string(data))
+		}
+	})
+
+	t.Run("Unmarshal", func(t *testing.T) {
+		require := require.New(t)
+
+		tests := []struct {
+			input string
+			want  testStruct
+		}{
+			{
+				input: `{"money":357}`,
+				want: testStruct{
+					Money: FromInt(357),
+				},
+			},
+			{
+				input: `{"money":154.30}`,
+				want: testStruct{
+					Money: FromFloat(154.30),
+				},
+			},
+			{
+				input: `{"money":0.07}`,
+				want: testStruct{
+					Money: FromFloat(0.07),
+				},
+			},
+			{
+				input: `{"money":"test"}`,
+				want: testStruct{
+					Money: FromInt(0),
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			var res testStruct
+
+			// Ignore errors
+			_ = json.Unmarshal([]byte(tt.input), &res)
+			require.Equal(tt.want, res)
+		}
+	})
 }
