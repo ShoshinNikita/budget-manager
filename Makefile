@@ -31,15 +31,13 @@ clear-local:
 test: test-integ
 
 test-unit:
-	go test -mod vendor -v ./...
+	go test -mod vendor -count 1 -v ./...
 
 test-integ:
 	# Run Postgres
 	./scripts/local/postgres.sh test
-	echo "Wait fot DB..."
-	sleep 5
-	# Run integration tests
-	go test -mod vendor --tags=integration -v ./...
+	# Run integration tests. Disable parallel launch with '-p 1' (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
+	go test -mod vendor -count 1 -p 1 --tags=integration -v ./...
 	# Stop and remove DB
 	docker stop budget_manager_postgres
 
