@@ -25,6 +25,10 @@ const (
 	dbDatabase = "postgres"
 )
 
+// -------------------------------------------------
+// Income
+// -------------------------------------------------
+
 func TestHandlers_Income(t *testing.T) {
 	requireGlobal := require.New(t)
 	server := initServer(requireGlobal)
@@ -316,6 +320,10 @@ func TestHandlers_Income(t *testing.T) {
 		}
 	})
 }
+
+// -------------------------------------------------
+// Monthly Payment
+// -------------------------------------------------
 
 func TestHandlers_MonthlyPayment(t *testing.T) {
 	requireGlobal := require.New(t)
@@ -611,6 +619,10 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 		}
 	})
 }
+
+// -------------------------------------------------
+// Spend
+// -------------------------------------------------
 
 func TestHandlers_Spend(t *testing.T) {
 	requireGlobal := require.New(t)
@@ -921,12 +933,16 @@ func TestHandlers_Spend(t *testing.T) {
 	})
 }
 
+// -------------------------------------------------
+// Spend Type
+// -------------------------------------------------
+
 func TestHandlers_SpendType(t *testing.T) {
 	requireGlobal := require.New(t)
 	server := initServer(requireGlobal)
 	defer cleanUp(requireGlobal, server)
 
-	t.Run("AddSpendType", func(t *testing.T) {
+	ok := t.Run("AddSpendType", func(t *testing.T) {
 		tests := []struct {
 			desc       string
 			req        models.AddSpendTypeReq
@@ -976,7 +992,7 @@ func TestHandlers_SpendType(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 
-			t.Run(tt.desc, func(t *testing.T) {
+			ok := t.Run(tt.desc, func(t *testing.T) {
 				// Prepare
 				require := require.New(t)
 				w := httptest.NewRecorder()
@@ -1010,10 +1026,45 @@ func TestHandlers_SpendType(t *testing.T) {
 					require.Fail("invalid resp type")
 				}
 			})
+			if !ok {
+				t.Fatalf("'%s' failed", tt.desc)
+			}
 		}
 	})
+	if !ok {
+		t.Fatal("AddSpendType failed")
+	}
 
-	t.Run("EditSpendType", func(t *testing.T) {
+	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
+		want := []db.SpendType{
+			{ID: 1, Name: "first type"},
+			{ID: 2, Name: "second type"},
+		}
+		// Prepare
+		require := require.New(t)
+		w := httptest.NewRecorder()
+
+		// Prepare request
+		request := httptest.NewRequest("GET", "/api/spend-types", nil)
+
+		// Send Request
+		server.GetSpendTypes(w, request)
+
+		// Check Response
+		response := w.Result()
+		require.Equal(http.StatusOK, response.StatusCode)
+
+		resp := &models.GetSpendTypesResp{}
+		decodeResponse(require, response.Body, resp)
+		response.Body.Close()
+
+		require.ElementsMatch(want, resp.SpendTypes)
+	})
+	if !ok {
+		t.Fatal("CheckSpendTypes failed")
+	}
+
+	ok = t.Run("EditSpendType", func(t *testing.T) {
 		tests := []struct {
 			desc       string
 			req        models.EditSpendTypeReq
@@ -1049,7 +1100,7 @@ func TestHandlers_SpendType(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 
-			t.Run(tt.desc, func(t *testing.T) {
+			ok := t.Run(tt.desc, func(t *testing.T) {
 				// Prepare
 				require := require.New(t)
 				w := httptest.NewRecorder()
@@ -1071,10 +1122,45 @@ func TestHandlers_SpendType(t *testing.T) {
 
 				require.Equal(tt.resp, *resp)
 			})
+			if !ok {
+				t.Fatalf("'%s' failed", tt.desc)
+			}
 		}
 	})
+	if !ok {
+		t.Fatal("EditSpendType failed")
+	}
 
-	t.Run("RemoveSpendType", func(t *testing.T) {
+	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
+		want := []db.SpendType{
+			{ID: 1, Name: "updated name"},
+			{ID: 2, Name: "second type"},
+		}
+		// Prepare
+		require := require.New(t)
+		w := httptest.NewRecorder()
+
+		// Prepare request
+		request := httptest.NewRequest("GET", "/api/spend-types", nil)
+
+		// Send Request
+		server.GetSpendTypes(w, request)
+
+		// Check Response
+		response := w.Result()
+		require.Equal(http.StatusOK, response.StatusCode)
+
+		resp := &models.GetSpendTypesResp{}
+		decodeResponse(require, response.Body, resp)
+		response.Body.Close()
+
+		require.ElementsMatch(want, resp.SpendTypes)
+	})
+	if !ok {
+		t.Fatal("CheckSpendTypes failed")
+	}
+
+	ok = t.Run("RemoveSpendType", func(t *testing.T) {
 		tests := []struct {
 			desc       string
 			req        models.RemoveSpendTypeReq
@@ -1118,7 +1204,7 @@ func TestHandlers_SpendType(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 
-			t.Run(tt.desc, func(t *testing.T) {
+			ok := t.Run(tt.desc, func(t *testing.T) {
 				// Prepare
 				require := require.New(t)
 				w := httptest.NewRecorder()
@@ -1140,8 +1226,39 @@ func TestHandlers_SpendType(t *testing.T) {
 
 				require.Equal(tt.resp, *resp)
 			})
+			if !ok {
+				t.Fatalf("'%s' failed", tt.desc)
+			}
 		}
 	})
+	if !ok {
+		t.Fatal("RemoveSpendType failed")
+	}
+
+	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
+		// Prepare
+		require := require.New(t)
+		w := httptest.NewRecorder()
+
+		// Prepare request
+		request := httptest.NewRequest("GET", "/api/spend-types", nil)
+
+		// Send Request
+		server.GetSpendTypes(w, request)
+
+		// Check Response
+		response := w.Result()
+		require.Equal(http.StatusOK, response.StatusCode)
+
+		resp := &models.GetSpendTypesResp{}
+		decodeResponse(require, response.Body, resp)
+		response.Body.Close()
+
+		require.Empty(resp.SpendTypes)
+	})
+	if !ok {
+		t.Fatal("CheckSpendTypes failed")
+	}
 }
 
 // -------------------------------------------------
