@@ -38,7 +38,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 		MonthID: req.MonthID,
 		Title:   req.Title,
 		Notes:   req.Notes,
-		Income:  money.FromInt(req.Income),
+		Income:  money.FromFloat(req.Income),
 	}
 	id, err := s.db.AddIncome(args)
 	if err != nil {
@@ -86,7 +86,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 		Notes: req.Notes,
 	}
 	if req.Income != nil {
-		income := money.FromInt(*req.Income)
+		income := money.FromFloat(*req.Income)
 		args.Income = &income
 	}
 	err := s.db.EditIncome(args)
@@ -172,7 +172,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 		Title:   req.Title,
 		TypeID:  req.TypeID,
 		Notes:   req.Notes,
-		Cost:    money.FromInt(req.Cost),
+		Cost:    money.FromFloat(req.Cost),
 	}
 	id, err := s.db.AddMonthlyPayment(args)
 	if err != nil {
@@ -221,7 +221,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 		TypeID: req.TypeID,
 	}
 	if req.Cost != nil {
-		cost := money.FromInt(*req.Cost)
+		cost := money.FromFloat(*req.Cost)
 		args.Cost = &cost
 	}
 	err := s.db.EditMonthlyPayment(args)
@@ -307,7 +307,7 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 		Title:  req.Title,
 		TypeID: req.TypeID,
 		Notes:  req.Notes,
-		Cost:   money.FromInt(req.Cost),
+		Cost:   money.FromFloat(req.Cost),
 	}
 	id, err := s.db.AddSpend(args)
 	if err != nil {
@@ -356,7 +356,7 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 		TypeID: req.TypeID,
 	}
 	if req.Cost != nil {
-		cost := money.FromInt(*req.Cost)
+		cost := money.FromFloat(*req.Cost)
 		args.Cost = &cost
 	}
 	err := s.db.EditSpend(args)

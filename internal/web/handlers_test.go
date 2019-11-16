@@ -156,7 +156,7 @@ func TestHandlers_Income(t *testing.T) {
 	t.Run("EditIncome", func(t *testing.T) {
 		newTitle := func(s string) *string { return &s }
 		newNotes := func(s string) *string { return &s }
-		newIncome := func(i int64) *int64 { return &i }
+		newIncome := func(i float64) *float64 { return &i }
 
 		tests := []struct {
 			desc       string
@@ -181,7 +181,7 @@ func TestHandlers_Income(t *testing.T) {
 					ID:     2,
 					Title:  newTitle("edited title"),
 					Notes:  newNotes("updated notes"),
-					Income: newIncome(123456),
+					Income: newIncome(123456.20),
 				},
 				statusCode: http.StatusOK,
 				resp: models.Response{
@@ -450,7 +450,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 		newTitle := func(s string) *string { return &s }
 		newNotes := func(s string) *string { return &s }
 		newTypeID := func(u uint) *uint { return &u }
-		newCost := func(i int64) *int64 { return &i }
+		newCost := func(i float64) *float64 { return &i }
 
 		tests := []struct {
 			desc       string
@@ -476,7 +476,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 					Title:  newTitle("edited title"),
 					Notes:  newNotes("updated notes"),
 					TypeID: newTypeID(1),
-					Cost:   newCost(123456),
+					Cost:   newCost(123456.50),
 				},
 				statusCode: http.StatusOK,
 				resp: models.Response{
@@ -490,7 +490,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 					ID:    5,
 					Title: newTitle("edited title"),
 					Notes: newNotes("updated notes"),
-					Cost:  newCost(10),
+					Cost:  newCost(10.05),
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
@@ -745,7 +745,7 @@ func TestHandlers_Spend(t *testing.T) {
 		newTitle := func(s string) *string { return &s }
 		newNotes := func(s string) *string { return &s }
 		newTypeID := func(u uint) *uint { return &u }
-		newCost := func(i int64) *int64 { return &i }
+		newCost := func(i float64) *float64 { return &i }
 
 		tests := []struct {
 			desc       string
@@ -771,7 +771,7 @@ func TestHandlers_Spend(t *testing.T) {
 					Title:  newTitle("edited title"),
 					Notes:  newNotes("updated notes"),
 					TypeID: newTypeID(2),
-					Cost:   newCost(120),
+					Cost:   newCost(0.30),
 				},
 				statusCode: http.StatusOK,
 				resp: models.Response{

@@ -20,10 +20,10 @@ type Response struct {
 type AddIncomeReq struct {
 	Request
 
-	MonthID uint   `json:"month_id"`
-	Title   string `json:"title"`
-	Notes   string `json:"notes,omitempty"` // optional
-	Income  int64  `json:"income"`
+	MonthID uint    `json:"month_id"`
+	Title   string  `json:"title"`
+	Notes   string  `json:"notes,omitempty"` // optional
+	Income  float64 `json:"income"`
 }
 type AddIncomeResp struct {
 	Response
@@ -34,10 +34,10 @@ type AddIncomeResp struct {
 type EditIncomeReq struct {
 	Request
 
-	ID     uint    `json:"id"`
-	Title  *string `json:"title,omitempty"`  // optional
-	Notes  *string `json:"notes,omitempty"`  // optional
-	Income *int64  `json:"income,omitempty"` // optional
+	ID     uint     `json:"id"`
+	Title  *string  `json:"title,omitempty"`  // optional
+	Notes  *string  `json:"notes,omitempty"`  // optional
+	Income *float64 `json:"income,omitempty"` // optional
 }
 
 type RemoveIncomeReq struct {
@@ -55,10 +55,10 @@ type AddMonthlyPaymentReq struct {
 
 	MonthID uint `json:"month_id"`
 
-	Title  string `json:"title"`
-	TypeID uint   `json:"type_id,omitempty"` // optional
-	Notes  string `json:"notes,omitempty"`   // optional
-	Cost   int64  `json:"cost"`
+	Title  string  `json:"title"`
+	TypeID uint    `json:"type_id,omitempty"` // optional
+	Notes  string  `json:"notes,omitempty"`   // optional
+	Cost   float64 `json:"cost"`
 }
 type AddMonthlyPaymentResp struct {
 	Response
@@ -69,11 +69,11 @@ type AddMonthlyPaymentResp struct {
 type EditMonthlyPaymentReq struct {
 	Request
 
-	ID     uint    `json:"id"`
-	Title  *string `json:"title,omitempty"`   // optional
-	TypeID *uint   `json:"type_id,omitempty"` // optional
-	Notes  *string `json:"notes,omitempty"`   // optional
-	Cost   *int64  `json:"cost,omitempty"`    // optional
+	ID     uint     `json:"id"`
+	Title  *string  `json:"title,omitempty"`   // optional
+	TypeID *uint    `json:"type_id,omitempty"` // optional
+	Notes  *string  `json:"notes,omitempty"`   // optional
+	Cost   *float64 `json:"cost,omitempty"`    // optional
 }
 
 type RemoveMonthlyPaymentReq struct {
@@ -91,10 +91,10 @@ type AddSpendReq struct {
 
 	DayID uint `json:"day_id"`
 
-	Title  string `json:"title"`
-	TypeID uint   `json:"type_id,omitempty"` // optional
-	Notes  string `json:"notes,omitempty"`   // optional
-	Cost   int64  `json:"cost"`
+	Title  string  `json:"title"`
+	TypeID uint    `json:"type_id,omitempty"` // optional
+	Notes  string  `json:"notes,omitempty"`   // optional
+	Cost   float64 `json:"cost"`
 }
 type AddSpendResp struct {
 	Response
@@ -105,11 +105,11 @@ type AddSpendResp struct {
 type EditSpendReq struct {
 	Request
 
-	ID     uint    `json:"id"`
-	Title  *string `json:"title,omitempty"`   // optional
-	TypeID *uint   `json:"type_id,omitempty"` // optional
-	Notes  *string `json:"notes,omitempty"`   // optional
-	Cost   *int64  `json:"cost,omitempty"`    // optional
+	ID     uint     `json:"id"`
+	Title  *string  `json:"title,omitempty"`   // optional
+	TypeID *uint    `json:"type_id,omitempty"` // optional
+	Notes  *string  `json:"notes,omitempty"`   // optional
+	Cost   *float64 `json:"cost,omitempty"`    // optional
 }
 
 type RemoveSpendReq struct {
