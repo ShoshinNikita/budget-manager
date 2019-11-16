@@ -612,6 +612,315 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 	})
 }
 
+func TestHandlers_Spend(t *testing.T) {
+	requireGlobal := require.New(t)
+	server := initServer(requireGlobal)
+	defer cleanUp(requireGlobal, server)
+
+	t.Run("AddSpend", func(t *testing.T) {
+		tests := []struct {
+			desc       string
+			req        models.AddSpendReq
+			statusCode int
+			resp       interface{}
+		}{
+			{
+				desc: "valid request",
+				req: models.AddSpendReq{
+					DayID: 1,
+					Title: "Break",
+					Cost:  30,
+				},
+				statusCode: http.StatusOK,
+				resp: models.AddSpendResp{
+					Response: models.Response{
+						Success: true,
+					},
+					ID: 1,
+				},
+			},
+			{
+				desc: "valid request with notes and type",
+				req: models.AddSpendReq{
+					DayID:  10,
+					Title:  "Bread",
+					Notes:  "warm",
+					TypeID: 1,
+					Cost:   50,
+				},
+				statusCode: http.StatusOK,
+				resp: models.AddSpendResp{
+					Response: models.Response{
+						Success: true,
+					},
+					ID: 2,
+				},
+			},
+			// Invalid requests
+			{
+				desc: "invalid request (empty title)",
+				req: models.AddSpendReq{
+					DayID: 1,
+					Title: "",
+					Notes: "some notes",
+					Cost:  20,
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+			{
+				desc: "invalid request (zero cost)",
+				req: models.AddSpendReq{
+					DayID: 12,
+					Title: "title",
+					Notes: "some notes",
+					Cost:  0,
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+			{
+				desc: "invalid request (invalid day)",
+				req: models.AddSpendReq{
+					DayID: 36000,
+					Title: "title",
+					Notes: "some notes",
+					Cost:  15000,
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+
+			t.Run(tt.desc, func(t *testing.T) {
+				// Prepare
+				require := require.New(t)
+				w := httptest.NewRecorder()
+
+				// Prepare request
+				body := encodeRequest(require, tt.req)
+				request := httptest.NewRequest("POST", "/api/spends", body)
+
+				// Send Request
+				server.AddSpend(w, request)
+
+				// Check Response
+				response := w.Result()
+				require.Equal(tt.statusCode, response.StatusCode)
+
+				wantResp := tt.resp
+				switch wantResp.(type) {
+				case models.AddSpendResp:
+					resp := &models.AddSpendResp{}
+					decodeResponse(require, response.Body, resp)
+					response.Body.Close()
+
+					require.Equal(wantResp, *resp)
+				case models.Response:
+					resp := &models.Response{}
+					decodeResponse(require, response.Body, resp)
+					response.Body.Close()
+
+					require.Equal(wantResp, *resp)
+				default:
+					require.Fail("invalid resp type")
+				}
+			})
+		}
+	})
+
+	t.Run("EditSpend", func(t *testing.T) {
+		newTitle := func(s string) *string { return &s }
+		newNotes := func(s string) *string { return &s }
+		newTypeID := func(u uint) *uint { return &u }
+		newCost := func(i int64) *int64 { return &i }
+
+		tests := []struct {
+			desc       string
+			req        models.EditSpendReq
+			statusCode int
+			resp       models.Response
+		}{
+			{
+				desc: "edit title",
+				req: models.EditSpendReq{
+					ID:    1,
+					Title: newTitle("edited title"),
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			{
+				desc: "edit all fields",
+				req: models.EditSpendReq{
+					ID:     2,
+					Title:  newTitle("edited title"),
+					Notes:  newNotes("updated notes"),
+					TypeID: newTypeID(2),
+					Cost:   newCost(120),
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			// Invalid requests
+			{
+				desc: "invalid request (empty title)",
+				req: models.EditSpendReq{
+					ID:    1,
+					Title: newTitle(""),
+					Notes: newNotes("updated notes"),
+					Cost:  newCost(10),
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+			{
+				desc: "invalid request (invalid id)",
+				req: models.EditSpendReq{
+					ID:    5,
+					Title: newTitle("edited title"),
+					Notes: newNotes("updated notes"),
+					Cost:  newCost(10),
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+			{
+				desc: "invalid request (zero cost)",
+				req: models.EditSpendReq{
+					ID:    2,
+					Title: newTitle("edited title"),
+					Notes: newNotes("updated notes"),
+					Cost:  newCost(0),
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+
+			t.Run(tt.desc, func(t *testing.T) {
+				// Prepare
+				require := require.New(t)
+				w := httptest.NewRecorder()
+
+				// Prepare request
+				body := encodeRequest(require, tt.req)
+				request := httptest.NewRequest("PUT", "/api/spends", body)
+
+				// Send Request
+				server.EditSpend(w, request)
+
+				// Check Response
+				response := w.Result()
+				require.Equal(tt.statusCode, response.StatusCode)
+
+				resp := &models.Response{}
+				decodeResponse(require, response.Body, resp)
+				response.Body.Close()
+
+				require.Equal(tt.resp, *resp)
+			})
+		}
+	})
+
+	t.Run("RemoveSpend", func(t *testing.T) {
+		tests := []struct {
+			desc       string
+			req        models.RemoveSpendReq
+			statusCode int
+			resp       models.Response
+		}{
+			{
+				desc: "remove Monthly Payment with id '1'",
+				req: models.RemoveSpendReq{
+					ID: 1,
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			{
+				desc: "remove Monthly Payment with id '2'",
+				req: models.RemoveSpendReq{
+					ID: 2,
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			// Invalid requests
+			{
+				desc: "remove Monthly Payment with id '3'",
+				req: models.RemoveSpendReq{
+					ID: 3,
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+
+			t.Run(tt.desc, func(t *testing.T) {
+				// Prepare
+				require := require.New(t)
+				w := httptest.NewRecorder()
+
+				// Prepare request
+				body := encodeRequest(require, tt.req)
+				request := httptest.NewRequest("DELETE", "/api/spends", body)
+
+				// Send Request
+				server.RemoveSpend(w, request)
+
+				// Check Response
+				response := w.Result()
+				require.Equal(tt.statusCode, response.StatusCode)
+
+				resp := &models.Response{}
+				decodeResponse(require, response.Body, resp)
+				response.Body.Close()
+
+				require.Equal(tt.resp, *resp)
+			})
+		}
+	})
+}
+
 // -------------------------------------------------
 // Server
 // -------------------------------------------------
