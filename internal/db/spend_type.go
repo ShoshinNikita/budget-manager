@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 
+	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 )
@@ -62,10 +63,20 @@ func (db DB) GetSpendTypes() ([]SpendType, error) {
 // AddSpendType adds new Spend Type
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &SpendType{Name: name}
-	err = db.db.Insert(spendType)
+	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		err = db.db.Insert(spendType)
+		if err != nil {
+			err = errorWrap(err, "can't insert a new Spend Type")
+			db.log.Error(err)
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
-		err = errorWrap(err, "can't insert a new Spend Type")
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return 0, internalError(err)
+		}
 		return 0, err
 	}
 
@@ -79,10 +90,20 @@ func (db DB) EditSpendType(id uint, newName string) error {
 	}
 
 	spendType := &SpendType{ID: id, Name: newName}
-	err := db.db.Update(spendType)
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		err = db.db.Update(spendType)
+		if err != nil {
+			err = errorWrap(err, "can't insert a new Spend Type")
+			db.log.Error(err)
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
-		err = errorWrap(err, "can't insert a new Spend Type")
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return internalError(err)
+		}
 		return err
 	}
 
@@ -96,10 +117,20 @@ func (db DB) RemoveSpendType(id uint) error {
 	}
 
 	spendType := &SpendType{ID: id}
-	err := db.db.Delete(spendType)
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		err = db.db.Delete(spendType)
+		if err != nil {
+			err = errorWrapf(err, "can't delete spend type with id '%d'", id)
+			db.log.Error(err)
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
-		err = errorWrapf(err, "can't delete spend type with id '%d'", id)
-		db.log.Error(err)
+		if !IsBadRequestError(err) {
+			return internalError(err)
+		}
 		return err
 	}
 

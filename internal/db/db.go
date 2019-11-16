@@ -116,6 +116,19 @@ func (db *DB) Prepare() error {
 	return nil
 }
 
+// DropDB drops all tables and relations. USE ONLY IN TESTS!
+func (db *DB) DropDB() error {
+	return dropTables(db.db,
+		&Month{}, &orm.DropTableOptions{IfExists: true},
+		&Income{}, &orm.DropTableOptions{IfExists: true},
+		&MonthlyPayment{}, &orm.DropTableOptions{IfExists: true},
+
+		&Day{}, &orm.DropTableOptions{IfExists: true},
+		&Spend{}, &orm.DropTableOptions{IfExists: true},
+		&SpendType{}, &orm.DropTableOptions{IfExists: true},
+	)
+}
+
 func (db *DB) initCurrentMonth() error {
 	year, month, _ := time.Now().Date()
 	err := db.db.Model(&Month{}).
