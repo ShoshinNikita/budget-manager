@@ -73,7 +73,7 @@ func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 
 		err := db.DropTable(model, opts)
 		if err != nil {
-			errors.Wrap(err, "can't drop table")
+			return errors.Wrap(err, "can't drop table")
 		}
 	}
 
