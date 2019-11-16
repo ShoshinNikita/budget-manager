@@ -921,6 +921,229 @@ func TestHandlers_Spend(t *testing.T) {
 	})
 }
 
+func TestHandlers_SpendType(t *testing.T) {
+	requireGlobal := require.New(t)
+	server := initServer(requireGlobal)
+	defer cleanUp(requireGlobal, server)
+
+	t.Run("AddSpendType", func(t *testing.T) {
+		tests := []struct {
+			desc       string
+			req        models.AddSpendTypeReq
+			statusCode int
+			resp       interface{}
+		}{
+			{
+				desc: "valid request",
+				req: models.AddSpendTypeReq{
+					Name: "first type",
+				},
+				statusCode: http.StatusOK,
+				resp: models.AddSpendTypeResp{
+					Response: models.Response{
+						Success: true,
+					},
+					ID: 1,
+				},
+			},
+			{
+				desc: "valid request with notes and type",
+				req: models.AddSpendTypeReq{
+					Name: "second type",
+				},
+				statusCode: http.StatusOK,
+				resp: models.AddSpendTypeResp{
+					Response: models.Response{
+						Success: true,
+					},
+					ID: 2,
+				},
+			},
+			// Invalid requests
+			{
+				desc: "invalid request (empty name)",
+				req: models.AddSpendTypeReq{
+					Name: "",
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+
+			t.Run(tt.desc, func(t *testing.T) {
+				// Prepare
+				require := require.New(t)
+				w := httptest.NewRecorder()
+
+				// Prepare request
+				body := encodeRequest(require, tt.req)
+				request := httptest.NewRequest("POST", "/api/spend-types", body)
+
+				// Send Request
+				server.AddSpendType(w, request)
+
+				// Check Response
+				response := w.Result()
+				require.Equal(tt.statusCode, response.StatusCode)
+
+				wantResp := tt.resp
+				switch wantResp.(type) {
+				case models.AddSpendTypeResp:
+					resp := &models.AddSpendTypeResp{}
+					decodeResponse(require, response.Body, resp)
+					response.Body.Close()
+
+					require.Equal(wantResp, *resp)
+				case models.Response:
+					resp := &models.Response{}
+					decodeResponse(require, response.Body, resp)
+					response.Body.Close()
+
+					require.Equal(wantResp, *resp)
+				default:
+					require.Fail("invalid resp type")
+				}
+			})
+		}
+	})
+
+	t.Run("EditSpendType", func(t *testing.T) {
+		tests := []struct {
+			desc       string
+			req        models.EditSpendTypeReq
+			statusCode int
+			resp       models.Response
+		}{
+			{
+				desc: "edit title",
+				req: models.EditSpendTypeReq{
+					ID:   1,
+					Name: "updated name",
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			// Invalid requests
+			{
+				desc: "invalid request (empty name)",
+				req: models.EditSpendTypeReq{
+					ID:   2,
+					Name: "",
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+
+			t.Run(tt.desc, func(t *testing.T) {
+				// Prepare
+				require := require.New(t)
+				w := httptest.NewRecorder()
+
+				// Prepare request
+				body := encodeRequest(require, tt.req)
+				request := httptest.NewRequest("PUT", "/api/spend-types", body)
+
+				// Send Request
+				server.EditSpendType(w, request)
+
+				// Check Response
+				response := w.Result()
+				require.Equal(tt.statusCode, response.StatusCode)
+
+				resp := &models.Response{}
+				decodeResponse(require, response.Body, resp)
+				response.Body.Close()
+
+				require.Equal(tt.resp, *resp)
+			})
+		}
+	})
+
+	t.Run("RemoveSpendType", func(t *testing.T) {
+		tests := []struct {
+			desc       string
+			req        models.RemoveSpendTypeReq
+			statusCode int
+			resp       models.Response
+		}{
+			{
+				desc: "remove Spend Type with id '1'",
+				req: models.RemoveSpendTypeReq{
+					ID: 1,
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			{
+				desc: "remove Spend Type with id '2'",
+				req: models.RemoveSpendTypeReq{
+					ID: 2,
+				},
+				statusCode: http.StatusOK,
+				resp: models.Response{
+					Success: true,
+				},
+			},
+			// Invalid requests
+			{
+				desc: "remove Spend Type with id '3'",
+				req: models.RemoveSpendTypeReq{
+					ID: 3,
+				},
+				statusCode: http.StatusBadRequest,
+				resp: models.Response{
+					Error:   "bad params",
+					Success: false,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+
+			t.Run(tt.desc, func(t *testing.T) {
+				// Prepare
+				require := require.New(t)
+				w := httptest.NewRecorder()
+
+				// Prepare request
+				body := encodeRequest(require, tt.req)
+				request := httptest.NewRequest("DELETE", "/api/spend-types", body)
+
+				// Send Request
+				server.RemoveSpendType(w, request)
+
+				// Check Response
+				response := w.Result()
+				require.Equal(tt.statusCode, response.StatusCode)
+
+				resp := &models.Response{}
+				decodeResponse(require, response.Body, resp)
+				response.Body.Close()
+
+				require.Equal(tt.resp, *resp)
+			})
+		}
+	})
+}
+
 // -------------------------------------------------
 // Server
 // -------------------------------------------------
