@@ -430,6 +430,33 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 // Spend Types
 // -------------------------------------------------
 
+// GET /api/spend-types
+//
+// Request: -
+// Response: models.GetSpendTypesResp
+//
+func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
+	// Process
+	types, err := s.db.GetSpendTypes()
+	if err != nil {
+		s.processError(w, "can't get all Spend Types", http.StatusInternalServerError, err)
+		return
+	}
+
+	resp := models.GetSpendTypesResp{
+		Response: models.Response{
+			Success: true,
+		},
+		SpendTypes: types,
+	}
+
+	// Encode
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
+}
+
 // POST /api/spend-types
 //
 // Request: models.AddSpendTypeReq
