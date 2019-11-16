@@ -283,19 +283,138 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 }
 
 // -------------------------------------------------
-// Spends
+// Spend
 // -------------------------------------------------
 
+// POST /api/spends
+//
+// Request: models.AddSpendReq
+// Response: models.AddSpendResp or models.Response
+//
 func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.AddSpendReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	args := db.AddSpendArgs{
+		DayID:  req.DayID,
+		Title:  req.Title,
+		TypeID: req.TypeID,
+		Notes:  req.Notes,
+		Cost:   money.FromInt(req.Cost),
+	}
+	id, err := s.db.AddSpend(args)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't add new Spend", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.AddSpendResp{
+		Response: models.Response{
+			Success: true,
+		},
+		ID: id,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
+// PUT /api/spends
+//
+// Request: models.EditSpendReq
+// Response: models.Response
+//
 func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.EditSpendReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	args := db.EditSpendArgs{
+		ID:     req.ID,
+		Title:  req.Title,
+		Notes:  req.Notes,
+		TypeID: req.TypeID,
+	}
+	if req.Cost != nil {
+		cost := money.FromInt(*req.Cost)
+		args.Cost = &cost
+	}
+	err := s.db.EditSpend(args)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't edit Spend", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.Response{
+		Success: true,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
-func (s Server) DeleteSpend(w http.ResponseWriter, r *http.Request) {
-	notImplementedYet(w, r)
+// DELETE /api/spends
+//
+// Request: models.RemoveSpendReq
+// Response: models.Response
+//
+func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.RemoveSpendReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	err := s.db.RemoveSpend(req.ID)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad params", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't remove Spend", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.Response{
+		Success: true,
+	}
+
+	// Encode
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
 // -------------------------------------------------

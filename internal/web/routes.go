@@ -31,12 +31,12 @@ func (s Server) addRoutes(router *mux.Router) {
 		{methods: "DELETE", path: "/api/monthly-payments", handler: http.HandlerFunc(s.RemoveMonthlyPayment)},
 		// Spend
 		{methods: "POST", path: "/api/spends", handler: http.HandlerFunc(s.AddSpend)},
-		{methods: "PUT", path: "/api/spends/{id}", handler: http.HandlerFunc(s.EditSpend)},
-		{methods: "DELETE", path: "/api/spends/{id}", handler: http.HandlerFunc(s.DeleteSpend)},
+		{methods: "PUT", path: "/api/spends", handler: http.HandlerFunc(s.EditSpend)},
+		{methods: "DELETE", path: "/api/spends", handler: http.HandlerFunc(s.RemoveSpend)},
 		// Spend Type
 		{methods: "POST", path: "/api/spend-types", handler: http.HandlerFunc(s.AddSpend)},
 		{methods: "PUT", path: "/api/spend-types/{id}", handler: http.HandlerFunc(s.EditSpend)},
-		{methods: "DELETE", path: "/api/spend-types/{id}", handler: http.HandlerFunc(s.DeleteSpend)},
+		{methods: "DELETE", path: "/api/spend-types/{id}", handler: http.HandlerFunc(s.RemoveSpend)},
 	}
 
 	for _, r := range routes {
