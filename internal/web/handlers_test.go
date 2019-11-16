@@ -53,7 +53,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 			},
 			{
-				desc: "valid request with notes",
+				desc: "valid request (with notes)",
 				req: models.AddIncomeReq{
 					MonthID: 1,
 					Title:   "some income",
@@ -165,7 +165,7 @@ func TestHandlers_Income(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "edit title",
+				desc: "valid request (edit title)",
 				req: models.EditIncomeReq{
 					ID:    1,
 					Title: newTitle("edited title"),
@@ -176,7 +176,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 			},
 			{
-				desc: "edit all fields",
+				desc: "valid request (edit all fields)",
 				req: models.EditIncomeReq{
 					ID:     2,
 					Title:  newTitle("edited title"),
@@ -255,7 +255,7 @@ func TestHandlers_Income(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "remove income with id '1'",
+				desc: "valid request (remove Income with id '1')",
 				req: models.RemoveIncomeReq{
 					ID: 1,
 				},
@@ -265,7 +265,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 			},
 			{
-				desc: "remove income with id '2'",
+				desc: "valid request (remove Income with id '2')",
 				req: models.RemoveIncomeReq{
 					ID: 2,
 				},
@@ -276,7 +276,7 @@ func TestHandlers_Income(t *testing.T) {
 			},
 			// Invalid requests
 			{
-				desc: "remove income with id '3'",
+				desc: "invalid request (remove non-existing Income)",
 				req: models.RemoveIncomeReq{
 					ID: 3,
 				},
@@ -345,7 +345,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 			},
 			{
-				desc: "valid request with notes and type",
+				desc: "valid request (with notes and type)",
 				req: models.AddMonthlyPaymentReq{
 					MonthID: 1,
 					Title:   "Rent",
@@ -459,7 +459,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "edit title",
+				desc: "valid request (edit title)",
 				req: models.EditMonthlyPaymentReq{
 					ID:    1,
 					Title: newTitle("edited title"),
@@ -470,7 +470,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 			},
 			{
-				desc: "edit all fields",
+				desc: "valid request (edit all fields)",
 				req: models.EditMonthlyPaymentReq{
 					ID:     2,
 					Title:  newTitle("edited title"),
@@ -550,7 +550,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "remove Monthly Payment with id '1'",
+				desc: "valid request (remove Monthly Payment with id '1')",
 				req: models.RemoveMonthlyPaymentReq{
 					ID: 1,
 				},
@@ -560,7 +560,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 			},
 			{
-				desc: "remove Monthly Payment with id '2'",
+				desc: "valid request (remove Monthly Payment with id '2')",
 				req: models.RemoveMonthlyPaymentReq{
 					ID: 2,
 				},
@@ -571,7 +571,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 			},
 			// Invalid requests
 			{
-				desc: "remove Monthly Payment with id '3'",
+				desc: "invalid request (remove non-existing Monthly Payment)",
 				req: models.RemoveMonthlyPaymentReq{
 					ID: 3,
 				},
@@ -640,7 +640,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 			},
 			{
-				desc: "valid request with notes and type",
+				desc: "valid request (with notes and type)",
 				req: models.AddSpendReq{
 					DayID:  10,
 					Title:  "Bread",
@@ -754,7 +754,7 @@ func TestHandlers_Spend(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "edit title",
+				desc: "valid request (edit title)",
 				req: models.EditSpendReq{
 					ID:    1,
 					Title: newTitle("edited title"),
@@ -765,7 +765,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 			},
 			{
-				desc: "edit all fields",
+				desc: "valid request (edit all fields)",
 				req: models.EditSpendReq{
 					ID:     2,
 					Title:  newTitle("edited title"),
@@ -859,7 +859,7 @@ func TestHandlers_Spend(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "remove Monthly Payment with id '1'",
+				desc: "valid request (remove Spend with id '1')",
 				req: models.RemoveSpendReq{
 					ID: 1,
 				},
@@ -869,7 +869,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 			},
 			{
-				desc: "remove Monthly Payment with id '2'",
+				desc: "valid request (remove Spend with id '2')",
 				req: models.RemoveSpendReq{
 					ID: 2,
 				},
@@ -880,7 +880,7 @@ func TestHandlers_Spend(t *testing.T) {
 			},
 			// Invalid requests
 			{
-				desc: "remove Monthly Payment with id '3'",
+				desc: "invalid request (remove non-existing Spend)",
 				req: models.RemoveSpendReq{
 					ID: 3,
 				},
@@ -947,7 +947,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				},
 			},
 			{
-				desc: "valid request with notes and type",
+				desc: "valid request (with notes and type)",
 				req: models.AddSpendTypeReq{
 					Name: "second type",
 				},
@@ -1021,7 +1021,7 @@ func TestHandlers_SpendType(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "edit title",
+				desc: "valid request (edit name)",
 				req: models.EditSpendTypeReq{
 					ID:   1,
 					Name: "updated name",
@@ -1082,7 +1082,7 @@ func TestHandlers_SpendType(t *testing.T) {
 			resp       models.Response
 		}{
 			{
-				desc: "remove Spend Type with id '1'",
+				desc: "valid request (remove Spend Type with id '1')",
 				req: models.RemoveSpendTypeReq{
 					ID: 1,
 				},
@@ -1092,7 +1092,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				},
 			},
 			{
-				desc: "remove Spend Type with id '2'",
+				desc: "valid request (remove Spend Type with id '2')",
 				req: models.RemoveSpendTypeReq{
 					ID: 2,
 				},
@@ -1103,7 +1103,7 @@ func TestHandlers_SpendType(t *testing.T) {
 			},
 			// Invalid requests
 			{
-				desc: "remove Spend Type with id '3'",
+				desc: "invalid request (remove non-existing Spend Type)",
 				req: models.RemoveSpendTypeReq{
 					ID: 3,
 				},
