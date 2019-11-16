@@ -128,8 +128,8 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
+	mp := &MonthlyPayment{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		mp := &MonthlyPayment{ID: args.ID}
 		err = tx.Select(mp)
 		if err != nil {
 			if err == pg.ErrNoRows {
@@ -193,11 +193,9 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
+	mp := &MonthlyPayment{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-
 		// Remove Monthly Payment
-
-		mp := &MonthlyPayment{ID: id}
 		err = tx.Model(mp).Column("month_id").WherePK().Select()
 		if err != nil {
 			err = errorWrap(err, "can't select Monthly Payment with passed id")

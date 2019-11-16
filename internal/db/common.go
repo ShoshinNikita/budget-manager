@@ -24,16 +24,6 @@ var (
 
 // Common errors
 
-func errBeginTransaction(err error) error {
-	const msg = "can't begin a new transaction"
-	return internalErrorWrap(err, msg)
-}
-
-func errCommitChanges(err error) error {
-	const msg = "can't commit changes"
-	return internalErrorWrap(err, msg)
-}
-
 func errRecomputeBudget(err error) error {
 	const msg = "can't recompute month budget"
 	return internalErrorWrap(err, msg)

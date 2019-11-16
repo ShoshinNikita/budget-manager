@@ -63,7 +63,6 @@ func (db DB) GetSpendTypes() ([]SpendType, error) {
 // AddSpendType adds new Spend Type
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &SpendType{Name: name}
-
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = db.db.Insert(spendType)
 		if err != nil {
@@ -91,7 +90,6 @@ func (db DB) EditSpendType(id uint, newName string) error {
 	}
 
 	spendType := &SpendType{ID: id, Name: newName}
-
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = db.db.Update(spendType)
 		if err != nil {
@@ -119,7 +117,6 @@ func (db DB) RemoveSpendType(id uint) error {
 	}
 
 	spendType := &SpendType{ID: id}
-
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = db.db.Delete(spendType)
 		if err != nil {

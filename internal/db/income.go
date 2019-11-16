@@ -123,9 +123,10 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		return ErrIncomeNotExist
 	}
 
+	in := &Income{ID: args.ID}
+
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Select Income
-		in := &Income{ID: args.ID}
 		err = tx.Select(in)
 		if err != nil {
 			if err == pg.ErrNoRows {
