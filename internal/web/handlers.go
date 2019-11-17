@@ -59,6 +59,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -105,6 +106,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -142,6 +144,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -193,6 +196,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -240,6 +244,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -277,6 +282,7 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -328,6 +334,7 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -375,6 +382,7 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -412,6 +420,7 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -456,6 +465,7 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -493,6 +503,7 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
@@ -530,6 +541,7 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Encode
+	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
