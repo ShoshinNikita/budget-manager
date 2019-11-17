@@ -157,7 +157,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 // POST /api/monthly-payments
 //
 // Request: models.AddMonthlyPaymentReq
-// Response models.AddMonthlyPaymentResp or models.Response
+// Response: models.AddMonthlyPaymentResp or models.Response
 //
 func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -205,7 +205,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 // PUT /api/monthly-payments
 //
 // Request: models.EditMonthlyPaymentReq
-// Response models.Response
+// Response: models.Response
 //
 func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
@@ -253,7 +253,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 // DELETE /api/monthly-payments
 //
 // Request: models.DeleteMonthlyPaymentReq
-// Response models.Response
+// Response: models.Response
 //
 func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
