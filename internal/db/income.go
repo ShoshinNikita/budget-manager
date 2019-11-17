@@ -18,13 +18,13 @@ var (
 // Income contains information about incomes (salary, gifts and etc.)
 type Income struct {
 	// MonthID is a foreign key to Months table
-	MonthID uint
+	MonthID uint `json:"month_id"`
 
-	ID uint `pg:",pk"`
+	ID uint `pg:",pk" json:"-"`
 
-	Title  string
-	Notes  string
-	Income money.Money
+	Title  string      `json:"title"`
+	Notes  string      `json:"notes,omitempty"`
+	Income money.Money `json:"income"`
 }
 
 func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {

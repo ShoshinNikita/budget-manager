@@ -18,15 +18,15 @@ var (
 // Spend contains information about spends
 type Spend struct {
 	// MonthID is a foreign key to Days table
-	DayID uint
+	DayID uint `json:"day_id"`
 
-	ID uint `pg:",pk"`
+	ID uint `pg:",pk" json:"-"`
 
-	Title  string
-	TypeID uint
-	Type   *SpendType `pg:"fk:type_id"`
-	Notes  string
-	Cost   money.Money
+	Title  string      `json:"title"`
+	TypeID uint        `json:"type_id,omitempty"`
+	Type   *SpendType  `pg:"fk:type_id" json:"type,omitempty"`
+	Notes  string      `json:"notes,omitempty"`
+	Cost   money.Money `json:"cost"`
 }
 
 func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
