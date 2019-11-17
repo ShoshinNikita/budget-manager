@@ -21,7 +21,7 @@ clear: clear-docker
 
 clear-docker:
 	# Stop and remove containers and volumes
-	docker-compose -f ${DOCKER_COMPOSE} rm -v --stop --force
+	docker-compose -f ${DOCKER_COMPOSE} down -v
 
 clear-local:
 	docker stop budget_manager_postgres || true
