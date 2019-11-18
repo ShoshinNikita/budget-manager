@@ -2,6 +2,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/ShoshinNikita/budget_manager/internal/db"
 )
 
@@ -15,6 +17,29 @@ type Request struct {
 type Response struct {
 	Success bool   `json:"success"`
 	Error   string `json:"error,omitempty"` // optional
+}
+
+// -------------------------------------------------
+// Month
+// -------------------------------------------------
+
+type GetMonthReq struct {
+	Request
+
+	ID *uint `json:"id"`
+}
+
+type GetMonthByYearAndMonthReq struct {
+	Request
+
+	Year  *int        `json:"year"`
+	Month *time.Month `json:"month"`
+}
+
+type GetMonthResp struct {
+	Response
+
+	Month db.Month `json:"month"`
 }
 
 // -------------------------------------------------
