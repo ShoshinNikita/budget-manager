@@ -180,9 +180,10 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 		return cost
 	}()
 
+	// Use "Add" because monthlyPaymentCost and TotalSpend are negative
+	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentCost).Divide(int64(daysInMonth(m.Month)))
 	m.TotalSpend = monthlyPaymentCost.Add(spendCost)
-	// Use "Add" because TotalSpend is negative
-	m.DailyBudget = m.TotalIncome.Add(m.TotalSpend).Divide(int64(daysInMonth(m.Month)))
+	m.Result = m.TotalIncome.Add(m.TotalSpend)
 
 	// Update Saldos (it is accumulated)
 	saldo := m.DailyBudget
