@@ -1262,6 +1262,21 @@ func TestHandlers_SpendType(t *testing.T) {
 }
 
 // -------------------------------------------------
+// Full process
+// -------------------------------------------------
+
+// TODO: add integration test to the for full process of usage:
+//   - add several Incomes
+//   - check month (Total Income, Total Spend, Result)
+//   - add several Monthly Payments
+//   - check month (Total Income, Total Spend, Result, Daily Budget)
+//   - add Spend Types
+//   - check list of Spend Types
+//   - add Spends (at least 10) in different days
+//   - check month (Total Income, Total Spend, Daily Budget, Saldo, Days, Result)
+//
+
+// -------------------------------------------------
 // Server
 // -------------------------------------------------
 

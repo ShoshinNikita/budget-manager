@@ -43,6 +43,30 @@ type GetMonthResp struct {
 }
 
 // -------------------------------------------------
+// Day
+// -------------------------------------------------
+
+type GetDayReq struct {
+	Request
+
+	ID *uint `json:"id"`
+}
+
+type GetDayByDateReq struct {
+	Request
+
+	Year  *int        `json:"year"`
+	Month *time.Month `json:"month"`
+	Day   *int        `json:"day"`
+}
+
+type GetDayResp struct {
+	Response
+
+	Day db.Day `json:"day"`
+}
+
+// -------------------------------------------------
 // Income
 // -------------------------------------------------
 

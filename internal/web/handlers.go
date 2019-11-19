@@ -91,6 +91,81 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET /api/days
+//
+// Request: models.GetDayReq or models.GetDayByDate
+// Response: models.GetDayResp or models.Response
+//
+func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Prepare
+	var dayID uint
+
+	body := &bytes.Buffer{}
+	tee := io.TeeReader(r.Body, body)
+
+	// Try to decode models.GetDayReq
+	req := &models.GetDayReq{}
+	// We have to use json.NewDecoder because there are several types of request
+	if err := json.NewDecoder(tee).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+	if req.ID != nil {
+		dayID = *req.ID
+	} else {
+		// Try to use models.GetDayByDateReq
+		req := &models.GetDayByDateReq{}
+		if err := jsonNewDecoder(body).Decode(req); err != nil {
+			s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+			return
+		}
+		if req.Year == nil || req.Month == nil || req.Day == nil {
+			s.processError(w, "invalid request: no id or year, month and day were passed", http.StatusBadRequest, nil)
+			return
+		}
+
+		id, err := s.db.GetDayIDByDate(*req.Year, int(*req.Month), *req.Day)
+		if err != nil {
+			switch {
+			case db.IsBadRequestError(err):
+				s.processError(w, "such Day doesn't exist", http.StatusBadRequest, err)
+			default:
+				s.processError(w, "can't select Day with passed data", http.StatusInternalServerError, err)
+			}
+			return
+		}
+
+		dayID = id
+	}
+
+	// Process
+	day, err := s.db.GetDay(dayID)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "Day with passed id doesn't exist", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't add select Day", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.GetDayResp{
+		Response: models.Response{
+			Success: true,
+		},
+		Day: *day,
+	}
+
+	// Encode
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
+}
+
 // -------------------------------------------------
 // Income
 // -------------------------------------------------

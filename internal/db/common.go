@@ -104,6 +104,30 @@ func (db DB) GetDay(id uint) (*Day, error) {
 	return d, nil
 }
 
+func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
+	monthID, err := db.GetMonthID(year, month)
+	if err != nil {
+		if err == ErrMonthNotExist {
+			return 0, ErrMonthNotExist
+		}
+		return 0, internalError(errors.Wrap(err, "can't define month id with passed year and month"))
+	}
+
+	d := &Day{}
+	err = db.db.Model(d).
+		Column("id").
+		Where("month_id = ? AND day = ?", monthID, day).
+		Select()
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return 0, ErrDayNotExist
+		}
+		return 0, internalErrorWrap(err, "can't select day with passed id")
+	}
+
+	return d.ID, nil
+}
+
 // -----------------------------------------------------------------------------
 
 func (db DB) GetMonthID(year, month int) (uint, error) {
