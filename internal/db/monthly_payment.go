@@ -18,15 +18,15 @@ var (
 // MonthlyPayment contains information about monthly payments (rent, Patreon and etc.)
 type MonthlyPayment struct {
 	// MonthID is a foreign key to Monthes table
-	MonthID uint
+	MonthID uint `json:"month_id"`
 
-	ID uint `pg:",pk"`
+	ID uint `pg:",pk" json:"-"`
 
-	Title  string
-	TypeID uint
-	Type   *SpendType `pg:"fk:type_id"`
-	Notes  string
-	Cost   money.Money
+	Title  string      `json:"title"`
+	TypeID uint        `json:"type_id,omitempty"`
+	Type   *SpendType  `pg:"fk:type_id" json:"type,omitempty"`
+	Notes  string      `json:"notes,omitempty"`
+	Cost   money.Money `json:"cost"`
 }
 
 func (in *MonthlyPayment) BeforeInsert(ctx context.Context) (context.Context, error) {

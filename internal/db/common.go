@@ -32,25 +32,25 @@ func errRecomputeBudget(err error) error {
 // -----------------------------------------------------------------------------
 
 type Month struct {
-	ID    uint
-	Year  int
-	Month time.Month
+	ID    uint       `json:"id"`
+	Year  int        `json:"year"`
+	Month time.Month `json:"month"`
 
 	// Incomes
 
-	Incomes     []*Income `pg:"fk:month_id"`
-	TotalIncome money.Money
+	Incomes     []*Income   `pg:"fk:month_id" json:"incomes"`
+	TotalIncome money.Money `json:"total_income"`
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
-	DailyBudget money.Money
+	DailyBudget money.Money `json:"daily_budget"`
 
 	// Spends
 
-	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
-	Days            []*Day            `pg:"fk:month_id"`
-	TotalSpend      money.Money       // must be negative or zero
+	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id" json:"monthly_payments"`
+	Days            []*Day            `pg:"fk:month_id" json:"days"`
+	TotalSpend      money.Money       `json:"total_spend"` // must be negative or zero
 
 	// Result is TotalIncome - TotalSpend
-	Result money.Money
+	Result money.Money `json:"result"`
 }
 
 func (db DB) GetMonth(id uint) (*Month, error) {
@@ -77,14 +77,14 @@ func (db DB) GetMonth(id uint) (*Month, error) {
 
 type Day struct {
 	// MonthID is a foreign key to Monthes table
-	MonthID uint
+	MonthID uint `json:"month_id"`
 
-	ID uint
+	ID uint `json:"id"`
 
-	Day int
+	Day int `json:"day"`
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
-	Saldo  money.Money
-	Spends []*Spend `pg:"fk:day_id"`
+	Saldo  money.Money `json:"saldo"`
+	Spends []*Spend    `pg:"fk:day_id" json:"spends"`
 }
 
 func (db DB) GetDay(id uint) (*Day, error) {

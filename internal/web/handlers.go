@@ -1,7 +1,9 @@
 package web
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
@@ -13,6 +15,81 @@ const (
 	errDecodeRequest  = "couldn't decode request"
 	errEncodeResponse = "couldn't encode response"
 )
+
+// GET /api/months
+//
+// Request: models.GetMonthReq or models.GetMonthByYearAndMonthReq
+// Response: models.GetMonthResp or models.Response
+//
+func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Prepare
+	var monthID uint
+
+	body := &bytes.Buffer{}
+	tee := io.TeeReader(r.Body, body)
+
+	// Try to decode models.GetMonthReq
+	req := &models.GetMonthReq{}
+	// We have to use json.NewDecoder because there are several types of request
+	if err := json.NewDecoder(tee).Decode(req); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+	if req.ID != nil {
+		monthID = *req.ID
+	} else {
+		// Try to use models.GetMonthByYearAndMonthReq
+		req := &models.GetMonthByYearAndMonthReq{}
+		if err := jsonNewDecoder(body).Decode(req); err != nil {
+			s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+			return
+		}
+		if req.Year == nil || req.Month == nil {
+			s.processError(w, "invalid request: no id or year and month were passed", http.StatusBadRequest, nil)
+			return
+		}
+
+		id, err := s.db.GetMonthID(*req.Year, int(*req.Month))
+		if err != nil {
+			switch {
+			case db.IsBadRequestError(err):
+				s.processError(w, "such Month doesn't exist", http.StatusBadRequest, err)
+			default:
+				s.processError(w, "can't select Month with passed data", http.StatusInternalServerError, err)
+			}
+			return
+		}
+
+		monthID = id
+	}
+
+	// Process
+	month, err := s.db.GetMonth(monthID)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "Month with passed id doesn't exist", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't add select Month", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	resp := models.GetMonthResp{
+		Response: models.Response{
+			Success: true,
+		},
+		Month: *month,
+	}
+
+	// Encode
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
+}
 
 // -------------------------------------------------
 // Income

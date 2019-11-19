@@ -21,6 +21,7 @@ func (s Server) addRoutes(router *mux.Router) {
 		{methods: "GET", path: "/years/{year}/months/{month}", handler: http.HandlerFunc(notImplementedYet)},
 
 		// API
+		{methods: "GET", path: "/api/months", handler: http.HandlerFunc(s.GetMonth)},
 		// Income
 		{methods: "POST", path: "/api/incomes", handler: http.HandlerFunc(s.AddIncome)},
 		{methods: "PUT", path: "/api/incomes", handler: http.HandlerFunc(s.EditIncome)},
