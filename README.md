@@ -1,6 +1,9 @@
 # Budget Manager
 
 - [Configuration](#configuration)
+- [Development](#development)
+  - [Run](#run)
+  - [Test](#test)
 - [API](#api)
   - [Income](#income)
   - [Monthly Payment](#monthly-payment)
@@ -19,6 +22,28 @@
 | `DB_PASSWORD`  |               | Password for connection to the db                                                                                                                       |
 | `DB_DATABASE`  | `postgres`    | Database for connection                                                                                                                                 |
 | `SERVER_PORT`  | `:8080`       |                                                                                                                                                         |
+
+## Development
+
+### Run
+
+You can run local version with `make run` (or `make run-docker`) with Docker. If you don't want to use Docker, you can build and run **Budget Manager** with `make run-local` (this target uses `go run` command)
+
+### Test
+
+#### Unit tests
+
+```bash
+make test-unit
+```
+
+#### Integration tests
+
+```bash
+make test
+# Or
+make test-integ
+```
 
 ## API
 
