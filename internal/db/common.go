@@ -12,7 +12,6 @@ import (
 
 // Errors
 
-// Checks
 var (
 	ErrMonthNotExist          = badRequestError(errors.New("month with passed id doesn't exist"))
 	ErrDayNotExist            = badRequestError(errors.New("day with passed id doesn't exist"))
@@ -29,6 +28,8 @@ func errRecomputeBudget(err error) error {
 	return internalErrorWrap(err, msg)
 }
 
+// -----------------------------------------------------------------------------
+// Month
 // -----------------------------------------------------------------------------
 
 type Month struct {
@@ -74,6 +75,38 @@ func (db DB) GetMonth(id uint) (*Month, error) {
 
 	return m, nil
 }
+
+func (db DB) GetMonthID(year, month int) (uint, error) {
+	m := &Month{}
+	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return 0, ErrMonthNotExist
+		}
+
+		return 0, internalErrorWrap(err, "can't select Month with passed year and month")
+	}
+
+	return m.ID, nil
+}
+
+func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
+	day := &Day{ID: dayID}
+	err := db.db.Model(day).Column("month_id").WherePK().Select()
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return 0, ErrDayNotExist
+		}
+
+		return 0, internalErrorWrap(err, "can't select day with passed id")
+	}
+
+	return day.MonthID, nil
+}
+
+// -----------------------------------------------------------------------------
+// Day
+// -----------------------------------------------------------------------------
 
 type Day struct {
 	// MonthID is a foreign key to Monthes table
@@ -129,36 +162,8 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 }
 
 // -----------------------------------------------------------------------------
-
-func (db DB) GetMonthID(year, month int) (uint, error) {
-	m := &Month{}
-	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
-	if err != nil {
-		if err == pg.ErrNoRows {
-			return 0, ErrMonthNotExist
-		}
-
-		return 0, internalErrorWrap(err, "can't select Month with passed year and month")
-	}
-
-	return m.ID, nil
-}
-
-func (db DB) GetMonthIDByDay(dayID uint) (uint, error) {
-	day := &Day{ID: dayID}
-	err := db.db.Model(day).Column("month_id").WherePK().Select()
-	if err != nil {
-		if err == pg.ErrNoRows {
-			return 0, ErrDayNotExist
-		}
-
-		return 0, internalErrorWrap(err, "can't select day with passed id")
-	}
-
-	return day.MonthID, nil
-}
-
 // Internal methods
+// -----------------------------------------------------------------------------
 
 func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m := &Month{ID: monthID}
