@@ -7,7 +7,7 @@ run: run-docker
 run-docker: clear
 	docker-compose -f ${DOCKER_COMPOSE} up --build
 
-run-local: clear-local
+run-local: clear
 	# Run Postgres
 	./scripts/local/postgres.sh
 	echo "Wait fot DB..."
@@ -17,7 +17,7 @@ run-local: clear-local
 
 # Clear
 
-clear: clear-docker
+clear: clear-local clear-docker
 
 clear-docker:
 	# Stop and remove containers and volumes
@@ -36,7 +36,7 @@ test-unit:
 test-integ:
 	# Run Postgres
 	./scripts/local/postgres.sh test
-	# Run integration tests. Disable parallel launch with '-p 1' (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
+	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
 	go test -mod vendor -count 1 -p 1 --tags=integration -v ./...
 	# Stop and remove DB
 	docker stop budget_manager_postgres
@@ -55,6 +55,5 @@ lint:
 	# More installation options: https://github.com/golangci/golangci-lint#binary-release
 	#
 	golangci-lint run \
-		--exclude="Error return value of \`tx.Rollback\` is not checked" \
 		--max-issues-per-linter=0 \
 		--max-same-issues=0
