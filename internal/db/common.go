@@ -90,7 +90,7 @@ func (db DB) GetMonthID(year, month int) (uint, error) {
 	return m.ID, nil
 }
 
-func (db DB) GetMonthIDByDay(dayID uint) (uint, error) {
+func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
 	day := &Day{ID: dayID}
 	err := db.db.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {

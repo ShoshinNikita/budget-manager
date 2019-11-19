@@ -78,7 +78,7 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 
 		// Recompute Month budget
 
-		monthID, err := db.GetMonthIDByDay(args.DayID)
+		monthID, err := db.GetMonthIDByDayID(args.DayID)
 		if err != nil {
 			return errorWrap(err, "can't get Month which contains Day with passed dayID")
 		}
@@ -150,7 +150,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 
 		// Recompute Month budget
 
-		monthID, err := db.GetMonthIDByDay(spend.DayID)
+		monthID, err := db.GetMonthIDByDayID(spend.DayID)
 		if err != nil {
 			return errorWrap(err, "can't get Month which contains Day with passed dayID")
 		}
@@ -212,7 +212,7 @@ func (db DB) RemoveSpend(id uint) error {
 
 		// Recompute Month budget
 
-		monthID, err := db.GetMonthIDByDay(spend.DayID)
+		monthID, err := db.GetMonthIDByDayID(spend.DayID)
 		if err != nil {
 			return errorWrap(err, "can't get Month which contains Day with passed dayID")
 		}
