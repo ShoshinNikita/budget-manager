@@ -130,7 +130,9 @@ func (db *DB) DropDB() error {
 }
 
 func (db *DB) initCurrentMonth() error {
-	year, month, _ := time.Now().Date()
+	now := time.Now()
+	year, month, _ := now.Date()
+
 	err := db.db.Model(&Month{}).
 		Column("id").
 		Where("year = ? AND month = ?", year, month).
@@ -154,7 +156,7 @@ func (db *DB) initCurrentMonth() error {
 		db.log.Debugf("current month id: '%d'", monthID)
 
 		// Add days for the current month
-		daysNumber := daysInMonth(month)
+		daysNumber := daysInMonth(now)
 		days := make([]*Day, daysNumber)
 		for i := range days {
 			days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
