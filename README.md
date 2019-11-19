@@ -5,6 +5,7 @@
   - [Run](#run)
   - [Test](#test)
 - [API](#api)
+  - [General](#general)
   - [Income](#income)
   - [Monthly Payment](#monthly-payment)
   - [Spend](#spend)
@@ -29,6 +30,11 @@
 
 You can run local version with `make run` (or `make run-docker`) with Docker. If you don't want to use Docker, you can build and run **Budget Manager** with `make run-local` (this target uses `go run` command)
 
+After the launch you can use `api.rest` file to make basic API requests. More info about the `.rest` and `.http` files:
+
+- [REST Client Extension for VS Code](https://github.com/Huachao/vscode-restclient)
+- [HTTP client in IntelliJ IDEA code editor](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html)
+
 ### Test
 
 #### Unit tests
@@ -50,6 +56,18 @@ make test-integ
 All endpoints return json response with `Content-Type: application/json` header.
 
 Requests and responses can be found in [internal/web/models](internal/web/models/models.go) package
+
+### General
+
+- `GET /api/months` - get month
+
+  **Request:** `models.GetMonthReq` or `models.GetMonthByYearAndMonthReq`
+  **Response:** `models.GetMonthResp` or `models.Response`
+
+- `GET /api/days` - get day
+
+  **Request:** `models.GetDayReq` or `models.GetDayByDate`
+  **Response:** `models.GetDayResp` or `models.Response`
 
 ### Income
 
@@ -103,6 +121,11 @@ Requests and responses can be found in [internal/web/models](internal/web/models
   **Response:** `models.Response`
 
 ### Spend Type
+
+- `GET /api/spend-types` - get list of all Spend Types
+
+  **Request**: -
+  **Response**: `models.GetSpendTypesResp` or `models.Response`
 
 - `POST /api/spend-types` - add new Spend Type
 
