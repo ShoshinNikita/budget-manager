@@ -87,12 +87,13 @@ func ping(db *pg.DB) (ok bool) {
 }
 
 // daysInMonth returns number of days in a month
-func daysInMonth(m time.Month) int {
-	year := time.Now().Year()
+func daysInMonth(t time.Time) int {
+	year := t.Year()
+	month := t.Month()
 
-	currentMonth := time.Date(year, m, 1, 0, 0, 0, 0, time.Local)
+	currentMonth := time.Date(year, month, 1, 0, 0, 0, 0, time.Local)
 	// Can just use m+1. time.Date will normalize overflowing month
-	nextMonth := time.Date(year, m+1, 1, 0, 0, 0, 0, time.Local)
+	nextMonth := time.Date(year, month+1, 1, 0, 0, 0, 0, time.Local)
 
 	days := int64(nextMonth.Sub(currentMonth)) / (int64(time.Hour) * 24)
 

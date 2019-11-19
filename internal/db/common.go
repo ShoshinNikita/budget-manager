@@ -183,8 +183,9 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 		return cost
 	}()
 
+	date := time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
 	// Use "Add" because monthlyPaymentCost and TotalSpend are negative
-	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentCost).Divide(int64(daysInMonth(m.Month)))
+	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentCost).Divide(int64(daysInMonth(date)))
 	m.TotalSpend = monthlyPaymentCost.Add(spendCost)
 	m.Result = m.TotalIncome.Add(m.TotalSpend)
 
