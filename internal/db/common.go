@@ -58,10 +58,12 @@ func (db DB) GetMonth(id uint) (*Month, error) {
 	err := db.db.Model(m).
 		Relation("Incomes").
 		Relation("MonthlyPayments").
+		Relation("MonthlyPayments.Type").
 		Relation("Days", func(q *orm.Query) (*orm.Query, error) {
 			return q.Order("day ASC"), nil
 		}).
 		Relation("Days.Spends").
+		Relation("Days.Spends.Type").
 		WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
@@ -89,6 +91,7 @@ func (db DB) GetDay(id uint) (*Day, error) {
 	d := &Day{ID: id}
 	err := db.db.Model(d).
 		Relation("Spends").
+		Relation("Spends.Type").
 		WherePK().
 		Select()
 	if err != nil {
