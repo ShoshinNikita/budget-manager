@@ -15,8 +15,8 @@ var (
 
 // SpendType contains information about spend type
 type SpendType struct {
-	ID   uint `pg:",pk"`
-	Name string
+	ID   uint   `pg:",pk" json:"id"`
+	Name string `json:"name"`
 }
 
 func (in *SpendType) BeforeInsert(ctx context.Context) (context.Context, error) {

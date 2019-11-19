@@ -1,6 +1,10 @@
 // Package models contains models of requests and responses
 package models
 
+import (
+	"github.com/ShoshinNikita/budget_manager/internal/db"
+)
+
 // -------------------------------------------------
 // Common
 // -------------------------------------------------
@@ -121,6 +125,12 @@ type RemoveSpendReq struct {
 // -------------------------------------------------
 // Spend Type
 // -------------------------------------------------
+
+type GetSpendTypesResp struct {
+	Response
+
+	SpendTypes []db.SpendType `json:"spend_types"`
+}
 
 type AddSpendTypeReq struct {
 	Request
