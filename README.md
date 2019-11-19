@@ -5,6 +5,7 @@
   - [Run](#run)
   - [Test](#test)
 - [API](#api)
+  - [General](#general)
   - [Income](#income)
   - [Monthly Payment](#monthly-payment)
   - [Spend](#spend)
@@ -50,6 +51,18 @@ make test-integ
 All endpoints return json response with `Content-Type: application/json` header.
 
 Requests and responses can be found in [internal/web/models](internal/web/models/models.go) package
+
+### General
+
+- `GET /api/months` - get month
+
+  **Request:** `models.GetMonthReq` or `models.GetMonthByYearAndMonthReq`
+  **Response:** `models.GetMonthResp` or `models.Response`
+
+- `GET /api/days` - get day
+
+  **Request:** `models.GetDayReq` or `models.GetDayByDate`
+  **Response:** `models.GetDayResp` or `models.Response`
 
 ### Income
 
@@ -103,6 +116,11 @@ Requests and responses can be found in [internal/web/models](internal/web/models
   **Response:** `models.Response`
 
 ### Spend Type
+
+- `GET /api/spend-types` - get list of all Spend Types
+
+  **Request**: -
+  **Response**: `models.GetSpendTypesResp` or `models.Response`
 
 - `POST /api/spend-types` - add new Spend Type
 

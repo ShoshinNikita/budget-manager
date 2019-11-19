@@ -585,7 +585,7 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 // GET /api/spend-types
 //
 // Request: -
-// Response: models.GetSpendTypesResp
+// Response: models.GetSpendTypesResp or models.Response
 //
 func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	// Process
