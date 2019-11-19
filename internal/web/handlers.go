@@ -122,7 +122,7 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if req.Year == nil || req.Month == nil || req.Day == nil {
-			s.processError(w, "invalid request: no id or year and month were passed", http.StatusBadRequest, nil)
+			s.processError(w, "invalid request: no id or year, month and day were passed", http.StatusBadRequest, nil)
 			return
 		}
 
