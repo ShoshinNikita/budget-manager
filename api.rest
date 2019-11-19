@@ -1,0 +1,132 @@
+// This file contains examples of basic API requests
+// Extension for VS Code: https://github.com/Huachao/vscode-restclient
+
+@schema = http
+@host = localhost
+@port = 8080
+@baseUrl = {{schema}}://{{host}}:{{port}}
+@currentYear = {{$datetime "YYYY"}}
+@currentMonth = {{$datetime "MM"}}
+@dayID = 11
+@dayNumber = 11
+
+// -------------------------------------------------
+// Incomes
+// -------------------------------------------------
+
+### Add income
+
+POST {{baseUrl}}/api/incomes
+Content-Type: application/json
+
+{
+	"month_id": 1,
+	"title": "Salary",
+	"income": 60000
+}
+
+// -------------------------------------------------
+// Spend Type
+// -------------------------------------------------
+
+### Add Spend Types
+
+POST {{baseUrl}}/api/spend-types
+Content-Type: application/json
+
+{
+	"name": "For PC"
+}
+
+###
+
+POST {{baseUrl}}/api/spend-types
+Content-Type: application/json
+
+{
+	"name": "Rent"
+}
+
+### Get all Spend Types
+
+GET {{baseUrl}}/api/spend-types
+
+// -------------------------------------------------
+// Monthly Payment
+// -------------------------------------------------
+
+### Add Monthly Payment
+
+POST {{baseUrl}}/api/monthly-payments
+Content-Type: application/json
+
+{
+	"month_id": 1,
+	"title": "Rent",
+	"type_id": 2,
+	"cost": 25000
+}
+
+// -------------------------------------------------
+// Spend
+// -------------------------------------------------
+
+### Add Spend
+
+POST {{baseUrl}}/api/spends
+Content-Type: application/json
+
+{
+	"day_id": {{dayID}},
+	"title": "Mechanical keyboard",
+	"notes": "On sales",
+	"type_id": 1,
+	"cost": 4105
+}
+
+// -------------------------------------------------
+// Month
+// -------------------------------------------------
+
+### Get Month by Id
+
+GET {{baseUrl}}/api/months
+Content-Type: application/json
+
+{
+	"id": 1
+}
+
+### Get Month by year and month
+
+GET {{baseUrl}}/api/months
+Content-Type: application/json
+
+{
+	"year": {{currentYear}},
+	"month": {{currentMonth}}
+}
+
+// -------------------------------------------------
+// Day
+// -------------------------------------------------
+
+### Get Day by ID
+
+GET {{baseUrl}}/api/days
+Content-Type: application/json
+
+{
+	"id": {{dayID}}
+}
+
+### Get Day by date
+
+GET {{baseUrl}}/api/days
+Content-Type: application/json
+
+{
+	"year": {{currentYear}},
+	"month": {{currentMonth}},
+	"day": {{dayNumber}}
+}
