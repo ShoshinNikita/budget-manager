@@ -439,7 +439,12 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	// Process
 	types, err := s.db.GetSpendTypes()
 	if err != nil {
-		s.processError(w, "can't get all Spend Types", http.StatusInternalServerError, err)
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "bad request", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't get all Spend Types", http.StatusInternalServerError, err)
+		}
 		return
 	}
 
