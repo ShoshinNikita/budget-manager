@@ -19,7 +19,7 @@ import (
 
 const (
 	dbHost     = "localhost"
-	dbPort     = "5432"
+	dbPort     = 5432
 	dbUser     = "postgres"
 	dbPassword = ""
 	dbDatabase = "postgres"
@@ -1285,13 +1285,13 @@ func initServer(require *require.Assertions) *Server {
 	log := clog.NewDevLogger()
 
 	// DB
-	dbOpts := db.NewDBOptions{
+	dbConfig := db.Config{
 		Host:     dbHost,
 		Port:     dbPort,
 		User:     dbUser,
 		Database: dbDatabase,
 	}
-	db, err := db.NewDB(dbOpts, log)
+	db, err := db.NewDB(dbConfig, log)
 	require.Nil(err)
 	err = db.DropDB()
 	require.Nil(err)

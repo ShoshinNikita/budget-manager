@@ -1,6 +1,7 @@
 package db
 
 import (
+	"strconv"
 	"time"
 
 	clog "github.com/ShoshinNikita/go-clog/v3"
@@ -25,23 +26,13 @@ const (
 	connectRetryTimeout = time.Second
 )
 
-// NewDBOptions contains options for NewDB function
-type NewDBOptions struct {
-	Host string
-	Port string
-
-	User     string
-	Password string
-	Database string
-}
-
 // NewDB creates a new connection to the db and pings it
-func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
+func NewDB(config Config, log *clog.Logger) (*DB, error) {
 	db := pg.Connect(&pg.Options{
-		Addr:     opts.Host + ":" + opts.Port,
-		User:     opts.User,
-		Password: opts.Password,
-		Database: opts.Database,
+		Addr:     config.Host + ":" + strconv.Itoa(config.Port),
+		User:     config.User,
+		Password: config.Password,
+		Database: config.Database,
 	})
 
 	log = log.WithPrefix("[database]")

@@ -13,7 +13,7 @@ import (
 	"github.com/ShoshinNikita/budget_manager/internal/web"
 )
 
-type config struct {
+type Config struct {
 	// Is debug mode on
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
@@ -23,13 +23,7 @@ type config struct {
 		Level string `env:"LOGGER_LEVEL" envDefault:"info"`
 	}
 
-	DB struct {
-		Host     string `env:"DB_HOST" envDefault:"localhost"`
-		Port     string `env:"DB_PORT" envDefault:"5432"`
-		User     string `env:"DB_USER" envDefault:"postgres"`
-		Password string `env:"DB_PASSWORD"`
-		Database string `env:"DB_DATABASE" envDefault:"postgres"`
-	}
+	DB db.Config
 
 	Server struct {
 		Port string `env:"SERVER_PORT" envDefault:":8080"`
@@ -38,7 +32,7 @@ type config struct {
 
 func main() {
 	// Parse config
-	var cnf config
+	var cnf Config
 	if err := env.Parse(&cnf); err != nil {
 		log.Fatalf("can't parse config: %s", err)
 	}
@@ -54,14 +48,7 @@ func main() {
 	// Connect to the db
 	log.Info("connect to the db")
 
-	dbOpts := db.NewDBOptions{
-		Host:     cnf.DB.Host,
-		Port:     cnf.DB.Port,
-		User:     cnf.DB.User,
-		Password: cnf.DB.Password,
-		Database: cnf.DB.Database,
-	}
-	db, err := db.NewDB(dbOpts, log)
+	db, err := db.NewDB(cnf.DB, log)
 	if err != nil {
 		log.Fatalf("couldn't connect to the db: %s", err)
 	}
