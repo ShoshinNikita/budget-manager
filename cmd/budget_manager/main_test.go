@@ -16,6 +16,7 @@ func TestConfig(t *testing.T) {
 
 	envs := []struct{ key, value string }{
 		{"DEBUG", "true"},
+		{"LOGGER_MODE", "develop"},
 		{"LOGGER_LEVEL", "fatal"},
 		{"DB_HOST", "example.com"},
 		{"DB_PORT", "8888"},
@@ -32,6 +33,7 @@ func TestConfig(t *testing.T) {
 		Debug: true,
 		Logger: logger.Config{
 			Level: "fatal",
+			Mode:  "develop",
 		},
 		DB: db.Config{
 			Host:     "example.com",
