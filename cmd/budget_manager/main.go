@@ -24,8 +24,8 @@ type Config struct {
 
 func main() {
 	// Parse config
-	var cnf Config
-	if err := env.Parse(&cnf); err != nil {
+	cnf, err := parseConfig()
+	if err != nil {
 		log.Fatalf("can't parse config: %s", err)
 	}
 
@@ -97,4 +97,13 @@ func main() {
 
 	log.Info("shutdowns are completed")
 	log.Info("stop")
+}
+
+func parseConfig() (*Config, error) {
+	cnf := &Config{}
+	if err := env.Parse(cnf); err != nil {
+		return nil, err
+	}
+
+	return cnf, nil
 }
