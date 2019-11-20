@@ -2,6 +2,12 @@ package logger
 
 import "github.com/ShoshinNikita/go-clog/v3"
 
+type Config struct {
+	// Level is a level of logger. Valid options: debug, info, warn, error, fatal.
+	// It is always debug, when debug mode is on
+	Level string `env:"LOGGER_LEVEL" envDefault:"info"`
+}
+
 func New(cnf Config, debug bool) *clog.Logger {
 
 	// Use production mode by default

@@ -11,20 +11,24 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-var (
-	ErrDataBaseIsDown = errors.New("database is down")
+const (
+	connectRetries      = 5
+	connectRetryTimeout = time.Second
 )
+
+type Config struct {
+	Host     string `env:"DB_HOST" envDefault:"localhost"`
+	Port     int    `env:"DB_PORT" envDefault:"5432"`
+	User     string `env:"DB_USER" envDefault:"postgres"`
+	Password string `env:"DB_PASSWORD"`
+	Database string `env:"DB_DATABASE" envDefault:"postgres"`
+}
 
 type DB struct {
 	db   *pg.DB
 	cron *cron.Cron
 	log  *clog.Logger
 }
-
-const (
-	connectRetries      = 5
-	connectRetryTimeout = time.Second
-)
 
 // NewDB creates a new connection to the db and pings it
 func NewDB(config Config, log *clog.Logger) (*DB, error) {
@@ -45,7 +49,7 @@ func NewDB(config Config, log *clog.Logger) (*DB, error) {
 		}
 		log.Debug("couldn't ping DB")
 		if i+1 == connectRetries {
-			return nil, ErrDataBaseIsDown
+			return nil, errors.New("database is down")
 		}
 
 		time.Sleep(connectRetryTimeout)

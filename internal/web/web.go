@@ -13,6 +13,10 @@ import (
 	"github.com/ShoshinNikita/budget_manager/internal/db"
 )
 
+type Config struct {
+	Port int `env:"SERVER_PORT" envDefault:"8080"`
+}
+
 type Server struct {
 	server *http.Server
 	db     *db.DB
