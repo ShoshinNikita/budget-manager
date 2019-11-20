@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/ShoshinNikita/go-clog/v3"
@@ -17,25 +18,15 @@ type Server struct {
 	db     *db.DB
 	log    *clog.Logger
 
-	config serverConfig
+	config Config
 }
 
-type serverConfig struct {
-	Port string
-}
-
-type NewServerOptions struct {
-	Port string
-}
-
-func NewServer(opts NewServerOptions, db *db.DB, log *clog.Logger) *Server {
+func NewServer(cnf Config, db *db.DB, log *clog.Logger) *Server {
 	//nolint:gosimple
 	return &Server{
-		db:  db,
-		log: log.WithPrefix("[server]"),
-		config: serverConfig{
-			Port: opts.Port,
-		},
+		db:     db,
+		log:    log.WithPrefix("[server]"),
+		config: cnf,
 	}
 }
 
@@ -52,7 +43,7 @@ func (s *Server) Prepare() {
 	router.PathPrefix("/static/").Handler(fileHandler)
 
 	s.server = &http.Server{
-		Addr:    s.config.Port,
+		Addr:    ":" + strconv.Itoa(s.config.Port),
 		Handler: router,
 	}
 }

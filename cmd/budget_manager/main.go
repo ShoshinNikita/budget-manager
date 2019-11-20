@@ -23,11 +23,8 @@ type Config struct {
 		Level string `env:"LOGGER_LEVEL" envDefault:"info"`
 	}
 
-	DB db.Config
-
-	Server struct {
-		Port string `env:"SERVER_PORT" envDefault:":8080"`
-	}
+	DB     db.Config
+	Server web.Config
 }
 
 func main() {
@@ -68,10 +65,7 @@ func main() {
 	// Create a new server instance
 	log.Info("create Server instance")
 
-	serverOpts := web.NewServerOptions{
-		Port: cnf.Server.Port,
-	}
-	server := web.NewServer(serverOpts, db, log)
+	server := web.NewServer(cnf.Server, db, log)
 	server.Prepare()
 
 	// Start server

@@ -1299,8 +1299,8 @@ func initServer(require *require.Assertions) *Server {
 	require.Nil(err)
 
 	// Server
-	serverOpts := NewServerOptions{Port: ":8080"}
-	server := NewServer(serverOpts, db, log)
+	config := Config{Port: 8080}
+	server := NewServer(config, db, log)
 
 	return server
 }
