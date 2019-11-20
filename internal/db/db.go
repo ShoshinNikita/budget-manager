@@ -1,6 +1,7 @@
 package db
 
 import (
+	"strconv"
 	"time"
 
 	clog "github.com/ShoshinNikita/go-clog/v3"
@@ -10,9 +11,18 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-var (
-	ErrDataBaseIsDown = errors.New("database is down")
+const (
+	connectRetries      = 5
+	connectRetryTimeout = time.Second
 )
+
+type Config struct {
+	Host     string `env:"DB_HOST" envDefault:"localhost"`
+	Port     int    `env:"DB_PORT" envDefault:"5432"`
+	User     string `env:"DB_USER" envDefault:"postgres"`
+	Password string `env:"DB_PASSWORD"`
+	Database string `env:"DB_DATABASE" envDefault:"postgres"`
+}
 
 type DB struct {
 	db   *pg.DB
@@ -20,28 +30,13 @@ type DB struct {
 	log  *clog.Logger
 }
 
-const (
-	connectRetries      = 5
-	connectRetryTimeout = time.Second
-)
-
-// NewDBOptions contains options for NewDB function
-type NewDBOptions struct {
-	Host string
-	Port string
-
-	User     string
-	Password string
-	Database string
-}
-
 // NewDB creates a new connection to the db and pings it
-func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
+func NewDB(config Config, log *clog.Logger) (*DB, error) {
 	db := pg.Connect(&pg.Options{
-		Addr:     opts.Host + ":" + opts.Port,
-		User:     opts.User,
-		Password: opts.Password,
-		Database: opts.Database,
+		Addr:     config.Host + ":" + strconv.Itoa(config.Port),
+		User:     config.User,
+		Password: config.Password,
+		Database: config.Database,
 	})
 
 	log = log.WithPrefix("[database]")
@@ -54,7 +49,7 @@ func NewDB(opts NewDBOptions, log *clog.Logger) (*DB, error) {
 		}
 		log.Debug("couldn't ping DB")
 		if i+1 == connectRetries {
-			return nil, ErrDataBaseIsDown
+			return nil, errors.New("database is down")
 		}
 
 		time.Sleep(connectRetryTimeout)

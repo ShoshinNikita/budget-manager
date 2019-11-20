@@ -9,7 +9,7 @@ import (
 
 const (
 	dbHost     = "localhost"
-	dbPort     = "5432"
+	dbPort     = 5432
 	dbUser     = "postgres"
 	dbPassword = ""
 	dbDatabase = "postgres"
@@ -18,15 +18,15 @@ const (
 const monthID = 1
 
 func initDB(require *require.Assertions) *DB {
-	opts := NewDBOptions{
+	log := clog.NewProdConfig().SetLevel(clog.LevelWarn).Build()
+
+	config := Config{
 		Host:     dbHost,
 		Port:     dbPort,
 		User:     dbUser,
 		Database: dbDatabase,
 	}
-
-	log := clog.NewProdConfig().SetLevel(clog.LevelWarn).Build()
-	db, err := NewDB(opts, log)
+	db, err := NewDB(config, log)
 	require.Nil(err)
 	err = db.DropDB()
 	require.Nil(err)

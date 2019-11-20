@@ -6,62 +6,36 @@ import (
 	"os/signal"
 	"syscall"
 
-	clog "github.com/ShoshinNikita/go-clog/v3"
 	"github.com/caarlos0/env/v6"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
+	"github.com/ShoshinNikita/budget_manager/internal/logger"
 	"github.com/ShoshinNikita/budget_manager/internal/web"
 )
 
-type config struct {
+type Config struct {
 	// Is debug mode on
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
-	Logger struct {
-		// Level is a level of logger. Valid options: debug, info, warn, error, fatal.
-		// It is always debug, when debug mode is on
-		Level string `env:"LOGGER_LEVEL" envDefault:"info"`
-	}
-
-	DB struct {
-		Host     string `env:"DB_HOST" envDefault:"localhost"`
-		Port     string `env:"DB_PORT" envDefault:"5432"`
-		User     string `env:"DB_USER" envDefault:"postgres"`
-		Password string `env:"DB_PASSWORD"`
-		Database string `env:"DB_DATABASE" envDefault:"postgres"`
-	}
-
-	Server struct {
-		Port string `env:"SERVER_PORT" envDefault:":8080"`
-	}
+	Logger logger.Config
+	DB     db.Config
+	Server web.Config
 }
 
 func main() {
 	// Parse config
-	var cnf config
-	if err := env.Parse(&cnf); err != nil {
+	cnf, err := parseConfig()
+	if err != nil {
 		log.Fatalf("can't parse config: %s", err)
 	}
 
-	// Setup logger. Use prod config by default
-	log := clog.NewProdConfig().SetLevel(logLevelFromString(cnf.Logger.Level)).Build()
-	if cnf.Debug {
-		log = clog.NewDevConfig().SetLevel(clog.LevelDebug).Build()
-	}
-
+	log := logger.New(cnf.Logger, cnf.Debug)
 	log.Info("start")
 
 	// Connect to the db
 	log.Info("connect to the db")
 
-	dbOpts := db.NewDBOptions{
-		Host:     cnf.DB.Host,
-		Port:     cnf.DB.Port,
-		User:     cnf.DB.User,
-		Password: cnf.DB.Password,
-		Database: cnf.DB.Database,
-	}
-	db, err := db.NewDB(dbOpts, log)
+	db, err := db.NewDB(cnf.DB, log)
 	if err != nil {
 		log.Fatalf("couldn't connect to the db: %s", err)
 	}
@@ -81,10 +55,7 @@ func main() {
 	// Create a new server instance
 	log.Info("create Server instance")
 
-	serverOpts := web.NewServerOptions{
-		Port: cnf.Server.Port,
-	}
-	server := web.NewServer(serverOpts, db, log)
+	server := web.NewServer(cnf.Server, db, log)
 	server.Prepare()
 
 	// Start server
@@ -128,19 +99,11 @@ func main() {
 	log.Info("stop")
 }
 
-func logLevelFromString(lvl string) clog.LogLevel {
-	switch lvl {
-	case "dbg", "debug":
-		return clog.LevelDebug
-	case "inf", "info":
-		return clog.LevelInfo
-	case "warn", "warning":
-		return clog.LevelWarn
-	case "err", "error":
-		return clog.LevelError
-	case "fatal":
-		return clog.LevelFatal
-	default:
-		return clog.LevelInfo
+func parseConfig() (*Config, error) {
+	cnf := &Config{}
+	if err := env.Parse(cnf); err != nil {
+		return nil, err
 	}
+
+	return cnf, nil
 }

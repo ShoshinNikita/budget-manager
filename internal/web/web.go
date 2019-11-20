@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/ShoshinNikita/go-clog/v3"
@@ -12,30 +13,24 @@ import (
 	"github.com/ShoshinNikita/budget_manager/internal/db"
 )
 
+type Config struct {
+	Port int `env:"SERVER_PORT" envDefault:"8080"`
+}
+
 type Server struct {
 	server *http.Server
 	db     *db.DB
 	log    *clog.Logger
 
-	config serverConfig
+	config Config
 }
 
-type serverConfig struct {
-	Port string
-}
-
-type NewServerOptions struct {
-	Port string
-}
-
-func NewServer(opts NewServerOptions, db *db.DB, log *clog.Logger) *Server {
+func NewServer(cnf Config, db *db.DB, log *clog.Logger) *Server {
 	//nolint:gosimple
 	return &Server{
-		db:  db,
-		log: log.WithPrefix("[server]"),
-		config: serverConfig{
-			Port: opts.Port,
-		},
+		db:     db,
+		log:    log.WithPrefix("[server]"),
+		config: cnf,
 	}
 }
 
@@ -52,7 +47,7 @@ func (s *Server) Prepare() {
 	router.PathPrefix("/static/").Handler(fileHandler)
 
 	s.server = &http.Server{
-		Addr:    s.config.Port,
+		Addr:    ":" + strconv.Itoa(s.config.Port),
 		Handler: router,
 	}
 }
