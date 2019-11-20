@@ -130,7 +130,7 @@ func TestHandlers_Income(t *testing.T) {
 				request := httptest.NewRequest("POST", "/api/incomes", body)
 
 				// Send Request
-				server.AddIncome(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -236,7 +236,7 @@ func TestHandlers_Income(t *testing.T) {
 				request := httptest.NewRequest("PUT", "/api/incomes", body)
 
 				// Send Request
-				server.EditIncome(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -305,7 +305,7 @@ func TestHandlers_Income(t *testing.T) {
 				request := httptest.NewRequest("DELETE", "/api/incomes", body)
 
 				// Send Request
-				server.RemoveIncome(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -427,7 +427,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				request := httptest.NewRequest("POST", "/api/monthly-payments", body)
 
 				// Send Request
-				server.AddMonthlyPayment(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -535,7 +535,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				request := httptest.NewRequest("PUT", "/api/monthly-payments", body)
 
 				// Send Request
-				server.EditMonthlyPayment(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -601,10 +601,10 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 
 				// Prepare request
 				body := encodeRequest(require, tt.req)
-				request := httptest.NewRequest("DELETE", "/api/monthly-payment", body)
+				request := httptest.NewRequest("DELETE", "/api/monthly-payments", body)
 
 				// Send Request
-				server.RemoveMonthlyPayment(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -726,7 +726,7 @@ func TestHandlers_Spend(t *testing.T) {
 				request := httptest.NewRequest("POST", "/api/spends", body)
 
 				// Send Request
-				server.AddSpend(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -848,7 +848,7 @@ func TestHandlers_Spend(t *testing.T) {
 				request := httptest.NewRequest("PUT", "/api/spends", body)
 
 				// Send Request
-				server.EditSpend(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -917,7 +917,7 @@ func TestHandlers_Spend(t *testing.T) {
 				request := httptest.NewRequest("DELETE", "/api/spends", body)
 
 				// Send Request
-				server.RemoveSpend(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -1002,7 +1002,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				request := httptest.NewRequest("POST", "/api/spend-types", body)
 
 				// Send Request
-				server.AddSpendType(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -1048,7 +1048,7 @@ func TestHandlers_SpendType(t *testing.T) {
 		request := httptest.NewRequest("GET", "/api/spend-types", nil)
 
 		// Send Request
-		server.GetSpendTypes(w, request)
+		server.server.Handler.ServeHTTP(w, request)
 
 		// Check Response
 		response := w.Result()
@@ -1110,7 +1110,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				request := httptest.NewRequest("PUT", "/api/spend-types", body)
 
 				// Send Request
-				server.EditSpendType(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -1144,7 +1144,7 @@ func TestHandlers_SpendType(t *testing.T) {
 		request := httptest.NewRequest("GET", "/api/spend-types", nil)
 
 		// Send Request
-		server.GetSpendTypes(w, request)
+		server.server.Handler.ServeHTTP(w, request)
 
 		// Check Response
 		response := w.Result()
@@ -1214,7 +1214,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				request := httptest.NewRequest("DELETE", "/api/spend-types", body)
 
 				// Send Request
-				server.RemoveSpendType(w, request)
+				server.server.Handler.ServeHTTP(w, request)
 
 				// Check Response
 				response := w.Result()
@@ -1244,7 +1244,7 @@ func TestHandlers_SpendType(t *testing.T) {
 		request := httptest.NewRequest("GET", "/api/spend-types", nil)
 
 		// Send Request
-		server.GetSpendTypes(w, request)
+		server.server.Handler.ServeHTTP(w, request)
 
 		// Check Response
 		response := w.Result()
@@ -1301,6 +1301,7 @@ func initServer(require *require.Assertions) *Server {
 	// Server
 	config := Config{Port: 8080}
 	server := NewServer(config, db, log)
+	server.Prepare()
 
 	return server
 }
