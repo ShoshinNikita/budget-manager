@@ -42,8 +42,14 @@ func NewServer(opts NewServerOptions, db *db.DB, log *clog.Logger) *Server {
 func (s *Server) Prepare() {
 	router := mux.NewRouter()
 
+	// Add API routes
 	s.log.Debug("add routes")
 	s.addRoutes(router)
+
+	// Add File Handler
+	fileHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
+	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30) // cache for 1 month
+	router.PathPrefix("/static/").Handler(fileHandler)
 
 	s.server = &http.Server{
 		Addr:    s.config.Port,
