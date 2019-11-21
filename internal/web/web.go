@@ -29,7 +29,7 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger) *Server {
 	//nolint:gosimple
 	return &Server{
 		db:     db,
-		log:    log.WithPrefix("[server]"),
+		log:    log,
 		config: cnf,
 	}
 }

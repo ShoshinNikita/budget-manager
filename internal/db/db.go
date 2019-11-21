@@ -39,8 +39,6 @@ func NewDB(config Config, log *clog.Logger) (*DB, error) {
 		Database: config.Database,
 	})
 
-	log = log.WithPrefix("[database]")
-
 	// Try to ping the DB
 	for i := 0; i < connectRetries; i++ {
 		log.Debugf("ping DB, try #%d", i+1)

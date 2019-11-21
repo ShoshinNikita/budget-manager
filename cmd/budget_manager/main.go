@@ -35,7 +35,7 @@ func main() {
 	// Connect to the db
 	log.Info("connect to the db")
 
-	db, err := db.NewDB(cnf.DB, log)
+	db, err := db.NewDB(cnf.DB, log.WithPrefix("[database]"))
 	if err != nil {
 		log.Fatalf("couldn't connect to the db: %s", err)
 	}
@@ -55,7 +55,7 @@ func main() {
 	// Create a new server instance
 	log.Info("create Server instance")
 
-	server := web.NewServer(cnf.Server, db, log)
+	server := web.NewServer(cnf.Server, db, log.WithPrefix("[server]"))
 	server.Prepare()
 
 	// Start server
