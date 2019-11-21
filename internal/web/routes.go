@@ -15,10 +15,11 @@ type route struct {
 func (s Server) addRoutes(router *mux.Router) {
 	routes := []route{
 		// Pages
-		{methods: "GET", path: "/years", handler: http.HandlerFunc(notImplementedYet)},
-		{methods: "GET", path: "/years/{year}", handler: http.HandlerFunc(notImplementedYet)},
-		{methods: "GET", path: "/years/{year}/months", handler: http.HandlerFunc(notImplementedYet)},
-		{methods: "GET", path: "/years/{year}/months/{month}", handler: http.HandlerFunc(notImplementedYet)},
+		{methods: "GET", path: "/", handler: http.HandlerFunc(s.indexPage)},
+		{methods: "GET", path: "/years", handler: http.HandlerFunc(s.yearsPage)},
+		{methods: "GET", path: "/years/{year}", handler: http.HandlerFunc(s.yearPage)},
+		{methods: "GET", path: "/years/{year}/months", handler: http.HandlerFunc(s.monthsPage)},
+		{methods: "GET", path: "/years/{year}/months/{month}", handler: http.HandlerFunc(s.monthPage)},
 
 		// API
 		{methods: "GET", path: "/api/months", handler: http.HandlerFunc(s.GetMonth)},

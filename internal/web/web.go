@@ -11,26 +11,39 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
+	"github.com/ShoshinNikita/budget_manager/internal/web/templates"
 )
 
 type Config struct {
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
+
+	// CacheTemplates defines whether templates have to be loaded from disk every request.
+	// It is useful during development. So, it is always false when Debug mode is on
+	CacheTemplates bool `env:"SERVER_CACHE_TEMPLATES" envDefault:"true"`
 }
 
 type Server struct {
+	log      *clog.Logger
+	db       *db.DB
+	tplStore *templates.TemplateStore
+
 	server *http.Server
-	db     *db.DB
-	log    *clog.Logger
 
 	config Config
 }
 
-func NewServer(cnf Config, db *db.DB, log *clog.Logger) *Server {
+func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
+	if debug {
+		// Load templates every request
+		cnf.CacheTemplates = false
+	}
+
 	//nolint:gosimple
 	return &Server{
-		db:     db,
-		log:    log,
-		config: cnf,
+		db:       db,
+		log:      log,
+		tplStore: templates.NewTemplateStore(log.WithPrefix("[template store]"), cnf.CacheTemplates),
+		config:   cnf,
 	}
 }
 

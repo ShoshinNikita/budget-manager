@@ -55,7 +55,7 @@ func main() {
 	// Create a new server instance
 	log.Info("create Server instance")
 
-	server := web.NewServer(cnf.Server, db, log.WithPrefix("[server]"))
+	server := web.NewServer(cnf.Server, db, log.WithPrefix("[server]"), cnf.Debug)
 	server.Prepare()
 
 	// Start server
