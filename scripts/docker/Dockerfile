@@ -21,7 +21,10 @@ FROM alpine:3.9
 
 WORKDIR /srv
 
+# Copy binaries
 COPY --from=builder /go/src/github.com/ShoshinNikita/budget_manager/bin .
+# Copy 'templates' directory
+COPY templates ./templates
 
 EXPOSE 8080
 
