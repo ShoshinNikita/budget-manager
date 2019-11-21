@@ -43,7 +43,8 @@ func TestConfig(t *testing.T) {
 			Database: "db",
 		},
 		Server: web.Config{
-			Port: 6666,
+			CacheTemplates: true,
+			Port:           6666,
 		},
 	}
 

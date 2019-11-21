@@ -1300,7 +1300,7 @@ func initServer(require *require.Assertions) *Server {
 
 	// Server
 	config := Config{Port: 8080}
-	server := NewServer(config, db, log)
+	server := NewServer(config, db, log, true)
 	server.Prepare()
 
 	return server
