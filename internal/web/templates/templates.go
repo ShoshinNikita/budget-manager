@@ -98,6 +98,6 @@ const nameLength = 8
 
 func generateTemplateName() string {
 	b := make([]byte, nameLength/2)
-	rand.Read(b)
+	rand.Read(b) //nolint:errcheck
 	return hex.EncodeToString(b)
 }

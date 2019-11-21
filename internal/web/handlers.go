@@ -735,6 +735,7 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 // Other
 // -------------------------------------------------
 
+//nolint:unused,deadcode,errcheck
 func notImplementedYet(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("not implemented yet")) //nolint:errcheck
+	w.Write([]byte("not implemented yet"))
 }
