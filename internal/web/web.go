@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
+	"github.com/ShoshinNikita/budget_manager/internal/web/templates"
 )
 
 type Config struct {
@@ -22,9 +23,11 @@ type Config struct {
 }
 
 type Server struct {
+	log      *clog.Logger
+	db       *db.DB
+	tplStore *templates.TemplateStore
+
 	server *http.Server
-	db     *db.DB
-	log    *clog.Logger
 
 	config Config
 }
@@ -37,9 +40,10 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
 
 	//nolint:gosimple
 	return &Server{
-		db:     db,
-		log:    log,
-		config: cnf,
+		db:       db,
+		log:      log,
+		tplStore: templates.NewTemplateStore(log.WithPrefix("[template store]"), cnf.CacheTemplates),
+		config:   cnf,
 	}
 }
 
