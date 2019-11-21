@@ -23,6 +23,8 @@ WORKDIR /srv
 
 # Copy binaries
 COPY --from=builder /go/src/github.com/ShoshinNikita/budget_manager/bin .
+# Copy 'static' directory
+COPY static ./static
 # Copy 'templates' directory
 COPY templates ./templates
 
