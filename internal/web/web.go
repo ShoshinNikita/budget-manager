@@ -98,6 +98,14 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
 func (s *Server) Prepare() {
 	router := mux.NewRouter()
 
+	// Add middlewares
+
+	if !s.config.SkipAuth {
+		router.Use(s.basicAuthMiddleware)
+	} else {
+		s.log.Warn("auth is disabled")
+	}
+
 	// Add API routes
 	s.log.Debug("add routes")
 	s.addRoutes(router)
