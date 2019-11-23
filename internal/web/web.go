@@ -27,6 +27,8 @@ type Config struct {
 	// It is useful during development. So, it is always false when Debug mode is on
 	CacheTemplates bool `env:"SERVER_CACHE_TEMPLATES" envDefault:"true"`
 
+	// SkipAuth disables auth. Works only in Debug mode!
+	SkipAuth bool `env:"SERVER_SKIP_AUTH"`
 	// Credentials is a list of pairs 'login:password' separated by comma.
 	// Example: "login:password,user:qwerty"
 	Credentials Credentials `env:"SERVER_CREDENTIALS"`
@@ -79,6 +81,9 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
 	if debug {
 		// Load templates every request
 		cnf.CacheTemplates = false
+	} else {
+		// Always false when Debug mode is off
+		cnf.SkipAuth = false
 	}
 
 	//nolint:gosimple
