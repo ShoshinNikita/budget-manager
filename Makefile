@@ -5,13 +5,15 @@ DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 run: run-docker
 
 run-docker: clear
-	docker-compose -f ${DOCKER_COMPOSE} up --build
+	docker-compose -f ${DOCKER_COMPOSE} up \
+		--build \
+		--force-recreate \
+		--renew-anon-volumes \
+		--exit-code-from budget_manager
 
 run-local: clear
 	# Run Postgres
 	./scripts/local/postgres.sh
-	echo "Wait fot DB..."
-	sleep 5
 	# Run Budget Manager
 	./scripts/local/run.sh
 
