@@ -4,6 +4,7 @@ package web
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -1262,6 +1263,86 @@ func TestHandlers_SpendType(t *testing.T) {
 }
 
 // -------------------------------------------------
+// Middlewares
+// -------------------------------------------------
+
+func TestMiddlewares_Auth(t *testing.T) {
+	globalRequire := require.New(t)
+
+	// Init custom server
+
+	// Logger
+	log := clog.NewDevLogger()
+
+	// DB
+	dbConfig := db.Config{Host: dbHost, Port: dbPort, User: dbUser, Database: dbDatabase}
+	db, err := db.NewDB(dbConfig, log)
+	globalRequire.Nil(err)
+	err = db.DropDB()
+	globalRequire.Nil(err)
+	err = db.Prepare()
+	globalRequire.Nil(err)
+
+	// Server
+	config := Config{
+		Port:     8080,
+		SkipAuth: false,
+		Credentials: Credentials{
+			// user:qwerty
+			"user": "$apr1$AlLoM14i$KvDlySdft5ag86nvn6PKI0",
+		},
+	}
+	server := NewServer(config, db, log, true)
+	server.Prepare()
+
+	// Run tests
+
+	tests := []struct {
+		desc            string
+		authHeaderValue string
+		wantCode        int
+	}{
+		{
+			desc:     "unauthorized (no auth)",
+			wantCode: http.StatusUnauthorized,
+		},
+		{
+			desc:            "unauthorized (invalid login)",
+			authHeaderValue: "Basic " + base64.URLEncoding.EncodeToString([]byte("admin:qwerty")),
+			wantCode:        http.StatusUnauthorized,
+		},
+		{
+			desc:            "unauthorized (invalid password)",
+			authHeaderValue: "Basic " + base64.URLEncoding.EncodeToString([]byte("user:user")),
+			wantCode:        http.StatusUnauthorized,
+		},
+		{
+			desc:            "authorized",
+			authHeaderValue: "Basic " + base64.URLEncoding.EncodeToString([]byte("user:qwerty")),
+			wantCode:        http.StatusOK,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.desc, func(t *testing.T) {
+			require := require.New(t)
+
+			w := httptest.NewRecorder()
+			request := httptest.NewRequest("GET", "/api/spend-types", nil)
+
+			if tt.authHeaderValue != "" {
+				request.Header.Set("Authorization", tt.authHeaderValue)
+			}
+
+			server.server.Handler.ServeHTTP(w, request)
+
+			require.Equal(tt.wantCode, w.Result().StatusCode)
+		})
+	}
+}
+
+// -------------------------------------------------
 // Full process
 // -------------------------------------------------
 
@@ -1277,8 +1358,10 @@ func TestHandlers_SpendType(t *testing.T) {
 //
 
 // -------------------------------------------------
-// Server
+// Helpers
 // -------------------------------------------------
+
+// Server
 
 func initServer(require *require.Assertions) *Server {
 	// Logger
@@ -1299,7 +1382,7 @@ func initServer(require *require.Assertions) *Server {
 	require.Nil(err)
 
 	// Server
-	config := Config{Port: 8080}
+	config := Config{Port: 8080, SkipAuth: true}
 	server := NewServer(config, db, log, true)
 	server.Prepare()
 
@@ -1318,9 +1401,7 @@ func cleanUp(require *require.Assertions, server *Server) {
 	// require.Nil(err)
 }
 
-// -------------------------------------------------
 // Decoding and Encoding
-// -------------------------------------------------
 
 func encodeRequest(require *require.Assertions, req interface{}) io.Reader {
 	buff := bytes.NewBuffer(nil)
