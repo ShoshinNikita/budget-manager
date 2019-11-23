@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/ShoshinNikita/go-clog/v3 v3.2.0
+	github.com/abbot/go-http-auth v0.4.0
 	github.com/caarlos0/env/v6 v6.1.0
 	github.com/go-pg/pg/v9 v9.0.0-beta.15
 	github.com/gorilla/mux v1.7.3

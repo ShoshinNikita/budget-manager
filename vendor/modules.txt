@@ -1,5 +1,7 @@
 # github.com/ShoshinNikita/go-clog/v3 v3.2.0
 github.com/ShoshinNikita/go-clog/v3
+# github.com/abbot/go-http-auth v0.4.0
+github.com/abbot/go-http-auth
 # github.com/caarlos0/env/v6 v6.1.0
 github.com/caarlos0/env/v6
 # github.com/davecgh/go-spew v1.1.0
@@ -40,7 +42,11 @@ github.com/vmihailenco/tagparser
 github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
 # golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
+# golang.org/x/net v0.0.0-20190420063019-afa5a82059c6
+golang.org/x/net/context
 # golang.org/x/sys v0.0.0-20191018095205-727590c5006e
 golang.org/x/sys/unix
 # gopkg.in/yaml.v2 v2.2.2
