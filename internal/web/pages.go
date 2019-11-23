@@ -28,7 +28,7 @@ func (s Server) yearsPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /years/{year}
+// GET /years/{year:[0-9]+}
 //
 func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	if err := s.tplStore.Execute(yearTemplatePath, w, nil); err != nil {
@@ -36,7 +36,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /years/{year}/months
+// GET /years/{year:[0-9]+}/months
 //
 func (s Server) monthsPage(w http.ResponseWriter, r *http.Request) {
 	if err := s.tplStore.Execute(monthsTemplatePath, w, nil); err != nil {
@@ -44,7 +44,7 @@ func (s Server) monthsPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /years/{year}/months/{month}
+// GET /years/{year:[0-9]+}/months/{month:[0-9]+}
 //
 func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	if err := s.tplStore.Execute(monthTemplatePath, w, nil); err != nil {
