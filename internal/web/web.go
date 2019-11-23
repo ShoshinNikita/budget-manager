@@ -49,11 +49,10 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 		}
 
 		login := split[0]
-		if login == "" {
-			return errors.New("login can't be empty")
-		}
-		// Password can be empty
 		password := split[1]
+		if login == "" || password == "" {
+			return errors.New("login and password can't be empty")
+		}
 
 		m[login] = password
 	}
