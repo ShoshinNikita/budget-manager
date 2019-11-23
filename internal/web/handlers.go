@@ -72,7 +72,7 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 		case db.IsBadRequestError(err):
 			s.processError(w, "Month with passed id doesn't exist", http.StatusBadRequest, err)
 		default:
-			s.processError(w, "can't add select Month", http.StatusInternalServerError, err)
+			s.processError(w, "can't select Month", http.StatusInternalServerError, err)
 		}
 		return
 	}

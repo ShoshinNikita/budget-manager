@@ -4,14 +4,131 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Budget Manager</title>
+	<title>{{.Month}} {{.Year}} | Budget Manager</title>
 
 	<link type="text/css" rel="stylesheet" href="/static/materialize/css/materialize.min.css"
 		media="screen,projection" />
+
+	<style>
+		/* Common */
+
+		body {
+			height: 100vh;
+			padding: 30px;
+			padding-bottom: 40px;
+		}
+
+		/* Body */
+
+		#body {
+			border: 1px solid #88888830;
+			border-radius: 5px;
+			display: flex;
+			height: 100%;
+			flex-direction: column;
+			margin: auto;
+			max-width: 1400px;
+			padding: 10px;
+		}
+
+		/* Path */
+
+		div#path {
+			border-bottom: 1px solid #00000020;
+			font-size: 25px;
+			margin: 0 auto 15px;
+			padding: 3px;
+			width: 100%;
+		}
+
+		div#path>span.path__element>a:hover {
+			text-decoration: underline;
+		}
+
+		div#path>span.path__element>a:link,
+		a:visited {
+			color: #039be5;
+		}
+
+		/* Detailed info: Incomes, Monthly Payments and Incomes */
+
+		div#detailed-info {
+			column-gap: 10px;
+			display: grid;
+			height: 100%;
+			row-gap: 10px;
+		}
+
+		/* Layout for small screens (< 992px) */
+		@media (max-width: 991px) {
+			div#detailed-info {
+				/* Use 'auto' for correct width */
+				grid-template-columns: 100%;
+				grid-template-rows: 20% 20% auto;
+				grid-template-areas:
+					"incomes"
+					"monthly-payments"
+					"days";
+			}
+		}
+
+		/* Layout for large screens (>= 992px) */
+		@media (min-width: 992px) {
+			div#detailed-info {
+				/* Use 'auto' for correct width */
+				grid-template-columns: 30% auto;
+				grid-template-rows: 50% auto;
+				grid-template-areas:
+					"incomes days"
+					"monthly-payments days";
+			}
+		}
+
+		div#detailed-info>.detailed-info__block {
+			border: 1px solid #88888820;
+			border-radius: 3px;
+			height: 100%;
+			padding: 3px;
+		}
+
+		div#detailed-info div#incomes {
+			grid-area: incomes;
+		}
+
+		div#detailed-info div#monthly-payments {
+			grid-area: monthly-payments;
+		}
+
+		div#detailed-info div#days {
+			grid-area: days;
+		}
+	</style>
 </head>
 
 <body>
-	<h1>TODO (month)</h1>
+	<div id="body">
+		<!-- Path like "Years / 2019 / Months / November" -->
+		<div id="path">
+			<span class="path__element"> <a href="/years">Years</a> </span>
+			<span class="path__element"> / </span>
+			<span class="path__element"> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
+			<span class="path__element"> / </span>
+			<span class="path__element"> <a href="/years/{{.Year}}/months">Months</a> </span>
+			<span class="path__element"> / </span>
+			<span class="path__element"> {{.Month}} </span>
+		</div>
+
+		<div id="detailed-info">
+			<!-- Incomes -->
+			<div id="incomes" class="detailed-info__block">TODO: Incomes</div>
+
+			<!-- Monthly Payments -->
+			<div id="monthly-payments" class="detailed-info__block">TODO: Monthly Payments</div>
+
+			<!-- Days -->
+			<div id="days" class="detailed-info__block">TODO: Days</div>
+		</div>
+	</div>
 
 	<script type="text/javascript" src="/static/materialize/js/materialize.min.js"></script>
 </body>

@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+
+	"github.com/ShoshinNikita/budget_manager/internal/db"
 )
 
 const (
@@ -79,16 +81,36 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 		s.processError(w, "invalid year was passed", http.StatusBadRequest, nil)
 		return
 	}
-	month, ok := getMonth(r)
+	monthNumber, ok := getMonth(r)
 	if !ok {
 		// TODO: use special 404 page
 		s.processError(w, "invalid month was passed", http.StatusBadRequest, nil)
 		return
 	}
 
-	s.log.Debug(year, month)
+	monthID, err := s.db.GetMonthID(year, int(monthNumber))
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			// TODO: use special 404 page
+			s.processError(w, "such Month doesn't exist", http.StatusBadRequest, err)
+		default:
+			// TODO: use special 500 page
+			s.processError(w, "can't select Month with passed data", http.StatusInternalServerError, err)
+		}
+		return
+	}
 
-	if err := s.tplStore.Execute(monthTemplatePath, w, nil); err != nil {
+	// Process
+	month, err := s.db.GetMonth(monthID)
+	if err != nil {
+		// Skip db.IsBadRequestError check
+
+		s.processError(w, "can't select Month info", http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := s.tplStore.Execute(monthTemplatePath, w, month); err != nil {
 		// TODO: use special 500 page
 		s.processError(w, "can't load template", http.StatusInternalServerError, err)
 	}
