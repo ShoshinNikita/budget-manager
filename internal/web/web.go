@@ -2,8 +2,10 @@ package web
 
 import (
 	"context"
+	"encoding"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ShoshinNikita/go-clog/v3"
@@ -14,13 +16,55 @@ import (
 	"github.com/ShoshinNikita/budget_manager/internal/web/templates"
 )
 
+// -------------------------------------------------
+// Config
+// -------------------------------------------------
+
 type Config struct {
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
 
 	// CacheTemplates defines whether templates have to be loaded from disk every request.
 	// It is useful during development. So, it is always false when Debug mode is on
 	CacheTemplates bool `env:"SERVER_CACHE_TEMPLATES" envDefault:"true"`
+
+	// SkipAuth disables auth. Works only in Debug mode!
+	SkipAuth bool `env:"SERVER_SKIP_AUTH"`
+	// Credentials is a list of pairs 'login:password' separated by comma.
+	// Example: "login:password,user:qwerty"
+	Credentials Credentials `env:"SERVER_CREDENTIALS"`
 }
+
+var _ encoding.TextUnmarshaler = &Credentials{}
+
+type Credentials map[string]string
+
+func (c *Credentials) UnmarshalText(text []byte) error {
+	m := make(Credentials)
+
+	pairs := strings.Split(string(text), ",")
+	for _, pair := range pairs {
+		split := strings.Split(pair, ":")
+		if len(split) != 2 {
+			return errors.New("invalid credential pair")
+		}
+
+		login := split[0]
+		password := split[1]
+		if login == "" || password == "" {
+			return errors.New("login and password can't be empty")
+		}
+
+		m[login] = password
+	}
+
+	*c = m
+
+	return nil
+}
+
+// -------------------------------------------------
+// Server
+// -------------------------------------------------
 
 type Server struct {
 	log      *clog.Logger
@@ -36,6 +80,9 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
 	if debug {
 		// Load templates every request
 		cnf.CacheTemplates = false
+	} else {
+		// Always false when Debug mode is off
+		cnf.SkipAuth = false
 	}
 
 	//nolint:gosimple
@@ -49,6 +96,14 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
 
 func (s *Server) Prepare() {
 	router := mux.NewRouter()
+
+	// Add middlewares
+
+	if !s.config.SkipAuth {
+		router.Use(s.basicAuthMiddleware)
+	} else {
+		s.log.Warn("auth is disabled")
+	}
 
 	// Add API routes
 	s.log.Debug("add routes")

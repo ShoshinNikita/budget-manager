@@ -24,6 +24,7 @@ func TestConfig(t *testing.T) {
 		{"DB_PASSWORD", "qwerty"},
 		{"DB_DATABASE", "db"},
 		{"SERVER_PORT", "6666"},
+		{"SERVER_CREDENTIALS", "user:qwerty,admin:admin"},
 	}
 	for _, env := range envs {
 		os.Setenv(env.key, env.value)
@@ -43,8 +44,12 @@ func TestConfig(t *testing.T) {
 			Database: "db",
 		},
 		Server: web.Config{
-			CacheTemplates: true,
 			Port:           6666,
+			CacheTemplates: true,
+			Credentials: web.Credentials{
+				"user":  "qwerty",
+				"admin": "admin",
+			},
 		},
 	}
 

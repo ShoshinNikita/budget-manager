@@ -1,5 +1,7 @@
 github.com/ShoshinNikita/go-clog/v3 v3.2.0 h1:1l97+y7gCVzsHivOFD0XW7csMjAlIflCA6+xE5cnSEw=
 github.com/ShoshinNikita/go-clog/v3 v3.2.0/go.mod h1:ngzYudhgOpGcUhWMHVPi9U6RW38iNpIHFtx11b8gvkI=
+github.com/abbot/go-http-auth v0.4.0 h1:QjmvZ5gSC7jm3Zg54DqWE/T5m1t2AfDu6QlXJT0EVT0=
+github.com/abbot/go-http-auth v0.4.0/go.mod h1:Cz6ARTIzApMJDzh5bRMSUou6UMSp0IEXg9km/ci7TJM=
 github.com/caarlos0/env/v6 v6.1.0 h1:4FbM+HmZA/Q5wdSrH2kj0KQXm7xnhuO8y3TuOTnOvqc=
 github.com/caarlos0/env/v6 v6.1.0/go.mod h1:iUA6X3VCAOwDhoqvgKlTGjjwJzQseIJaFYApUqQkt+8=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
