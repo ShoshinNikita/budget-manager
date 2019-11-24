@@ -7,6 +7,9 @@ import (
 )
 
 var (
+	// For text/templates and html/templates
+	_ fmt.Formatter = (*Money)(nil)
+	// For json
 	_ json.Marshaler   = (*Money)(nil)
 	_ json.Unmarshaler = (*Money)(nil)
 )
@@ -100,14 +103,8 @@ func (m Money) Divide(n int64) Money {
 // -------------------------------------------------
 
 func (m Money) MarshalJSON() ([]byte, error) {
-	var str string
-	if m%precision == 0 {
-		// We can skip ".00" because we won't lose any significant digits
-		str = strconv.FormatInt(m.ToInt(), 10)
-	} else {
-		str = fmt.Sprintf("%.2f", m.ToFloat())
-	}
-	return []byte(str), nil
+	// Always format with 2 digits after decimal point (123.45, 123.00 and etc.)
+	return []byte(fmt.Sprintf("%.2f", m.ToFloat())), nil
 }
 
 func (m *Money) UnmarshalJSON(data []byte) error {
@@ -117,4 +114,11 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 	}
 	*m = FromFloat(f)
 	return nil
+}
+
+// Format implements 'fmt.Formatter' interface
+func (m Money) Format(f fmt.State, c rune) {
+	// Money.MarshalJSON always returns nil error
+	data, _ := m.MarshalJSON()
+	f.Write(data)
 }

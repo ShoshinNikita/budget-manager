@@ -2,6 +2,7 @@ package money_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -247,7 +248,7 @@ func TestJSON(t *testing.T) {
 				input: testStruct{
 					Money: FromInt(357),
 				},
-				want: `{"money":357}`,
+				want: `{"money":357.00}`,
 			},
 			{
 				input: testStruct{
@@ -323,4 +324,50 @@ func TestJSON(t *testing.T) {
 			require.Equal(tt.want, res)
 		}
 	})
+}
+
+func TestFormat(t *testing.T) {
+	require := require.New(t)
+
+	tests := []struct {
+		input Money
+		want  string
+	}{
+		{
+			input: FromInt(357),
+			want:  "357.00",
+		},
+		{
+			input: FromFloat(154.30),
+			want:  "154.30",
+		},
+		{
+			input: FromFloat(0.07),
+			want:  "0.07",
+		},
+		{
+			input: FromFloat(15.073),
+			want:  "15.07",
+		},
+		{
+			input: FromFloat(15.078),
+			want:  "15.07",
+		},
+	}
+
+	for _, tt := range tests {
+		var s string
+
+		s = fmt.Sprint(tt.input)
+		require.Equal(tt.want, s)
+
+		s = fmt.Sprintf("%s", tt.input)
+		require.Equal(tt.want, s)
+
+		s = fmt.Sprintf("%v", tt.input)
+		require.Equal(tt.want, s)
+
+		s = fmt.Sprintf("%+v", tt.input)
+		require.Equal(tt.want, s)
+	}
 }
