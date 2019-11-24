@@ -7,13 +7,14 @@
 	<title>{{.Month}} {{.Year}} | Budget Manager</title>
 
 	<style>
-		/* Common */
+		/* | Common */
+
 		* {
 			box-sizing: border-box;
 		}
 
 		body {
-			color: rgba(0, 0, 0, 0.87);
+			color: #000000dd;
 			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 			font-weight: normal;
 			height: 100vh;
@@ -22,24 +23,41 @@
 			padding-bottom: 40px;
 		}
 
-		/* Body */
+		a:link,
+		a:visited {
+			text-decoration: none;
+			color: #039be5;
+		}
 
-		#body {
+		a:hover {
+			text-decoration: underline;
+		}
+
+
+
+		.money::after {
+			color: black;
+			content: "⛁";
+			margin-left: 3px;
+		}
+
+		/* | App */
+
+		#app {
 			border: 1px solid #88888830;
 			border-radius: 5px;
 			display: grid;
 			grid-template-rows: minmax(min-content, max-content) auto;
 			row-gap: 15px;
-			margin: auto;
-			margin-bottom: 30px;
+			margin: 0 auto 30px;
 			max-width: 1400px;
 			min-height: 100%;
 			padding: 10px;
 		}
 
-		/* Header */
+		/* | Header */
 
-		div#header {
+		#header {
 			border-bottom: 1px solid #00000020;
 			box-sizing: content-box;
 			display: grid;
@@ -50,57 +68,69 @@
 			width: 100%;
 		}
 
-		/* Layout for small screens (< 1050px) */
-		@media (max-width: 1049px) {
-			div#header {
-				/* Use 'auto' for correct width */
-				grid-template-columns: 100%;
-				grid-template-rows: repeat(2, minmax(min-content, max-content));
-				height: auto;
-			}
-		}
-
-		/* Layout for large screens (>= 1050px) */
-		@media (min-width: 1050px) {
-			div#header {
-				/* Use 'auto' for correct width */
-				grid-template-columns: 325px auto;
-			}
-		}
-
-		/* Path */
-
-		div#header>div#path {
+		#header__path,
+		#header__stats {
 			font-size: 20px;
 		}
 
-		div#header>div#path>span.path__element>a:link,
-		a:visited {
-			text-decoration: none;
-			color: #039be5;
+		.header__stats--gain {
+			color: green;
 		}
 
-		div#header>div#path>span.path__element>a:hover {
-			text-decoration: underline;
+		.header__stats--lose {
+			color: crimson;
 		}
 
-		div#header>div#stats {
-			font-size: 20px;
+		.header__stats--gain,
+		.header__stats--lose {
+			margin-right: 10px;
 		}
 
-		/* Detailed info: Incomes, Monthly Payments and Incomes */
+		/* | Detailed info */
 
-		div#detailed-info {
+		#detailed-info {
 			column-gap: 10px;
 			display: grid;
 			height: 100%;
 			row-gap: 10px;
 		}
 
-		/* Layout for small screens (< 1050px) */
+		.detailed-info__block {
+			border: 1px solid #88888820;
+			border-radius: 3px;
+			height: 100%;
+			padding: 3px;
+		}
+
+		/* || Income */
+
+		#detailed-info__incomes {
+			grid-area: incomes;
+		}
+
+		/* || Monthly Payments */
+
+		#detailed-info__monthly-payments {
+			grid-area: monthly-payments;
+		}
+
+		/* || Days */
+
+		#detailed-info__days {
+			grid-area: days;
+		}
+
+		/* | Layouts */
+
+		/* For small screens (< 1050px) */
 		@media (max-width: 1049px) {
-			div#detailed-info {
-				/* Use 'auto' for correct width */
+			#header {
+				grid-template-columns: 100%;
+				grid-template-rows: repeat(2, minmax(min-content, max-content));
+				height: auto;
+			}
+
+			#detailed-info {
 				grid-template-columns: 100%;
 				grid-template-rows: 20% 20% auto;
 				grid-template-areas:
@@ -110,9 +140,13 @@
 			}
 		}
 
-		/* Layout for large screens (>= 1050px) */
+		/* For large screens (>= 1050px) */
 		@media (min-width: 1050px) {
-			div#detailed-info {
+			#header {
+				grid-template-columns: 325px auto;
+			}
+
+			#detailed-info {
 				/* Use 'auto' for correct width */
 				grid-template-columns: 30% auto;
 				grid-template-rows: 50% auto;
@@ -121,70 +155,50 @@
 					"monthly-payments days";
 			}
 		}
-
-		div#detailed-info>.detailed-info__block {
-			border: 1px solid #88888820;
-			border-radius: 3px;
-			height: 100%;
-			padding: 3px;
-		}
-
-		div#detailed-info div#incomes {
-			grid-area: incomes;
-		}
-
-		div#detailed-info div#monthly-payments {
-			grid-area: monthly-payments;
-		}
-
-		div#detailed-info div#days {
-			grid-area: days;
-		}
 	</style>
 </head>
 
 <body>
-	<div id="body">
+	<div id="app">
 		<div id="header">
 			<!-- Path like "Years / 2019 / Months / November" -->
-			<div id="path">
-				<span class="path__element"> <a href="/years">Years</a> </span>
-				<span class="path__element"> / </span>
-				<span class="path__element"> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
-				<span class="path__element"> / </span>
-				<span class="path__element"> <a href="/years/{{.Year}}/months">Months</a> </span>
-				<span class="path__element"> / </span>
-				<span class="path__element"> {{.Month}} </span>
+			<div id="header__path">
+				<span> <a href="/years">Years</a> </span>
+				<span> / </span>
+				<span> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
+				<span> / </span>
+				<span> <a href="/years/{{.Year}}/months">Months</a> </span>
+				<span> / </span>
+				<span> {{.Month}} </span>
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->
-			<div id="stats">
+			<div id="header__stats">
 				<span>Incomes:</span>
-				<span style="color: green;">{{.TotalIncome}}</span>
-				<span style="margin-right: 10px;">⛁</span>
+				<span class="header__stats--gain money">{{.TotalIncome}}</span>
 				<span>Spends:</span>
-				<span style="color: crimson;">{{.TotalSpend}}</span>
-				<span style="margin-right: 10px;">⛁</span>
+				<span class="header__stats--lose money">{{.TotalSpend}}</span>
 				<span>Result:</span>
 				<!-- .Result > 0 -->
 				{{if gt .Result 0}}
-				<span style="color: green;">{{.Result}}</span>
+				<span class="header__stats--gain money">{{.Result}}</span>
 				{{else}}
-				<span style="color: crimson;">{{.Result}}</span>
+				<span class="header__stats--lose money">{{.Result}}</span>
 				{{end}}
-				<span style="margin-right: 10px;">⛁</span>
 			</div>
 		</div>
 
 		<div id="detailed-info">
 			<!-- Incomes -->
-			<div id="incomes" class="detailed-info__block">TODO: Incomes</div>
+			<div id="detailed-info__incomes" class="detailed-info__block">TODO: Incomes</div>
 
 			<!-- Monthly Payments -->
-			<div id="monthly-payments" class="detailed-info__block">TODO: Monthly Payments</div>
+			<div id="detailed-info__monthly-payments" class="detailed-info__block">
+				TODO: Monthly Payments
+			</div>
 
 			<!-- Days -->
-			<div id="days" class="detailed-info__block">TODO: Days</div>
+			<div id="detailed-info__days" class="detailed-info__block">TODO: Days</div>
 		</div>
 	</div>
 </body>
