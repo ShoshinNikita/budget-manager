@@ -7,6 +7,9 @@ import (
 )
 
 var (
+	// For text/templates and html/templates
+	_ fmt.Formatter = (*Money)(nil)
+	// For json
 	_ json.Marshaler   = (*Money)(nil)
 	_ json.Unmarshaler = (*Money)(nil)
 )
@@ -111,4 +114,11 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 	}
 	*m = FromFloat(f)
 	return nil
+}
+
+// Format implements 'fmt.Formatter' interface
+func (m Money) Format(f fmt.State, c rune) {
+	// Money.MarshalJSON always returns nil error
+	data, _ := m.MarshalJSON()
+	f.Write(data)
 }
