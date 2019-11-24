@@ -100,14 +100,8 @@ func (m Money) Divide(n int64) Money {
 // -------------------------------------------------
 
 func (m Money) MarshalJSON() ([]byte, error) {
-	var str string
-	if m%precision == 0 {
-		// We can skip ".00" because we won't lose any significant digits
-		str = strconv.FormatInt(m.ToInt(), 10)
-	} else {
-		str = fmt.Sprintf("%.2f", m.ToFloat())
-	}
-	return []byte(str), nil
+	// Always format with 2 digits after decimal point (123.45, 123.00 and etc.)
+	return []byte(fmt.Sprintf("%.2f", m.ToFloat())), nil
 }
 
 func (m *Money) UnmarshalJSON(data []byte) error {

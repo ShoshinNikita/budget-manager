@@ -247,7 +247,7 @@ func TestJSON(t *testing.T) {
 				input: testStruct{
 					Money: FromInt(357),
 				},
-				want: `{"money":357}`,
+				want: `{"money":357.00}`,
 			},
 			{
 				input: testStruct{
