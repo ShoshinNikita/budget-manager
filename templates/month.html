@@ -27,32 +27,65 @@
 		#body {
 			border: 1px solid #88888830;
 			border-radius: 5px;
-			display: flex;
-			height: 100%;
-			flex-direction: column;
+			display: grid;
+			grid-template-rows: minmax(min-content, max-content) auto;
+			row-gap: 15px;
 			margin: auto;
+			margin-bottom: 30px;
 			max-width: 1400px;
+			min-height: 100%;
 			padding: 10px;
+		}
+
+		/* Header */
+
+		div#header {
+			border-bottom: 1px solid #00000020;
+			box-sizing: content-box;
+			display: grid;
+			column-gap: 20px;
+			height: 35px;
+			line-height: 35px;
+			padding-bottom: 5px;
+			width: 100%;
+		}
+
+		/* Layout for small screens (< 1050px) */
+		@media (max-width: 1049px) {
+			div#header {
+				/* Use 'auto' for correct width */
+				grid-template-columns: 100%;
+				grid-template-rows: repeat(2, minmax(min-content, max-content));
+				height: auto;
+			}
+		}
+
+		/* Layout for large screens (>= 1050px) */
+		@media (min-width: 1050px) {
+			div#header {
+				/* Use 'auto' for correct width */
+				grid-template-columns: 325px auto;
+			}
 		}
 
 		/* Path */
 
-		div#path {
-			border-bottom: 1px solid #00000020;
-			font-size: 25px;
-			margin: 0 auto 15px;
-			padding: 3px;
-			width: 100%;
+		div#header>div#path {
+			font-size: 20px;
 		}
 
-		div#path>span.path__element>a:link,
+		div#header>div#path>span.path__element>a:link,
 		a:visited {
 			text-decoration: none;
 			color: #039be5;
 		}
 
-		div#path>span.path__element>a:hover {
+		div#header>div#path>span.path__element>a:hover {
 			text-decoration: underline;
+		}
+
+		div#header>div#stats {
+			font-size: 20px;
 		}
 
 		/* Detailed info: Incomes, Monthly Payments and Incomes */
@@ -64,8 +97,8 @@
 			row-gap: 10px;
 		}
 
-		/* Layout for small screens (< 992px) */
-		@media (max-width: 991px) {
+		/* Layout for small screens (< 1050px) */
+		@media (max-width: 1049px) {
 			div#detailed-info {
 				/* Use 'auto' for correct width */
 				grid-template-columns: 100%;
@@ -77,8 +110,8 @@
 			}
 		}
 
-		/* Layout for large screens (>= 992px) */
-		@media (min-width: 992px) {
+		/* Layout for large screens (>= 1050px) */
+		@media (min-width: 1050px) {
 			div#detailed-info {
 				/* Use 'auto' for correct width */
 				grid-template-columns: 30% auto;
@@ -112,15 +145,35 @@
 
 <body>
 	<div id="body">
-		<!-- Path like "Years / 2019 / Months / November" -->
-		<div id="path">
-			<span class="path__element"> <a href="/years">Years</a> </span>
-			<span class="path__element"> / </span>
-			<span class="path__element"> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
-			<span class="path__element"> / </span>
-			<span class="path__element"> <a href="/years/{{.Year}}/months">Months</a> </span>
-			<span class="path__element"> / </span>
-			<span class="path__element"> {{.Month}} </span>
+		<div id="header">
+			<!-- Path like "Years / 2019 / Months / November" -->
+			<div id="path">
+				<span class="path__element"> <a href="/years">Years</a> </span>
+				<span class="path__element"> / </span>
+				<span class="path__element"> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
+				<span class="path__element"> / </span>
+				<span class="path__element"> <a href="/years/{{.Year}}/months">Months</a> </span>
+				<span class="path__element"> / </span>
+				<span class="path__element"> {{.Month}} </span>
+			</div>
+
+			<!-- Stats: Total Income and Spend, Result -->
+			<div id="stats">
+				<span>Incomes:</span>
+				<span style="color: green;">{{.TotalIncome}}</span>
+				<span style="margin-right: 10px;">⛁</span>
+				<span>Spends:</span>
+				<span style="color: crimson;">{{.TotalSpend}}</span>
+				<span style="margin-right: 10px;">⛁</span>
+				<span>Result:</span>
+				<!-- .Result > 0 -->
+				{{if gt .Result 0}}
+				<span style="color: green;">{{.Result}}</span>
+				{{else}}
+				<span style="color: crimson;">{{.Result}}</span>
+				{{end}}
+				<span style="margin-right: 10px;">⛁</span>
+			</div>
 		</div>
 
 		<div id="detailed-info">
