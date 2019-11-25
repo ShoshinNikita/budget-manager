@@ -33,12 +33,28 @@
 			text-decoration: underline;
 		}
 
-
-
 		.money::after {
 			color: black;
 			content: "⛁";
 			margin-left: 3px;
+		}
+
+		/* || Table */
+
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		table th,
+		td {
+			border-bottom: 1px solid #88888830;
+			padding: 5px;
+			text-align: left;
+		}
+
+		table tr:last-child td {
+			border-bottom: none;
 		}
 
 		/* | App */
@@ -46,13 +62,11 @@
 		#app {
 			border: 1px solid #88888830;
 			border-radius: 5px;
-			display: grid;
-			grid-template-rows: minmax(min-content, max-content) auto;
-			row-gap: 15px;
+			height: 100%;
 			margin: 0 auto 30px;
 			max-width: 1400px;
-			min-height: 100%;
 			padding: 10px;
+			width: 100%;
 		}
 
 		/* | Header */
@@ -62,15 +76,12 @@
 			box-sizing: content-box;
 			display: grid;
 			column-gap: 20px;
+			font-size: 20px;
 			height: 35px;
 			line-height: 35px;
+			margin-bottom: 10px;
 			padding-bottom: 5px;
 			width: 100%;
-		}
-
-		#header__path,
-		#header__stats {
-			font-size: 20px;
 		}
 
 		.header__stats--gain {
@@ -96,10 +107,29 @@
 		}
 
 		.detailed-info__block {
-			border: 1px solid #88888820;
+			border: 1px solid #88888810;
 			border-radius: 3px;
+			display: flex;
+			flex-direction: column;
+			overflow-x: auto;
 			height: 100%;
-			padding: 3px;
+		}
+
+		.detailed-info__block__header {
+			border-bottom: 1px solid #88888840;
+			font-size: 18px;
+			padding-bottom: 5px;
+			text-align: center;
+		}
+
+		.detailed-info__block__table {
+			height: 100%;
+			overflow-x: auto;
+		}
+
+		.detailed-info__block__no-data-msg {
+			font-size: 18px;
+			text-align: center;
 		}
 
 		/* || Income */
@@ -122,21 +152,36 @@
 
 		/* | Layouts */
 
-		/* For small screens (< 1050px) */
+		/* For medium screens (< 1050px) */
 		@media (max-width: 1049px) {
+			body {
+				padding: 15px;
+			}
+
+			#app {
+				margin: 0;
+			}
+
 			#header {
 				grid-template-columns: 100%;
 				grid-template-rows: repeat(2, minmax(min-content, max-content));
+				font-size: 16px;
 				height: auto;
+				line-height: 18px;
 			}
 
 			#detailed-info {
 				grid-template-columns: 100%;
-				grid-template-rows: 20% 20% auto;
+				grid-template-rows: 2fr 2fr 3fr;
 				grid-template-areas:
 					"incomes"
 					"monthly-payments"
 					"days";
+			}
+
+			.detailed-info__block__header {
+				font-size: 14px;
+				padding: 0;
 			}
 		}
 
@@ -147,9 +192,8 @@
 			}
 
 			#detailed-info {
-				/* Use 'auto' for correct width */
-				grid-template-columns: 30% auto;
-				grid-template-rows: 50% auto;
+				grid-template-columns: 3fr 7fr;
+				grid-template-rows: 1fr 1fr;
 				grid-template-areas:
 					"incomes days"
 					"monthly-payments days";
@@ -190,7 +234,33 @@
 
 		<div id="detailed-info">
 			<!-- Incomes -->
-			<div id="detailed-info__incomes" class="detailed-info__block">TODO: Incomes</div>
+			<div id="detailed-info__incomes" class="detailed-info__block">
+				{{if .Incomes}}
+				<div class="detailed-info__block__header">Incomes</div>
+				<!-- Incomes list -->
+				<div class="detailed-info__block__table">
+					<table>
+						<tr>
+							<th>Title</th>
+							<th>Notes</th>
+							<th class="money">Income,</th>
+						</tr>
+
+						{{range .Incomes}}
+						<tr>
+							<td>{{.Title}}</td>
+							<td>{{.Notes}}</td>
+							<td>{{.Income}}</td>
+						</tr>
+						{{end}}
+					</table>
+				</div>
+				{{else}}
+				<div class="detailed-info__block__no-data-msg">
+					<span>No Incomes :(</span>
+				</div>
+				{{end}}
+			</div>
 
 			<!-- Monthly Payments -->
 			<div id="detailed-info__monthly-payments" class="detailed-info__block">
@@ -201,6 +271,42 @@
 			<div id="detailed-info__days" class="detailed-info__block">TODO: Days</div>
 		</div>
 	</div>
+
+	<script>
+		function pxToNumber(px) {
+			if (px === "") {
+				return 0;
+			}
+
+			px = px.slice(0, -2)
+			return Number(px);
+		}
+
+		function setDetailedInfoHeight() {
+			// App
+			const app = document.getElementById("app");
+			const appHeight = app.clientHeight;
+			const appStyles = window.getComputedStyle(app, null);
+			const appPaddingTop = pxToNumber(appStyles.getPropertyValue("padding-top"));
+			const appPaddingBottom = pxToNumber(appStyles.getPropertyValue("padding-bottom"));
+
+			// Header
+			const header = document.getElementById("header");
+			const headerHeight = header.clientHeight;
+			const headerStyles = window.getComputedStyle(header, null);
+			const headerMarginBottom = pxToNumber(headerStyles.getPropertyValue("margin-bottom"));
+
+			// Compute height
+			const availableHeight = appHeight - (appPaddingTop + appPaddingBottom) - headerHeight - headerMarginBottom;
+
+			// Set height of #detailed-info
+			const detailedInfo = document.getElementById("detailed-info");
+			detailedInfo.style.height = String(availableHeight) + "px";
+		}
+
+		window.addEventListener("load", setDetailedInfoHeight);
+		window.addEventListener("resize", setDetailedInfoHeight);
+	</script>
 </body>
 
 </html>
