@@ -192,7 +192,7 @@
 			}
 
 			#detailed-info {
-				grid-template-columns: 3fr 7fr;
+				grid-template-columns: 1fr 2fr;
 				grid-template-rows: 1fr 1fr;
 				grid-template-areas:
 					"incomes days"
@@ -264,7 +264,39 @@
 
 			<!-- Monthly Payments -->
 			<div id="detailed-info__monthly-payments" class="detailed-info__block">
-				TODO: Monthly Payments
+				{{if .MonthlyPayments}}
+				<div class="detailed-info__block__header">Monthly Payments</div>
+				<!-- Monthly Payment list -->
+				<div class="detailed-info__block__table">
+					<table>
+						<tr>
+							<th>Title</th>
+							<th>Notes</th>
+							<th>Type</th>
+							<th class="money">Cost,</th>
+						</tr>
+
+						{{range .MonthlyPayments}}
+						<tr>
+							<td>{{.Title}}</td>
+							<td>{{.Notes}}</td>
+							<td>
+								{{if .Type}}
+								{{.Type.Name}}
+								{{else}}
+								-
+								{{end}}
+							</td>
+							<td>{{.Cost}}</td>
+						</tr>
+						{{end}}
+					</table>
+				</div>
+				{{else}}
+				<div class="detailed-info__block__no-data-msg">
+					<span>No Monthly Payments :)</span>
+				</div>
+				{{end}}
 			</div>
 
 			<!-- Days -->
