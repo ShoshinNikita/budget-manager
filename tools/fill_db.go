@@ -1,5 +1,4 @@
 // Add test data: Incomes, Monthly Payments, Spends and Spend Types.
-// Run with 'go run api/api.go'
 
 package main
 
