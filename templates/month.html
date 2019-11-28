@@ -11,6 +11,8 @@
 
 		* {
 			box-sizing: border-box;
+			scrollbar-color: #88888840 #88888840;
+			scrollbar-width: thin;
 		}
 
 		body {
@@ -23,6 +25,8 @@
 			padding-bottom: 40px;
 		}
 
+		/* || Links */
+
 		a:link,
 		a:visited {
 			text-decoration: none;
@@ -33,10 +37,24 @@
 			text-decoration: underline;
 		}
 
+		/* || Money */
+
 		.money::after {
 			color: black;
 			content: "⛁";
 			margin-left: 3px;
+		}
+
+		.money--gain {
+			color: green;
+		}
+
+		.money--gain::before {
+			content: "+";
+		}
+
+		.money--lose {
+			color: crimson;
 		}
 
 		/* || Table */
@@ -57,6 +75,13 @@
 			border-bottom: none;
 		}
 
+		/* || Other */
+
+		.noselect {
+			cursor: default;
+			user-select: none;
+		}
+
 		/* | App */
 
 		#app {
@@ -64,7 +89,7 @@
 			border-radius: 5px;
 			height: 100%;
 			margin: 0 auto 30px;
-			max-width: 1400px;
+			max-width: 1800px;
 			padding: 10px;
 			width: 100%;
 		}
@@ -84,30 +109,21 @@
 			width: 100%;
 		}
 
-		.header__stats--gain {
-			color: green;
-		}
-
-		.header__stats--lose {
-			color: crimson;
-		}
-
-		.header__stats--gain,
-		.header__stats--lose {
+		.header__stats {
 			margin-right: 10px;
 		}
 
 		/* | Detailed info */
 
 		#detailed-info {
-			column-gap: 10px;
+			column-gap: 20px;
 			display: grid;
 			height: 100%;
-			row-gap: 10px;
+			row-gap: 20px;
 		}
 
 		.detailed-info__block {
-			border: 1px solid #88888810;
+			border: 1px solid #88888830;
 			border-radius: 3px;
 			display: flex;
 			flex-direction: column;
@@ -116,7 +132,8 @@
 		}
 
 		.detailed-info__block__header {
-			border-bottom: 1px solid #88888840;
+			border-bottom: 1px solid #88888860;
+			margin: 0 5px 5px;
 			font-size: 18px;
 			padding-bottom: 5px;
 			text-align: center;
@@ -208,26 +225,26 @@
 			<!-- Path like "Years / 2019 / Months / November" -->
 			<div id="header__path">
 				<span> <a href="/years">Years</a> </span>
-				<span> / </span>
+				<span class="noselect"> / </span>
 				<span> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
-				<span> / </span>
+				<span class="noselect"> / </span>
 				<span> <a href="/years/{{.Year}}/months">Months</a> </span>
-				<span> / </span>
+				<span class="noselect"> / </span>
 				<span> {{.Month}} </span>
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->
 			<div id="header__stats">
-				<span>Incomes:</span>
-				<span class="header__stats--gain money">{{.TotalIncome}}</span>
-				<span>Spends:</span>
-				<span class="header__stats--lose money">{{.TotalSpend}}</span>
-				<span>Result:</span>
+				<span class="noselect">Incomes:</span>
+				<span class="header__stats money money--gain">{{.TotalIncome}}</span>
+				<span class="noselect">Spends:</span>
+				<span class="header__stats money money--lose">{{.TotalSpend}}</span>
+				<span class="noselect">Result:</span>
 				<!-- .Result > 0 -->
 				{{if gt .Result 0}}
-				<span class="header__stats--gain money">{{.Result}}</span>
+				<span class="header__stats money money--gain">{{.Result}}</span>
 				{{else}}
-				<span class="header__stats--lose money">{{.Result}}</span>
+				<span class="header__stats money money--lose">{{.Result}}</span>
 				{{end}}
 			</div>
 		</div>
@@ -236,14 +253,14 @@
 			<!-- Incomes -->
 			<div id="detailed-info__incomes" class="detailed-info__block">
 				{{if .Incomes}}
-				<div class="detailed-info__block__header">Incomes</div>
+				<div class="detailed-info__block__header noselect">Incomes</div>
 				<!-- Incomes list -->
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th>Title</th>
-							<th>Notes</th>
-							<th class="money">Income,</th>
+							<th class="noselect">Title</th>
+							<th class="noselect">Notes</th>
+							<th class="money noselect">Income,</th>
 						</tr>
 
 						{{range .Incomes}}
@@ -265,15 +282,15 @@
 			<!-- Monthly Payments -->
 			<div id="detailed-info__monthly-payments" class="detailed-info__block">
 				{{if .MonthlyPayments}}
-				<div class="detailed-info__block__header">Monthly Payments</div>
+				<div class="detailed-info__block__header noselect">Monthly Payments</div>
 				<!-- Monthly Payment list -->
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th>Title</th>
-							<th>Notes</th>
-							<th>Type</th>
-							<th class="money">Cost,</th>
+							<th class="noselect">Title</th>
+							<th class="noselect">Notes</th>
+							<th class="noselect">Type</th>
+							<th class="money noselect">Cost,</th>
 						</tr>
 
 						{{range .MonthlyPayments}}
