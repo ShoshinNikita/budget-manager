@@ -34,10 +34,20 @@
 
 You can run local version with `make run` (or `make run-docker`) with Docker. If you don't want to use Docker, you can build and run **Budget Manager** with `make run-local` (this target uses `go run` command)
 
-After the launch you can use `api.rest` file to make basic API requests. More info about the `.rest` and `.http` files:
+After the launch you can use [`tools/api.rest`](tools/api.rest) file to make basic API requests. More info about the `.rest` and `.http` files:
 
 - [REST Client Extension for VS Code](https://github.com/Huachao/vscode-restclient)
 - [HTTP client in IntelliJ IDEA code editor](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html)
+
+Also you can use [`tools/fill_db.go`](tools/fill_db.go) script to fill the DB. This script makes `POST` requests to create Incomes, Monthly Payments, Spends and Spend Types.
+
+```bash
+# Run Budget Manager
+make run
+
+# Add test data
+go run tools/fill_db.go
+```
 
 ### Test
 
