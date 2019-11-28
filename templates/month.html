@@ -7,6 +7,13 @@
 	<title>{{.Month}} {{.Year}} | Budget Manager</title>
 
 	<style>
+		/* | Variables */
+
+		:root {
+			--border-color: #88888830;
+			--border-accent-color: #88888860;
+		}
+
 		/* | Common */
 
 		* {
@@ -66,13 +73,13 @@
 
 		table th,
 		td {
-			border-bottom: 1px solid #88888830;
+			border-bottom: 1px solid var(--border-color);
 			padding: 5px;
 			text-align: left;
 		}
 
 		table tr:last-child td {
-			border-bottom: none;
+			/* border-bottom: none; */
 		}
 
 		/* || Other */
@@ -85,7 +92,7 @@
 		/* | App */
 
 		#app {
-			border: 1px solid #88888830;
+			border: 1px solid var(--border-color);
 			border-radius: 5px;
 			height: 100%;
 			margin: 0 auto 30px;
@@ -97,7 +104,7 @@
 		/* | Header */
 
 		#header {
-			border-bottom: 1px solid #00000020;
+			border-bottom: 1px solid var(--border-accent-color);
 			box-sizing: content-box;
 			display: grid;
 			column-gap: 20px;
@@ -123,7 +130,7 @@
 		}
 
 		.detailed-info__block {
-			border: 1px solid #88888830;
+			border: 1px solid var(--border-color);
 			border-radius: 3px;
 			display: flex;
 			flex-direction: column;
@@ -132,7 +139,7 @@
 		}
 
 		.detailed-info__block__header {
-			border-bottom: 1px solid #88888860;
+			border-bottom: 1px solid var(--border-accent-color);
 			margin: 0 5px 5px;
 			font-size: 18px;
 			padding-bottom: 5px;
