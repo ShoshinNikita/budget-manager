@@ -78,10 +78,6 @@
 			text-align: left;
 		}
 
-		table tr:last-child td {
-			/* border-bottom: none; */
-		}
-
 		/* || Other */
 
 		.noselect {
@@ -174,6 +170,66 @@
 			grid-area: days;
 		}
 
+		#detailed-info__days__calendar {
+			display: grid;
+			grid-template-columns: repeat(7, 1fr);
+			column-gap: 10px;
+			row-gap: 10px;
+			margin-bottom: 30px;
+		}
+
+		.detailed-info__days__calendar__day {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			padding: 3px;
+		}
+
+		.detailed-info__days__calendar__day:hover {
+			background-color: #d3d3d340;
+			cursor: pointer;
+		}
+
+		.detailed-info__days__calendar__day__number {
+			left: 5px;
+			margin-bottom: 5px;
+			top: 5px;
+		}
+
+		.detailed-info__days__calendar__day__summary {
+			display: grid;
+			grid-template-columns: repeat(2, auto);
+		}
+
+		.detailed-info__days__calendar__day__summary__spends-number {
+			text-align: left;
+		}
+
+		.detailed-info__days__calendar__day__summary__saldo {
+			text-align: right;
+			padding-right: 3px;
+		}
+
+		.detailed-info__days__day {
+			/* Hidden by default */
+			display: none;
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			padding: 3px;
+		}
+
+		.detailed-info__days__day__date {
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 18px;
+			margin: 5px 0px 10px;
+			padding: 0 10px;
+		}
+
+		.detailed-info__days__day__result {
+			font-size: 18px;
+			margin: 10px 10px 10px 0;
+			text-align: right;
+		}
+
 		/* | Layouts */
 
 		/* For medium screens (< 1050px) */
@@ -223,6 +279,14 @@
 					"monthly-payments days";
 			}
 		}
+
+		/* Custom layouts */
+
+		@media (max-width: 1250px) {
+			#detailed-info__days__calendar {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
 	</style>
 </head>
 
@@ -248,7 +312,7 @@
 				<span class="header__stats money money--lose">{{.TotalSpend}}</span>
 				<span class="noselect">Result:</span>
 				<!-- .Result > 0 -->
-				{{if gt .Result 0}}
+				{{if ge .Result 0}}
 				<span class="header__stats money money--gain">{{.Result}}</span>
 				{{else}}
 				<span class="header__stats money money--lose">{{.Result}}</span>
@@ -324,11 +388,150 @@
 			</div>
 
 			<!-- Days -->
-			<div id="detailed-info__days" class="detailed-info__block">TODO: Days</div>
+			<div id="detailed-info__days" class="detailed-info__block" style="border: none;">
+				<div id="detailed-info__days__calendar">
+					{{range .Days}}
+					<div id="id-calendar-day-{{.Day}}" class="detailed-info__days__calendar__day"
+						onclick="selectDay('{{.Day}}');">
+
+						<div class="detailed-info__days__calendar__day__number">
+							{{.Day}} {{$.Month}}
+						</div>
+
+						<div class="detailed-info__days__calendar__day__summary">
+							<div class="detailed-info__days__calendar__day__summary__spends-number" title="Spends">
+								{{len .Spends}}
+							</div>
+							<div class="detailed-info__days__calendar__day__summary__saldo" title="Saldo">
+								{{if ge .Saldo 0}}
+								<span class="money--gain">{{.Saldo}}</span>
+								{{else}}
+								<span class="money--lose">{{.Saldo}}</span>
+								{{end}}
+							</div>
+						</div>
+					</div>
+					{{end}}
+				</div>
+
+				{{range .Days}}
+				<div id="id-day-{{.Day}}" class="detailed-info__days__day">
+					<div class="detailed-info__days__day__date">
+						{{.Day}} {{$.Month}}
+					</div>
+					<div>
+						{{if .Spends}}
+						<table>
+							<tr>
+								<th class="noselect">Title</th>
+								<th class="noselect">Notes</th>
+								<th class="noselect">Type</th>
+								<th class="money noselect">Cost</th>
+							</tr>
+
+							{{range .Spends}}
+							<tr>
+								<td>{{.Title}}</td>
+								<td>{{.Notes}}</td>
+								<td>
+									{{if .Type}}
+									{{.Type.Name}}
+									{{else}}
+									-
+									{{end}}
+								</td>
+								<td>{{.Cost}}</td>
+							</tr>
+							{{end}}
+						</table>
+						{{else}}
+						<div class="detailed-info__block__no-data-msg">
+							<span>No Spends :)</span>
+						</div>
+						{{end}}
+					</div>
+
+					<div class="detailed-info__days__day__result">
+						<span>Saldo:</span>
+						{{if ge .Saldo 0}}
+						<span class="money money--gain">{{.Saldo}}</span>
+						{{else}}
+						<span class="money money--lose">{{.Saldo}}</span>
+						{{end}}
+					</div>
+				</div>
+				{{end}}
+			</div>
 		</div>
 	</div>
 
 	<script>
+		// Days
+
+		const calendarDayIDPrefix = "id-calendar-day-";
+		const calendarDayClass = "detailed-info__days__calendar__day";
+		//
+		const dayIDPrefix = "id-day-";
+		const dayClass = "detailed-info__days__day";
+
+		function selectDay(dayNumber) {
+			// Calendar
+
+			// Remove highlights
+			const calendarDays = document.getElementsByClassName(calendarDayClass);
+			for (let i = 0; i < calendarDays.length; i++) {
+				calendarDays[i].style.backgroundColor = "";
+			}
+
+			// Highlight day in calendar
+			const calendarDayElemID = calendarDayIDPrefix + dayNumber;
+			const calendarDayElem = document.getElementById(calendarDayElemID);
+			if (calendarDayElem === undefined) {
+				console.error(`element with id '${calendarDayElem}' doesn't exist`);
+			} else {
+				calendarDayElem.style.backgroundColor = "#d3d3d340";
+			}
+
+			// Chosen day
+
+			// Hide all days at first
+			const days = document.getElementsByClassName(dayClass);
+			for (let i = 0; i < days.length; i++) {
+				days[i].style.display = "none";
+			}
+
+			// Display chosen day
+			const dayElemID = dayIDPrefix + dayNumber;
+			const dayElem = document.getElementById(dayElemID);
+			if (dayElem === undefined) {
+				console.error(`element with id '${dayElemID}' doesn't exist`);
+			} else {
+				dayElem.style.display = "block";
+			}
+		}
+
+		// Select current day
+		window.addEventListener("load", () => {
+			const now = new Date();
+			const year = now.getFullYear();
+			const month = now.getMonth() + 1;
+			const day = now.getDate();
+
+			// Check whether this page shows current month
+			const urlRegexp = /years\/(\d+)\/months\/(\d+)/;
+			const match = window.location.href.match(urlRegexp);
+			if (match.length === 3 && match[1] == year && match[2] == month) {
+				// Select current day
+				selectDay(day);
+				return;
+			}
+
+			// Just choose first day
+			selectDay(1);
+		});
+
+		// Layouts
+
 		function pxToNumber(px) {
 			if (px === "") {
 				return 0;
