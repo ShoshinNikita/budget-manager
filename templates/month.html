@@ -10,8 +10,12 @@
 		/* | Variables */
 
 		:root {
+			--font-color: #000000dd;
+
 			--border-color: #88888830;
 			--border-accent-color: #88888860;
+
+			--hover-color: #d3d3d340;
 		}
 
 		/* | Common */
@@ -23,7 +27,7 @@
 		}
 
 		body {
-			color: #000000dd;
+			color: var(--font-color);
 			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 			font-weight: normal;
 			height: 100vh;
@@ -76,6 +80,10 @@
 			border-bottom: 1px solid var(--border-color);
 			padding: 5px;
 			text-align: left;
+		}
+
+		table tr:last-child td {
+			border-bottom: none;
 		}
 
 		/* || Other */
@@ -185,7 +193,7 @@
 		}
 
 		.detailed-info__days__calendar__day:hover {
-			background-color: #d3d3d340;
+			background-color: var(--hover-color);
 			cursor: pointer;
 		}
 
@@ -489,7 +497,7 @@
 			if (calendarDayElem === undefined) {
 				console.error(`element with id '${calendarDayElem}' doesn't exist`);
 			} else {
-				calendarDayElem.style.backgroundColor = "#d3d3d340";
+				calendarDayElem.style.backgroundColor = "var(--hover-color)";
 			}
 
 			// Chosen day
