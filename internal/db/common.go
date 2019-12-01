@@ -54,18 +54,11 @@ type Month struct {
 	Result money.Money `json:"result"`
 }
 
-func (db DB) GetMonth(id uint) (*Month, error) {
-	m := &Month{ID: id}
-	err := db.db.Model(m).
-		Relation("Incomes").
-		Relation("MonthlyPayments").
-		Relation("MonthlyPayments.Type").
-		Relation("Days", func(q *orm.Query) (*orm.Query, error) {
-			return q.Order("day ASC"), nil
-		}).
-		Relation("Days.Spends").
-		Relation("Days.Spends.Type").
-		WherePK().Select()
+func (db DB) GetMonth(id uint) (m *Month, err error) {
+	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
+		m, err = db.getMonth(tx, id)
+		return err
+	})
 	if err != nil {
 		if err == pg.ErrNoRows {
 			return nil, ErrMonthNotExist
@@ -123,10 +116,9 @@ type Day struct {
 func (db DB) GetDay(id uint) (*Day, error) {
 	d := &Day{ID: id}
 	err := db.db.Model(d).
-		Relation("Spends").
+		Relation("Spends", orderByID).
 		Relation("Spends.Type").
-		WherePK().
-		Select()
+		WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
 			return nil, ErrDayNotExist
@@ -165,17 +157,10 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 // Internal methods
 // -----------------------------------------------------------------------------
 
-func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
-	m := &Month{ID: monthID}
-	err := tx.Model(m).
-		Relation("Incomes").
-		Relation("MonthlyPayments").
-		Relation("Days").
-		Relation("Days.Spends").
-		WherePK().
-		Select()
+func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
+	m, err := db.getMonth(tx, monthID)
 	if err != nil {
-		return internalErrorWrap(err, "can't select month")
+		return errorWrapf(err, "can't select month")
 	}
 
 	// Update Total Income
@@ -248,6 +233,26 @@ func (_ DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	}
 
 	return nil
+}
+
+func (_ DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
+	m := &Month{ID: id}
+	err := tx.Model(m).
+		Relation("Incomes", orderByID).
+		Relation("MonthlyPayments", orderByID).
+		Relation("MonthlyPayments.Type").
+		Relation("Days", func(q *orm.Query) (*orm.Query, error) {
+			return q.Order("day ASC"), nil
+		}).
+		Relation("Days.Spends", orderByID).
+		Relation("Days.Spends.Type").
+		WherePK().Select()
+
+	return m, err
+}
+
+func orderByID(q *orm.Query) (*orm.Query, error) {
+	return q.Order("id ASC"), nil
 }
 
 // Checks
