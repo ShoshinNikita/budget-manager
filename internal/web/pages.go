@@ -110,7 +110,22 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.tplStore.Execute(monthTemplatePath, w, month); err != nil {
+	spendTypes, err := s.db.GetSpendTypes()
+	if err != nil {
+		// Skip db.IsBadRequestError check
+
+		s.processError(w, "can't get Spend Types", http.StatusInternalServerError, err)
+		return
+	}
+
+	resp := struct {
+		*db.Month
+		SpendTypes []db.SpendType
+	}{
+		Month:      month,
+		SpendTypes: spendTypes,
+	}
+	if err := s.tplStore.Execute(monthTemplatePath, w, resp); err != nil {
 		// TODO: use special 500 page
 		s.processError(w, "can't load template", http.StatusInternalServerError, err)
 	}
