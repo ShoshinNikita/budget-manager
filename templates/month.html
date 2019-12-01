@@ -38,10 +38,14 @@
 
 		/* || Inputs */
 
+		input {
+			background-color: white;
+			font-size: 15px;
+		}
+
 		input[type="text"] {
 			border: none;
 			border-bottom: 1px solid var(--border-accent-color);
-			font-size: 14px;
 			width: 100%;
 		}
 
@@ -49,9 +53,8 @@
 			border: 1px solid var(--border-accent-color);
 			border-radius: 3px;
 			cursor: pointer;
-			width: 80px;
 			height: 23px;
-			background-color: white;
+			width: 80px;
 		}
 
 		input[type="button"]:hover {
@@ -59,6 +62,21 @@
 		}
 
 		input[type="button"]:active {
+			color: var(--font-color);
+		}
+
+		select {
+			appearance: none;
+			-moz-appearance: none;
+			-webkit-appearance: none;
+			background-color: white;
+			border: 1px solid var(--border-accent-color);
+			cursor: pointer;
+			padding: 2px 16px 2px 0;
+			background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>") no-repeat right;
+		}
+
+		select:active {
 			color: var(--font-color);
 		}
 
@@ -181,13 +199,16 @@
 			overflow-x: auto;
 		}
 
-		.detailed-info__block__table__add-buttons {
-			margin: 10px 0;
-			text-align: center;
+		.detailed-info__block__table__header-title {
+			width: 120px;
 		}
 
-		.detailed-info__block__no-data-msg {
-			font-size: 18px;
+		.detailed-info__block__table__header-cost {
+			width: 100px;
+		}
+
+		.detailed-info__block__table__add-buttons {
+			margin: 10px 0;
 			text-align: center;
 		}
 
@@ -367,9 +388,9 @@
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th class="noselect" style="width: 120px;">Title</th>
+							<th class="detailed-info__block__table__header-title noselect">Title</th>
 							<th class="noselect">Notes</th>
-							<th class="money noselect" style="width: 100px;">Income,</th>
+							<th class="detailed-info__block__table__header-cost money noselect">Income,</th>
 						</tr>
 
 						{{range .Incomes}}
@@ -409,16 +430,17 @@
 
 			<!-- Monthly Payments -->
 			<div id="detailed-info__monthly-payments" class="detailed-info__block">
-				{{if .MonthlyPayments}}
 				<div class="detailed-info__block__header noselect">Monthly Payments</div>
 				<!-- Monthly Payment list -->
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th class="noselect">Title</th>
+							<th class="detailed-info__block__table__header-title noselect">Title</th>
 							<th class="noselect">Notes</th>
 							<th class="noselect">Type</th>
-							<th class="money noselect">Cost,</th>
+							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px">
+								Cost,
+							</th>
 						</tr>
 
 						{{range .MonthlyPayments}}
@@ -435,13 +457,41 @@
 							<td>{{.Cost}}</td>
 						</tr>
 						{{end}}
+
+						<tr>
+							<td>
+								<input type="text" id="new-monthly-payment-title" placeholder="Title" autocomplete="off"
+									data-json-name="title" data-json-type="text">
+							</td>
+							<td>
+								<input
+									type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off"
+									data-json-name="notes" data-json-type="text">
+							</td>
+							<td>
+								<select id="new-monthly-payment-type" autocomplete="off"
+									data-json-name="type_id" data-json-type="number">
+									<option value="">-</option>
+									{{range $.SpendTypes}}
+									<option value="{{.ID}}">{{.Name}}</option>
+									{{end}}
+								</select>
+							</td>
+							<td>
+								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off"
+									data-json-name="cost" data-json-type="number">
+							</td>
+						</tr>
 					</table>
+
+					<div class="detailed-info__block__table__add-buttons">
+						<input type="button" value="Reset"
+							onclick="resetValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost')">
+
+						<input type="button" value="Submit"
+							onclick="sendRequest('POST', '/api/monthly-payments', { 'month_id': Number('{{.ID}}'), ...getValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost') })">
+					</div>
 				</div>
-				{{else}}
-				<div class="detailed-info__block__no-data-msg">
-					<span>No Monthly Payments :)</span>
-				</div>
-				{{end}}
 			</div>
 
 			<!-- Days -->
