@@ -403,17 +403,14 @@
 
 						<tr>
 							<td>
-								<input type="text" id="new-income-title" placeholder="Title" autocomplete="off"
-									data-json-name="title" data-json-type="text">
+								<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
 							</td>
 							<td>
 								<input
-									type="text" id="new-income-notes" placeholder="Notes" autocomplete="off"
-									data-json-name="notes" data-json-type="text">
+									type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
 							</td>
 							<td>
-								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off"
-									data-json-name="income" data-json-type="number">
+								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
 							</td>
 						</tr>
 					</table>
@@ -422,8 +419,7 @@
 						<input type="button" value="Reset"
 							onclick="resetValues('new-income-title', 'new-income-notes', 'new-income-income')">
 
-						<input type="button" value="Submit"
-							onclick="sendRequest('POST', '/api/incomes', { 'month_id': Number('{{.ID}}'), ...getValues('new-income-title', 'new-income-notes', 'new-income-income') })">
+						<input type="button" value="Submit" onclick="addIncome()">
 					</div>
 				</div>
 			</div>
@@ -460,17 +456,15 @@
 
 						<tr>
 							<td>
-								<input type="text" id="new-monthly-payment-title" placeholder="Title" autocomplete="off"
-									data-json-name="title" data-json-type="text">
+								<input type="text" id="new-monthly-payment-title" placeholder="Title"
+									autocomplete="off">
 							</td>
 							<td>
 								<input
-									type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off"
-									data-json-name="notes" data-json-type="text">
+									type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off">
 							</td>
 							<td>
-								<select id="new-monthly-payment-type" autocomplete="off"
-									data-json-name="type_id" data-json-type="number">
+								<select id="new-monthly-payment-type" autocomplete="off">
 									<option value="">-</option>
 									{{range $.SpendTypes}}
 									<option value="{{.ID}}">{{.Name}}</option>
@@ -478,8 +472,7 @@
 								</select>
 							</td>
 							<td>
-								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off"
-									data-json-name="cost" data-json-type="number">
+								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
 							</td>
 						</tr>
 					</table>
@@ -488,8 +481,7 @@
 						<input type="button" value="Reset"
 							onclick="resetValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost')">
 
-						<input type="button" value="Submit"
-							onclick="sendRequest('POST', '/api/monthly-payments', { 'month_id': Number('{{.ID}}'), ...getValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost') })">
+						<input type="button" value="Submit" onclick="addMonthlyPayment()">
 					</div>
 				</div>
 			</div>
@@ -573,6 +565,11 @@
 	</div>
 
 	<script>
+		// ----------------------------------------------------
+		// Global variables
+		// ----------------------------------------------------
+		const MonthID = Number("{{.ID}}");
+
 		// ----------------------------------------------------
 		// Days
 		// ----------------------------------------------------
@@ -681,56 +678,41 @@
 		// Requests
 		// ----------------------------------------------------
 
-		/** resetValues resets values of passed elements
-		 *
-		 * @param {...string} elemIDs - list of element ids
-		 */
-		function resetValues(...elemIDs) {
-			for (let i = 0; i < elemIDs.length; i++) {
-				/**
-				* @type {HTMLInputElement}
-				*/
-				const elem = document.getElementById(elemIDs[i]);
-				if (elem === undefined) {
-					console.error(`element with id '${elemIDs[i]}' doesn't exist`)
-					continue;
-				}
-
-				elem.value = "";
+		function addIncome() {
+			const fields = {
+				"month_id": MonthID,
+				"title": getValue("new-income-title"),
+				"notes": getValue("new-income-notes"),
+				"income": Number(getValue("new-income-income")),
 			}
+
+			sendRequest("POST", "/api/incomes", fields);
+		}
+
+		function addMonthlyPayment() {
+			const fields = {
+				"month_id": MonthID,
+				"title": getValue("new-monthly-payment-title"),
+				"notes": getValue("new-monthly-payment-notes"),
+				"type_id": Number(getValue("new-monthly-payment-type")),
+				"cost": Number(getValue("new-monthly-payment-cost")),
+			};
+
+			sendRequest("POST", "/api/monthly-payments", fields);
 		}
 
 		/**
-		 * @param {...string} elemIDs - list of element ids to parse:
-		 *   - name is taken from attribute 'data-json-name'.
-		 *   - value is taken from attribute 'value'.
-		 *   - type (text or number) can be specified with attribute 'data-json-type'
-		 * 
-		 * @return {Object} parsed values
+		 * @param {...string} elemID - id of an element
+		 * @return {Object} value of an element or empty string
 		 */
-		function getValues(...elemIDs) {
-			let data = {};
-
-			for (let i = 0; i < elemIDs.length; i++) {
-				/**
-				* @type {HTMLInputElement}
-				*/
-				const elem = document.getElementById(elemIDs[i]);
-				if (elem === undefined) {
-					console.error(`element with id '${elemIDs[i]}' doesn't exist`);
-					continue;
-				}
-
-				const key = elem.getAttribute("data-json-name");
-				const dataType = elem.getAttribute("data-json-type");
-				if (dataType === null || dataType === "" || dataType === "text") {
-					data[key] = String(elem.value);
-				} else if (dataType === "number") {
-					data[key] = Number(elem.value);
-				}
+		function getValue(elemID) {
+			const elem = document.getElementById(elemID);
+			if (elem === undefined) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return "";
 			}
 
-			return data;
+			return elem.value || "";
 		}
 
 		/**
@@ -772,6 +754,25 @@
 		// ----------------------------------------------------
 		// Helpers
 		// ----------------------------------------------------
+
+		/** resetValues resets values of passed elements
+		 *
+		 * @param {...string} elemIDs - list of element ids
+		 */
+		function resetValues(...elemIDs) {
+			for (let i = 0; i < elemIDs.length; i++) {
+				/**
+				* @type {HTMLInputElement}
+				*/
+				const elem = document.getElementById(elemIDs[i]);
+				if (elem === undefined) {
+					console.error(`element with id '${elemIDs[i]}' doesn't exist`)
+					continue;
+				}
+
+				elem.value = "";
+			}
+		}
 
 		function processError(error) {
 			console.error(error);
