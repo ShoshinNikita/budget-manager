@@ -36,6 +36,32 @@
 			padding-bottom: 40px;
 		}
 
+		/* || Inputs */
+
+		input[type="text"] {
+			border: none;
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 14px;
+			width: 100%;
+		}
+
+		input[type="button"] {
+			border: 1px solid var(--border-accent-color);
+			border-radius: 3px;
+			cursor: pointer;
+			width: 80px;
+			height: 23px;
+			background-color: white;
+		}
+
+		input[type="button"]:hover {
+			background-color: var(--hover-color);
+		}
+
+		input[type="button"]:active {
+			color: var(--font-color);
+		}
+
 		/* || Links */
 
 		a:link,
@@ -153,6 +179,11 @@
 		.detailed-info__block__table {
 			height: 100%;
 			overflow-x: auto;
+		}
+
+		.detailed-info__block__table__add-buttons {
+			margin: 10px 0;
+			text-align: center;
 		}
 
 		.detailed-info__block__no-data-msg {
@@ -331,15 +362,14 @@
 		<div id="detailed-info">
 			<!-- Incomes -->
 			<div id="detailed-info__incomes" class="detailed-info__block">
-				{{if .Incomes}}
 				<div class="detailed-info__block__header noselect">Incomes</div>
 				<!-- Incomes list -->
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th class="noselect">Title</th>
+							<th class="noselect" style="width: 120px;">Title</th>
 							<th class="noselect">Notes</th>
-							<th class="money noselect">Income,</th>
+							<th class="money noselect" style="width: 100px;">Income,</th>
 						</tr>
 
 						{{range .Incomes}}
@@ -349,13 +379,32 @@
 							<td>{{.Income}}</td>
 						</tr>
 						{{end}}
+
+						<tr>
+							<td>
+								<input type="text" id="new-income-title" placeholder="Title" autocomplete="off"
+									data-json-name="title" data-json-type="text">
+							</td>
+							<td>
+								<input
+									type="text" id="new-income-notes" placeholder="Notes" autocomplete="off"
+									data-json-name="notes" data-json-type="text">
+							</td>
+							<td>
+								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off"
+									data-json-name="income" data-json-type="number">
+							</td>
+						</tr>
 					</table>
+
+					<div class="detailed-info__block__table__add-buttons">
+						<input type="button" value="Reset"
+							onclick="resetValues('new-income-title', 'new-income-notes', 'new-income-income')">
+
+						<input type="button" value="Submit"
+							onclick="sendRequest('POST', '/api/incomes', { 'month_id': Number('{{.ID}}'), ...getValues('new-income-title', 'new-income-notes', 'new-income-income') })">
+					</div>
 				</div>
-				{{else}}
-				<div class="detailed-info__block__no-data-msg">
-					<span>No Incomes :(</span>
-				</div>
-				{{end}}
 			</div>
 
 			<!-- Monthly Payments -->
@@ -474,7 +523,9 @@
 	</div>
 
 	<script>
+		// ----------------------------------------------------
 		// Days
+		// ----------------------------------------------------
 
 		const calendarDayIDPrefix = "id-calendar-day-";
 		const calendarDayClass = "detailed-info__days__calendar__day";
@@ -538,7 +589,9 @@
 			selectDay(1);
 		});
 
+		// ----------------------------------------------------
 		// Layouts
+		// ----------------------------------------------------
 
 		function pxToNumber(px) {
 			if (px === "") {
@@ -573,6 +626,107 @@
 
 		window.addEventListener("load", setDetailedInfoHeight);
 		window.addEventListener("resize", setDetailedInfoHeight);
+
+		// ----------------------------------------------------
+		// Requests
+		// ----------------------------------------------------
+
+		/** resetValues resets values of passed elements
+		 *
+		 * @param {...string} elemIDs - list of element ids
+		 */
+		function resetValues(...elemIDs) {
+			for (let i = 0; i < elemIDs.length; i++) {
+				/**
+				* @type {HTMLInputElement}
+				*/
+				const elem = document.getElementById(elemIDs[i]);
+				if (elem === undefined) {
+					console.error(`element with id '${elemIDs[i]}' doesn't exist`)
+					continue;
+				}
+
+				elem.value = "";
+			}
+		}
+
+		/**
+		 * @param {...string} elemIDs - list of element ids to parse:
+		 *   - name is taken from attribute 'data-json-name'.
+		 *   - value is taken from attribute 'value'.
+		 *   - type (text or number) can be specified with attribute 'data-json-type'
+		 * 
+		 * @return {Object} parsed values
+		 */
+		function getValues(...elemIDs) {
+			let data = {};
+
+			for (let i = 0; i < elemIDs.length; i++) {
+				/**
+				* @type {HTMLInputElement}
+				*/
+				const elem = document.getElementById(elemIDs[i]);
+				if (elem === undefined) {
+					console.error(`element with id '${elemIDs[i]}' doesn't exist`);
+					continue;
+				}
+
+				const key = elem.getAttribute("data-json-name");
+				const dataType = elem.getAttribute("data-json-type");
+				if (dataType === null || dataType === "" || dataType === "text") {
+					data[key] = String(elem.value);
+				} else if (dataType === "number") {
+					data[key] = Number(elem.value);
+				}
+			}
+
+			return data;
+		}
+
+		/**
+		 * @param {string} method - HTTP method (POST or PUT)
+		 * @param {string} url - request url
+		 * @param {Object} fields - additional json fields (like month id, day id and etc.)
+		 */
+		function sendRequest(method, url, fields) {
+			if (!fields) {
+				return;
+			}
+
+			fetch(url, {
+				method: method,
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(fields)
+			}).then(resp => {
+				if (resp.status === 200 || resp.status === 201) {
+					// Success. Reload page
+					location.reload();
+
+					// Prevent next 'then' to show an error
+					return { success: true };
+				}
+
+				// Got an error
+				return resp.json()
+			}).then(resp => {
+				if (!resp.success) {
+					processError(resp.error);
+				}
+			}).catch(err => {
+				processError(err);
+			})
+		}
+
+		// ----------------------------------------------------
+		// Helpers
+		// ----------------------------------------------------
+
+		function processError(error) {
+			console.error(error);
+			alert("Error: " + error);
+		}
 	</script>
 </body>
 
