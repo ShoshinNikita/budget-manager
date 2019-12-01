@@ -401,6 +401,7 @@
 						</tr>
 						{{end}}
 
+						<!-- Inputs for new Income -->
 						<tr>
 							<td>
 								<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
@@ -454,6 +455,7 @@
 						</tr>
 						{{end}}
 
+						<!-- Inputs for new Monthly Payment -->
 						<tr>
 							<td>
 								<input type="text" id="new-monthly-payment-title" placeholder="Title"
@@ -518,8 +520,8 @@
 					<div class="detailed-info__days__day__date">
 						{{.Day}} {{$.Month.Month}}
 					</div>
+
 					<div>
-						{{if .Spends}}
 						<table>
 							<tr>
 								<th class="noselect">Title</th>
@@ -542,12 +544,42 @@
 								<td>{{.Cost}}</td>
 							</tr>
 							{{end}}
+
+							<!--
+								Inputs for new Spend
+
+								We use '-{{.ID}}' suffix because we render all days, just hide them.
+								So, ids without this suffix wouldn't be unique. We use day id instead of
+								day number because we pass into 'addSpend' function day id.
+							-->
+							<tr>
+								<td>
+									<input type="text" id="new-spend-title-{{.ID}}" placeholder="Title" autocomplete="off">
+								</td>
+								<td>
+									<input
+										type="text" id="new-spend-notes-{{.ID}}" placeholder="Notes" autocomplete="off">
+								</td>
+								<td>
+									<select id="new-spend-type-{{.ID}}" autocomplete="off">
+										<option value="">-</option>
+										{{range $.SpendTypes}}
+										<option value="{{.ID}}">{{.Name}}</option>
+										{{end}}
+									</select>
+								</td>
+								<td>
+									<input type="text" id="new-spend-cost-{{.ID}}" placeholder="Cost" autocomplete="off">
+								</td>
+							</tr>
 						</table>
-						{{else}}
-						<div class="detailed-info__block__no-data-msg">
-							<span>No Spends :)</span>
+
+						<div class="detailed-info__block__table__add-buttons">
+							<input type="button" value="Reset"
+								onclick="resetValues('new-spend-title-{{.ID}}', 'new-spend-notes-{{.ID}}', 'new-spend-type-{{.ID}}', 'new-spend-cost-{{.ID}}')">
+
+							<input type="button" value="Submit" onclick="addSpend(Number('{{.ID}}'))">
 						</div>
-						{{end}}
 					</div>
 
 					<div class="detailed-info__days__day__result">
@@ -699,6 +731,18 @@
 			};
 
 			sendRequest("POST", "/api/monthly-payments", fields);
+		}
+
+		function addSpend(dayID) {
+			const fields = {
+				"day_id": dayID,
+				"title": getValue(`new-spend-title-${dayID}`),
+				"notes": getValue(`new-spend-notes-${dayID}`),
+				"type_id": Number(getValue(`new-spend-type-${dayID}`)),
+				"cost": Number(getValue(`new-spend-cost-${dayID}`)),
+			};
+
+			sendRequest("POST", "/api/spends", fields);
 		}
 
 		/**
