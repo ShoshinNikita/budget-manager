@@ -819,7 +819,12 @@
 		}
 
 		function removeIncome(id) {
-			alert(`Remove Income ${id}: not implemented yet`);
+			if (!confirm("Do you really want to delete the Income?")) {
+				return;
+			}
+
+			const fields = { "id": id };
+			sendRequest("DELETE", "/api/incomes", fields);
 		}
 
 		// Monthly Payments
@@ -841,7 +846,12 @@
 		}
 
 		function removeMonthlyPayment(id) {
-			alert(`Remove MP ${id}: not implemented yet`);
+			if (!confirm("Do you really want to delete the Monthly Payment?")) {
+				return;
+			}
+
+			const fields = { "id": id };
+			sendRequest("DELETE", "/api/monthly-payments", fields);
 		}
 
 		// Spends
@@ -863,7 +873,12 @@
 		}
 
 		function removeSpend(id) {
-			alert(`Remove Spend ${id}: not implemented yet`);
+			if (!confirm("Do you really want to delete the Spend?")) {
+				return;
+			}
+
+			const fields = { "id": id };
+			sendRequest("DELETE", "/api/spends", fields);
 		}
 
 		/**
