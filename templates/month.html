@@ -292,8 +292,8 @@
 
 		/* | Layouts */
 
-		/* For medium screens (< 1050px) */
-		@media (max-width: 1049px) {
+		/* For small screens (< 950px) */
+		@media (max-width: 949px) {
 			body {
 				padding: 15px;
 			}
@@ -323,10 +323,36 @@
 				font-size: 14px;
 				padding: 0;
 			}
+
+			#detailed-info__days__calendar {
+				grid-template-columns: repeat(4, 1fr);
+			}
 		}
 
-		/* For large screens (>= 1050px) */
-		@media (min-width: 1050px) {
+		/* For medium screens (950px <= width < 1400px) */
+		@media (min-width: 950px) and (max-width: 1399px) {
+			#header {
+				grid-template-columns: 275px auto;
+				font-size: 16px;
+				height: auto;
+				line-height: 18px;
+			}
+
+			#detailed-info {
+				grid-template-columns: 2fr 3fr;
+				grid-template-rows: 1fr 1fr;
+				grid-template-areas:
+					"incomes days"
+					"monthly-payments days";
+			}
+
+			#detailed-info__days__calendar {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+
+		/* For large screens (1400 <= width) */
+		@media (min-width: 1400px) {
 			#header {
 				grid-template-columns: 325px auto;
 			}
@@ -337,14 +363,6 @@
 				grid-template-areas:
 					"incomes days"
 					"monthly-payments days";
-			}
-		}
-
-		/* Custom layouts */
-
-		@media (max-width: 1250px) {
-			#detailed-info__days__calendar {
-				grid-template-columns: repeat(4, 1fr);
 			}
 		}
 	</style>
