@@ -600,11 +600,32 @@
 		// ----------------------------------------------------
 		// Global variables
 		// ----------------------------------------------------
+
 		const MonthID = Number("{{.ID}}");
 
 		// ----------------------------------------------------
 		// Days
 		// ----------------------------------------------------
+
+		// Select current day
+		window.addEventListener("load", () => {
+			const now = new Date();
+			const year = now.getFullYear();
+			const month = now.getMonth() + 1;
+			const day = now.getDate();
+
+			// Check whether this page shows current month
+			const urlRegexp = /years\/(\d+)\/months\/(\d+)/;
+			const match = window.location.href.match(urlRegexp);
+			if (match.length === 3 && match[1] == year && match[2] == month) {
+				// Select current day
+				selectDay(day);
+				return;
+			}
+
+			// Just choose first day
+			selectDay(1);
+		});
 
 		const calendarDayIDPrefix = "id-calendar-day-";
 		const calendarDayClass = "detailed-info__days__calendar__day";
@@ -648,38 +669,12 @@
 			}
 		}
 
-		// Select current day
-		window.addEventListener("load", () => {
-			const now = new Date();
-			const year = now.getFullYear();
-			const month = now.getMonth() + 1;
-			const day = now.getDate();
-
-			// Check whether this page shows current month
-			const urlRegexp = /years\/(\d+)\/months\/(\d+)/;
-			const match = window.location.href.match(urlRegexp);
-			if (match.length === 3 && match[1] == year && match[2] == month) {
-				// Select current day
-				selectDay(day);
-				return;
-			}
-
-			// Just choose first day
-			selectDay(1);
-		});
-
 		// ----------------------------------------------------
 		// Layouts
 		// ----------------------------------------------------
 
-		function pxToNumber(px) {
-			if (px === "") {
-				return 0;
-			}
-
-			px = px.slice(0, -2)
-			return Number(px);
-		}
+		window.addEventListener("load", setDetailedInfoHeight);
+		window.addEventListener("resize", setDetailedInfoHeight);
 
 		function setDetailedInfoHeight() {
 			// App
@@ -703,12 +698,20 @@
 			detailedInfo.style.height = String(availableHeight) + "px";
 		}
 
-		window.addEventListener("load", setDetailedInfoHeight);
-		window.addEventListener("resize", setDetailedInfoHeight);
+		function pxToNumber(px) {
+			if (px === "") {
+				return 0;
+			}
+
+			px = px.slice(0, -2);
+			return Number(px);
+		}
 
 		// ----------------------------------------------------
 		// Requests
 		// ----------------------------------------------------
+
+		// Incomes
 
 		function addIncome() {
 			const fields = {
@@ -720,6 +723,8 @@
 
 			sendRequest("POST", "/api/incomes", fields);
 		}
+
+		// Monthly Payments
 
 		function addMonthlyPayment() {
 			const fields = {
@@ -733,6 +738,8 @@
 			sendRequest("POST", "/api/monthly-payments", fields);
 		}
 
+		// Spends
+
 		function addSpend(dayID) {
 			const fields = {
 				"day_id": dayID,
@@ -743,20 +750,6 @@
 			};
 
 			sendRequest("POST", "/api/spends", fields);
-		}
-
-		/**
-		 * @param {...string} elemID - id of an element
-		 * @return {Object} value of an element or empty string
-		 */
-		function getValue(elemID) {
-			const elem = document.getElementById(elemID);
-			if (elem === undefined) {
-				console.error(`element with id '${elemID}' doesn't exist`);
-				return "";
-			}
-
-			return elem.value || "";
 		}
 
 		/**
@@ -799,6 +792,20 @@
 		// Helpers
 		// ----------------------------------------------------
 
+		/**
+		 * @param {...string} elemID - id of an element
+		 * @return {Object} value of an element or empty string
+		 */
+		function getValue(elemID) {
+			const elem = document.getElementById(elemID);
+			if (elem === undefined) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return "";
+			}
+
+			return elem.value || "";
+		}
+
 		/** resetValues resets values of passed elements
 		 *
 		 * @param {...string} elemIDs - list of element ids
@@ -822,6 +829,7 @@
 			console.error(error);
 			alert("Error: " + error);
 		}
+
 	</script>
 </body>
 
