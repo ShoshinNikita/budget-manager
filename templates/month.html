@@ -137,6 +137,23 @@
 			user-select: none;
 		}
 
+		div.feather-icon {
+			cursor: pointer;
+			padding: 3px;
+		}
+
+		div.feather-icon>svg {
+			fill: none;
+			stroke: #888888a0;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+			stroke-width: 2;
+		}
+
+		div.feather-icon:hover>svg {
+			stroke: #666666;
+		}
+
 		/* | App */
 
 		#app {
@@ -205,6 +222,16 @@
 
 		.detailed-info__block__table__header-cost {
 			width: 100px;
+		}
+
+		.detailed-info__block__table__actions {
+			display: flex;
+		}
+
+		.detailed-info__block__table__actions__edit>svg,
+		.detailed-info__block__table__actions__remove>svg {
+			height: 18px;
+			width: 18px;
 		}
 
 		.detailed-info__block__table__add-buttons {
@@ -408,7 +435,8 @@
 						<tr>
 							<th class="detailed-info__block__table__header-title noselect">Title</th>
 							<th class="noselect">Notes</th>
-							<th class="detailed-info__block__table__header-cost money noselect">Income,</th>
+							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px;">Income,</th>
+							<th></th>
 						</tr>
 
 						{{range .Incomes}}
@@ -416,6 +444,20 @@
 							<td>{{.Title}}</td>
 							<td>{{.Notes}}</td>
 							<td>{{.Income}}</td>
+							<td>
+								<div class="detailed-info__block__table__actions">
+									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit" onclick="editIncome(Number('{{.ID}}'))">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
+										</svg>
+									</div>
+									<div class="feather-icon detailed-info__block__table__actions__remove" title="Remove" onclick="removeIncome(Number('{{.ID}}'))">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+										</svg>
+									</div>
+								</div>
+							</td>
 						</tr>
 						{{end}}
 
@@ -456,6 +498,7 @@
 							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px">
 								Cost,
 							</th>
+							<th></th>
 						</tr>
 
 						{{range .MonthlyPayments}}
@@ -470,6 +513,20 @@
 								{{end}}
 							</td>
 							<td>{{.Cost}}</td>
+							<td>
+								<div class="detailed-info__block__table__actions">
+									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit" onclick="editMonthlyPayment(Number('{{.ID}}'))">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
+										</svg>
+									</div>
+									<div class="feather-icon detailed-info__block__table__actions__remove" title="Remove" onclick="removeMonthlyPayment(Number('{{.ID}}'))">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+										</svg>
+									</div>
+								</div>
+							</td>
 						</tr>
 						{{end}}
 
@@ -545,7 +602,8 @@
 								<th class="noselect">Title</th>
 								<th class="noselect">Notes</th>
 								<th class="noselect">Type</th>
-								<th class="money noselect">Cost</th>
+								<th class="money noselect" style="width: 100px;">Cost</th>
+								<th></th>
 							</tr>
 
 							{{range .Spends}}
@@ -560,6 +618,20 @@
 									{{end}}
 								</td>
 								<td>{{.Cost}}</td>
+								<td>
+									<div class="detailed-info__block__table__actions">
+										<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit" onclick="editSpend(Number('{{.ID}}'))">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
+											</svg>
+										</div>
+										<div class="feather-icon detailed-info__block__table__actions__remove" title="Remove" onclick="removeSpend(Number('{{.ID}}'))">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+											</svg>
+										</div>
+									</div>
+								</td>
 							</tr>
 							{{end}}
 
@@ -742,6 +814,14 @@
 			sendRequest("POST", "/api/incomes", fields);
 		}
 
+		function editIncome(id) {
+			alert(`Edit Income ${id}: not implemented yet`);
+		}
+
+		function removeIncome(id) {
+			alert(`Remove Income ${id}: not implemented yet`);
+		}
+
 		// Monthly Payments
 
 		function addMonthlyPayment() {
@@ -756,6 +836,14 @@
 			sendRequest("POST", "/api/monthly-payments", fields);
 		}
 
+		function editMonthlyPayment(id) {
+			alert(`Edit MP ${id}: not implemented yet`);
+		}
+
+		function removeMonthlyPayment(id) {
+			alert(`Remove MP ${id}: not implemented yet`);
+		}
+
 		// Spends
 
 		function addSpend(dayID) {
@@ -768,6 +856,14 @@
 			};
 
 			sendRequest("POST", "/api/spends", fields);
+		}
+
+		function editSpend(id) {
+			alert(`Edit Spend ${id}: not implemented yet`);
+		}
+
+		function removeSpend(id) {
+			alert(`Remove Spend ${id}: not implemented yet`);
 		}
 
 		/**
