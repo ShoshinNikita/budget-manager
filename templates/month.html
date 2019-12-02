@@ -224,6 +224,11 @@
 			width: 100px;
 		}
 
+		.detailed-info__block__table__header-actions {
+			/* Set width to minimum */
+			width: 1px;
+		}
+
 		.detailed-info__block__table__actions {
 			display: flex;
 		}
@@ -254,6 +259,7 @@
 		/* || Days */
 
 		#detailed-info__days {
+			border: none;
 			grid-area: days;
 		}
 
@@ -436,7 +442,7 @@
 							<th class="detailed-info__block__table__header-title noselect">Title</th>
 							<th class="noselect">Notes</th>
 							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px;">Income,</th>
-							<th></th>
+							<th class="detailed-info__block__table__header-actions"></th>
 						</tr>
 
 						{{range .Incomes}}
@@ -498,7 +504,7 @@
 							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px">
 								Cost,
 							</th>
-							<th></th>
+							<th class="detailed-info__block__table__header-actions"></th>
 						</tr>
 
 						{{range .MonthlyPayments}}
@@ -564,7 +570,7 @@
 			</div>
 
 			<!-- Days -->
-			<div id="detailed-info__days" class="detailed-info__block" style="border: none;">
+			<div id="detailed-info__days" class="detailed-info__block">
 				<div id="detailed-info__days__calendar">
 					{{range .Days}}
 					<div id="id-calendar-day-{{.Day}}" class="detailed-info__days__calendar__day"
@@ -603,7 +609,7 @@
 								<th class="noselect">Notes</th>
 								<th class="noselect">Type</th>
 								<th class="money noselect" style="width: 100px;">Cost</th>
-								<th></th>
+								<th class="detailed-info__block__table__header-actions"></th>
 							</tr>
 
 							{{range .Spends}}
