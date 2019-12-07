@@ -323,6 +323,29 @@
 			text-align: right;
 		}
 
+		/* | Modal windows */
+
+		#modal-window__background {
+			background-color: #00000050;
+			display: none;
+			height: 100%;
+			left: 0;
+			position: absolute;
+			top: 0;
+			width: 100%;
+		}
+
+		.modal-window {
+			background-color: white;
+			display: none;
+			height: 50%;
+			left: 50%;
+			position: absolute;
+			top: 20%;
+			transform: translateX(-50%);
+			width: 50%;
+		}
+
 		/* | Layouts */
 
 		/* For small screens (< 950px) */
@@ -452,7 +475,8 @@
 							<td>{{.Income}}</td>
 							<td>
 								<div class="detailed-info__block__table__actions">
-									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit" onclick="editIncome(Number('{{.ID}}'))">
+									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit"
+										onclick="showModalWindowToEditIncome('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.Income}}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
@@ -521,7 +545,8 @@
 							<td>{{.Cost}}</td>
 							<td>
 								<div class="detailed-info__block__table__actions">
-									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit" onclick="editMonthlyPayment(Number('{{.ID}}'))">
+									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit"
+										onclick="showModalWindowToEditMonthlyPayment('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
@@ -626,7 +651,8 @@
 								<td>{{.Cost}}</td>
 								<td>
 									<div class="detailed-info__block__table__actions">
-										<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit" onclick="editSpend(Number('{{.ID}}'))">
+										<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit"
+											onclick="showModalWindowToEditSpend('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 											</svg>
@@ -688,6 +714,24 @@
 					</div>
 				</div>
 				{{end}}
+			</div>
+		</div>
+
+		<!-- Modal windows (hidden by default) -->
+		<div id="modal-window__background">
+			<!-- Edit Income -->
+			<div id="modal-window__edit-income" class="modal-window">
+				TODO: edit Income
+			</div>
+
+			<!-- Edit Monthly Payment -->
+			<div id="modal-window__edit-monthly-payment" class="modal-window">
+				TODO: edit Monthly Payment
+			</div>
+
+			<!-- Edit Spend -->
+			<div id="modal-window__edit-spend" class="modal-window">
+				TODO: edit Spend
 			</div>
 		</div>
 	</div>
@@ -924,6 +968,95 @@
 		}
 
 		// ----------------------------------------------------
+		// Modal windows
+		// ----------------------------------------------------
+
+		// Add event listener to hide modal window on click outside of Modal Window
+		window.addEventListener("load", () => {
+			const elem = document.getElementById(modalWindowID);
+			if (!elem) {
+				console.error(`element with id '${modalWindowID}' doesn't exist`);
+				return
+			}
+
+			// Hide on click
+			elem.addEventListener("click", (ev) => {
+				if (ev.target.id !== modalWindowID) {
+					return;
+				}
+				hideElement(modalWindowID);
+			})
+		});
+
+		// Add event listener to hide modal window on Esc key pressing
+		window.addEventListener("keydown", (ev) => {
+			const escKeyCode = 27;
+
+			if (ev.keyCode === escKeyCode) {
+				hideAllModalWindows();
+			}
+		})
+
+		const modalWindowID = "modal-window__background";
+		const editIncomeModalWindowID = "modal-window__edit-income";
+		const editMonthlyPaymentModalWindowID = "modal-window__edit-monthly-payment";
+		const editSpendModalWindowID = "modal-window__edit-spend";
+
+		/**
+		 * @param {string} id - Income id
+		 * @param {string} title - current Income title
+		 * @param {string} notes - current Income notes
+		 * @param {string} income - current income
+		 */
+		function showModalWindowToEditIncome(id, title, notes, income) {
+			hideAllModalWindows();
+
+			console.log(id, title, notes, income);
+			showElement(editIncomeModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		/**
+		 * @param {string} id - Monthly Payment id
+		 * @param {string} title - current Monthly Payment title
+		 * @param {string} notes - current Monthly Payment notes
+		 * @param {string} typeID - current Monthly Payment type id
+		 * @param {string} cost - current Monthly Payment cost
+		 */
+		function showModalWindowToEditMonthlyPayment(id, title, notes, typeID, cost) {
+			hideAllModalWindows();
+
+			console.log(id, title, notes, typeID, cost);
+			showElement(editMonthlyPaymentModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		/**
+		 * @param {string} id - Spend id
+		 * @param {string} title - current Spend title
+		 * @param {string} notes - current Spend notes
+		 * @param {string} typeID - current Spend type id
+		 * @param {string} cost - current Spend cost
+		 */
+		function showModalWindowToEditSpend(id, title, notes, typeID, cost) {
+			hideAllModalWindows();
+
+			console.log(id, title, notes, typeID, cost);
+			showElement(editSpendModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		/**
+		 * hideAllModalWindows hides all Modal Windows
+		 */
+		function hideAllModalWindows() {
+			hideElement(modalWindowID);
+			hideElement(editIncomeModalWindowID);
+			hideElement(editMonthlyPaymentModalWindowID);
+			hideElement(editSpendModalWindowID);
+		}
+
+		// ----------------------------------------------------
 		// Helpers
 		// ----------------------------------------------------
 
@@ -958,6 +1091,34 @@
 
 				elem.value = "";
 			}
+		}
+
+		/** showElement sets 'display' to 'block'
+		 *
+		 * @param {string} elemID - element id
+		 */
+		function showElement(elemID) {
+			const elem = document.getElementById(elemID);
+			if (!elem) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return
+			}
+
+			elem.style.display = "block";
+		}
+
+		/** hideElement sets 'display' to 'none'
+		 *
+		 * @param {string} elemID - element id
+		 */
+		function hideElement(elemID) {
+			const elem = document.getElementById(elemID);
+			if (!elem) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return
+			}
+
+			elem.style.display = "none";
 		}
 
 		function processError(error) {
