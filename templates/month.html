@@ -45,8 +45,12 @@
 
 		input[type="text"] {
 			border: none;
-			border-bottom: 1px solid var(--border-accent-color);
+			border-bottom: 1px solid var(--border-color);
 			width: 100%;
+		}
+
+		input[type="text"]:focus {
+			border-bottom: 1px solid var(--border-accent-color);
 		}
 
 		input[type="button"] {
@@ -337,13 +341,32 @@
 
 		.modal-window {
 			background-color: white;
+			border-radius: 5px;
+			box-shadow: 0px 0px 10px 10px #00000020;
 			display: none;
-			height: 50%;
 			left: 50%;
+			max-width: 700px;
+			padding: 20px;
 			position: absolute;
 			top: 20%;
 			transform: translateX(-50%);
-			width: 50%;
+			width: 80%;
+		}
+
+		.modal-window__header {
+			font-size: 18px;
+			text-align: center;
+		}
+
+		.modal-window__edit-field {
+			display: grid;
+			grid-template-columns: 100px auto;
+			margin-bottom: 5px;
+		}
+
+		.modal-window__save-button {
+			margin-top: 20px;
+			text-align: center;
 		}
 
 		/* | Layouts */
@@ -721,7 +744,27 @@
 		<div id="modal-window__background">
 			<!-- Edit Income -->
 			<div id="modal-window__edit-income" class="modal-window">
-				TODO: edit Income
+				<div class="modal-window__header noselect">Edit Income</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-income__title" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-income__notes" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Income:</span>
+					<input id="modal-window__edit-income__income" type="text">
+				</div>
+
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="button" id="modal-window__edit-income__save-button" value="Save">
+				</div>
 			</div>
 
 			<!-- Edit Monthly Payment -->
@@ -865,7 +908,15 @@
 		}
 
 		function editIncome(id) {
-			alert(`Edit Income ${id}: not implemented yet`);
+			const income = getValue("modal-window__edit-income__income");
+			const fields = {
+				"id": Number(id),
+				"title": getValue("modal-window__edit-income__title"),
+				"notes": getValue("modal-window__edit-income__notes"),
+				"income": Number(income) || income,
+			}
+
+			sendRequest("PUT", "/api/incomes", fields);
 		}
 
 		function removeIncome(id) {
@@ -1011,7 +1062,16 @@
 		function showModalWindowToEditIncome(id, title, notes, income) {
 			hideAllModalWindows();
 
-			console.log(id, title, notes, income);
+			// Set current values
+			setValue("modal-window__edit-income__title", title);
+			setValue("modal-window__edit-income__notes", notes);
+			setValue("modal-window__edit-income__income", income);
+
+			// Reset event listener
+			const saveButton = document.getElementById("modal-window__edit-income__save-button");
+			saveButton.onclick = () => { editIncome(id); }
+
+			// Show Modal Window
 			showElement(editIncomeModalWindowID);
 			showElement(modalWindowID);
 		}
@@ -1061,7 +1121,7 @@
 		// ----------------------------------------------------
 
 		/**
-		 * @param {...string} elemID - id of an element
+		 * @param {string} elemID - id of an element
 		 * @return {Object} value of an element or empty string
 		 */
 		function getValue(elemID) {
@@ -1072,6 +1132,20 @@
 			}
 
 			return elem.value || "";
+		}
+
+		/**
+		 * @param {string} elemID - id of an element 
+		 * @param {string} value - new value element
+		 */
+		function setValue(elemID, value) {
+			const elem = document.getElementById(elemID);
+			if (elem === undefined) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return;
+			}
+
+			elem.value = value;
 		}
 
 		/** resetValues resets values of passed elements
