@@ -809,7 +809,37 @@
 
 			<!-- Edit Spend -->
 			<div id="modal-window__edit-spend" class="modal-window">
-				TODO: edit Spend
+				<div class="modal-window__header noselect">Edit Spend</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-spend__title" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-spend__notes" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Type:</span>
+					<select id="modal-window__edit-spend__type">
+						<option value="0">-</option>
+						{{range $.SpendTypes}}
+						<option value="{{.ID}}">{{.Name}}</option>
+						{{end}}
+					</select>
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Cost:</span>
+					<input id="modal-window__edit-spend__cost" type="text">
+				</div>
+
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="button" id="modal-window__edit-spend__save-button" value="Save">
+				</div>
 			</div>
 		</div>
 	</div>
@@ -1014,7 +1044,16 @@
 		}
 
 		function editSpend(id) {
-			alert(`Edit Spend ${id}: not implemented yet`);
+			const cost = getValue("modal-window__edit-spend__cost");
+			const fields = {
+				"id": Number(id),
+				"title": getValue("modal-window__edit-spend__title"),
+				"notes": getValue("modal-window__edit-spend__notes"),
+				"type_id": Number(getValue("modal-window__edit-spend__type")),
+				"cost": Number(cost) || cost,
+			}
+
+			sendRequest("PUT", "/api/spends", fields);
 		}
 
 		function removeSpend(id) {
@@ -1155,7 +1194,17 @@
 		function showModalWindowToEditSpend(id, title, notes, typeID, cost) {
 			hideAllModalWindows();
 
-			console.log(id, title, notes, typeID, cost);
+			// Set current values
+			setValue("modal-window__edit-spend__title", title);
+			setValue("modal-window__edit-spend__notes", notes);
+			setValue("modal-window__edit-spend__type", typeID);
+			setValue("modal-window__edit-spend__cost", cost);
+
+			// Reset event listener
+			const saveButton = document.getElementById("modal-window__edit-spend__save-button");
+			saveButton.onclick = () => { editSpend(id); }
+
+			// Show Modal Window
 			showElement(editSpendModalWindowID);
 			showElement(modalWindowID);
 		}
