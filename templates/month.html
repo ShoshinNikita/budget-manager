@@ -182,11 +182,24 @@
 			line-height: 35px;
 			margin-bottom: 10px;
 			padding-bottom: 5px;
+			position: relative;
 			width: 100%;
 		}
 
 		.header__stats {
 			margin-right: 10px;
+		}
+
+		#header__type-manager {
+			height: 100%;
+			position: absolute;
+			right: 0px;
+			top: 0px;
+		}
+
+		#header__type-manager>svg {
+			height: 30px;
+			width: 30px;
 		}
 
 		/* | Detailed info */
@@ -376,8 +389,8 @@
 
 		/* | Layouts */
 
-		/* For small screens (< 950px) */
-		@media (max-width: 949px) {
+		/* For small screens (< 1000px) */
+		@media (max-width: 999px) {
 			body {
 				padding: 15px;
 			}
@@ -413,13 +426,12 @@
 			}
 		}
 
-		/* For medium screens (950px <= width < 1400px) */
-		@media (min-width: 950px) and (max-width: 1399px) {
+		/* For medium screens (1000px <= width < 1400px) */
+		@media (min-width: 1000px) and (max-width: 1399px) {
 			#header {
-				grid-template-columns: 275px auto;
-				font-size: 16px;
+				grid-template-columns: 300px auto;
+				font-size: 18px;
 				height: auto;
-				line-height: 18px;
 			}
 
 			#detailed-info {
@@ -467,7 +479,7 @@
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->
-			<div id="header__stats">
+			<div>
 				<span class="noselect">Incomes:</span>
 				<span class="header__stats money money--gain">{{.TotalIncome}}</span>
 				<span class="noselect">Spends:</span>
@@ -479,6 +491,12 @@
 				{{else}}
 				<span class="header__stats money money--lose">{{.Result}}</span>
 				{{end}}
+			</div>
+
+			<div id="header__type-manager" class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
+				<svg>
+					<use xlink:href="/static/feather/feather-sprite.svg#tag" />
+				</svg>
 			</div>
 		</div>
 
@@ -1267,6 +1285,10 @@
 			// Show Modal Window
 			showElement(editSpendModalWindowID);
 			showElement(modalWindowID);
+		}
+
+		function showModalWindowToEditTypes() {
+			alert("TODO");
 		}
 
 		/**
