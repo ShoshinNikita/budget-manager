@@ -977,11 +977,17 @@
 		// Incomes
 
 		function addIncome() {
+			const income = getValue("new-income-income");
+			if (isNaN(income)) {
+				processError("income must be a number");
+				return;
+			}
+
 			const fields = {
 				"month_id": MonthID,
 				"title": getValue("new-income-title"),
 				"notes": getValue("new-income-notes"),
-				"income": Number(getValue("new-income-income")),
+				"income": Number(income),
 			}
 
 			sendRequest("POST", "/api/incomes", fields);
@@ -989,11 +995,16 @@
 
 		function editIncome(id) {
 			const income = getValue("modal-window__edit-income__income");
+			if (isNaN(income)) {
+				processError("income must be a number");
+				return;
+			}
+
 			const fields = {
 				"id": Number(id),
 				"title": getValue("modal-window__edit-income__title"),
 				"notes": getValue("modal-window__edit-income__notes"),
-				"income": Number(income) || income,
+				"income": Number(income),
 			}
 
 			sendRequest("PUT", "/api/incomes", fields);
@@ -1004,32 +1015,49 @@
 				return;
 			}
 
-			const fields = { "id": id };
+			const fields = { "id": Number(id) };
 			sendRequest("DELETE", "/api/incomes", fields);
 		}
 
 		// Monthly Payments
 
 		function addMonthlyPayment() {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue("new-monthly-payment-type");
+
+			const cost = getValue("new-monthly-payment-cost");
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
 			const fields = {
 				"month_id": MonthID,
 				"title": getValue("new-monthly-payment-title"),
 				"notes": getValue("new-monthly-payment-notes"),
-				"type_id": Number(getValue("new-monthly-payment-type")),
-				"cost": Number(getValue("new-monthly-payment-cost")),
+				"type_id": Number(typeID),
+				"cost": Number(cost),
 			};
 
 			sendRequest("POST", "/api/monthly-payments", fields);
 		}
 
 		function editMonthlyPayment(id) {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue("modal-window__edit-monthly-payment__type");
+
 			const cost = getValue("modal-window__edit-monthly-payment__cost");
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
 			const fields = {
 				"id": Number(id),
 				"title": getValue("modal-window__edit-monthly-payment__title"),
 				"notes": getValue("modal-window__edit-monthly-payment__notes"),
-				"type_id": Number(getValue("modal-window__edit-monthly-payment__type")),
-				"cost": Number(cost) || cost,
+				"type_id": Number(typeID),
+				"cost": Number(cost),
 			}
 
 			sendRequest("PUT", "/api/monthly-payments", fields);
@@ -1040,32 +1068,49 @@
 				return;
 			}
 
-			const fields = { "id": id };
+			const fields = { "id": Number(id) };
 			sendRequest("DELETE", "/api/monthly-payments", fields);
 		}
 
 		// Spends
 
 		function addSpend(dayID) {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue(`new-spend-type-${dayID}`);
+
+			const cost = getValue(`new-spend-cost-${dayID}`)
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
 			const fields = {
-				"day_id": dayID,
+				"day_id": Number(dayID),
 				"title": getValue(`new-spend-title-${dayID}`),
 				"notes": getValue(`new-spend-notes-${dayID}`),
-				"type_id": Number(getValue(`new-spend-type-${dayID}`)),
-				"cost": Number(getValue(`new-spend-cost-${dayID}`)),
+				"type_id": Number(typeID),
+				"cost": Number(cost),
 			};
 
 			sendRequest("POST", "/api/spends", fields);
 		}
 
 		function editSpend(id) {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue("modal-window__edit-spend__type");
+
 			const cost = getValue("modal-window__edit-spend__cost");
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
 			const fields = {
 				"id": Number(id),
 				"title": getValue("modal-window__edit-spend__title"),
 				"notes": getValue("modal-window__edit-spend__notes"),
-				"type_id": Number(getValue("modal-window__edit-spend__type")),
-				"cost": Number(cost) || cost,
+				"type_id": Number(typeID),
+				"cost": Number(cost),
 			}
 
 			sendRequest("PUT", "/api/spends", fields);
@@ -1076,7 +1121,7 @@
 				return;
 			}
 
-			const fields = { "id": id };
+			const fields = { "id": Number(id) };
 			sendRequest("DELETE", "/api/spends", fields);
 		}
 
