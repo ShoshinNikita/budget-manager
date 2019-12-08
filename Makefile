@@ -61,3 +61,6 @@ lint:
 		--max-same-issues=0
 
 check: lint test
+
+bench:
+	./tools/bench.sh
