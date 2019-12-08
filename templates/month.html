@@ -855,17 +855,29 @@
 		// Days
 		// ----------------------------------------------------
 
-		// Select current day
+		// Select day
 		window.addEventListener("load", () => {
 			const now = new Date();
 			const year = now.getFullYear();
 			const month = now.getMonth() + 1;
 			const day = now.getDate();
 
-			// Check whether this page shows current month
-			const urlRegexp = /years\/(\d+)\/months\/(\d+)/;
+			const urlRegexp = /years\/(\d+)\/months\/(\d+)(?:#(\d+))?/;
 			const match = window.location.href.match(urlRegexp);
-			if (match.length === 3 && match[1] == year && match[2] == month) {
+
+			// Check whether day is passed in URL
+			if (match[3] && Number(match[3])) {
+				const passedDay = Number(match[3]);
+				const daysInMonth = new Date(year, month, 0).getDate();
+				if (0 < passedDay && passedDay <= daysInMonth) {
+					// Select passed day
+					selectDay(passedDay);
+					return;
+				}
+			}
+
+			// Check whether we display current month
+			if (match[1] == year && match[2] == month) {
 				// Select current day
 				selectDay(day);
 				return;
@@ -912,9 +924,12 @@
 			const dayElem = document.getElementById(dayElemID);
 			if (dayElem === undefined) {
 				console.error(`element with id '${dayElemID}' doesn't exist`);
-			} else {
-				dayElem.style.display = "block";
+				return;
 			}
+
+			dayElem.style.display = "block";
+			// Set day number in URL
+			location.hash = dayNumber;
 		}
 
 		// ----------------------------------------------------
