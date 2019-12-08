@@ -364,6 +364,11 @@
 			margin-bottom: 5px;
 		}
 
+		.modal-window__edit-field>select {
+			min-width: 150px;
+			width: 25%;
+		}
+
 		.modal-window__save-button {
 			margin-top: 20px;
 			text-align: center;
@@ -596,7 +601,7 @@
 							</td>
 							<td>
 								<select id="new-monthly-payment-type" autocomplete="off">
-									<option value="">-</option>
+									<option value="0">-</option>
 									{{range $.SpendTypes}}
 									<option value="{{.ID}}">{{.Name}}</option>
 									{{end}}
@@ -707,7 +712,7 @@
 								</td>
 								<td>
 									<select id="new-spend-type-{{.ID}}" autocomplete="off">
-										<option value="">-</option>
+										<option value="0">-</option>
 										{{range $.SpendTypes}}
 										<option value="{{.ID}}">{{.Name}}</option>
 										{{end}}
@@ -769,7 +774,37 @@
 
 			<!-- Edit Monthly Payment -->
 			<div id="modal-window__edit-monthly-payment" class="modal-window">
-				TODO: edit Monthly Payment
+				<div class="modal-window__header noselect">Edit Monthly Payment</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-monthly-payment__title" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-monthly-payment__notes" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Type:</span>
+					<select id="modal-window__edit-monthly-payment__type">
+						<option value="0">-</option>
+						{{range $.SpendTypes}}
+						<option value="{{.ID}}">{{.Name}}</option>
+						{{end}}
+					</select>
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Cost:</span>
+					<input id="modal-window__edit-monthly-payment__cost" type="text">
+				</div>
+
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="button" id="modal-window__edit-monthly-payment__save-button" value="Save">
+				</div>
 			</div>
 
 			<!-- Edit Spend -->
@@ -943,7 +978,16 @@
 		}
 
 		function editMonthlyPayment(id) {
-			alert(`Edit MP ${id}: not implemented yet`);
+			const cost = getValue("modal-window__edit-monthly-payment__cost");
+			const fields = {
+				"id": Number(id),
+				"title": getValue("modal-window__edit-monthly-payment__title"),
+				"notes": getValue("modal-window__edit-monthly-payment__notes"),
+				"type_id": Number(getValue("modal-window__edit-monthly-payment__type")),
+				"cost": Number(cost) || cost,
+			}
+
+			sendRequest("PUT", "/api/monthly-payments", fields);
 		}
 
 		function removeMonthlyPayment(id) {
@@ -1086,7 +1130,17 @@
 		function showModalWindowToEditMonthlyPayment(id, title, notes, typeID, cost) {
 			hideAllModalWindows();
 
-			console.log(id, title, notes, typeID, cost);
+			// Set current values
+			setValue("modal-window__edit-monthly-payment__title", title);
+			setValue("modal-window__edit-monthly-payment__notes", notes);
+			setValue("modal-window__edit-monthly-payment__type", typeID);
+			setValue("modal-window__edit-monthly-payment__cost", cost);
+
+			// Reset event listener
+			const saveButton = document.getElementById("modal-window__edit-monthly-payment__save-button");
+			saveButton.onclick = () => { editMonthlyPayment(id); }
+
+			// Show Modal Window
 			showElement(editMonthlyPaymentModalWindowID);
 			showElement(modalWindowID);
 		}
