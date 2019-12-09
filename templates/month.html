@@ -163,6 +163,8 @@
 		#app {
 			border: 1px solid var(--border-color);
 			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
 			height: 100%;
 			margin: 0 auto 30px;
 			max-width: 1800px;
@@ -207,7 +209,8 @@
 		#detailed-info {
 			column-gap: 20px;
 			display: grid;
-			height: 100%;
+			/* 100% - header height - header padding-bottom - header margin-bottom */
+			height: calc(100% - 35px - 5px - 10px);
 			row-gap: 20px;
 		}
 
@@ -948,44 +951,6 @@
 			dayElem.style.display = "block";
 			// Set day number in URL
 			location.hash = dayNumber;
-		}
-
-		// ----------------------------------------------------
-		// Layouts
-		// ----------------------------------------------------
-
-		window.addEventListener("load", setDetailedInfoHeight);
-		window.addEventListener("resize", setDetailedInfoHeight);
-
-		function setDetailedInfoHeight() {
-			// App
-			const app = document.getElementById("app");
-			const appHeight = app.clientHeight;
-			const appStyles = window.getComputedStyle(app, null);
-			const appPaddingTop = pxToNumber(appStyles.getPropertyValue("padding-top"));
-			const appPaddingBottom = pxToNumber(appStyles.getPropertyValue("padding-bottom"));
-
-			// Header
-			const header = document.getElementById("header");
-			const headerHeight = header.clientHeight;
-			const headerStyles = window.getComputedStyle(header, null);
-			const headerMarginBottom = pxToNumber(headerStyles.getPropertyValue("margin-bottom"));
-
-			// Compute height
-			const availableHeight = appHeight - (appPaddingTop + appPaddingBottom) - headerHeight - headerMarginBottom;
-
-			// Set height of #detailed-info
-			const detailedInfo = document.getElementById("detailed-info");
-			detailedInfo.style.height = String(availableHeight) + "px";
-		}
-
-		function pxToNumber(px) {
-			if (px === "") {
-				return 0;
-			}
-
-			px = px.slice(0, -2);
-			return Number(px);
 		}
 
 		// ----------------------------------------------------
