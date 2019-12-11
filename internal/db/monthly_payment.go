@@ -203,7 +203,7 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 			return err
 		}
 
-		err = db.db.Delete(mp)
+		err = tx.Delete(mp)
 		if err != nil {
 			err = errorWrapf(err, "can't remove Monthly Payment with id '%d'", id)
 			db.log.Error(err)
