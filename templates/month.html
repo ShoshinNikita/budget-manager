@@ -134,6 +134,17 @@
 			border-bottom: none;
 		}
 
+		/* || Actions */
+
+		div.actions-horizontal-list {
+			display: flex;
+		}
+
+		div.actions-horizontal-list>.feather-icon>svg {
+			width: 18px;
+			height: 18px;
+		}
+
 		/* || Other */
 
 		.noselect {
@@ -247,16 +258,6 @@
 		.detailed-info__block__table__header-actions {
 			/* Set width to minimum */
 			width: 1px;
-		}
-
-		.detailed-info__block__table__actions {
-			display: flex;
-		}
-
-		.detailed-info__block__table__actions__edit>svg,
-		.detailed-info__block__table__actions__remove>svg {
-			height: 18px;
-			width: 18px;
 		}
 
 		.detailed-info__block__table__add-buttons {
@@ -523,14 +524,14 @@
 							<td>{{.Notes}}</td>
 							<td>{{.Income}}</td>
 							<td>
-								<div class="detailed-info__block__table__actions">
-									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit"
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Edit"
 										onclick="showModalWindowToEditIncome('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.Income}}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
 									</div>
-									<div class="feather-icon detailed-info__block__table__actions__remove" title="Remove" onclick="removeIncome(Number('{{.ID}}'))">
+									<div class="feather-icon" title="Remove" onclick="removeIncome(Number('{{.ID}}'))">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 										</svg>
@@ -593,14 +594,14 @@
 							</td>
 							<td>{{.Cost}}</td>
 							<td>
-								<div class="detailed-info__block__table__actions">
-									<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit"
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Edit"
 										onclick="showModalWindowToEditMonthlyPayment('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
 									</div>
-									<div class="feather-icon detailed-info__block__table__actions__remove" title="Remove" onclick="removeMonthlyPayment(Number('{{.ID}}'))">
+									<div class="feather-icon" title="Remove" onclick="removeMonthlyPayment(Number('{{.ID}}'))">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 										</svg>
@@ -699,14 +700,14 @@
 								</td>
 								<td>{{.Cost}}</td>
 								<td>
-									<div class="detailed-info__block__table__actions">
-										<div class="feather-icon detailed-info__block__table__actions__edit" title="Edit"
+									<div class="actions-horizontal-list">
+										<div class="feather-icon" title="Edit"
 											onclick="showModalWindowToEditSpend('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 											</svg>
 										</div>
-										<div class="feather-icon detailed-info__block__table__actions__remove" title="Remove" onclick="removeSpend(Number('{{.ID}}'))">
+										<div class="feather-icon" title="Remove" onclick="removeSpend(Number('{{.ID}}'))">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 											</svg>
