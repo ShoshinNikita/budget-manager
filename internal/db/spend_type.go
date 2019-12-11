@@ -125,6 +125,28 @@ func (db DB) RemoveSpendType(id uint) error {
 			return err
 		}
 
+		// Reset Type IDs
+
+		_, err = tx.Model((*MonthlyPayment)(nil)).
+			Set("type_id = 0").
+			Where("type_id = ?", id).
+			Update()
+		if err != nil {
+			err = errorWrap(err, "can't reset Type IDs of Monthly Payments")
+			db.log.Error(err)
+			return err
+		}
+
+		_, err = tx.Model((*Spend)(nil)).
+			Set("type_id = 0").
+			Where("type_id = ?", id).
+			Update()
+		if err != nil {
+			err = errorWrap(err, "can't reset Type IDs of Spends")
+			db.log.Error(err)
+			return err
+		}
+
 		return nil
 	})
 	if err != nil {
