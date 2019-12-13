@@ -351,7 +351,8 @@
 			display: none;
 			height: 100%;
 			left: 0;
-			position: absolute;
+			overflow-y: auto;
+			position: fixed;
 			top: 0;
 			width: 100%;
 		}
@@ -361,17 +362,15 @@
 			border-radius: 5px;
 			box-shadow: 0px 0px 10px 10px #00000020;
 			display: none;
-			left: 50%;
+			margin: 9vh auto 5vh;
 			max-width: 700px;
 			padding: 20px;
-			position: absolute;
-			top: 20%;
-			transform: translateX(-50%);
 			width: 80%;
 		}
 
 		.modal-window__header {
 			font-size: 18px;
+			margin-bottom: 10px;
 			text-align: center;
 		}
 
@@ -389,6 +388,24 @@
 		.modal-window__save-button {
 			margin-top: 20px;
 			text-align: center;
+		}
+
+		.modal-window__manage-types__spend-type {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: 200px 30px;
+			width: min-content;
+			margin: 0 auto 5px;
+		}
+
+		.modal-window__manage-types__spend-type:last-child {
+			margin-bottom: 20px;
+		}
+
+		.modal-window__manage-types__spend-type>.feather-icon>svg {
+			height: 20px;
+			vertical-align: middle;
+			width: 20px;
 		}
 
 		/* | Layouts */
@@ -863,6 +880,42 @@
 					<input type="button" id="modal-window__edit-spend__save-button" value="Save">
 				</div>
 			</div>
+
+			<!-- Manage types -->
+			<div id="modal-window__manage-types" class="modal-window">
+				<div class="modal-window__header noselect">Manage Spend Types</div>
+
+				{{range .SpendTypes}}
+				<div id="modal-window__manage-types__spend-type-{{.ID}}" class="modal-window__manage-types__spend-type">
+					<input type="text" id="edit-spend-type-name-{{.ID}}" value="{{.Name}}" autocomplete="off"
+						placeholder="{{.Name}}">
+
+					<div class="actions-horizontal-list">
+						<div class="feather-icon" title="Save" onclick="editSpendType('{{.ID}}', '{{.Name}}')">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#check" />
+							</svg>
+						</div>
+						<div class="feather-icon" title="Remove" onclick="removeSpendType(Number('{{.ID}}'))">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+							</svg>
+						</div>
+					</div>
+				</div>
+				{{end}}
+
+				<!-- New Spend Type -->
+				<div class="modal-window__manage-types__spend-type">
+					<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
+
+					<div class="feather-icon" title="Add" onclick="addSpendType()">
+						<svg>
+							<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+						</svg>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -1109,12 +1162,71 @@
 			sendRequest("DELETE", "/api/spends", fields);
 		}
 
+		// Spend Types
+
+		// If spendTypeChanged is true, page will be reloaded after closing Modal Window
+		var spendTypeChanged = false;
+
+		function addSpendType() {
+			const name = getValue("new-spend-type-name");
+			if (name === "") {
+				processError("Name of Spend Type can't be empty");
+				return;
+			}
+
+			const fields = {
+				"name": name
+			}
+
+			// Reload on success
+			sendRequest("POST", "/api/spend-types", fields);
+		}
+
+		function editSpendType(id, oldName) {
+			const newName = getValue(`edit-spend-type-name-${id}`);
+			if (newName === oldName) {
+				// Do nothing
+				return;
+			}
+			if (newName === "") {
+				processError("Name of Spend Type can't be empty");
+				return;
+			}
+
+			const fields = {
+				"id": Number(id),
+				"name": newName,
+			}
+
+			const handler = () => { spendTypeChanged = true; }
+			sendRequest("PUT", "/api/spend-types", fields, handler);
+		}
+
+		function removeSpendType(id) {
+			const fields = {
+				"id": Number(id),
+			}
+
+			const hideRemovedSpendType = () => {
+				spendTypeChanged = true;
+
+				const elemID = `modal-window__manage-types__spend-type-${id}`;
+				const elem = document.getElementById(elemID);
+				if (!elem) {
+					return;
+				}
+				elem.style.display = "none";
+			}
+			sendRequest("DELETE", "/api/spend-types", fields, hideRemovedSpendType);
+		}
+
 		/**
 		 * @param {string} method - HTTP method (POST or PUT)
 		 * @param {string} url - request url
 		 * @param {Object} fields - additional json fields (like month id, day id and etc.)
+		 * @param {Function} successHandler - success handler (page are reloaded by default)
 		 */
-		function sendRequest(method, url, fields) {
+		function sendRequest(method, url, fields, successHandler = () => { location.reload() }) {
 			if (!fields) {
 				return;
 			}
@@ -1127,19 +1239,18 @@
 				body: JSON.stringify(fields)
 			}).then(resp => {
 				if (resp.status === 200 || resp.status === 201) {
-					// Success. Reload page
-					location.reload();
-
-					// Prevent next 'then' to show an error
 					return { success: true };
 				}
 
-				// Got an error
+				// Retunr an error
 				return resp.json()
 			}).then(resp => {
-				if (!resp.success) {
-					processError(resp.error);
+				if (resp.success) {
+					successHandler();
+					return;
 				}
+
+				processError(resp.error);
 			}).catch(err => {
 				processError(err);
 			})
@@ -1162,7 +1273,7 @@
 				if (ev.target.id !== modalWindowID) {
 					return;
 				}
-				hideElement(modalWindowID);
+				hideAllModalWindows();
 			})
 		});
 
@@ -1179,6 +1290,7 @@
 		const editIncomeModalWindowID = "modal-window__edit-income";
 		const editMonthlyPaymentModalWindowID = "modal-window__edit-monthly-payment";
 		const editSpendModalWindowID = "modal-window__edit-spend";
+		const manageSpendTypesModalWindowID = "modal-window__manage-types";
 
 		/**
 		 * @param {string} id - Income id
@@ -1254,7 +1366,11 @@
 		}
 
 		function showModalWindowToEditTypes() {
-			alert("TODO");
+			hideAllModalWindows();
+
+			// Show Modal Window
+			showElement(manageSpendTypesModalWindowID);
+			showElement(modalWindowID);
 		}
 
 		/**
@@ -1265,6 +1381,12 @@
 			hideElement(editIncomeModalWindowID);
 			hideElement(editMonthlyPaymentModalWindowID);
 			hideElement(editSpendModalWindowID);
+			hideElement(manageSpendTypesModalWindowID);
+
+			if (spendTypeChanged) {
+				// Reload page to display updated Spend Types
+				location.reload();
+			}
 		}
 
 		// ----------------------------------------------------
