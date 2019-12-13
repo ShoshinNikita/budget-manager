@@ -120,6 +120,7 @@
 
 		table {
 			border-collapse: collapse;
+			margin-bottom: 30px;
 			width: 100%;
 		}
 
@@ -570,15 +571,23 @@
 							<td>
 								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
 							</td>
+							<td>
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Add" onclick="addIncome()">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+										</svg>
+									</div>
+									<div class="feather-icon" title="Reset"
+										onclick="resetValues('new-income-title', 'new-income-notes', 'new-income-income')">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" />
+										</svg>
+									</div>
+								</div>
+							</td>
 						</tr>
 					</table>
-
-					<div class="detailed-info__block__table__add-buttons">
-						<input type="button" value="Reset"
-							onclick="resetValues('new-income-title', 'new-income-notes', 'new-income-income')">
-
-						<input type="button" value="Submit" onclick="addIncome()">
-					</div>
 				</div>
 			</div>
 
@@ -649,15 +658,23 @@
 							<td>
 								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
 							</td>
+							<td>
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Add" onclick="addMonthlyPayment()">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+										</svg>
+									</div>
+									<div class="feather-icon" title="Reset"
+										onclick="resetValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost')">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" />
+										</svg>
+									</div>
+								</div>
+							</td>
 						</tr>
 					</table>
-
-					<div class="detailed-info__block__table__add-buttons">
-						<input type="button" value="Reset"
-							onclick="resetValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost')">
-
-						<input type="button" value="Submit" onclick="addMonthlyPayment()">
-					</div>
 				</div>
 			</div>
 
@@ -760,15 +777,23 @@
 								<td>
 									<input type="text" id="new-spend-cost-{{.ID}}" placeholder="Cost" autocomplete="off">
 								</td>
+								<td>
+									<div class="actions-horizontal-list">
+										<div class="feather-icon" title="Add" onclick="addSpend(Number('{{.ID}}'))">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+											</svg>
+										</div>
+										<div class="feather-icon" title="Reset"
+											onclick="resetValues('new-spend-title-{{.ID}}', 'new-spend-notes-{{.ID}}', 'new-spend-type-{{.ID}}', 'new-spend-cost-{{.ID}}')">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" />
+											</svg>
+										</div>
+									</div>
+								</td>
 							</tr>
 						</table>
-
-						<div class="detailed-info__block__table__add-buttons">
-							<input type="button" value="Reset"
-								onclick="resetValues('new-spend-title-{{.ID}}', 'new-spend-notes-{{.ID}}', 'new-spend-type-{{.ID}}', 'new-spend-cost-{{.ID}}')">
-
-							<input type="button" value="Submit" onclick="addSpend(Number('{{.ID}}'))">
-						</div>
 					</div>
 
 					<div class="detailed-info__days__day__result">
