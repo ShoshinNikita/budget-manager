@@ -135,7 +135,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 
 	spend := &Spend{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		err = db.db.Select(spend)
+		err = tx.Select(spend)
 		if err != nil {
 			return errorWrap(err, "can't select Spend with passed id")
 		}
@@ -200,12 +200,12 @@ func (db DB) RemoveSpend(id uint) error {
 	spend := &Spend{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Remove Spend
-		err = db.db.Model(spend).Column("day_id").WherePK().Select()
+		err = tx.Model(spend).Column("day_id").WherePK().Select()
 		if err != nil {
 			return errorWrap(err, "can't select Spend with passed id")
 		}
 
-		err = db.db.Delete(spend)
+		err = tx.Delete(spend)
 		if err != nil {
 			return errorWrap(err, "can't delete Spend with passed id")
 		}

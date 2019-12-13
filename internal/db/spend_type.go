@@ -64,7 +64,7 @@ func (db DB) GetSpendTypes() ([]SpendType, error) {
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		err = db.db.Insert(spendType)
+		err = tx.Insert(spendType)
 		if err != nil {
 			err = errorWrap(err, "can't insert a new Spend Type")
 			db.log.Error(err)
@@ -91,7 +91,7 @@ func (db DB) EditSpendType(id uint, newName string) error {
 
 	spendType := &SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		err = db.db.Update(spendType)
+		err = tx.Update(spendType)
 		if err != nil {
 			err = errorWrap(err, "can't insert a new Spend Type")
 			db.log.Error(err)
@@ -118,9 +118,31 @@ func (db DB) RemoveSpendType(id uint) error {
 
 	spendType := &SpendType{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		err = db.db.Delete(spendType)
+		err = tx.Delete(spendType)
 		if err != nil {
 			err = errorWrapf(err, "can't delete spend type with id '%d'", id)
+			db.log.Error(err)
+			return err
+		}
+
+		// Reset Type IDs
+
+		_, err = tx.Model((*MonthlyPayment)(nil)).
+			Set("type_id = 0").
+			Where("type_id = ?", id).
+			Update()
+		if err != nil {
+			err = errorWrap(err, "can't reset Type IDs of Monthly Payments")
+			db.log.Error(err)
+			return err
+		}
+
+		_, err = tx.Model((*Spend)(nil)).
+			Set("type_id = 0").
+			Where("type_id = ?", id).
+			Update()
+		if err != nil {
+			err = errorWrap(err, "can't reset Type IDs of Spends")
 			db.log.Error(err)
 			return err
 		}
