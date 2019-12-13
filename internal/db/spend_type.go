@@ -50,7 +50,7 @@ func (db DB) GetSpendType(id uint) (*SpendType, error) {
 // GetSpendTypes returns all Spend Types
 func (db DB) GetSpendTypes() ([]SpendType, error) {
 	spendTypes := []SpendType{}
-	err := db.db.Model(&spendTypes).Select()
+	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
 		err = errorWrap(err, "can't select Spend Types")
 		db.log.Error(err)
