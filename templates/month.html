@@ -129,6 +129,7 @@
 			border-bottom: 1px solid var(--border-color);
 			padding: 5px;
 			text-align: left;
+			word-break: break-word;
 		}
 
 		table tr:last-child td {
@@ -168,6 +169,10 @@
 
 		div.feather-icon:hover>svg {
 			stroke: #666666;
+		}
+
+		svg.svg-icon-plus {
+			transform: scale(1.2);
 		}
 
 		/* | App */
@@ -574,14 +579,8 @@
 							<td>
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Add" onclick="addIncome()">
-										<svg>
+										<svg class="svg-icon-plus">
 											<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-										</svg>
-									</div>
-									<div class="feather-icon" title="Reset"
-										onclick="resetValues('new-income-title', 'new-income-notes', 'new-income-income')">
-										<svg>
-											<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" />
 										</svg>
 									</div>
 								</div>
@@ -661,14 +660,8 @@
 							<td>
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Add" onclick="addMonthlyPayment()">
-										<svg>
+										<svg class="svg-icon-plus">
 											<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-										</svg>
-									</div>
-									<div class="feather-icon" title="Reset"
-										onclick="resetValues('new-monthly-payment-title', 'new-monthly-payment-notes', 'new-monthly-payment-type', 'new-monthly-payment-cost')">
-										<svg>
-											<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" />
 										</svg>
 									</div>
 								</div>
@@ -780,14 +773,8 @@
 								<td>
 									<div class="actions-horizontal-list">
 										<div class="feather-icon" title="Add" onclick="addSpend(Number('{{.ID}}'))">
-											<svg>
+											<svg class="svg-icon-plus">
 												<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-											</svg>
-										</div>
-										<div class="feather-icon" title="Reset"
-											onclick="resetValues('new-spend-title-{{.ID}}', 'new-spend-notes-{{.ID}}', 'new-spend-type-{{.ID}}', 'new-spend-cost-{{.ID}}')">
-											<svg>
-												<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" />
 											</svg>
 										</div>
 									</div>
