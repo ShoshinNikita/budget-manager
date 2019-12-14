@@ -1,6 +1,11 @@
 name: Check code
 on:
   push:
+    paths-ignore:
+      - "templates/**"
+      - "static/**"
+      - "tools/**"
+      - "README.md"
 
 jobs:
   check-code:
