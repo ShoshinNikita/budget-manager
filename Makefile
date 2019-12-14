@@ -38,8 +38,14 @@ test-unit:
 test-integ:
 	# Run Postgres
 	./scripts/local/postgres.sh test
+
 	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
-	go test -mod vendor -count 1 -p 1 --tags=integration -v ./...
+	go test -mod=vendor -count=1 -p=1 --tags=integration -v \
+		-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget_manager/... \
+		./...
+	go tool cover -func=cover.out
+	rm cover.out
+
 	# Stop and remove DB
 	docker stop budget_manager_postgres
 
