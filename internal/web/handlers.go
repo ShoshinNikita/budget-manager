@@ -72,7 +72,7 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 		case db.IsBadRequestError(err):
 			s.processError(w, "Month with passed id doesn't exist", http.StatusBadRequest, err)
 		default:
-			s.processError(w, "can't add select Month", http.StatusInternalServerError, err)
+			s.processError(w, "can't select Month", http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -738,4 +738,16 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 //nolint:unused,deadcode,errcheck
 func notImplementedYet(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("not implemented yet"))
+}
+
+// -------------------------------------------------
+// Helpers
+// -------------------------------------------------
+
+// jsonNewDecoder is a wrapper for json.NewDecoder function.
+// It creates a new json.Decoder and calls json.Decoder.DisallowUnknownFields method
+func jsonNewDecoder(r io.Reader) *json.Decoder {
+	d := json.NewDecoder(r)
+	d.DisallowUnknownFields()
+	return d
 }

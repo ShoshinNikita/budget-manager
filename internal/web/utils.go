@@ -2,7 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"runtime"
 	"strings"
@@ -39,14 +38,4 @@ func getCallerFunc(skip int) string {
 	}
 
 	return ""
-}
-
-// -------------------------------------------------
-
-// jsonNewDecoder is a wrapper for json.NewDecoder function.
-// It creates a new json.Decoder and calls json.Decoder.DisallowUnknownFields method
-func jsonNewDecoder(r io.Reader) *json.Decoder {
-	d := json.NewDecoder(r)
-	d.DisallowUnknownFields()
-	return d
 }

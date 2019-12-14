@@ -4,16 +4,1510 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Budget Manager</title>
+	<title>{{.Month.Month}} {{.Year}} | Budget Manager</title>
 
-	<link type="text/css" rel="stylesheet" href="/static/materialize/css/materialize.min.css"
-		media="screen,projection" />
+	<style>
+		/* | Variables */
+
+		:root {
+			--font-color: #000000dd;
+
+			--border-color: #88888830;
+			--border-accent-color: #88888860;
+
+			--hover-color: #d3d3d340;
+		}
+
+		/* | Common */
+
+		* {
+			box-sizing: border-box;
+		}
+
+		/* || Scrollbar */
+
+		/* Firefox */
+
+		* {
+			scrollbar-color: #88888840 #88888840;
+			scrollbar-width: thin;
+		}
+
+		/* WebKit */
+
+		::-webkit-scrollbar {
+			width: 7px;
+		}
+
+		::-webkit-scrollbar-track {
+			background-color: #eff0f1;
+
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: #88888840;
+		}
+
+		body {
+			color: var(--font-color);
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			font-weight: normal;
+			height: 100vh;
+			margin: 0;
+			padding: 30px;
+			padding-bottom: 40px;
+		}
+
+		/* || Inputs */
+
+		input {
+			background-color: white;
+			font-size: 15px;
+		}
+
+		input[type="text"] {
+			border: none;
+			border-bottom: 1px solid var(--border-color);
+			width: 100%;
+		}
+
+		input[type="text"]:focus {
+			border-bottom: 1px solid var(--border-accent-color);
+		}
+
+		input[type="button"] {
+			border: 1px solid var(--border-accent-color);
+			border-radius: 3px;
+			cursor: pointer;
+			height: 23px;
+			width: 80px;
+		}
+
+		input[type="button"]:hover {
+			background-color: var(--hover-color);
+		}
+
+		input[type="button"]:active {
+			color: var(--font-color);
+		}
+
+		select {
+			appearance: none;
+			-moz-appearance: none;
+			-webkit-appearance: none;
+			background-color: white;
+			border: 1px solid var(--border-accent-color);
+			cursor: pointer;
+			padding: 2px 16px 2px 0;
+			background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>") no-repeat right;
+		}
+
+		select:active {
+			color: var(--font-color);
+		}
+
+		/* || Links */
+
+		a:link,
+		a:visited {
+			text-decoration: none;
+			color: #039be5;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		/* || Money */
+
+		.money::after {
+			color: black;
+			content: "⛁";
+			margin-left: 3px;
+		}
+
+		.money--gain {
+			color: green;
+		}
+
+		.money--gain::before {
+			content: "+";
+		}
+
+		.money--lose {
+			color: crimson;
+		}
+
+		/* || Table */
+
+		table {
+			border-collapse: collapse;
+			margin-bottom: 30px;
+			width: 100%;
+		}
+
+		table th,
+		td {
+			border-bottom: 1px solid var(--border-color);
+			padding: 5px;
+			text-align: left;
+			word-break: break-word;
+		}
+
+		table tr:last-child td {
+			border-bottom: none;
+		}
+
+		/* || Actions */
+
+		div.actions-horizontal-list {
+			display: flex;
+		}
+
+		div.actions-horizontal-list>.feather-icon>svg {
+			width: 18px;
+			height: 18px;
+		}
+
+		/* || Other */
+
+		.noselect {
+			cursor: default;
+			user-select: none;
+		}
+
+		div.feather-icon {
+			cursor: pointer;
+			padding: 3px;
+		}
+
+		div.feather-icon>svg {
+			fill: none;
+			stroke: #888888a0;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+			stroke-width: 2;
+		}
+
+		div.feather-icon:hover>svg {
+			stroke: #666666;
+		}
+
+		svg.svg-icon-plus {
+			transform: scale(1.2);
+		}
+
+		/* | App */
+
+		#app {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+			margin: 0 auto 30px;
+			max-width: 1800px;
+			padding: 10px;
+			width: 100%;
+		}
+
+		/* | Header */
+
+		#header {
+			border-bottom: 1px solid var(--border-accent-color);
+			box-sizing: content-box;
+			display: grid;
+			column-gap: 20px;
+			font-size: 20px;
+			height: 35px;
+			line-height: 35px;
+			margin-bottom: 10px;
+			padding-bottom: 5px;
+			position: relative;
+			width: 100%;
+		}
+
+		.header__stats {
+			margin-right: 10px;
+		}
+
+		#header__type-manager {
+			height: 100%;
+			position: absolute;
+			right: 0px;
+			top: 0px;
+		}
+
+		#header__type-manager>svg {
+			height: 30px;
+			width: 30px;
+		}
+
+		/* | Detailed info */
+
+		#detailed-info {
+			column-gap: 20px;
+			display: grid;
+			/* 100% - header height - header padding-bottom - header margin-bottom */
+			height: calc(100% - 35px - 5px - 10px);
+			row-gap: 20px;
+		}
+
+		.detailed-info__block {
+			border: 1px solid var(--border-color);
+			border-radius: 3px;
+			display: flex;
+			flex-direction: column;
+			overflow-x: auto;
+			height: 100%;
+		}
+
+		.detailed-info__block__header {
+			border-bottom: 1px solid var(--border-accent-color);
+			margin: 0 5px 5px;
+			font-size: 18px;
+			padding-bottom: 5px;
+			text-align: center;
+		}
+
+		.detailed-info__block__table {
+			height: 100%;
+			overflow-x: auto;
+		}
+
+		.detailed-info__block__table__header-title {
+			width: 120px;
+		}
+
+		.detailed-info__block__table__header-cost {
+			width: 100px;
+		}
+
+		.detailed-info__block__table__header-actions {
+			/* Set width to minimum */
+			width: 1px;
+		}
+
+		.detailed-info__block__table__add-buttons {
+			margin: 10px 0;
+			text-align: center;
+		}
+
+		/* || Income */
+
+		#detailed-info__incomes {
+			grid-area: incomes;
+		}
+
+		/* || Monthly Payments */
+
+		#detailed-info__monthly-payments {
+			grid-area: monthly-payments;
+		}
+
+		/* || Days */
+
+		#detailed-info__days {
+			border: none;
+			grid-area: days;
+		}
+
+		#detailed-info__days__calendar {
+			display: grid;
+			grid-template-columns: repeat(7, 1fr);
+			column-gap: 10px;
+			row-gap: 10px;
+			margin-bottom: 30px;
+		}
+
+		.detailed-info__days__calendar__day {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			padding: 3px;
+		}
+
+		.detailed-info__days__calendar__day:hover {
+			background-color: var(--hover-color);
+			cursor: pointer;
+		}
+
+		.detailed-info__days__calendar__day__number {
+			left: 5px;
+			margin-bottom: 5px;
+			top: 5px;
+		}
+
+		.detailed-info__days__calendar__day__summary {
+			display: grid;
+			grid-template-columns: repeat(2, auto);
+		}
+
+		.detailed-info__days__calendar__day__summary__spends-number {
+			text-align: left;
+		}
+
+		.detailed-info__days__calendar__day__summary__saldo {
+			text-align: right;
+			padding-right: 3px;
+		}
+
+		.detailed-info__days__day {
+			/* Hidden by default */
+			display: none;
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			padding: 3px;
+		}
+
+		.detailed-info__days__day__date {
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 18px;
+			margin: 5px 0px 10px;
+			padding: 0 10px;
+		}
+
+		.detailed-info__days__day__result {
+			font-size: 18px;
+			margin: 10px 10px 10px 0;
+			text-align: right;
+		}
+
+		/* | Modal windows */
+
+		#modal-window__background {
+			background-color: #00000050;
+			display: none;
+			height: 100%;
+			left: 0;
+			overflow-y: auto;
+			position: fixed;
+			top: 0;
+			width: 100%;
+		}
+
+		.modal-window {
+			background-color: white;
+			border-radius: 5px;
+			box-shadow: 0px 0px 10px 10px #00000020;
+			display: none;
+			margin: 9vh auto 5vh;
+			max-width: 700px;
+			padding: 20px;
+			width: 80%;
+		}
+
+		.modal-window__header {
+			font-size: 18px;
+			margin-bottom: 10px;
+			text-align: center;
+		}
+
+		.modal-window__edit-field {
+			display: grid;
+			grid-template-columns: 100px auto;
+			margin-bottom: 5px;
+		}
+
+		.modal-window__edit-field>select {
+			min-width: 150px;
+			width: 25%;
+		}
+
+		.modal-window__save-button {
+			margin-top: 20px;
+			text-align: center;
+		}
+
+		.modal-window__manage-types__spend-type {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: 200px 30px;
+			width: min-content;
+			margin: 0 auto 5px;
+		}
+
+		.modal-window__manage-types__spend-type:last-child {
+			margin-bottom: 20px;
+		}
+
+		.modal-window__manage-types__spend-type>.feather-icon>svg {
+			height: 20px;
+			vertical-align: middle;
+			width: 20px;
+		}
+
+		/* | Layouts */
+
+		/* For small screens (< 1000px) */
+		@media (max-width: 999px) {
+			body {
+				padding: 15px;
+			}
+
+			#app {
+				margin: 0;
+			}
+
+			#header {
+				grid-template-columns: 100%;
+				grid-template-rows: repeat(2, minmax(min-content, max-content));
+				font-size: 16px;
+				height: auto;
+				line-height: 18px;
+			}
+
+			#detailed-info {
+				grid-template-columns: 100%;
+				grid-template-rows: 2fr 2fr 3fr;
+				grid-template-areas:
+					"incomes"
+					"monthly-payments"
+					"days";
+			}
+
+			.detailed-info__block__header {
+				font-size: 14px;
+				padding: 0;
+			}
+
+			#detailed-info__days__calendar {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+
+		/* For medium screens (1000px <= width < 1400px) */
+		@media (min-width: 1000px) and (max-width: 1399px) {
+			#header {
+				grid-template-columns: 300px auto;
+				font-size: 18px;
+				height: auto;
+			}
+
+			#detailed-info {
+				grid-template-columns: 2fr 3fr;
+				grid-template-rows: 1fr 1fr;
+				grid-template-areas:
+					"incomes days"
+					"monthly-payments days";
+			}
+
+			#detailed-info__days__calendar {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+
+		/* For large screens (1400 <= width) */
+		@media (min-width: 1400px) {
+			#header {
+				grid-template-columns: 325px auto;
+			}
+
+			#detailed-info {
+				grid-template-columns: 1fr 2fr;
+				grid-template-rows: 1fr 1fr;
+				grid-template-areas:
+					"incomes days"
+					"monthly-payments days";
+			}
+		}
+	</style>
 </head>
 
 <body>
-	<h1>TODO (month)</h1>
+	<div id="app">
+		<div id="header">
+			<!-- Path like "Years / 2019 / Months / November" -->
+			<div id="header__path">
+				<span> <a href="/years">Years</a> </span>
+				<span class="noselect"> / </span>
+				<span> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
+				<span class="noselect"> / </span>
+				<span> <a href="/years/{{.Year}}/months">Months</a> </span>
+				<span class="noselect"> / </span>
+				<span> {{.Month.Month}} </span>
+			</div>
 
-	<script type="text/javascript" src="/static/materialize/js/materialize.min.js"></script>
+			<!-- Stats: Total Income and Spend, Result -->
+			<div>
+				<span class="noselect">Incomes:</span>
+				<span class="header__stats money money--gain">{{.TotalIncome}}</span>
+				<span class="noselect">Spends:</span>
+				<span class="header__stats money money--lose">{{.TotalSpend}}</span>
+				<span class="noselect">Result:</span>
+				<!-- .Result > 0 -->
+				{{if ge .Result 0}}
+				<span class="header__stats money money--gain">{{.Result}}</span>
+				{{else}}
+				<span class="header__stats money money--lose">{{.Result}}</span>
+				{{end}}
+			</div>
+
+			<div id="header__type-manager" class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
+				<svg>
+					<use xlink:href="/static/feather/feather-sprite.svg#tag" />
+				</svg>
+			</div>
+		</div>
+
+		<div id="detailed-info">
+			<!-- Incomes -->
+			<div id="detailed-info__incomes" class="detailed-info__block">
+				<div class="detailed-info__block__header noselect">Incomes</div>
+				<!-- Incomes list -->
+				<div class="detailed-info__block__table">
+					<table>
+						<tr>
+							<th class="detailed-info__block__table__header-title noselect">Title</th>
+							<th class="noselect">Notes</th>
+							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px;">Income,</th>
+							<th class="detailed-info__block__table__header-actions"></th>
+						</tr>
+
+						{{range .Incomes}}
+						<tr>
+							<td>{{.Title}}</td>
+							<td>{{.Notes}}</td>
+							<td>{{.Income}}</td>
+							<td>
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Edit"
+										onclick="showModalWindowToEditIncome('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.Income}}')">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
+										</svg>
+									</div>
+									<div class="feather-icon" title="Remove" onclick="removeIncome(Number('{{.ID}}'))">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+										</svg>
+									</div>
+								</div>
+							</td>
+						</tr>
+						{{end}}
+
+						<!-- Inputs for new Income -->
+						<tr>
+							<td>
+								<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
+							</td>
+							<td>
+								<input
+									type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
+							</td>
+							<td>
+								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
+							</td>
+							<td>
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Add" onclick="addIncome()">
+										<svg class="svg-icon-plus">
+											<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+										</svg>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<!-- Monthly Payments -->
+			<div id="detailed-info__monthly-payments" class="detailed-info__block">
+				<div class="detailed-info__block__header noselect">Monthly Payments</div>
+				<!-- Monthly Payment list -->
+				<div class="detailed-info__block__table">
+					<table>
+						<tr>
+							<th class="detailed-info__block__table__header-title noselect">Title</th>
+							<th class="noselect">Notes</th>
+							<th class="noselect">Type</th>
+							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px">
+								Cost,
+							</th>
+							<th class="detailed-info__block__table__header-actions"></th>
+						</tr>
+
+						{{range .MonthlyPayments}}
+						<tr>
+							<td>{{.Title}}</td>
+							<td>{{.Notes}}</td>
+							<td>
+								{{if .Type}}
+								{{.Type.Name}}
+								{{else}}
+								-
+								{{end}}
+							</td>
+							<td>{{.Cost}}</td>
+							<td>
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Edit"
+										onclick="showModalWindowToEditMonthlyPayment('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
+										</svg>
+									</div>
+									<div class="feather-icon" title="Remove" onclick="removeMonthlyPayment(Number('{{.ID}}'))">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+										</svg>
+									</div>
+								</div>
+							</td>
+						</tr>
+						{{end}}
+
+						<!-- Inputs for new Monthly Payment -->
+						<tr>
+							<td>
+								<input type="text" id="new-monthly-payment-title" placeholder="Title"
+									autocomplete="off">
+							</td>
+							<td>
+								<input
+									type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off">
+							</td>
+							<td>
+								<select id="new-monthly-payment-type" autocomplete="off">
+									<option value="0">-</option>
+									{{range $.SpendTypes}}
+									<option value="{{.ID}}">{{.Name}}</option>
+									{{end}}
+								</select>
+							</td>
+							<td>
+								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
+							</td>
+							<td>
+								<div class="actions-horizontal-list">
+									<div class="feather-icon" title="Add" onclick="addMonthlyPayment()">
+										<svg class="svg-icon-plus">
+											<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+										</svg>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<!-- Days -->
+			<div id="detailed-info__days" class="detailed-info__block">
+				<div id="detailed-info__days__calendar">
+					{{range .Days}}
+					<div id="id-calendar-day-{{.Day}}" class="detailed-info__days__calendar__day"
+						onclick="selectDay('{{.Day}}');">
+
+						<div class="detailed-info__days__calendar__day__number">
+							{{.Day}} {{$.Month.Month}}
+						</div>
+
+						<div class="detailed-info__days__calendar__day__summary">
+							<div class="detailed-info__days__calendar__day__summary__spends-number" title="Spends">
+								{{len .Spends}}
+							</div>
+							<div class="detailed-info__days__calendar__day__summary__saldo" title="Saldo">
+								{{if ge .Saldo 0}}
+								<span class="money--gain">{{.Saldo}}</span>
+								{{else}}
+								<span class="money--lose">{{.Saldo}}</span>
+								{{end}}
+							</div>
+						</div>
+					</div>
+					{{end}}
+				</div>
+
+				{{range .Days}}
+				<div id="id-day-{{.Day}}" class="detailed-info__days__day">
+					<div class="detailed-info__days__day__date">
+						{{.Day}} {{$.Month.Month}}
+					</div>
+
+					<div>
+						<table>
+							<tr>
+								<th class="noselect">Title</th>
+								<th class="noselect">Notes</th>
+								<th class="noselect">Type</th>
+								<th class="money noselect" style="width: 100px;">Cost</th>
+								<th class="detailed-info__block__table__header-actions"></th>
+							</tr>
+
+							{{range .Spends}}
+							<tr>
+								<td>{{.Title}}</td>
+								<td>{{.Notes}}</td>
+								<td>
+									{{if .Type}}
+									{{.Type.Name}}
+									{{else}}
+									-
+									{{end}}
+								</td>
+								<td>{{.Cost}}</td>
+								<td>
+									<div class="actions-horizontal-list">
+										<div class="feather-icon" title="Edit"
+											onclick="showModalWindowToEditSpend('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
+											</svg>
+										</div>
+										<div class="feather-icon" title="Remove" onclick="removeSpend(Number('{{.ID}}'))">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+											</svg>
+										</div>
+									</div>
+								</td>
+							</tr>
+							{{end}}
+
+							<!--
+								Inputs for new Spend
+
+								We use '-{{.ID}}' suffix because we render all days, just hide them.
+								So, ids without this suffix wouldn't be unique. We use day id instead of
+								day number because we pass into 'addSpend' function day id.
+							-->
+							<tr>
+								<td>
+									<input type="text" id="new-spend-title-{{.ID}}" placeholder="Title" autocomplete="off">
+								</td>
+								<td>
+									<input
+										type="text" id="new-spend-notes-{{.ID}}" placeholder="Notes" autocomplete="off">
+								</td>
+								<td>
+									<select id="new-spend-type-{{.ID}}" autocomplete="off">
+										<option value="0">-</option>
+										{{range $.SpendTypes}}
+										<option value="{{.ID}}">{{.Name}}</option>
+										{{end}}
+									</select>
+								</td>
+								<td>
+									<input type="text" id="new-spend-cost-{{.ID}}" placeholder="Cost" autocomplete="off">
+								</td>
+								<td>
+									<div class="actions-horizontal-list">
+										<div class="feather-icon" title="Add" onclick="addSpend(Number('{{.ID}}'))">
+											<svg class="svg-icon-plus">
+												<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+											</svg>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+
+					<div class="detailed-info__days__day__result">
+						<span>Saldo:</span>
+						{{if ge .Saldo 0}}
+						<span class="money money--gain">{{.Saldo}}</span>
+						{{else}}
+						<span class="money money--lose">{{.Saldo}}</span>
+						{{end}}
+					</div>
+				</div>
+				{{end}}
+			</div>
+		</div>
+
+		<!-- Modal windows (hidden by default) -->
+		<div id="modal-window__background">
+			<!-- Edit Income -->
+			<div id="modal-window__edit-income" class="modal-window">
+				<div class="modal-window__header noselect">Edit Income</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-income__title" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-income__notes" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Income:</span>
+					<input id="modal-window__edit-income__income" type="text">
+				</div>
+
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="button" id="modal-window__edit-income__save-button" value="Save">
+				</div>
+			</div>
+
+			<!-- Edit Monthly Payment -->
+			<div id="modal-window__edit-monthly-payment" class="modal-window">
+				<div class="modal-window__header noselect">Edit Monthly Payment</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-monthly-payment__title" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-monthly-payment__notes" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Type:</span>
+					<select id="modal-window__edit-monthly-payment__type">
+						<option value="0">-</option>
+						{{range $.SpendTypes}}
+						<option value="{{.ID}}">{{.Name}}</option>
+						{{end}}
+					</select>
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Cost:</span>
+					<input id="modal-window__edit-monthly-payment__cost" type="text">
+				</div>
+
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="button" id="modal-window__edit-monthly-payment__save-button" value="Save">
+				</div>
+			</div>
+
+			<!-- Edit Spend -->
+			<div id="modal-window__edit-spend" class="modal-window">
+				<div class="modal-window__header noselect">Edit Spend</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-spend__title" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-spend__notes" type="text">
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Type:</span>
+					<select id="modal-window__edit-spend__type">
+						<option value="0">-</option>
+						{{range $.SpendTypes}}
+						<option value="{{.ID}}">{{.Name}}</option>
+						{{end}}
+					</select>
+				</div>
+
+				<div class="modal-window__edit-field">
+					<span class="noselect">Cost:</span>
+					<input id="modal-window__edit-spend__cost" type="text">
+				</div>
+
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="button" id="modal-window__edit-spend__save-button" value="Save">
+				</div>
+			</div>
+
+			<!-- Manage types -->
+			<div id="modal-window__manage-types" class="modal-window">
+				<div class="modal-window__header noselect">Manage Spend Types</div>
+
+				{{range .SpendTypes}}
+				<div id="modal-window__manage-types__spend-type-{{.ID}}" class="modal-window__manage-types__spend-type">
+					<input type="text" id="edit-spend-type-name-{{.ID}}" value="{{.Name}}" autocomplete="off"
+						placeholder="{{.Name}}">
+
+					<div class="actions-horizontal-list">
+						<div class="feather-icon" title="Save" onclick="editSpendType('{{.ID}}', '{{.Name}}')">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#check" />
+							</svg>
+						</div>
+						<div class="feather-icon" title="Remove" onclick="removeSpendType(Number('{{.ID}}'))">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#trash" />
+							</svg>
+						</div>
+					</div>
+				</div>
+				{{end}}
+
+				<!-- New Spend Type -->
+				<div class="modal-window__manage-types__spend-type">
+					<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
+
+					<div class="feather-icon" title="Add" onclick="addSpendType()">
+						<svg>
+							<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// ----------------------------------------------------
+		// Global variables
+		// ----------------------------------------------------
+
+		const MonthID = Number("{{.ID}}");
+
+		// ----------------------------------------------------
+		// Days
+		// ----------------------------------------------------
+
+		// Select day
+		window.addEventListener("load", () => {
+			const now = new Date();
+			const year = now.getFullYear();
+			const month = now.getMonth() + 1;
+			const day = now.getDate();
+
+			const urlRegexp = /years\/(\d+)\/months\/(\d+)(?:#(\d+))?/;
+			const match = window.location.href.match(urlRegexp);
+
+			// Check whether day is passed in URL
+			if (match[3] && Number(match[3])) {
+				const passedDay = Number(match[3]);
+				const daysInMonth = new Date(year, month, 0).getDate();
+				if (0 < passedDay && passedDay <= daysInMonth) {
+					// Select passed day
+					selectDay(passedDay);
+					return;
+				}
+			}
+
+			// Check whether we display current month
+			if (match[1] == year && match[2] == month) {
+				// Select current day
+				selectDay(day);
+				return;
+			}
+
+			// Just choose first day
+			selectDay(1);
+		});
+
+		const calendarDayIDPrefix = "id-calendar-day-";
+		const calendarDayClass = "detailed-info__days__calendar__day";
+		//
+		const dayIDPrefix = "id-day-";
+		const dayClass = "detailed-info__days__day";
+
+		function selectDay(dayNumber) {
+			// Calendar
+
+			// Remove highlights
+			const calendarDays = document.getElementsByClassName(calendarDayClass);
+			for (let i = 0; i < calendarDays.length; i++) {
+				calendarDays[i].style.backgroundColor = "";
+			}
+
+			// Highlight day in calendar
+			const calendarDayElemID = calendarDayIDPrefix + dayNumber;
+			const calendarDayElem = document.getElementById(calendarDayElemID);
+			if (calendarDayElem === undefined) {
+				console.error(`element with id '${calendarDayElem}' doesn't exist`);
+			} else {
+				calendarDayElem.style.backgroundColor = "var(--hover-color)";
+			}
+
+			// Chosen day
+
+			// Hide all days at first
+			const days = document.getElementsByClassName(dayClass);
+			for (let i = 0; i < days.length; i++) {
+				days[i].style.display = "none";
+			}
+
+			// Display chosen day
+			const dayElemID = dayIDPrefix + dayNumber;
+			const dayElem = document.getElementById(dayElemID);
+			if (dayElem === undefined) {
+				console.error(`element with id '${dayElemID}' doesn't exist`);
+				return;
+			}
+
+			dayElem.style.display = "block";
+			// Set day number in URL
+			location.hash = dayNumber;
+		}
+
+		// ----------------------------------------------------
+		// Requests
+		// ----------------------------------------------------
+
+		// Incomes
+
+		function addIncome() {
+			const income = getValue("new-income-income");
+			if (isNaN(income)) {
+				processError("income must be a number");
+				return;
+			}
+
+			const fields = {
+				"month_id": MonthID,
+				"title": getValue("new-income-title"),
+				"notes": getValue("new-income-notes"),
+				"income": Number(income),
+			}
+
+			sendRequest("POST", "/api/incomes", fields);
+		}
+
+		function editIncome(id) {
+			const income = getValue("modal-window__edit-income__income");
+			if (isNaN(income)) {
+				processError("income must be a number");
+				return;
+			}
+
+			const fields = {
+				"id": Number(id),
+				"title": getValue("modal-window__edit-income__title"),
+				"notes": getValue("modal-window__edit-income__notes"),
+				"income": Number(income),
+			}
+
+			sendRequest("PUT", "/api/incomes", fields);
+		}
+
+		function removeIncome(id) {
+			if (!confirm("Do you really want to delete the Income?")) {
+				return;
+			}
+
+			const fields = { "id": Number(id) };
+			sendRequest("DELETE", "/api/incomes", fields);
+		}
+
+		// Monthly Payments
+
+		function addMonthlyPayment() {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue("new-monthly-payment-type");
+
+			const cost = getValue("new-monthly-payment-cost");
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
+			const fields = {
+				"month_id": MonthID,
+				"title": getValue("new-monthly-payment-title"),
+				"notes": getValue("new-monthly-payment-notes"),
+				"type_id": Number(typeID),
+				"cost": Number(cost),
+			};
+
+			sendRequest("POST", "/api/monthly-payments", fields);
+		}
+
+		function editMonthlyPayment(id) {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue("modal-window__edit-monthly-payment__type");
+
+			const cost = getValue("modal-window__edit-monthly-payment__cost");
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
+			const fields = {
+				"id": Number(id),
+				"title": getValue("modal-window__edit-monthly-payment__title"),
+				"notes": getValue("modal-window__edit-monthly-payment__notes"),
+				"type_id": Number(typeID),
+				"cost": Number(cost),
+			}
+
+			sendRequest("PUT", "/api/monthly-payments", fields);
+		}
+
+		function removeMonthlyPayment(id) {
+			if (!confirm("Do you really want to delete the Monthly Payment?")) {
+				return;
+			}
+
+			const fields = { "id": Number(id) };
+			sendRequest("DELETE", "/api/monthly-payments", fields);
+		}
+
+		// Spends
+
+		function addSpend(dayID) {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue(`new-spend-type-${dayID}`);
+
+			const cost = getValue(`new-spend-cost-${dayID}`)
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
+			const fields = {
+				"day_id": Number(dayID),
+				"title": getValue(`new-spend-title-${dayID}`),
+				"notes": getValue(`new-spend-notes-${dayID}`),
+				"type_id": Number(typeID),
+				"cost": Number(cost),
+			};
+
+			sendRequest("POST", "/api/spends", fields);
+		}
+
+		function editSpend(id) {
+			// Skip check because user can't specify typeID as not a number
+			const typeID = getValue("modal-window__edit-spend__type");
+
+			const cost = getValue("modal-window__edit-spend__cost");
+			if (isNaN(cost)) {
+				processError("cost must be a number");
+				return;
+			}
+
+			const fields = {
+				"id": Number(id),
+				"title": getValue("modal-window__edit-spend__title"),
+				"notes": getValue("modal-window__edit-spend__notes"),
+				"type_id": Number(typeID),
+				"cost": Number(cost),
+			}
+
+			sendRequest("PUT", "/api/spends", fields);
+		}
+
+		function removeSpend(id) {
+			if (!confirm("Do you really want to delete the Spend?")) {
+				return;
+			}
+
+			const fields = { "id": Number(id) };
+			sendRequest("DELETE", "/api/spends", fields);
+		}
+
+		// Spend Types
+
+		// If spendTypeChanged is true, page will be reloaded after closing Modal Window
+		var spendTypeChanged = false;
+
+		function addSpendType() {
+			const name = getValue("new-spend-type-name");
+			if (name === "") {
+				processError("Name of Spend Type can't be empty");
+				return;
+			}
+
+			const fields = {
+				"name": name
+			}
+
+			// Reload on success
+			sendRequest("POST", "/api/spend-types", fields);
+		}
+
+		function editSpendType(id, oldName) {
+			const newName = getValue(`edit-spend-type-name-${id}`);
+			if (newName === oldName) {
+				// Do nothing
+				return;
+			}
+			if (newName === "") {
+				processError("Name of Spend Type can't be empty");
+				return;
+			}
+
+			const fields = {
+				"id": Number(id),
+				"name": newName,
+			}
+
+			const handler = () => { spendTypeChanged = true; }
+			sendRequest("PUT", "/api/spend-types", fields, handler);
+		}
+
+		function removeSpendType(id) {
+			const fields = {
+				"id": Number(id),
+			}
+
+			const hideRemovedSpendType = () => {
+				spendTypeChanged = true;
+
+				const elemID = `modal-window__manage-types__spend-type-${id}`;
+				const elem = document.getElementById(elemID);
+				if (!elem) {
+					return;
+				}
+				elem.style.display = "none";
+			}
+			sendRequest("DELETE", "/api/spend-types", fields, hideRemovedSpendType);
+		}
+
+		/**
+		 * @param {string} method - HTTP method (POST or PUT)
+		 * @param {string} url - request url
+		 * @param {Object} fields - additional json fields (like month id, day id and etc.)
+		 * @param {Function} successHandler - success handler (page are reloaded by default)
+		 */
+		function sendRequest(method, url, fields, successHandler = () => { location.reload() }) {
+			if (!fields) {
+				return;
+			}
+
+			fetch(url, {
+				method: method,
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify(fields)
+			}).then(resp => {
+				if (resp.status === 200 || resp.status === 201) {
+					return { success: true };
+				}
+
+				// Retunr an error
+				return resp.json()
+			}).then(resp => {
+				if (resp.success) {
+					successHandler();
+					return;
+				}
+
+				processError(resp.error);
+			}).catch(err => {
+				processError(err);
+			})
+		}
+
+		// ----------------------------------------------------
+		// Modal windows
+		// ----------------------------------------------------
+
+		// Add event listener to hide modal window on click outside of Modal Window
+		window.addEventListener("load", () => {
+			const elem = document.getElementById(modalWindowID);
+			if (!elem) {
+				console.error(`element with id '${modalWindowID}' doesn't exist`);
+				return
+			}
+
+			// Hide on click
+			elem.addEventListener("click", (ev) => {
+				if (ev.target.id !== modalWindowID) {
+					return;
+				}
+				hideAllModalWindows();
+			})
+		});
+
+		// Add event listener to hide modal window on Esc key pressing
+		window.addEventListener("keydown", (ev) => {
+			const escKeyCode = 27;
+
+			if (ev.keyCode === escKeyCode) {
+				hideAllModalWindows();
+			}
+		})
+
+		const modalWindowID = "modal-window__background";
+		const editIncomeModalWindowID = "modal-window__edit-income";
+		const editMonthlyPaymentModalWindowID = "modal-window__edit-monthly-payment";
+		const editSpendModalWindowID = "modal-window__edit-spend";
+		const manageSpendTypesModalWindowID = "modal-window__manage-types";
+
+		/**
+		 * @param {string} id - Income id
+		 * @param {string} title - current Income title
+		 * @param {string} notes - current Income notes
+		 * @param {string} income - current income
+		 */
+		function showModalWindowToEditIncome(id, title, notes, income) {
+			hideAllModalWindows();
+
+			// Set current values
+			setValue("modal-window__edit-income__title", title);
+			setValue("modal-window__edit-income__notes", notes);
+			setValue("modal-window__edit-income__income", income);
+
+			// Reset event listener
+			const saveButton = document.getElementById("modal-window__edit-income__save-button");
+			saveButton.onclick = () => { editIncome(id); }
+
+			// Show Modal Window
+			showElement(editIncomeModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		/**
+		 * @param {string} id - Monthly Payment id
+		 * @param {string} title - current Monthly Payment title
+		 * @param {string} notes - current Monthly Payment notes
+		 * @param {string} typeID - current Monthly Payment type id
+		 * @param {string} cost - current Monthly Payment cost
+		 */
+		function showModalWindowToEditMonthlyPayment(id, title, notes, typeID, cost) {
+			hideAllModalWindows();
+
+			// Set current values
+			setValue("modal-window__edit-monthly-payment__title", title);
+			setValue("modal-window__edit-monthly-payment__notes", notes);
+			setValue("modal-window__edit-monthly-payment__type", typeID);
+			setValue("modal-window__edit-monthly-payment__cost", cost);
+
+			// Reset event listener
+			const saveButton = document.getElementById("modal-window__edit-monthly-payment__save-button");
+			saveButton.onclick = () => { editMonthlyPayment(id); }
+
+			// Show Modal Window
+			showElement(editMonthlyPaymentModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		/**
+		 * @param {string} id - Spend id
+		 * @param {string} title - current Spend title
+		 * @param {string} notes - current Spend notes
+		 * @param {string} typeID - current Spend type id
+		 * @param {string} cost - current Spend cost
+		 */
+		function showModalWindowToEditSpend(id, title, notes, typeID, cost) {
+			hideAllModalWindows();
+
+			// Set current values
+			setValue("modal-window__edit-spend__title", title);
+			setValue("modal-window__edit-spend__notes", notes);
+			setValue("modal-window__edit-spend__type", typeID);
+			setValue("modal-window__edit-spend__cost", cost);
+
+			// Reset event listener
+			const saveButton = document.getElementById("modal-window__edit-spend__save-button");
+			saveButton.onclick = () => { editSpend(id); }
+
+			// Show Modal Window
+			showElement(editSpendModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		function showModalWindowToEditTypes() {
+			hideAllModalWindows();
+
+			// Show Modal Window
+			showElement(manageSpendTypesModalWindowID);
+			showElement(modalWindowID);
+		}
+
+		/**
+		 * hideAllModalWindows hides all Modal Windows
+		 */
+		function hideAllModalWindows() {
+			hideElement(modalWindowID);
+			hideElement(editIncomeModalWindowID);
+			hideElement(editMonthlyPaymentModalWindowID);
+			hideElement(editSpendModalWindowID);
+			hideElement(manageSpendTypesModalWindowID);
+
+			if (spendTypeChanged) {
+				// Reload page to display updated Spend Types
+				location.reload();
+			}
+		}
+
+		// ----------------------------------------------------
+		// Helpers
+		// ----------------------------------------------------
+
+		/**
+		 * @param {string} elemID - id of an element
+		 * @return {Object} value of an element or empty string
+		 */
+		function getValue(elemID) {
+			const elem = document.getElementById(elemID);
+			if (elem === undefined) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return "";
+			}
+
+			return elem.value || "";
+		}
+
+		/**
+		 * @param {string} elemID - id of an element 
+		 * @param {string} value - new value element
+		 */
+		function setValue(elemID, value) {
+			const elem = document.getElementById(elemID);
+			if (elem === undefined) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return;
+			}
+
+			elem.value = value;
+		}
+
+		/** resetValues resets values of passed elements
+		 *
+		 * @param {...string} elemIDs - list of element ids
+		 */
+		function resetValues(...elemIDs) {
+			for (let i = 0; i < elemIDs.length; i++) {
+				/**
+				* @type {HTMLInputElement}
+				*/
+				const elem = document.getElementById(elemIDs[i]);
+				if (elem === undefined) {
+					console.error(`element with id '${elemIDs[i]}' doesn't exist`)
+					continue;
+				}
+
+				elem.value = "";
+			}
+		}
+
+		/** showElement sets 'display' to 'block'
+		 *
+		 * @param {string} elemID - element id
+		 */
+		function showElement(elemID) {
+			const elem = document.getElementById(elemID);
+			if (!elem) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return
+			}
+
+			elem.style.display = "block";
+		}
+
+		/** hideElement sets 'display' to 'none'
+		 *
+		 * @param {string} elemID - element id
+		 */
+		function hideElement(elemID) {
+			const elem = document.getElementById(elemID);
+			if (!elem) {
+				console.error(`element with id '${elemID}' doesn't exist`);
+				return
+			}
+
+			elem.style.display = "none";
+		}
+
+		function processError(error) {
+			console.error(error);
+			alert("Error: " + error);
+		}
+
+	</script>
 </body>
 
 </html>
