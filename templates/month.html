@@ -22,8 +22,30 @@
 
 		* {
 			box-sizing: border-box;
+		}
+
+		/* || Scrollbar */
+
+		/* Firefox */
+
+		* {
 			scrollbar-color: #88888840 #88888840;
 			scrollbar-width: thin;
+		}
+
+		/* WebKit */
+
+		::-webkit-scrollbar {
+			width: 7px;
+		}
+
+		::-webkit-scrollbar-track {
+			background-color: #eff0f1;
+
+		}
+
+		::-webkit-scrollbar-thumb {
+			background-color: #88888840;
 		}
 
 		body {
