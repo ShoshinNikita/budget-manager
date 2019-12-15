@@ -12,13 +12,12 @@ import (
 
 const (
 	indexTemplatePath  = "./templates/index.html"
-	yearsTemplatePath  = "./templates/years.html"
 	yearTemplatePath   = "./templates/year.html"
-	monthsTemplatePath = "./templates/months.html"
 	monthTemplatePath  = "./templates/month.html"
 )
 
 // GET /
+// GET /overview
 //
 func (s Server) indexPage(w http.ResponseWriter, r *http.Request) {
 	if err := s.tplStore.Execute(indexTemplatePath, w, nil); err != nil {
@@ -27,16 +26,7 @@ func (s Server) indexPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /years
-//
-func (s Server) yearsPage(w http.ResponseWriter, r *http.Request) {
-	if err := s.tplStore.Execute(yearsTemplatePath, w, nil); err != nil {
-		// TODO: use special 500 page
-		s.processError(w, "can't load template", http.StatusInternalServerError, err)
-	}
-}
-
-// GET /years/{year:[0-9]+}
+// GET /overview/{year:[0-9]+}
 //
 func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	year, ok := getYear(r)
@@ -54,25 +44,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /years/{year:[0-9]+}/months
-//
-func (s Server) monthsPage(w http.ResponseWriter, r *http.Request) {
-	year, ok := getYear(r)
-	if !ok {
-		// TODO: use special 404 page
-		s.processError(w, "invalid year was passed", http.StatusBadRequest, nil)
-		return
-	}
-
-	s.log.Debug(year)
-
-	if err := s.tplStore.Execute(monthsTemplatePath, w, nil); err != nil {
-		// TODO: use special 500 page
-		s.processError(w, "can't load template", http.StatusInternalServerError, err)
-	}
-}
-
-// GET /years/{year:[0-9]+}/months/{month:[0-9]+}
+// GET /overview/{year:[0-9]+}/{month:[0-9]+}
 //
 func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	year, ok := getYear(r)
