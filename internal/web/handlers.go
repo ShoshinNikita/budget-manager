@@ -3,8 +3,10 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
 	"github.com/ShoshinNikita/budget_manager/internal/db/money"
@@ -15,6 +17,15 @@ const (
 	errDecodeRequest  = "couldn't decode request"
 	errEncodeResponse = "couldn't encode response"
 )
+
+// GET / - redirects to the current month page
+//
+func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
+	year, month, _ := time.Now().Date()
+
+	url := fmt.Sprintf("/overview/%d/%d", year, month)
+	http.Redirect(w, r, url, http.StatusSeeOther)
+}
 
 // GET /api/months
 //

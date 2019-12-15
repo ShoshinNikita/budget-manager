@@ -1,10 +1,10 @@
 #!/bin/bash
-# This script makes requests to http://localhost:8080/years/${current_year}/months/${current_month}
+# This script makes requests to http://localhost:8080/overview/${current_year}/${current_month}
 # via 'vegeta' for 5 seconds with 25 workers
 
 YEAR=$(date +"%Y")
 MONTH=$(date +"%m")
-URL="http://localhost:8080/years/${YEAR}/months/${MONTH}"
+URL="http://localhost:8080/overview/${YEAR}/${MONTH}"
 DURATION="5s"
 #
 RESULT_FILE="results.bin"
