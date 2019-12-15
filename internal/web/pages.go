@@ -11,16 +11,15 @@ import (
 )
 
 const (
-	indexTemplatePath  = "./templates/index.html"
-	yearTemplatePath   = "./templates/year.html"
-	monthTemplatePath  = "./templates/month.html"
+	overviewTemplatePath = "./templates/overview.html"
+	yearTemplatePath     = "./templates/year.html"
+	monthTemplatePath    = "./templates/month.html"
 )
 
-// GET /
 // GET /overview
 //
-func (s Server) indexPage(w http.ResponseWriter, r *http.Request) {
-	if err := s.tplStore.Execute(indexTemplatePath, w, nil); err != nil {
+func (s Server) overviewPage(w http.ResponseWriter, r *http.Request) {
+	if err := s.tplStore.Execute(overviewTemplatePath, w, nil); err != nil {
 		// TODO: use special 500 page
 		s.processError(w, "can't load template", http.StatusInternalServerError, err)
 	}

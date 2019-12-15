@@ -15,8 +15,7 @@ type route struct {
 func (s Server) addRoutes(router *mux.Router) {
 	routes := []route{
 		// Pages
-		{methods: "GET", path: "/", handler: s.indexPage},
-		{methods: "GET", path: "/overview", handler: s.indexPage},
+		{methods: "GET", path: "/overview", handler: s.overviewPage},
 		{methods: "GET", path: "/overview/{year:[0-9]+}", handler: s.yearPage},
 		{methods: "GET", path: "/overview/{year:[0-9]+}/{month:[0-9]+}", handler: s.monthPage},
 
