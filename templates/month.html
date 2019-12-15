@@ -354,13 +354,11 @@
 <body>
 	<div id="app">
 		<div id="header">
-			<!-- Path like "Years / 2019 / Months / November" -->
+			<!-- Path like "Overview / 2019 / November" -->
 			<div id="header__path">
-				<span> <a href="/years">Years</a> </span>
+				<span> <a href="/overview">Overview<a> </span>
 				<span class="noselect"> / </span>
-				<span> <a href="/years/{{.Year}}">{{.Year}}</a> </span>
-				<span class="noselect"> / </span>
-				<span> <a href="/years/{{.Year}}/months">Months</a> </span>
+				<span> <a href="/overview/{{.Year}}">{{.Year}}</a> </span>
 				<span class="noselect"> / </span>
 				<span> {{.Month.Month}} </span>
 			</div>
@@ -809,7 +807,7 @@
 			const month = now.getMonth() + 1;
 			const day = now.getDate();
 
-			const urlRegexp = /years\/(\d+)\/months\/(\d+)(?:#(\d+))?/;
+			const urlRegexp = /overview\/(\d+)\/(\d+)(?:#(\d+))?/;
 			const match = window.location.href.match(urlRegexp);
 
 			// Check whether day is passed in URL
