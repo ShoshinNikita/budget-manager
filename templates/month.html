@@ -366,15 +366,15 @@
 			<!-- Stats: Total Income and Spend, Result -->
 			<div>
 				<span class="noselect">Incomes:</span>
-				<span class="header__stats money money--gain">{{.TotalIncome}}</span>
+				<span class="header__stats money--gain">{{.TotalIncome}}</span>
 				<span class="noselect">Spends:</span>
-				<span class="header__stats money money--lose">{{.TotalSpend}}</span>
+				<span class="header__stats money--lose">{{.TotalSpend}}</span>
 				<span class="noselect">Result:</span>
 				<!-- .Result > 0 -->
 				{{if ge .Result 0}}
-				<span class="header__stats money money--gain">{{.Result}}</span>
+				<span class="header__stats money--gain">{{.Result}}</span>
 				{{else}}
-				<span class="header__stats money money--lose">{{.Result}}</span>
+				<span class="header__stats money--lose">{{.Result}}</span>
 				{{end}}
 			</div>
 
@@ -644,9 +644,9 @@
 					<div class="detailed-info__days__day__result">
 						<span>Saldo:</span>
 						{{if ge .Saldo 0}}
-						<span class="money money--gain">{{.Saldo}}</span>
+						<span class="money--gain">{{.Saldo}}</span>
 						{{else}}
-						<span class="money money--lose">{{.Saldo}}</span>
+						<span class="money--lose">{{.Saldo}}</span>
 						{{end}}
 					</div>
 				</div>
