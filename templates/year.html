@@ -4,11 +4,173 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Budget Manager</title>
+	<title>{{.Year}} | Budget Manager</title>
+	<link rel="stylesheet" href="/static/css/common.css">
+
+	<style>
+		body {
+			height: 100vh;
+			margin: 0;
+			padding: 30px;
+			padding-bottom: 40px;
+		}
+
+		a:link.no-decoration {
+			text-decoration: none !important;
+		}
+
+		/* | App */
+
+		#app {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			margin: 0 auto 30px;
+			max-width: 1800px;
+			min-height: 100%;
+			padding: 10px;
+			width: 100%;
+		}
+
+		/* || Header */
+
+		#header {
+			border-bottom: 1px solid var(--border-accent-color);
+			box-sizing: content-box;
+			font-size: 20px;
+			height: 35px;
+			line-height: 35px;
+			margin-bottom: 10px;
+			padding-bottom: 5px;
+		}
+
+		/* || Months */
+
+		#months-list {
+			display: grid;
+			grid-template-columns: repeat(6, 1fr);
+			column-gap: 20px;
+			row-gap: 20px;
+		}
+
+		.month,
+		.month--not-exist {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			cursor: pointer;
+			height: 120px;
+			padding: 7px;
+			padding-left: 10px;
+
+			transition-property: padding-left;
+			transition-duration: 0.175s;
+			transition-timing-function: ease-in-out;
+		}
+
+		.month:hover {
+			background-color: var(--hover-color);
+			padding-left: 15px;
+		}
+
+		.month--not-exist {
+			cursor: default;
+			opacity: 0.5;
+		}
+
+		.month__header {
+			font-size: 17px;
+		}
+
+		.month__results {
+			display: grid;
+			grid-template-columns: min-content max-content;
+			column-gap: 10px;
+			margin-top: 7px;
+			color: red;
+		}
+
+		.month__results__value {
+			text-align: right;
+		}
+
+		/* | Layouts */
+
+		/* For small screens (< 1000px) */
+		@media (max-width: 999px) {
+			body {
+				padding: 15px;
+			}
+		}
+
+		/* For smartphones (< 450px) */
+		@media (max-width: 449px) {
+			#months-list {
+				grid-template-columns: repeat(1, 1fr);
+			}
+		}
+
+		/* For small screens (450px <= width < 1000px) */
+		@media (min-width: 450px) and (max-width: 999px) {
+			#months-list {
+				grid-template-columns: repeat(2, 1fr);
+			}
+		}
+
+		/* For medium screens (1000px <= width < 1400px) */
+		@media (min-width: 1000px) and (max-width: 1399px) {
+			#months-list {
+				grid-template-columns: repeat(3, 1fr);
+			}
+		}
+	</style>
 </head>
 
 <body>
-	<h1>TODO (year)</h1>
+	<div id="app">
+		<div id="header">
+			<!-- Path like "Overview / 2019" -->
+			<div id="header__path">
+				<span> <a href="/overview">Overview</a> </span>
+				<span class="noselect"> / </span>
+				<span>{{.Year}}</span>
+			</div>
+		</div>
+
+		<div id="months-list">
+			{{range .Months}}
+
+			{{if ne .ID 0}}
+			<!-- Show month overview -->
+
+			<!-- Use the number of a month instead of the name -->
+			<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
+				<div class="month" title="Go to the month">
+					<div class="month__header">{{.Month}} {{.Year}}</div>
+					<div class="month__results">
+						<div>Income:</div>
+						<div class="month__results__value money--gain">{{.TotalIncome}}</div>
+						<div>Spend:</div>
+						<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+						<div>Result:</div>
+						<div class="month__results__value">
+							{{if ge .Result 0}}
+							<span class="money--gain">{{.Result}}</span>
+							{{else}}
+							<span class="money--lose">{{.Result}}</span>
+							{{end}}</div>
+					</div>
+				</div>
+			</a>
+			{{else}}
+			<!-- Just show a stub -->
+			<div class="month--not-exist" title="No data for the month">
+				<div class="month__header">{{.Month}} {{.Year}}</div>
+			</div>
+			{{end}}
+			{{end}}
+		</div>
+	</div>
 </body>
 
 </html>
