@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/ShoshinNikita/budget_manager/internal/db"
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 )
 
@@ -35,9 +36,32 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.log.Debug(year)
+	months, err := s.db.GetMonths(year)
+	// Render the page even theare no months for passed year
+	if err != nil && err != db.ErrYearNotExist {
+		s.processDBError(w, err)
+		return
+	}
 
-	if err := s.tplStore.Execute(yearTemplatePath, w, nil); err != nil {
+	// Display all months. Months without data in DB have zero id
+
+	allMonths := make([]*models.Month, 12)
+	for month := time.January; month <= time.December; month++ {
+		allMonths[month-1] = &models.Month{
+			ID:    0,
+			Year:  year,
+			Month: month,
+		}
+	}
+	for _, m := range months {
+		allMonths[m.Month-1] = m
+	}
+
+	resp := map[string]interface{}{
+		"Year":   year,
+		"Months": allMonths,
+	}
+	if err := s.tplStore.Execute(yearTemplatePath, w, resp); err != nil {
 		// TODO: use special 500 page
 		s.processError(w, "can't load template", http.StatusInternalServerError, err)
 	}
