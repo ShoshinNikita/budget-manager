@@ -353,6 +353,47 @@ func TestFormat(t *testing.T) {
 			input: FromFloat(15.078),
 			want:  "15.07",
 		},
+		// Check grouping
+		{
+			input: FromInt(1_500),
+			want:  "1 500.00",
+		},
+		{
+			input: FromInt(15_000),
+			want:  "15 000.00",
+		},
+		{
+			input: FromInt(150_000),
+			want:  "150 000.00",
+		},
+		{
+			input: FromFloat(1_500_000.05),
+			want:  "1 500 000.05",
+		},
+		{
+			input: FromFloat(15_000_000.05),
+			want:  "15 000 000.05",
+		},
+		{
+			input: FromFloat(150_000_000.05),
+			want:  "150 000 000.05",
+		},
+		{
+			input: FromFloat(1_500_000_000.05),
+			want:  "1 500 000 000.05",
+		},
+		{
+			input: FromFloat(15_000_000_000.05),
+			want:  "15 000 000 000.05",
+		},
+		{
+			input: FromFloat(150_000_000_000.00),
+			want:  "150 000 000 000.00",
+		},
+		{
+			input: FromInt(1_500_000_000_000),
+			want:  "1 500 000 000 000.00",
+		},
 	}
 
 	for _, tt := range tests {

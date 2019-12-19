@@ -104,7 +104,7 @@ func (m Money) Divide(n int64) Money {
 
 func (m Money) MarshalJSON() ([]byte, error) {
 	// Always format with 2 digits after decimal point (123.45, 123.00 and etc.)
-	return []byte(fmt.Sprintf("%.2f", m.ToFloat())), nil
+	return []byte(m.ToString()), nil
 }
 
 func (m *Money) UnmarshalJSON(data []byte) error {
@@ -116,9 +116,38 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Format implements 'fmt.Formatter' interface
+// Format implements 'fmt.Formatter' interface. It divides a number in groups of three didits
+// separated by thin space
 func (m Money) Format(f fmt.State, c rune) {
-	// Money.MarshalJSON always returns nil error
-	data, _ := m.MarshalJSON()
-	f.Write(data)
+	const thinSpace = " "
+
+	str := m.ToString()
+
+	// This algorithm can be buggy because the string is changing in proccess, but
+	// it works for 1000000000000.00 (one trillion must be enough for all cases) and
+	// it is very simple. So, leave it as is.
+
+	for i := len(str) - 6; i > 0; i -= 3 {
+		// We don't use comma as a separator because:
+		//
+		//   The 22nd General Conference on Weights and Measures declared in 2003 that
+		//   "the symbol for the decimal marker shall be either the point on the line or
+		//   the comma on the line". It further reaffirmed that "numbers may be divided in
+		//   groups of three in order to facilitate reading; neither dots nor commas are ever
+		//   inserted in the spaces between groups"
+		//
+		// Source: https://en.wikipedia.org/wiki/Decimal_separator#Current_standards
+		//
+		// Use thin space ' ' instead (https://en.wikipedia.org/wiki/Thin_space)
+
+		str = str[:i] + thinSpace + str[i:]
+	}
+
+	f.Write([]byte(str))
+}
+
+// ToString converts Money to string. Money is always formatted as a number with 2 digits
+// after decimal point (123.45, 123.00 and etc.)
+func (m Money) ToString() string {
+	return fmt.Sprintf("%.2f", m.ToFloat())
 }
