@@ -56,8 +56,10 @@ func addIncomes() {
 	for i, in := range incomes {
 		body := bytes.NewBuffer(nil)
 		json.NewEncoder(body).Encode(in) //nolint:errcheck
+
 		resp, _ := http.Post("http://localhost:8080/api/incomes", "application/json", body)
 		fmt.Printf("  [%d] code: %d\n", i+1, resp.StatusCode)
+		resp.Body.Close()
 	}
 }
 
@@ -72,8 +74,10 @@ func addSpendTypes() {
 	for i, in := range types {
 		body := bytes.NewBuffer(nil)
 		json.NewEncoder(body).Encode(in) //nolint:errcheck
+
 		resp, _ := http.Post("http://localhost:8080/api/spend-types", "application/json", body)
 		fmt.Printf("  [%d] code: %d\n", i+1, resp.StatusCode)
+		resp.Body.Close()
 	}
 }
 
@@ -120,8 +124,10 @@ func addMonthlyPayments() {
 	for i, in := range incomes {
 		body := bytes.NewBuffer(nil)
 		json.NewEncoder(body).Encode(in) //nolint:errcheck
+
 		resp, _ := http.Post("http://localhost:8080/api/monthly-payments", "application/json", body)
 		fmt.Printf("  [%d] code: %d\n", i+1, resp.StatusCode)
+		resp.Body.Close()
 	}
 }
 
@@ -166,7 +172,9 @@ func addSpends() {
 	for i, in := range spends {
 		body := bytes.NewBuffer(nil)
 		json.NewEncoder(body).Encode(in) //nolint:errcheck
+
 		resp, _ := http.Post("http://localhost:8080/api/spends", "application/json", body)
 		fmt.Printf("  [%d] code: %d\n", i+1, resp.StatusCode)
+		resp.Body.Close()
 	}
 }

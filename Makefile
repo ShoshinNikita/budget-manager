@@ -63,6 +63,8 @@ lint:
 	# More installation options: https://github.com/golangci/golangci-lint#binary-release
 	#
 	golangci-lint run \
+		--enable-all \
+		--disable wsl,dupl,godox \
 		--max-issues-per-linter=0 \
 		--max-same-issues=0
 

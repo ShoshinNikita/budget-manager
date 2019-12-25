@@ -92,7 +92,7 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 	return incomeID, nil
 }
 
-func (_ DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
+func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 	in := &Income{
 		MonthID: args.MonthID,
 
@@ -166,7 +166,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 	return nil
 }
 
-func (_ DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
+func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 	if args.Title != nil {
 		in.Title = *args.Title
 	}
@@ -235,7 +235,7 @@ func (db DB) RemoveIncome(id uint) error {
 	return nil
 }
 
-func (_ DB) removeIncome(tx *pg.Tx, id uint) error {
+func (DB) removeIncome(tx *pg.Tx, id uint) error {
 	in := &Income{ID: id}
 	return tx.Delete(in)
 }

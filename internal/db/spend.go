@@ -102,7 +102,7 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 	return id, nil
 }
 
-func (_ DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
+func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 	spend := &Spend{
 		DayID:  args.DayID,
 		Title:  args.Title,
@@ -174,7 +174,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 	return nil
 }
 
-func (_ DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
+func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
 	if args.Title != nil {
 		spend.Title = *args.Title
 	}

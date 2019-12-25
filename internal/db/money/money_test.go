@@ -11,90 +11,95 @@ import (
 )
 
 func TestConvertMoney(t *testing.T) {
-	t.Run("int to int", func(t *testing.T) {
-		require := require.New(t)
+	t.Run("int to int", testConvertMoney_IntToInt)
+	t.Run("float to float", testConvertMoney_FloatToFloat)
+	t.Run("int to float", testConvertMoney_IntToFloat)
+	t.Run("float to int", testConvertMoney_FloatToInt)
+}
 
-		tests := []struct {
-			in        int64
-			res       Money
-			converted int64
-		}{
-			{in: -20, res: Money(-2000), converted: -20},
-			{in: 0, res: Money(0), converted: 0},
-			{in: 15, res: Money(1500), converted: 15},
-			{in: 1000000, res: Money(100000000), converted: 1000000},
-		}
+func testConvertMoney_IntToInt(t *testing.T) { // nolint:stylecheck,golint
+	require := require.New(t)
 
-		for _, tt := range tests {
-			res := FromInt(tt.in)
-			require.Equal(tt.res, res)
-			require.Equal(tt.converted, res.ToInt())
-		}
-	})
+	tests := []struct {
+		in        int64
+		res       Money
+		converted int64
+	}{
+		{in: -20, res: Money(-2000), converted: -20},
+		{in: 0, res: Money(0), converted: 0},
+		{in: 15, res: Money(1500), converted: 15},
+		{in: 1000000, res: Money(100000000), converted: 1000000},
+	}
 
-	t.Run("float to float", func(t *testing.T) {
-		require := require.New(t)
+	for _, tt := range tests {
+		res := FromInt(tt.in)
+		require.Equal(tt.res, res)
+		require.Equal(tt.converted, res.ToInt())
+	}
+}
 
-		tests := []struct {
-			in        float64
-			res       Money
-			converted float64
-		}{
-			{in: -20.50, res: Money(-2050), converted: -20.50},
-			{in: 0, res: Money(0), converted: 0},
-			{in: 0.75, res: Money(75), converted: 0.75},
-			{in: 15.30, res: Money(1530), converted: 15.30},
-			{in: 1000000.87, res: Money(100000087), converted: 1000000.87},
-		}
+func testConvertMoney_FloatToFloat(t *testing.T) { // nolint:stylecheck,golint
+	require := require.New(t)
 
-		for _, tt := range tests {
-			res := FromFloat(tt.in)
-			require.Equal(tt.res, res)
-			require.Equal(tt.converted, res.ToFloat())
-		}
-	})
+	tests := []struct {
+		in        float64
+		res       Money
+		converted float64
+	}{
+		{in: -20.50, res: Money(-2050), converted: -20.50},
+		{in: 0, res: Money(0), converted: 0},
+		{in: 0.75, res: Money(75), converted: 0.75},
+		{in: 15.30, res: Money(1530), converted: 15.30},
+		{in: 1000000.87, res: Money(100000087), converted: 1000000.87},
+	}
 
-	t.Run("int to float", func(t *testing.T) {
-		require := require.New(t)
+	for _, tt := range tests {
+		res := FromFloat(tt.in)
+		require.Equal(tt.res, res)
+		require.Equal(tt.converted, res.ToFloat())
+	}
+}
 
-		tests := []struct {
-			in        int64
-			res       Money
-			converted float64
-		}{
-			{in: -20, res: Money(-2000), converted: -20},
-			{in: 0, res: Money(0), converted: 0},
-			{in: 15, res: Money(1500), converted: 15},
-			{in: 1000000, res: Money(100000000), converted: 1000000},
-		}
+func testConvertMoney_IntToFloat(t *testing.T) { // nolint:stylecheck,golint
+	require := require.New(t)
 
-		for _, tt := range tests {
-			res := FromInt(tt.in)
-			require.Equal(tt.res, res)
-			require.Equal(tt.converted, res.ToFloat())
-		}
-	})
+	tests := []struct {
+		in        int64
+		res       Money
+		converted float64
+	}{
+		{in: -20, res: Money(-2000), converted: -20},
+		{in: 0, res: Money(0), converted: 0},
+		{in: 15, res: Money(1500), converted: 15},
+		{in: 1000000, res: Money(100000000), converted: 1000000},
+	}
 
-	t.Run("float to int", func(t *testing.T) {
-		require := require.New(t)
+	for _, tt := range tests {
+		res := FromInt(tt.in)
+		require.Equal(tt.res, res)
+		require.Equal(tt.converted, res.ToFloat())
+	}
+}
 
-		tests := []struct {
-			in        float64
-			res       Money
-			converted int64
-		}{
-			{in: -20.5, res: Money(-2050), converted: -20},
-			{in: 0.30, res: Money(30), converted: 0},
-			{in: 15, res: Money(1500), converted: 15},
-			{in: 1000000.87, res: Money(100000087), converted: 1000000},
-		}
+func testConvertMoney_FloatToInt(t *testing.T) { // nolint:stylecheck,golint
+	require := require.New(t)
 
-		for _, tt := range tests {
-			res := FromFloat(tt.in)
-			require.Equal(tt.res, res)
-			require.Equal(tt.converted, res.ToInt())
-		}
-	})
+	tests := []struct {
+		in        float64
+		res       Money
+		converted int64
+	}{
+		{in: -20.5, res: Money(-2050), converted: -20},
+		{in: 0.30, res: Money(30), converted: 0},
+		{in: 15, res: Money(1500), converted: 15},
+		{in: 1000000.87, res: Money(100000087), converted: 1000000},
+	}
+
+	for _, tt := range tests {
+		res := FromFloat(tt.in)
+		require.Equal(tt.res, res)
+		require.Equal(tt.converted, res.ToInt())
+	}
 }
 
 func TestAdd(t *testing.T) {
@@ -233,97 +238,86 @@ func TestDivide(t *testing.T) {
 }
 
 func TestJSON(t *testing.T) {
+	t.Run("Marshal", testJSON_Marshal)
+	t.Run("Unmarshal", testJSON_Unmarshal)
+}
+
+func testJSON_Marshal(t *testing.T) { // nolint:stylecheck,golint
 	type testStruct struct {
 		Money Money `json:"money"`
 	}
 
-	t.Run("Marshal", func(t *testing.T) {
-		require := require.New(t)
+	require := require.New(t)
 
-		tests := []struct {
-			input testStruct
-			want  string
-		}{
-			{
-				input: testStruct{
-					Money: FromInt(357),
-				},
-				want: `{"money":357.00}`,
-			},
-			{
-				input: testStruct{
-					Money: FromFloat(154.30),
-				},
-				want: `{"money":154.30}`,
-			},
-			{
-				input: testStruct{
-					Money: FromFloat(0.07),
-				},
-				want: `{"money":0.07}`,
-			},
-			{
-				input: testStruct{
-					Money: FromFloat(15.073),
-				},
-				want: `{"money":15.07}`,
-			},
-			{
-				input: testStruct{
-					Money: FromFloat(15.078),
-				},
-				want: `{"money":15.07}`,
-			},
-		}
+	tests := []struct {
+		input testStruct
+		want  string
+	}{
+		{
+			input: testStruct{Money: FromInt(357)},
+			want:  `{"money":357.00}`,
+		},
+		{
+			input: testStruct{Money: FromFloat(154.30)},
+			want:  `{"money":154.30}`,
+		},
+		{
+			input: testStruct{Money: FromFloat(0.07)},
+			want:  `{"money":0.07}`,
+		},
+		{
+			input: testStruct{Money: FromFloat(15.073)},
+			want:  `{"money":15.07}`,
+		},
+		{
+			input: testStruct{Money: FromFloat(15.078)},
+			want:  `{"money":15.07}`,
+		},
+	}
 
-		for _, tt := range tests {
-			data, err := json.Marshal(tt.input)
-			require.Nil(err)
-			require.Equal(tt.want, string(data))
-		}
-	})
+	for _, tt := range tests {
+		data, err := json.Marshal(tt.input)
+		require.Nil(err)
+		require.Equal(tt.want, string(data))
+	}
+}
 
-	t.Run("Unmarshal", func(t *testing.T) {
-		require := require.New(t)
+func testJSON_Unmarshal(t *testing.T) { // nolint:stylecheck,golint
+	type testStruct struct {
+		Money Money `json:"money"`
+	}
 
-		tests := []struct {
-			input string
-			want  testStruct
-		}{
-			{
-				input: `{"money":357}`,
-				want: testStruct{
-					Money: FromInt(357),
-				},
-			},
-			{
-				input: `{"money":154.30}`,
-				want: testStruct{
-					Money: FromFloat(154.30),
-				},
-			},
-			{
-				input: `{"money":0.07}`,
-				want: testStruct{
-					Money: FromFloat(0.07),
-				},
-			},
-			{
-				input: `{"money":"test"}`,
-				want: testStruct{
-					Money: FromInt(0),
-				},
-			},
-		}
+	require := require.New(t)
 
-		for _, tt := range tests {
-			var res testStruct
+	tests := []struct {
+		input string
+		want  testStruct
+	}{
+		{
+			input: `{"money":357}`,
+			want:  testStruct{Money: FromInt(357)},
+		},
+		{
+			input: `{"money":154.30}`,
+			want:  testStruct{Money: FromFloat(154.30)},
+		},
+		{
+			input: `{"money":0.07}`,
+			want:  testStruct{Money: FromFloat(0.07)},
+		},
+		{
+			input: `{"money":"test"}`,
+			want:  testStruct{Money: FromInt(0)},
+		},
+	}
 
-			// Ignore errors
-			_ = json.Unmarshal([]byte(tt.input), &res)
-			require.Equal(tt.want, res)
-		}
-	})
+	for _, tt := range tests {
+		var res testStruct
+
+		// Ignore errors
+		_ = json.Unmarshal([]byte(tt.input), &res)
+		require.Equal(tt.want, res)
+	}
 }
 
 func TestFormat(t *testing.T) {
@@ -333,67 +327,22 @@ func TestFormat(t *testing.T) {
 		input Money
 		want  string
 	}{
-		{
-			input: FromInt(357),
-			want:  "357.00",
-		},
-		{
-			input: FromFloat(154.30),
-			want:  "154.30",
-		},
-		{
-			input: FromFloat(0.07),
-			want:  "0.07",
-		},
-		{
-			input: FromFloat(15.073),
-			want:  "15.07",
-		},
-		{
-			input: FromFloat(15.078),
-			want:  "15.07",
-		},
+		{input: FromInt(357), want: "357.00"},
+		{input: FromFloat(154.30), want: "154.30"},
+		{input: FromFloat(0.07), want: "0.07"},
+		{input: FromFloat(15.073), want: "15.07"},
+		{input: FromFloat(15.078), want: "15.07"},
 		// Check grouping
-		{
-			input: FromInt(1_500),
-			want:  "1 500.00",
-		},
-		{
-			input: FromInt(15_000),
-			want:  "15 000.00",
-		},
-		{
-			input: FromInt(150_000),
-			want:  "150 000.00",
-		},
-		{
-			input: FromFloat(1_500_000.05),
-			want:  "1 500 000.05",
-		},
-		{
-			input: FromFloat(15_000_000.05),
-			want:  "15 000 000.05",
-		},
-		{
-			input: FromFloat(150_000_000.05),
-			want:  "150 000 000.05",
-		},
-		{
-			input: FromFloat(1_500_000_000.05),
-			want:  "1 500 000 000.05",
-		},
-		{
-			input: FromFloat(15_000_000_000.05),
-			want:  "15 000 000 000.05",
-		},
-		{
-			input: FromFloat(150_000_000_000.00),
-			want:  "150 000 000 000.00",
-		},
-		{
-			input: FromInt(1_500_000_000_000),
-			want:  "1 500 000 000 000.00",
-		},
+		{input: FromInt(1_500), want: "1 500.00"},
+		{input: FromInt(15_000), want: "15 000.00"},
+		{input: FromInt(150_000), want: "150 000.00"},
+		{input: FromFloat(1_500_000.05), want: "1 500 000.05"},
+		{input: FromFloat(15_000_000.05), want: "15 000 000.05"},
+		{input: FromFloat(150_000_000.05), want: "150 000 000.05"},
+		{input: FromFloat(1_500_000_000.05), want: "1 500 000 000.05"},
+		{input: FromFloat(15_000_000_000.05), want: "15 000 000 000.05"},
+		{input: FromFloat(150_000_000_000.00), want: "150 000 000 000.00"},
+		{input: FromInt(1_500_000_000_000), want: "1 500 000 000 000.00"},
 	}
 
 	for _, tt := range tests {

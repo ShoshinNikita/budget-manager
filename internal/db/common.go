@@ -157,6 +157,7 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 // Internal methods
 // -----------------------------------------------------------------------------
 
+// nolint:funlen
 func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
@@ -235,7 +236,7 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	return nil
 }
 
-func (_ DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
+func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
 	m := &Month{ID: id}
 	err := tx.Model(m).
 		Relation("Incomes", orderByID).

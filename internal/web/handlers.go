@@ -1,10 +1,10 @@
 package web
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -37,43 +37,10 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare
 	var monthID uint
-
-	body := &bytes.Buffer{}
-	tee := io.TeeReader(r.Body, body)
-
-	// Try to decode models.GetMonthReq
-	req := &models.GetMonthReq{}
-	// We have to use json.NewDecoder because there are several types of request
-	if err := json.NewDecoder(tee).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+	monthID, ok := s.getMonthID(w, r)
+	if !ok {
+		// 'Server.getMonthID' has already called 'Server.processError'
 		return
-	}
-	if req.ID != nil {
-		monthID = *req.ID
-	} else {
-		// Try to use models.GetMonthByYearAndMonthReq
-		req := &models.GetMonthByYearAndMonthReq{}
-		if err := jsonNewDecoder(body).Decode(req); err != nil {
-			s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
-			return
-		}
-		if req.Year == nil || req.Month == nil {
-			s.processError(w, "invalid request: no id or year and month were passed", http.StatusBadRequest, nil)
-			return
-		}
-
-		id, err := s.db.GetMonthID(*req.Year, int(*req.Month))
-		if err != nil {
-			switch {
-			case db.IsBadRequestError(err):
-				s.processError(w, "such Month doesn't exist", http.StatusBadRequest, err)
-			default:
-				s.processError(w, "can't select Month with passed data", http.StatusInternalServerError, err)
-			}
-			return
-		}
-
-		monthID = id
 	}
 
 	// Process
@@ -102,6 +69,49 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok bool) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		s.processError(w, "couldn't read body", http.StatusBadRequest, err)
+		return 0, false
+	}
+
+	// Try to decode models.GetMonthReq
+	idReq := &models.GetMonthReq{}
+	// We have to use json.NewDecoder because there are several types of request
+	if err := json.Unmarshal(body, idReq); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return 0, false
+	}
+	if idReq.ID != nil {
+		return *idReq.ID, true
+	}
+
+	// Try to use models.GetMonthByYearAndMonthReq
+	yearAndMonthReq := &models.GetMonthByYearAndMonthReq{}
+	if err := json.Unmarshal(body, yearAndMonthReq); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return 0, false
+	}
+	if yearAndMonthReq.Year == nil || yearAndMonthReq.Month == nil {
+		s.processError(w, "invalid request: no id or year and month were passed", http.StatusBadRequest, nil)
+		return 0, false
+	}
+
+	id, err = s.db.GetMonthID(*yearAndMonthReq.Year, int(*yearAndMonthReq.Month))
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "such Month doesn't exist", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't select Month with passed data", http.StatusInternalServerError, err)
+		}
+		return 0, false
+	}
+
+	return id, true
+}
+
 // GET /api/days
 //
 // Request: models.GetDayReq or models.GetDayByDate
@@ -111,44 +121,10 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Prepare
-	var dayID uint
-
-	body := &bytes.Buffer{}
-	tee := io.TeeReader(r.Body, body)
-
-	// Try to decode models.GetDayReq
-	req := &models.GetDayReq{}
-	// We have to use json.NewDecoder because there are several types of request
-	if err := json.NewDecoder(tee).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+	dayID, ok := s.getDayID(w, r)
+	if !ok {
+		// 'Server.getDayID' has already called 'Server.processError'
 		return
-	}
-	if req.ID != nil {
-		dayID = *req.ID
-	} else {
-		// Try to use models.GetDayByDateReq
-		req := &models.GetDayByDateReq{}
-		if err := jsonNewDecoder(body).Decode(req); err != nil {
-			s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
-			return
-		}
-		if req.Year == nil || req.Month == nil || req.Day == nil {
-			s.processError(w, "invalid request: no id or year, month and day were passed", http.StatusBadRequest, nil)
-			return
-		}
-
-		id, err := s.db.GetDayIDByDate(*req.Year, int(*req.Month), *req.Day)
-		if err != nil {
-			switch {
-			case db.IsBadRequestError(err):
-				s.processError(w, "such Day doesn't exist", http.StatusBadRequest, err)
-			default:
-				s.processError(w, "can't select Day with passed data", http.StatusInternalServerError, err)
-			}
-			return
-		}
-
-		dayID = id
 	}
 
 	// Process
@@ -175,6 +151,49 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
+}
+
+func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bool) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		s.processError(w, "couldn't read body", http.StatusBadRequest, err)
+		return 0, false
+	}
+
+	// Try to decode models.GetDayReq
+	idReqreq := &models.GetDayReq{}
+	// We have to use json.NewDecoder because there are several types of request
+	if err := json.Unmarshal(body, idReqreq); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return 0, false
+	}
+	if idReqreq.ID != nil {
+		return *idReqreq.ID, true
+	}
+
+	// Try to use models.GetDayByDateReq
+	dateReq := &models.GetDayByDateReq{}
+	if err := json.Unmarshal(body, dateReq); err != nil {
+		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		return 0, false
+	}
+	if dateReq.Year == nil || dateReq.Month == nil || dateReq.Day == nil {
+		s.processError(w, "invalid request: no id or year, month and day were passed", http.StatusBadRequest, nil)
+		return 0, false
+	}
+
+	id, err = s.db.GetDayIDByDate(*dateReq.Year, int(*dateReq.Month), *dateReq.Day)
+	if err != nil {
+		switch {
+		case db.IsBadRequestError(err):
+			s.processError(w, "such Day doesn't exist", http.StatusBadRequest, err)
+		default:
+			s.processError(w, "can't select Day with passed data", http.StatusInternalServerError, err)
+		}
+		return 0, false
+	}
+
+	return id, true
 }
 
 // -------------------------------------------------
@@ -747,7 +766,7 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 // -------------------------------------------------
 
 //nolint:unused,deadcode,errcheck
-func notImplementedYet(w http.ResponseWriter, r *http.Request) {
+func notImplementedYet(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("not implemented yet"))
 }
 

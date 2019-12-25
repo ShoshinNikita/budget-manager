@@ -14,7 +14,7 @@ var (
 	_ json.Unmarshaler = (*Money)(nil)
 )
 
-// Money is a sum of money multiplied by presicion (100). It can be negative
+// Money is a sum of money multiplied by precision (100). It can be negative
 // Money is marshalled without multiplication:
 //   - FromInt(15) -> 15
 //   - FromFloat(15.07) -> 15.07
@@ -72,17 +72,17 @@ func (m Money) AddFloat(add float64) Money {
 // Sub functions
 // -------------------------------------------------
 
-// Sub returns remainder after substraction
+// Sub returns remainder after subtraction
 func (m Money) Sub(sub Money) Money {
 	return m - sub
 }
 
-// SubInt returns remainder after substraction
+// SubInt returns remainder after subtraction
 func (m Money) SubInt(sub int64) Money {
 	return m - FromInt(sub)
 }
 
-// SubFloat returns remainder after substraction
+// SubFloat returns remainder after subtraction
 func (m Money) SubFloat(sub float64) Money {
 	return m - FromFloat(sub)
 }
@@ -123,7 +123,7 @@ func (m Money) Format(f fmt.State, c rune) {
 
 	str := m.ToString()
 
-	// This algorithm can be buggy because the string is changing in proccess, but
+	// This algorithm can be buggy because the string is changing in process, but
 	// it works for 1000000000000.00 (one trillion must be enough for all cases) and
 	// it is very simple. So, leave it as is.
 

@@ -6,15 +6,44 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ShoshinNikita/go-clog/v3"
 	"github.com/caarlos0/env/v6"
+	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
 	"github.com/ShoshinNikita/budget_manager/internal/logger"
 	"github.com/ShoshinNikita/budget_manager/internal/web"
 )
 
+func main() {
+	// Create a new application
+	app := NewApp()
+
+	// Parse application config
+	if err := app.ParseConfig(); err != nil {
+		log.Fatalln(err)
+	}
+
+	// Prepare the application
+	if err := app.PrepareComponents(); err != nil {
+		log.Fatalln(err)
+	}
+
+	// Run the application
+	if err := app.Run(); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+type App struct {
+	config Config
+
+	db     *db.DB
+	log    *clog.Logger
+	server *web.Server
+}
+
 type Config struct {
-	// Is debug mode on
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
 	Logger logger.Config
@@ -22,50 +51,79 @@ type Config struct {
 	Server web.Config
 }
 
-func main() {
-	// Parse config
-	cnf, err := parseConfig()
-	if err != nil {
-		log.Fatalf("can't parse config: %s", err)
+// NewApp returns a new instance of App
+func NewApp() *App {
+	return &App{}
+}
+
+// ParseConfig parses app config
+func (app *App) ParseConfig() error {
+	if err := env.Parse(&app.config); err != nil {
+		return err
 	}
+	return nil
+}
 
-	log := logger.New(cnf.Logger, cnf.Debug)
-	log.Info("start")
+// PrepareComponents prepares logger, db and web server
+func (app *App) PrepareComponents() error {
+	// Logger
+	app.prepareLogger()
+	app.log.Info("logger is initialized")
 
-	// Connect to the db
-	log.Info("connect to the db")
-
-	db, err := db.NewDB(cnf.DB, log.WithPrefix("[database]"))
-	if err != nil {
-		log.Fatalf("couldn't connect to the db: %s", err)
+	// DB
+	app.log.Info("prepare database...")
+	if err := app.prepareDB(); err != nil {
+		return errors.Wrap(err, "database init error")
 	}
+	app.log.Info("database is initialized")
 
-	log.Info("connection was successful")
+	// Web Server
+	app.log.Info("prepare web server...")
+	app.prepareWebServer()
+	app.log.Info("web server is initialized")
+
+	return nil
+}
+
+func (app *App) prepareLogger() {
+	app.log = logger.New(app.config.Logger, app.config.Debug)
+}
+
+func (app *App) prepareDB() (err error) {
+	// Connect
+	app.log.Debug("connect to the db...")
+	app.db, err = db.NewDB(app.config.DB, app.log.WithPrefix("[database]"))
+	if err != nil {
+		return errors.Wrap(err, "couldn't connect to the db")
+	}
+	app.log.Debug("connection is ready")
 
 	// Prepare the db
-	log.Info("prepare db")
-
-	err = db.Prepare()
+	app.log.Debug("prepare db...")
+	err = app.db.Prepare()
 	if err != nil {
-		log.Fatalf("couldn't prepare the db: %s", err)
+		return errors.Wrap(err, "couldn't prepare the db")
 	}
+	app.log.Debug("preparations were successful")
 
-	log.Info("preparations were successful")
+	return nil
+}
 
-	// Create a new server instance
-	log.Info("create Server instance")
+func (app *App) prepareWebServer() {
+	app.server = web.NewServer(
+		app.config.Server, app.db, app.log.WithPrefix("[server]"), app.config.Debug,
+	)
+	app.server.Prepare()
+}
 
-	server := web.NewServer(cnf.Server, db, log.WithPrefix("[server]"), cnf.Debug)
-	server.Prepare()
+// Run runs web server and waits for a server error or an interrupt signal
+func (app *App) Run() (appErr error) {
+	app.log.Info("start app")
 
-	// Start server
-	serverError := make(chan struct{})
+	// Start the application
+	webServerError := make(chan error, 1)
 	go func() {
-		log.Info("start Server")
-		if err := server.ListenAndServer(); err != nil {
-			log.Errorf("server fatal error: %s", err)
-			close(serverError)
-		}
+		webServerError <- app.server.ListenAndServer()
 	}()
 
 	// Wait for interrupt signal
@@ -74,36 +132,34 @@ func main() {
 
 	select {
 	case <-term:
-		log.Warn("got an interrupt signal")
-	case <-serverError:
-		log.Warn("server is down")
+		app.log.Warn("got an interrupt signal")
+	case err := <-webServerError:
+		appErr = err
+		app.log.Warnf("server is down: %s", err)
 	}
 
-	log.Warn("shutdown services")
+	app.Shutdown()
+
+	return appErr
+}
+
+// Shutdown shutdowns the app components
+func (app *App) Shutdown() {
+	app.log.Info("shutdown components...")
 
 	// Server
-	log.Info("shutdown the server")
-	err = server.Shutdown()
+	app.log.Info("shutdown web server")
+	err := app.server.Shutdown()
 	if err != nil {
-		log.Errorf("can't shutdown the db gracefully: %s", err)
+		app.log.Errorf("can't shutdown the db gracefully: %s", err)
 	}
 
 	// Database
-	log.Info("shutdown the database")
-	err = db.Shutdown()
+	app.log.Info("shutdown the database")
+	err = app.db.Shutdown()
 	if err != nil {
-		log.Errorf("can't shutdown the db gracefully: %s", err)
+		app.log.Errorf("can't shutdown the db gracefully: %s", err)
 	}
 
-	log.Info("shutdowns are completed")
-	log.Info("stop")
-}
-
-func parseConfig() (*Config, error) {
-	cnf := &Config{}
-	if err := env.Parse(cnf); err != nil {
-		return nil, err
-	}
-
-	return cnf, nil
+	app.log.Info("shutdowns are completed")
 }
