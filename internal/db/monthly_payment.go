@@ -96,7 +96,7 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 	return id, nil
 }
 
-func (_ DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err error) {
+func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err error) {
 	mp := &MonthlyPayment{
 		MonthID: args.MonthID,
 		Title:   args.Title,
@@ -169,7 +169,7 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 	return nil
 }
 
-func (_ DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaymentArgs) error {
+func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaymentArgs) error {
 	if args.Title != nil {
 		mp.Title = *args.Title
 	}

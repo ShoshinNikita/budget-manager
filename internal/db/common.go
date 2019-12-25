@@ -235,7 +235,7 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	return nil
 }
 
-func (_ DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
+func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
 	m := &Month{ID: id}
 	err := tx.Model(m).
 		Relation("Incomes", orderByID).
