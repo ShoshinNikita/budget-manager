@@ -53,7 +53,8 @@ func TestConfig(t *testing.T) {
 		},
 	}
 
-	cnf, err := parseConfig()
+	app := NewApp()
+	err := app.ParseConfig()
 	require.Nil(err)
-	require.Equal(want, *cnf)
+	require.Equal(want, app.config)
 }
