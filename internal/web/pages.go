@@ -9,6 +9,7 @@ import (
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
 const (
@@ -57,9 +58,32 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		allMonths[m.Month-1] = m
 	}
 
+	annualIncome := func() money.Money {
+		var res money.Money
+		for _, m := range allMonths {
+			res = res.Add(m.TotalIncome)
+		}
+		return res
+	}()
+
+	annualSpend := func() money.Money {
+		var res money.Money
+		for _, m := range allMonths {
+			// Use Add because 'TotalSpend' is negative
+			res = res.Add(m.TotalSpend)
+		}
+		return res
+	}()
+
+	// Use Add because 'annualSpend' is negative
+	result := annualIncome.Add(annualSpend)
+
 	resp := map[string]interface{}{
-		"Year":   year,
-		"Months": allMonths,
+		"Year":         year,
+		"Months":       allMonths,
+		"AnnualIncome": annualIncome,
+		"AnnualSpend":  annualSpend,
+		"Result":       result,
 	}
 	if err := s.tplStore.Execute(yearTemplatePath, w, resp); err != nil {
 		// TODO: use special 500 page
