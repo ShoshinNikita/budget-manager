@@ -215,26 +215,40 @@ func TestSub(t *testing.T) {
 }
 
 func TestDivide(t *testing.T) {
-	require := require.New(t)
+	t.Run("common divides", func(t *testing.T) {
+		require := require.New(t)
 
-	tests := []struct {
-		origin   Money
-		n        int64
-		res      Money
-		resInt   int64
-		resFloat float64
-	}{
-		{origin: FromInt(1500), n: 1, res: Money(150000), resInt: 1500, resFloat: 1500},
-		{origin: FromInt(1500), n: 5, res: Money(30000), resInt: 300, resFloat: 300},
-		{origin: FromInt(1500), n: 7, res: Money(21428), resInt: 214, resFloat: 214.28},
-	}
+		tests := []struct {
+			origin   Money
+			n        int64
+			res      Money
+			resInt   int64
+			resFloat float64
+		}{
+			{origin: FromInt(1500), n: 1, res: Money(150000), resInt: 1500, resFloat: 1500},
+			{origin: FromInt(1500), n: 5, res: Money(30000), resInt: 300, resFloat: 300},
+			{origin: FromInt(1500), n: 7, res: Money(21428), resInt: 214, resFloat: 214.28},
+		}
 
-	for _, tt := range tests {
-		res := tt.origin.Divide(tt.n)
-		require.Equal(tt.res, res)
-		require.Equal(tt.resInt, res.ToInt())
-		require.Equal(tt.resFloat, res.ToFloat())
-	}
+		for _, tt := range tests {
+			res := tt.origin.Divide(tt.n)
+			require.Equal(tt.res, res)
+			require.Equal(tt.resInt, res.ToInt())
+			require.Equal(tt.resFloat, res.ToFloat())
+		}
+	})
+
+	// Special case
+	t.Run("divide by zero", func(t *testing.T) {
+		require := require.New(t)
+
+		defer func() {
+			r := recover()
+			require.NotNil(r)
+		}()
+
+		FromFloat(120.5).Divide(0)
+	})
 }
 
 func TestJSON(t *testing.T) {
@@ -324,8 +338,9 @@ func TestFormat(t *testing.T) {
 	require := require.New(t)
 
 	tests := []struct {
-		input Money
-		want  string
+		input  Money
+		format string // default format is '%v'
+		want   string
 	}{
 		{input: FromInt(357), want: "357.00"},
 		{input: FromFloat(154.30), want: "154.30"},
@@ -343,21 +358,20 @@ func TestFormat(t *testing.T) {
 		{input: FromFloat(15_000_000_000.05), want: "15 000 000 000.05"},
 		{input: FromFloat(150_000_000_000.00), want: "150 000 000 000.00"},
 		{input: FromInt(1_500_000_000_000), want: "1 500 000 000 000.00"},
+		// Check formats
+		{input: FromFloat(0.05), format: "%d", want: "0"},
+		{input: FromFloat(0.05), format: "%f", want: "0.05"},
+		{input: FromFloat(1_500.25), format: "%d", want: "1500"},
+		{input: FromFloat(1_500.25), format: "%f", want: "1500.25"},
 	}
 
 	for _, tt := range tests {
 		var s string
+		if tt.format == "" {
+			tt.format = "%v"
+		}
 
-		s = fmt.Sprint(tt.input)
-		require.Equal(tt.want, s)
-
-		s = fmt.Sprintf("%s", tt.input)
-		require.Equal(tt.want, s)
-
-		s = fmt.Sprintf("%v", tt.input)
-		require.Equal(tt.want, s)
-
-		s = fmt.Sprintf("%+v", tt.input)
+		s = fmt.Sprintf(tt.format, tt.input)
 		require.Equal(tt.want, s)
 	}
 }
