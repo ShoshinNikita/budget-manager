@@ -126,9 +126,20 @@ func (m Money) Format(f fmt.State, c rune) {
 	switch c {
 	case 'd':
 		str = str[:len(str)-3]
+		if str == "-0" {
+			str = "0"
+		}
 	case 'f':
 		// Do nothing
 	default:
+		var negative bool
+		// There's a case when minus is separated by thin space (- 100 000.00).
+		// So, trim it for a while.
+		if str[0] == '-' {
+			negative = true
+			str = str[1:]
+		}
+
 		// This algorithm can be buggy because the string is changing in process, but
 		// it works for 1000000000000.00 (one trillion must be enough for all cases) and
 		// it is very simple. So, leave it as is.
@@ -147,6 +158,10 @@ func (m Money) Format(f fmt.State, c rune) {
 			// Use thin space ' ' instead (https://en.wikipedia.org/wiki/Thin_space)
 
 			str = str[:i] + thinSpace + str[i:]
+		}
+
+		if negative {
+			str = "-" + str
 		}
 	}
 
