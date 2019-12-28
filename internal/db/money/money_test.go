@@ -343,26 +343,42 @@ func TestFormat(t *testing.T) {
 		want   string
 	}{
 		{input: FromInt(357), want: "357.00"},
+		{input: FromInt(-357), want: "-357.00"},
 		{input: FromFloat(154.30), want: "154.30"},
+		{input: FromFloat(-154.30), want: "-154.30"},
 		{input: FromFloat(0.07), want: "0.07"},
 		{input: FromFloat(15.073), want: "15.07"},
 		{input: FromFloat(15.078), want: "15.07"},
 		// Check grouping
 		{input: FromInt(1_500), want: "1 500.00"},
+		{input: FromInt(-1_500), want: "-1 500.00"},
 		{input: FromInt(15_000), want: "15 000.00"},
+		{input: FromInt(-15_000), want: "-15 000.00"},
 		{input: FromInt(150_000), want: "150 000.00"},
+		{input: FromInt(-150_000), want: "-150 000.00"},
 		{input: FromFloat(1_500_000.05), want: "1 500 000.05"},
+		{input: FromFloat(-1_500_000.05), want: "-1 500 000.05"},
 		{input: FromFloat(15_000_000.05), want: "15 000 000.05"},
+		{input: FromFloat(-15_000_000.05), want: "-15 000 000.05"},
 		{input: FromFloat(150_000_000.05), want: "150 000 000.05"},
+		{input: FromFloat(-150_000_000.05), want: "-150 000 000.05"},
 		{input: FromFloat(1_500_000_000.05), want: "1 500 000 000.05"},
+		{input: FromFloat(-1_500_000_000.05), want: "-1 500 000 000.05"},
 		{input: FromFloat(15_000_000_000.05), want: "15 000 000 000.05"},
+		{input: FromFloat(-15_000_000_000.05), want: "-15 000 000 000.05"},
 		{input: FromFloat(150_000_000_000.00), want: "150 000 000 000.00"},
+		{input: FromFloat(-150_000_000_000.00), want: "-150 000 000 000.00"},
 		{input: FromInt(1_500_000_000_000), want: "1 500 000 000 000.00"},
+		{input: FromInt(-1_500_000_000_000), want: "-1 500 000 000 000.00"},
 		// Check formats
 		{input: FromFloat(0.05), format: "%d", want: "0"},
+		{input: FromFloat(-0.05), format: "%d", want: "0"},
 		{input: FromFloat(0.05), format: "%f", want: "0.05"},
+		{input: FromFloat(-0.05), format: "%f", want: "-0.05"},
 		{input: FromFloat(1_500.25), format: "%d", want: "1500"},
+		{input: FromFloat(-1_500.25), format: "%d", want: "-1500"},
 		{input: FromFloat(1_500.25), format: "%f", want: "1500.25"},
+		{input: FromFloat(-1_500.25), format: "%f", want: "-1500.25"},
 	}
 
 	for _, tt := range tests {
