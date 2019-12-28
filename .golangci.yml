@@ -1,0 +1,18 @@
+run:
+  concurrency: 4
+
+linters:
+  enable-all: true
+  disable:
+    - wsl
+    - dupl
+    - godox
+
+linters-settings:
+  funlen:
+    lines: 80
+
+issues:
+  # Display all issues
+  max-issues-per-linter: 0
+  max-same-issues: 0
