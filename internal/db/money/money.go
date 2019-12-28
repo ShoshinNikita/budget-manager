@@ -123,24 +123,31 @@ func (m Money) Format(f fmt.State, c rune) {
 
 	str := m.ToString()
 
-	// This algorithm can be buggy because the string is changing in process, but
-	// it works for 1000000000000.00 (one trillion must be enough for all cases) and
-	// it is very simple. So, leave it as is.
+	switch c {
+	case 'd':
+		str = str[:len(str)-3]
+	case 'f':
+		// Do nothing
+	default:
+		// This algorithm can be buggy because the string is changing in process, but
+		// it works for 1000000000000.00 (one trillion must be enough for all cases) and
+		// it is very simple. So, leave it as is.
 
-	for i := len(str) - 6; i > 0; i -= 3 {
-		// We don't use comma as a separator because:
-		//
-		//   The 22nd General Conference on Weights and Measures declared in 2003 that
-		//   "the symbol for the decimal marker shall be either the point on the line or
-		//   the comma on the line". It further reaffirmed that "numbers may be divided in
-		//   groups of three in order to facilitate reading; neither dots nor commas are ever
-		//   inserted in the spaces between groups"
-		//
-		// Source: https://en.wikipedia.org/wiki/Decimal_separator#Current_standards
-		//
-		// Use thin space ' ' instead (https://en.wikipedia.org/wiki/Thin_space)
+		for i := len(str) - 6; i > 0; i -= 3 {
+			// We don't use comma as a separator because:
+			//
+			//   The 22nd General Conference on Weights and Measures declared in 2003 that
+			//   "the symbol for the decimal marker shall be either the point on the line or
+			//   the comma on the line". It further reaffirmed that "numbers may be divided in
+			//   groups of three in order to facilitate reading; neither dots nor commas are ever
+			//   inserted in the spaces between groups"
+			//
+			// Source: https://en.wikipedia.org/wiki/Decimal_separator#Current_standards
+			//
+			// Use thin space ' ' instead (https://en.wikipedia.org/wiki/Thin_space)
 
-		str = str[:i] + thinSpace + str[i:]
+			str = str[:i] + thinSpace + str[i:]
+		}
 	}
 
 	f.Write([]byte(str))

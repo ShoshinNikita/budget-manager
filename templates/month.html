@@ -407,7 +407,7 @@
 							<td>
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Edit"
-										onclick="showModalWindowToEditIncome('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.Income}}')">
+										onclick="showModalWindowToEditIncome('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{printf `%f` .Income}}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
@@ -479,7 +479,7 @@
 							<td>
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Edit"
-										onclick="showModalWindowToEditMonthlyPayment('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
+										onclick="showModalWindowToEditMonthlyPayment('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{printf `%f` .Cost}}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
@@ -587,7 +587,7 @@
 								<td>
 									<div class="actions-horizontal-list">
 										<div class="feather-icon" title="Edit"
-											onclick="showModalWindowToEditSpend('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{.Cost}}')">
+											onclick="showModalWindowToEditSpend('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{.TypeID}}', '{{printf `%f` .Cost}}')">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 											</svg>
