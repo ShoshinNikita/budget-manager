@@ -9,8 +9,14 @@ import (
 	clog "github.com/ShoshinNikita/go-clog/v3"
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
-	"github.com/pkg/errors"
+	pkgErrors "github.com/pkg/errors"
+
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 )
+
+// --------------------------------------------------
+// DB
+// --------------------------------------------------
 
 // createTables create table according to passed models and options. It returns the first encountered error
 //
@@ -23,7 +29,7 @@ import (
 //
 func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 	if len(modelsAndOpts)%2 != 0 {
-		return errors.New("invalid numbers of arguments")
+		return pkgErrors.New("invalid numbers of arguments")
 	}
 
 	for i := 0; i < len(modelsAndOpts); i += 2 {
@@ -31,7 +37,7 @@ func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 		opts, ok := modelsAndOpts[i+1].(*orm.CreateTableOptions)
 		if !ok {
 			if modelsAndOpts[i+1] != nil {
-				return errors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
+				return pkgErrors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
 			}
 
 			opts = nil
@@ -39,7 +45,7 @@ func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 
 		err := db.CreateTable(model, opts)
 		if err != nil {
-			return errors.Wrap(err, "can't create table")
+			return pkgErrors.Wrap(err, "can't create table")
 		}
 	}
 
@@ -57,7 +63,7 @@ func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 //
 func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 	if len(modelsAndOpts)%2 != 0 {
-		return errors.New("invalid numbers of arguments")
+		return pkgErrors.New("invalid numbers of arguments")
 	}
 
 	for i := 0; i < len(modelsAndOpts); i += 2 {
@@ -65,7 +71,7 @@ func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 		opts, ok := modelsAndOpts[i+1].(*orm.DropTableOptions)
 		if !ok {
 			if modelsAndOpts[i+1] != nil {
-				return errors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
+				return pkgErrors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
 			}
 
 			opts = nil
@@ -73,7 +79,7 @@ func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 
 		err := db.DropTable(model, opts)
 		if err != nil {
-			return errors.Wrap(err, "can't drop table")
+			return pkgErrors.Wrap(err, "can't drop table")
 		}
 	}
 
@@ -85,6 +91,10 @@ func ping(db *pg.DB) (ok bool) {
 	_, err := db.Exec("SELECT 1")
 	return err == nil
 }
+
+// --------------------------------------------------
+// Time
+// --------------------------------------------------
 
 // daysInMonth returns number of days in a month
 func daysInMonth(t time.Time) int {
@@ -99,6 +109,10 @@ func daysInMonth(t time.Time) int {
 
 	return int(days)
 }
+
+// --------------------------------------------------
+// Cron Logger
+// --------------------------------------------------
 
 type cronLogger struct {
 	log *clog.Logger
@@ -148,4 +162,18 @@ func buildStringFromKeysAndValues(keysAndValues ...interface{}) string {
 	}
 
 	return b.String()
+}
+
+// --------------------------------------------------
+// Checker
+// --------------------------------------------------
+
+// checkModel calls 'Check' method of passed model. If error is not nil,// it wraps error
+// with 'errors.WithOriginalError()' and 'errors.WithType(errors.UserError)' options
+func checkModel(model interface{ Check() error }) error {
+	err := model.Check()
+	if err != nil {
+		return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
+	}
+	return nil
 }

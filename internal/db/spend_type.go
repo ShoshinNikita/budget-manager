@@ -47,8 +47,8 @@ func (db DB) GetSpendTypes() ([]models.SpendType, error) {
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &models.SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		if err := spendType.Check(); err != nil {
-			return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
+		if err := checkModel(spendType); err != nil {
+			return err
 		}
 
 		err = tx.Insert(spendType)
@@ -76,8 +76,8 @@ func (db DB) EditSpendType(id uint, newName string) error {
 
 	spendType := &models.SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		if err := spendType.Check(); err != nil {
-			return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
+		if err := checkModel(spendType); err != nil {
+			return err
 		}
 
 		err = tx.Update(spendType)

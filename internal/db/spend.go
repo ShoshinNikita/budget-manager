@@ -64,8 +64,8 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 		Cost:   args.Cost,
 	}
 
-	if err := spend.Check(); err != nil {
-		return 0, errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
+	if err := checkModel(spend); err != nil {
+		return 0, err
 	}
 	err := tx.Insert(spend)
 	if err != nil {
@@ -144,8 +144,8 @@ func (DB) editSpend(tx *pg.Tx, spend *models.Spend, args EditSpendArgs) error {
 		spend.Cost = *args.Cost
 	}
 
-	if err := spend.Check(); err != nil {
-		return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.AppError))
+	if err := checkModel(spend); err != nil {
+		return err
 	}
 	return tx.Update(spend)
 }
