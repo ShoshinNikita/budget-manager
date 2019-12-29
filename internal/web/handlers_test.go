@@ -85,7 +85,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Income: title can't be empty",
 					Success: false,
 				},
 			},
@@ -99,7 +99,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Income: invalid income: '0'",
 					Success: false,
 				},
 			},
@@ -113,7 +113,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Month with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -205,7 +205,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Income with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -219,7 +219,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't edit the Income: invalid income: '0'",
 					Success: false,
 				},
 			},
@@ -288,7 +288,7 @@ func TestHandlers_Income(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Income with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -382,7 +382,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Monthly Payment: title can't be empty",
 					Success: false,
 				},
 			},
@@ -396,7 +396,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Monthly Payment: invalid cost: '0'",
 					Success: false,
 				},
 			},
@@ -410,7 +410,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Month with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -504,7 +504,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Monthly Payment with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -518,7 +518,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't edit the Monthly Payment: invalid cost: '0'",
 					Success: false,
 				},
 			},
@@ -587,7 +587,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Monthly Payment with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -681,7 +681,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Spend: title can't be empty",
 					Success: false,
 				},
 			},
@@ -695,7 +695,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Spend: invalid cost: '0'",
 					Success: false,
 				},
 			},
@@ -709,7 +709,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Day with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -803,7 +803,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't edit the Spend: title can't be empty",
 					Success: false,
 				},
 			},
@@ -817,7 +817,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Spend with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -831,7 +831,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't edit the Spend: invalid cost: '0'",
 					Success: false,
 				},
 			},
@@ -900,7 +900,7 @@ func TestHandlers_Spend(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Spend with passed id doesn't exist",
 					Success: false,
 				},
 			},
@@ -985,7 +985,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't add a new Spend Type: name can't be empty",
 					Success: false,
 				},
 			},
@@ -1093,7 +1093,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "can't edit the Spend Type: name can't be empty",
 					Success: false,
 				},
 			},
@@ -1197,7 +1197,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
-					Error:   "bad params",
+					Error:   "Spend Type with passed id doesn't exist",
 					Success: false,
 				},
 			},
