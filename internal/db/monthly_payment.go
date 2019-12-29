@@ -4,6 +4,7 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
@@ -25,7 +26,9 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 		// Add Monthly Payment
 		id, err = db.addMonthlyPayment(tx, args)
 		if err != nil {
-			err = errorWrap(err, "can't add new MonthlyPayment")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't add new MonthlyPayment"),
+				errors.WithTypeIfNotSet(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -41,9 +44,6 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return 0, internalError(err)
-		}
 		return 0, err
 	}
 
@@ -60,11 +60,11 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 	}
 
 	if err := mp.Check(); err != nil {
-		return 0, badRequestError(err)
+		return 0, errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
 	}
 	err = tx.Insert(mp)
 	if err != nil {
-		return 0, errorWrap(err, "can't insert MonthlyPayment")
+		return 0, err
 	}
 
 	return mp.ID, nil
@@ -92,7 +92,9 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 			if err == pg.ErrNoRows {
 				err = ErrMonthlyPaymentNotExist
 			} else {
-				err = errorWrap(err, "can't get Monthly Payment with passed id")
+				err = errors.Wrap(err,
+					errors.WithMsg("can't get Monthly Payment with passed id"),
+					errors.WithType(errors.AppError))
 			}
 
 			db.log.Error(err)
@@ -102,7 +104,9 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		// Edit Monthly Payment
 		err = db.editMonthlyPayment(tx, mp, args)
 		if err != nil {
-			err = errorWrapf(err, "can't edit Monthly Payment with id '%d'", args.ID)
+			err = errors.Wrap(err,
+				errors.WithMsg("can't edit Monthly Payment"),
+				errors.WithTypeIfNotSet(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -117,9 +121,6 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
 		return err
 	}
 
@@ -141,10 +142,10 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *models.MonthlyPayment, args EditMont
 	}
 
 	if err := mp.Check(); err != nil {
-		return badRequestError(err)
+		return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
 	}
-	err := tx.Update(mp)
-	return errorWrap(err, "can't update Monthly Payment")
+
+	return tx.Update(mp)
 }
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
@@ -158,14 +159,18 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 		// Remove Monthly Payment
 		err = tx.Model(mp).Column("month_id").WherePK().Select()
 		if err != nil {
-			err = errorWrap(err, "can't select Monthly Payment with passed id")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't select Monthly Payment with passed id"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
 
 		err = tx.Delete(mp)
 		if err != nil {
-			err = errorWrapf(err, "can't remove Monthly Payment with id '%d'", id)
+			err = errors.Wrap(err,
+				errors.WithMsg("can't remove Monthly Payment"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -181,9 +186,6 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
 		return err
 	}
 

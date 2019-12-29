@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/go-pg/pg/v9"
 )
 
@@ -10,7 +11,16 @@ func (db DB) GetSpendType(id uint) (*models.SpendType, error) {
 	spendType := &models.SpendType{ID: id}
 	err := db.db.Select(spendType)
 	if err != nil {
-		err = errorWrapf(err, "can't select Spend Type with id '%d'", id)
+		if err == pg.ErrNoRows {
+			err = errors.Wrap(err,
+				errors.WithMsg("Spend Type with passed id doesn't exist"),
+				errors.WithType(errors.UserError))
+		} else {
+			err = errors.Wrap(err,
+				errors.WithMsg("can't select Spend Type"),
+				errors.WithType(errors.AppError))
+		}
+
 		db.log.Error(err)
 		return nil, err
 	}
@@ -23,7 +33,9 @@ func (db DB) GetSpendTypes() ([]models.SpendType, error) {
 	spendTypes := []models.SpendType{}
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
-		err = errorWrap(err, "can't select Spend Types")
+		err = errors.Wrap(err,
+			errors.WithMsg("can't select Spend Types"),
+			errors.WithType(errors.AppError))
 		db.log.Error(err)
 		return nil, err
 	}
@@ -36,11 +48,14 @@ func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &models.SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := spendType.Check(); err != nil {
-			return badRequestError(err)
+			return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
 		}
+
 		err = tx.Insert(spendType)
 		if err != nil {
-			err = errorWrap(err, "can't insert a new Spend Type")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't insert a new Spend Type"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -48,9 +63,6 @@ func (db DB) AddSpendType(name string) (typeID uint, err error) {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return 0, internalError(err)
-		}
 		return 0, err
 	}
 
@@ -66,11 +78,14 @@ func (db DB) EditSpendType(id uint, newName string) error {
 	spendType := &models.SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := spendType.Check(); err != nil {
-			return badRequestError(err)
+			return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
 		}
+
 		err = tx.Update(spendType)
 		if err != nil {
-			err = errorWrap(err, "can't insert a new Spend Type")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't insert a new Spend Type"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -78,9 +93,6 @@ func (db DB) EditSpendType(id uint, newName string) error {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
 		return err
 	}
 
@@ -97,7 +109,9 @@ func (db DB) RemoveSpendType(id uint) error {
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Delete(spendType)
 		if err != nil {
-			err = errorWrapf(err, "can't delete spend type with id '%d'", id)
+			err = errors.Wrap(err,
+				errors.WithMsg("can't delete Spend Type"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -109,7 +123,9 @@ func (db DB) RemoveSpendType(id uint) error {
 			Where("type_id = ?", id).
 			Update()
 		if err != nil {
-			err = errorWrap(err, "can't reset Type IDs of Monthly Payments")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't reset Type IDs of Monthly Payments"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -119,7 +135,9 @@ func (db DB) RemoveSpendType(id uint) error {
 			Where("type_id = ?", id).
 			Update()
 		if err != nil {
-			err = errorWrap(err, "can't reset Type IDs of Spends")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't reset Type IDs of Spends"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -127,9 +145,6 @@ func (db DB) RemoveSpendType(id uint) error {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
 		return err
 	}
 

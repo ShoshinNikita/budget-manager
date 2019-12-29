@@ -4,6 +4,7 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
@@ -24,7 +25,9 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 		// Add a new Income
 		incomeID, err = db.addIncome(tx, args)
 		if err != nil {
-			err = errorWrap(err, "can't add income")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't add income"),
+				errors.WithTypeIfNotSet(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -40,9 +43,6 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return 0, internalError(err)
-		}
 		return 0, err
 	}
 
@@ -59,11 +59,10 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 	}
 
 	if err := in.Check(); err != nil {
-		return 0, badRequestError(err)
+		return 0, errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
 	}
 	err = tx.Insert(in)
 	if err != nil {
-		err = errorWrap(err, "can't insert a new row")
 		return 0, err
 	}
 
@@ -92,7 +91,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 			if err == pg.ErrNoRows {
 				err = ErrIncomeNotExist
 			} else {
-				err = errorWrapf(err, "can't select Income with passed id '%d'", args.ID)
+				err = errors.Wrap(err, errors.WithMsg("can't select Income"), errors.WithType(errors.AppError))
 			}
 			db.log.Error(err)
 			return err
@@ -101,7 +100,9 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		// Edit Income
 		err = db.editIncome(tx, in, args)
 		if err != nil {
-			err = errorWrap(err, "can't edit Income")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't edit Income"),
+				errors.WithTypeIfNotSet(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -117,9 +118,6 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
 		return err
 	}
 
@@ -138,11 +136,11 @@ func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
 	}
 
 	if err := in.Check(); err != nil {
-		return badRequestError(err)
+		return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
 	}
 	err := tx.Update(in)
 	if err != nil {
-		return errorWrap(err, "can't update Income")
+		return err
 	}
 
 	return nil
@@ -165,7 +163,9 @@ func (db DB) RemoveIncome(id uint) error {
 			return in.MonthID, nil
 		}()
 		if err != nil {
-			err = errorWrap(err, "can't select Income with passed id")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't select Income with passed id"),
+				errors.WithType(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -173,7 +173,9 @@ func (db DB) RemoveIncome(id uint) error {
 		// Remove income
 		err = db.removeIncome(tx, id)
 		if err != nil {
-			err = errorWrap(err, "can't remove Income with passed id")
+			err = errors.Wrap(err,
+				errors.WithMsg("can't remove Income with passed id"),
+				errors.WithTypeIfNotSet(errors.AppError))
 			db.log.Error(err)
 			return err
 		}
@@ -189,9 +191,6 @@ func (db DB) RemoveIncome(id uint) error {
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
 		return err
 	}
 
