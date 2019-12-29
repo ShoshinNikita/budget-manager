@@ -62,7 +62,23 @@ func Wrap(err error, opts ...Option) error {
 		opt(&wrappedError)
 	}
 
+	return wrappedError
+}
+
+// GetOriginalError returns original error. If err isn't an instance of 'fundamental' type,
+// passed error will be returned
+func GetOriginalError(err error) error {
+	if err, ok := err.(fundamental); ok {
+		return err.originalError
+	}
 	return err
+}
+
+func GetErrorType(err error) (t ErrorType, ok bool) {
+	if err, ok := err.(fundamental); ok {
+		return err.errorType, true
+	}
+	return UndefinedError, false
 }
 
 // --------------------------------------------------
