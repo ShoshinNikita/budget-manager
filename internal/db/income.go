@@ -1,18 +1,10 @@
 package db
 
 import (
-	"context"
-
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
-)
-
-var (
-	_ orm.BeforeInsertHook = (*Income)(nil)
-	_ orm.BeforeUpdateHook = (*Income)(nil)
 )
 
 // Income contains information about incomes (salary, gifts and etc.)
@@ -27,25 +19,21 @@ type Income struct {
 	Income money.Money `json:"income"`
 }
 
-func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
+// Check checks whether Income is valid (not empty title, positive income and etc.)
+func (in Income) Check() error {
 	// Check Title
 	if in.Title == "" {
-		return ctx, badRequestError(errors.New("title can't be empty"))
+		return badRequestError(errors.New("title can't be empty"))
 	}
 
 	// Skip Notes
 
 	// Check Income
 	if in.Income <= 0 {
-		return ctx, badRequestError(errors.Errorf("invalid income: '%d'", in.Income))
+		return badRequestError(errors.Errorf("invalid income: '%d'", in.Income))
 	}
 
-	return ctx, nil
-}
-
-func (in *Income) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	// Can use BeforeInsert hook
-	return in.BeforeInsert(ctx)
+	return nil
 }
 
 // -----------------------------------------------------------------------------
@@ -101,6 +89,9 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 		Income: args.Income,
 	}
 
+	if err := in.Check(); err != nil {
+		return 0, err
+	}
 	err = tx.Insert(in)
 	if err != nil {
 		err = errorWrap(err, "can't insert a new row")
@@ -177,6 +168,9 @@ func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 		in.Income = *args.Income
 	}
 
+	if err := in.Check(); err != nil {
+		return err
+	}
 	err := tx.Update(in)
 	if err != nil {
 		return errorWrap(err, "can't update Income")

@@ -1,16 +1,8 @@
 package db
 
 import (
-	"context"
-
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
-)
-
-var (
-	_ orm.BeforeInsertHook = (*SpendType)(nil)
-	_ orm.BeforeUpdateHook = (*SpendType)(nil)
 )
 
 // SpendType contains information about spend type
@@ -19,17 +11,14 @@ type SpendType struct {
 	Name string `json:"name"`
 }
 
-func (in *SpendType) BeforeInsert(ctx context.Context) (context.Context, error) {
+// Check checks whether Spend Type is valid (not empty name)
+func (in SpendType) Check() error {
 	// Check Name
 	if in.Name == "" {
-		return ctx, badRequestError(errors.Errorf("name can't be empty"))
+		return badRequestError(errors.Errorf("name can't be empty"))
 	}
 
-	return ctx, nil
-}
-
-func (in *SpendType) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	return in.BeforeInsert(ctx)
+	return nil
 }
 
 // -----------------------------------------------------------------------------
@@ -64,6 +53,9 @@ func (db DB) GetSpendTypes() ([]SpendType, error) {
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		if err := spendType.Check(); err != nil {
+			return err
+		}
 		err = tx.Insert(spendType)
 		if err != nil {
 			err = errorWrap(err, "can't insert a new Spend Type")
@@ -91,6 +83,9 @@ func (db DB) EditSpendType(id uint, newName string) error {
 
 	spendType := &SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		if err := spendType.Check(); err != nil {
+			return err
+		}
 		err = tx.Update(spendType)
 		if err != nil {
 			err = errorWrap(err, "can't insert a new Spend Type")

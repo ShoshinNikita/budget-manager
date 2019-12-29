@@ -1,18 +1,10 @@
 package db
 
 import (
-	"context"
-
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
-)
-
-var (
-	_ orm.BeforeInsertHook = (*MonthlyPayment)(nil)
-	_ orm.BeforeUpdateHook = (*MonthlyPayment)(nil)
 )
 
 // MonthlyPayment contains information about monthly payments (rent, Patreon and etc.)
@@ -29,10 +21,11 @@ type MonthlyPayment struct {
 	Cost   money.Money `json:"cost"`
 }
 
-func (in *MonthlyPayment) BeforeInsert(ctx context.Context) (context.Context, error) {
+// Check checks whether Monthly Payment is valid (not empty title, positive cost and etc.)
+func (in MonthlyPayment) Check() error {
 	// Check Title
 	if in.Title == "" {
-		return ctx, badRequestError(errors.New("title can't be empty"))
+		return badRequestError(errors.New("title can't be empty"))
 	}
 
 	// Skip Type
@@ -41,14 +34,10 @@ func (in *MonthlyPayment) BeforeInsert(ctx context.Context) (context.Context, er
 
 	// Check Cost
 	if in.Cost <= 0 {
-		return ctx, badRequestError(errors.Errorf("invalid income: '%d'", in.Cost))
+		return badRequestError(errors.Errorf("invalid income: '%d'", in.Cost))
 	}
 
-	return ctx, nil
-}
-
-func (in *MonthlyPayment) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	return in.BeforeInsert(ctx)
+	return nil
 }
 
 // -----------------------------------------------------------------------------
@@ -105,6 +94,9 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 		Cost:    args.Cost,
 	}
 
+	if err := mp.Check(); err != nil {
+		return 0, err
+	}
 	err = tx.Insert(mp)
 	if err != nil {
 		return 0, errorWrap(err, "can't insert MonthlyPayment")
@@ -183,6 +175,9 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaym
 		mp.Cost = *args.Cost
 	}
 
+	if err := mp.Check(); err != nil {
+		return err
+	}
 	err := tx.Update(mp)
 	return errorWrap(err, "can't update Monthly Payment")
 }

@@ -1,18 +1,10 @@
 package db
 
 import (
-	"context"
-
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
-)
-
-var (
-	_ orm.BeforeInsertHook = (*Spend)(nil)
-	_ orm.BeforeUpdateHook = (*Spend)(nil)
 )
 
 // Spend contains information about spends
@@ -29,10 +21,11 @@ type Spend struct {
 	Cost   money.Money `json:"cost"`
 }
 
-func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
+// Check checks whether Income is valid (not empty title, positive cost and etc.)
+func (in Spend) Check() error {
 	// Check Title
 	if in.Title == "" {
-		return ctx, badRequestError(errors.New("title can't be empty"))
+		return badRequestError(errors.New("title can't be empty"))
 	}
 
 	// Skip Type
@@ -41,14 +34,10 @@ func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
 
 	// Check Cost
 	if in.Cost <= 0 {
-		return ctx, badRequestError(errors.Errorf("invalid income: '%d'", in.Cost))
+		return badRequestError(errors.Errorf("invalid income: '%d'", in.Cost))
 	}
 
-	return ctx, nil
-}
-
-func (in *Spend) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	return in.BeforeInsert(ctx)
+	return nil
 }
 
 // -----------------------------------------------------------------------------
@@ -111,6 +100,9 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 		Cost:   args.Cost,
 	}
 
+	if err := spend.Check(); err != nil {
+		return 0, err
+	}
 	err := tx.Insert(spend)
 	if err != nil {
 		return 0, errorWrap(err, "can't insert Spend")
@@ -188,6 +180,9 @@ func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
 		spend.Cost = *args.Cost
 	}
 
+	if err := spend.Check(); err != nil {
+		return err
+	}
 	return tx.Update(spend)
 }
 
