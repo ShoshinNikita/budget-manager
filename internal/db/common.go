@@ -14,22 +14,22 @@ import (
 // Errors
 
 var (
-	ErrMonthNotExist = errors.New("month with passed id doesn't exist",
+	ErrMonthNotExist = errors.New("Month with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
-	ErrDayNotExist = errors.New("day with passed id doesn't exist",
+	ErrDayNotExist = errors.New("Day with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
-	ErrIncomeNotExist = errors.New("income with passed id doesn't exist",
+	ErrIncomeNotExist = errors.New("Income with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
-	ErrMonthlyPaymentNotExist = errors.New("monthly payment with passed id doesn't exist",
+	ErrMonthlyPaymentNotExist = errors.New("Monthly Payment with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
-	ErrSpendNotExist = errors.New("spend with passed id doesn't exist",
+	ErrSpendNotExist = errors.New("Spend with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
-	ErrSpendTypeNotExist = errors.New("spend type with passed id doesn't exist",
+	ErrSpendTypeNotExist = errors.New("Spend Type with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
 )

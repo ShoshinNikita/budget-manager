@@ -110,7 +110,7 @@ func (in MonthlyPayment) Check() error {
 
 	// Check Cost
 	if in.Cost <= 0 {
-		return fmt.Errorf("invalid income: '%d'", in.Cost)
+		return fmt.Errorf("invalid cost: '%d'", in.Cost)
 	}
 
 	return nil
@@ -147,7 +147,7 @@ func (in Spend) Check() error {
 
 	// Check Cost
 	if in.Cost <= 0 {
-		return fmt.Errorf("invalid income: '%d'", in.Cost)
+		return fmt.Errorf("invalid cost: '%d'", in.Cost)
 	}
 
 	return nil

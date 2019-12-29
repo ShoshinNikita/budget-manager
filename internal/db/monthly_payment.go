@@ -27,7 +27,7 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 		id, err = db.addMonthlyPayment(tx, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't add new MonthlyPayment"),
+				errors.WithMsg("can't add a new Monthly Payment"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -98,7 +98,7 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		err = db.editMonthlyPayment(tx, mp, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit Monthly Payment"),
+				errors.WithMsg("can't edit the Monthly Payment"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 

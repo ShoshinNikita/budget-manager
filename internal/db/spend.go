@@ -102,7 +102,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 		err = db.editSpend(tx, spend, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit Spend with passed id"),
+				errors.WithMsg("can't edit the Spend"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 

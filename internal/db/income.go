@@ -26,7 +26,7 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 		incomeID, err = db.addIncome(tx, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't add income"),
+				errors.WithMsg("can't add a new Income"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -95,7 +95,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		err = db.editIncome(tx, in, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit Income"),
+				errors.WithMsg("can't edit the Income"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 

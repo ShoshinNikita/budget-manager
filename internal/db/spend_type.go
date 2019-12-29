@@ -48,13 +48,13 @@ func (db DB) AddSpendType(name string) (typeID uint, err error) {
 	spendType := &models.SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
-			return err
+			return errors.Wrap(err, errors.WithMsg("can't add a new Spend Type"))
 		}
 
 		err = tx.Insert(spendType)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't insert a new Spend Type"),
+				errors.WithMsg("can't add a new Spend Type"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -77,13 +77,13 @@ func (db DB) EditSpendType(id uint, newName string) error {
 	spendType := &models.SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
-			return err
+			return errors.Wrap(err, errors.WithMsg("can't edit the Spend Type"))
 		}
 
 		err = tx.Update(spendType)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't insert a new Spend Type"),
+				errors.WithMsg("can't edit the Spend Type"),
 				errors.WithType(errors.AppError))
 		}
 
