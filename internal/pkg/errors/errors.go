@@ -14,6 +14,8 @@ const (
 	AppError
 )
 
+const DefaultErrorMessage = "unknown error"
+
 type fundamental struct {
 	originalError     error
 	showOriginalError bool
@@ -34,7 +36,7 @@ func (err fundamental) Error() string {
 	}
 
 	if res == "" {
-		res = "unknown error"
+		res = DefaultErrorMessage
 	}
 	return res
 }

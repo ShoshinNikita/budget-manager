@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 )
 
@@ -62,30 +61,19 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 
 	monthID, err := s.db.GetMonthID(year, int(monthNumber))
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			// TODO: use special 404 page
-			s.processError(w, "such Month doesn't exist", http.StatusBadRequest, err)
-		default:
-			// TODO: use special 500 page
-			s.processError(w, "can't select Month with passed data", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
 	// Process
 	month, err := s.db.GetMonth(monthID)
 	if err != nil {
-		// Skip db.IsBadRequestError check
-
 		s.processError(w, "can't select Month info", http.StatusInternalServerError, err)
 		return
 	}
 
 	spendTypes, err := s.db.GetSpendTypes()
 	if err != nil {
-		// Skip db.IsBadRequestError check
-
 		s.processError(w, "can't get Spend Types", http.StatusInternalServerError, err)
 		return
 	}

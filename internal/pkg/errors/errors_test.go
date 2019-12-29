@@ -40,7 +40,7 @@ func TestNew(t *testing.T) {
 				msg:               "",
 				errorType:         UserError,
 			},
-			wantPrint: "unknown error",
+			wantPrint: DefaultErrorMessage,
 		},
 		{
 			errorMsg: "test",

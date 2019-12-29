@@ -46,12 +46,7 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	// Process
 	month, err := s.db.GetMonth(monthID)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "Month with passed id doesn't exist", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't select Month", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -100,12 +95,7 @@ func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok 
 
 	id, err = s.db.GetMonthID(*yearAndMonthReq.Year, int(*yearAndMonthReq.Month))
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "such Month doesn't exist", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't select Month with passed data", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return 0, false
 	}
 
@@ -130,12 +120,7 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	// Process
 	day, err := s.db.GetDay(dayID)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "Day with passed id doesn't exist", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't add select Day", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -184,12 +169,7 @@ func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bo
 
 	id, err = s.db.GetDayIDByDate(*dateReq.Year, int(*dateReq.Month), *dateReq.Day)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "such Day doesn't exist", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't select Day with passed data", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return 0, false
 	}
 
@@ -224,12 +204,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddIncome(args)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't add new Income", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -274,12 +249,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditIncome(args)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't edit Income", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -312,12 +282,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveIncome(req.ID)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't remove Income", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -361,12 +326,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddMonthlyPayment(args)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't add new Monthly Payment", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -412,12 +372,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditMonthlyPayment(args)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't edit Monthly Payment", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -450,12 +405,7 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveMonthlyPayment(req.ID)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't remove Monthly Payment", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -499,12 +449,7 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddSpend(args)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't add new Spend", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -550,12 +495,7 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditSpend(args)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't edit Spend", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -588,12 +528,7 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveSpend(req.ID)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't remove Spend", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -621,12 +556,7 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	// Process
 	types, err := s.db.GetSpendTypes()
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad request", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't get all Spend Types", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -662,12 +592,7 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	// Process
 	id, err := s.db.AddSpendType(req.Name)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't add new Spend Type", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -703,12 +628,7 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.EditSpendType(req.ID, req.Name)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't edit Spend Type", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
@@ -741,12 +661,7 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveSpendType(req.ID)
 	if err != nil {
-		switch {
-		case db.IsBadRequestError(err):
-			s.processError(w, "bad params", http.StatusBadRequest, err)
-		default:
-			s.processError(w, "can't remove Spend Type", http.StatusInternalServerError, err)
-		}
+		s.processDBError(w, err)
 		return
 	}
 
