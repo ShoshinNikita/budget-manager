@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 )
 
 const (
@@ -90,8 +91,8 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := struct {
-		*db.Month
-		SpendTypes []db.SpendType
+		*models.Month
+		SpendTypes []models.SpendType
 	}{
 		Month:      month,
 		SpendTypes: spendTypes,

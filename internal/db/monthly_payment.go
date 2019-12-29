@@ -2,45 +2,10 @@ package db
 
 import (
 	"github.com/go-pg/pg/v9"
-	"github.com/pkg/errors"
 
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
-
-// MonthlyPayment contains information about monthly payments (rent, Patreon and etc.)
-type MonthlyPayment struct {
-	// MonthID is a foreign key to Monthes table
-	MonthID uint `json:"month_id"`
-
-	ID uint `pg:",pk" json:"-"`
-
-	Title  string      `json:"title"`
-	TypeID uint        `json:"type_id,omitempty"`
-	Type   *SpendType  `pg:"fk:type_id" json:"type,omitempty"`
-	Notes  string      `json:"notes,omitempty"`
-	Cost   money.Money `json:"cost"`
-}
-
-// Check checks whether Monthly Payment is valid (not empty title, positive cost and etc.)
-func (in MonthlyPayment) Check() error {
-	// Check Title
-	if in.Title == "" {
-		return badRequestError(errors.New("title can't be empty"))
-	}
-
-	// Skip Type
-
-	// Skip Notes
-
-	// Check Cost
-	if in.Cost <= 0 {
-		return badRequestError(errors.Errorf("invalid income: '%d'", in.Cost))
-	}
-
-	return nil
-}
-
-// -----------------------------------------------------------------------------
 
 type AddMonthlyPaymentArgs struct {
 	MonthID uint
@@ -86,7 +51,7 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 }
 
 func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err error) {
-	mp := &MonthlyPayment{
+	mp := &models.MonthlyPayment{
 		MonthID: args.MonthID,
 		Title:   args.Title,
 		Notes:   args.Notes,
@@ -95,7 +60,7 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 	}
 
 	if err := mp.Check(); err != nil {
-		return 0, err
+		return 0, badRequestError(err)
 	}
 	err = tx.Insert(mp)
 	if err != nil {
@@ -120,7 +85,7 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
-	mp := &MonthlyPayment{ID: args.ID}
+	mp := &models.MonthlyPayment{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Select(mp)
 		if err != nil {
@@ -161,7 +126,7 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 	return nil
 }
 
-func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaymentArgs) error {
+func (DB) editMonthlyPayment(tx *pg.Tx, mp *models.MonthlyPayment, args EditMonthlyPaymentArgs) error {
 	if args.Title != nil {
 		mp.Title = *args.Title
 	}
@@ -176,7 +141,7 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaym
 	}
 
 	if err := mp.Check(); err != nil {
-		return err
+		return badRequestError(err)
 	}
 	err := tx.Update(mp)
 	return errorWrap(err, "can't update Monthly Payment")
@@ -188,7 +153,7 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
-	mp := &MonthlyPayment{ID: id}
+	mp := &models.MonthlyPayment{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Remove Monthly Payment
 		err = tx.Model(mp).Column("month_id").WherePK().Select()

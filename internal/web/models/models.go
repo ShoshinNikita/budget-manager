@@ -4,7 +4,7 @@ package models
 import (
 	"time"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 )
 
 // -------------------------------------------------
@@ -39,7 +39,7 @@ type GetMonthByYearAndMonthReq struct {
 type GetMonthResp struct {
 	Response
 
-	Month db.Month `json:"month"`
+	Month models.Month `json:"month"`
 }
 
 // -------------------------------------------------
@@ -63,7 +63,7 @@ type GetDayByDateReq struct {
 type GetDayResp struct {
 	Response
 
-	Day db.Day `json:"day"`
+	Day models.Day `json:"day"`
 }
 
 // -------------------------------------------------
@@ -178,7 +178,7 @@ type RemoveSpendReq struct {
 type GetSpendTypesResp struct {
 	Response
 
-	SpendTypes []db.SpendType `json:"spend_types"`
+	SpendTypes []models.SpendType `json:"spend_types"`
 }
 
 type AddSpendTypeReq struct {

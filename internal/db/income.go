@@ -2,41 +2,10 @@ package db
 
 import (
 	"github.com/go-pg/pg/v9"
-	"github.com/pkg/errors"
 
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
-
-// Income contains information about incomes (salary, gifts and etc.)
-type Income struct {
-	// MonthID is a foreign key to Months table
-	MonthID uint `json:"month_id"`
-
-	ID uint `pg:",pk" json:"-"`
-
-	Title  string      `json:"title"`
-	Notes  string      `json:"notes,omitempty"`
-	Income money.Money `json:"income"`
-}
-
-// Check checks whether Income is valid (not empty title, positive income and etc.)
-func (in Income) Check() error {
-	// Check Title
-	if in.Title == "" {
-		return badRequestError(errors.New("title can't be empty"))
-	}
-
-	// Skip Notes
-
-	// Check Income
-	if in.Income <= 0 {
-		return badRequestError(errors.Errorf("invalid income: '%d'", in.Income))
-	}
-
-	return nil
-}
-
-// -----------------------------------------------------------------------------
 
 type AddIncomeArgs struct {
 	MonthID uint
@@ -81,7 +50,7 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 }
 
 func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
-	in := &Income{
+	in := &models.Income{
 		MonthID: args.MonthID,
 
 		Title:  args.Title,
@@ -90,7 +59,7 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 	}
 
 	if err := in.Check(); err != nil {
-		return 0, err
+		return 0, badRequestError(err)
 	}
 	err = tx.Insert(in)
 	if err != nil {
@@ -114,7 +83,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		return ErrIncomeNotExist
 	}
 
-	in := &Income{ID: args.ID}
+	in := &models.Income{ID: args.ID}
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Select Income
@@ -157,7 +126,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 	return nil
 }
 
-func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
+func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
 	if args.Title != nil {
 		in.Title = *args.Title
 	}
@@ -169,7 +138,7 @@ func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 	}
 
 	if err := in.Check(); err != nil {
-		return err
+		return badRequestError(err)
 	}
 	err := tx.Update(in)
 	if err != nil {
@@ -187,7 +156,7 @@ func (db DB) RemoveIncome(id uint) error {
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		monthID, err := func() (uint, error) {
-			in := &Income{ID: id}
+			in := &models.Income{ID: id}
 			err = tx.Model(in).Column("month_id").WherePK().Select()
 			if err != nil {
 				return 0, err
@@ -230,6 +199,6 @@ func (db DB) RemoveIncome(id uint) error {
 }
 
 func (DB) removeIncome(tx *pg.Tx, id uint) error {
-	in := &Income{ID: id}
+	in := &models.Income{ID: id}
 	return tx.Delete(in)
 }

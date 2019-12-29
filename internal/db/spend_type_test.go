@@ -8,6 +8,8 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
+
+	. "github.com/ShoshinNikita/budget_manager/internal/db/models"
 )
 
 func TestAddSpendType(t *testing.T) {
