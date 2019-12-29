@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
 // Errors
