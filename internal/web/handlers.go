@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db"
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget_manager/internal/web/models"
 )
 

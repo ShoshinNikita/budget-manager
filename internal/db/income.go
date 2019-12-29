@@ -1,54 +1,11 @@
 package db
 
 import (
-	"context"
-
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
-	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
-
-var (
-	_ orm.BeforeInsertHook = (*Income)(nil)
-	_ orm.BeforeUpdateHook = (*Income)(nil)
-)
-
-// Income contains information about incomes (salary, gifts and etc.)
-type Income struct {
-	// MonthID is a foreign key to Months table
-	MonthID uint `json:"month_id"`
-
-	ID uint `pg:",pk" json:"-"`
-
-	Title  string      `json:"title"`
-	Notes  string      `json:"notes,omitempty"`
-	Income money.Money `json:"income"`
-}
-
-func (in *Income) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Check Title
-	if in.Title == "" {
-		return ctx, badRequestError(errors.New("title can't be empty"))
-	}
-
-	// Skip Notes
-
-	// Check Income
-	if in.Income <= 0 {
-		return ctx, badRequestError(errors.Errorf("invalid income: '%d'", in.Income))
-	}
-
-	return ctx, nil
-}
-
-func (in *Income) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	// Can use BeforeInsert hook
-	return in.BeforeInsert(ctx)
-}
-
-// -----------------------------------------------------------------------------
 
 type AddIncomeArgs struct {
 	MonthID uint
@@ -93,7 +50,7 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 }
 
 func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
-	in := &Income{
+	in := &models.Income{
 		MonthID: args.MonthID,
 
 		Title:  args.Title,
@@ -101,6 +58,9 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 		Income: args.Income,
 	}
 
+	if err := in.Check(); err != nil {
+		return 0, badRequestError(err)
+	}
 	err = tx.Insert(in)
 	if err != nil {
 		err = errorWrap(err, "can't insert a new row")
@@ -123,7 +83,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		return ErrIncomeNotExist
 	}
 
-	in := &Income{ID: args.ID}
+	in := &models.Income{ID: args.ID}
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Select Income
@@ -166,7 +126,7 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 	return nil
 }
 
-func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
+func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
 	if args.Title != nil {
 		in.Title = *args.Title
 	}
@@ -177,6 +137,9 @@ func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 		in.Income = *args.Income
 	}
 
+	if err := in.Check(); err != nil {
+		return badRequestError(err)
+	}
 	err := tx.Update(in)
 	if err != nil {
 		return errorWrap(err, "can't update Income")
@@ -193,7 +156,7 @@ func (db DB) RemoveIncome(id uint) error {
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		monthID, err := func() (uint, error) {
-			in := &Income{ID: id}
+			in := &models.Income{ID: id}
 			err = tx.Model(in).Column("month_id").WherePK().Select()
 			if err != nil {
 				return 0, err
@@ -236,6 +199,6 @@ func (db DB) RemoveIncome(id uint) error {
 }
 
 func (DB) removeIncome(tx *pg.Tx, id uint) error {
-	in := &Income{ID: id}
+	in := &models.Income{ID: id}
 	return tx.Delete(in)
 }

@@ -7,7 +7,8 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
 // Errors
@@ -32,29 +33,7 @@ func errRecomputeBudget(err error) error {
 // Month
 // -----------------------------------------------------------------------------
 
-type Month struct {
-	ID    uint       `json:"id"`
-	Year  int        `json:"year"`
-	Month time.Month `json:"month"`
-
-	// Incomes
-
-	Incomes     []*Income   `pg:"fk:month_id" json:"incomes"`
-	TotalIncome money.Money `json:"total_income"`
-	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
-	DailyBudget money.Money `json:"daily_budget"`
-
-	// Spends
-
-	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id" json:"monthly_payments"`
-	Days            []*Day            `pg:"fk:month_id" json:"days"`
-	TotalSpend      money.Money       `json:"total_spend"` // must be negative or zero
-
-	// Result is TotalIncome - TotalSpend
-	Result money.Money `json:"result"`
-}
-
-func (db DB) GetMonth(id uint) (m *Month, err error) {
+func (db DB) GetMonth(id uint) (m *models.Month, err error) {
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
 		m, err = db.getMonth(tx, id)
 		return err
@@ -70,7 +49,7 @@ func (db DB) GetMonth(id uint) (m *Month, err error) {
 }
 
 func (db DB) GetMonthID(year, month int) (uint, error) {
-	m := &Month{}
+	m := &models.Month{}
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
@@ -84,7 +63,7 @@ func (db DB) GetMonthID(year, month int) (uint, error) {
 }
 
 func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
-	day := &Day{ID: dayID}
+	day := &models.Day{ID: dayID}
 	err := db.db.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
@@ -101,20 +80,8 @@ func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
 // Day
 // -----------------------------------------------------------------------------
 
-type Day struct {
-	// MonthID is a foreign key to Monthes table
-	MonthID uint `json:"month_id"`
-
-	ID uint `json:"id"`
-
-	Day int `json:"day"`
-	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
-	Saldo  money.Money `json:"saldo"`
-	Spends []*Spend    `pg:"fk:day_id" json:"spends"`
-}
-
-func (db DB) GetDay(id uint) (*Day, error) {
-	d := &Day{ID: id}
+func (db DB) GetDay(id uint) (*models.Day, error) {
+	d := &models.Day{ID: id}
 	err := db.db.Model(d).
 		Relation("Spends", orderByID).
 		Relation("Spends.Type").
@@ -138,7 +105,7 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 		return 0, internalError(errors.Wrap(err, "can't define month id with passed year and month"))
 	}
 
-	d := &Day{}
+	d := &models.Day{}
 	err = db.db.Model(d).
 		Column("id").
 		Where("month_id = ? AND day = ?", monthID, day).
@@ -236,8 +203,8 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	return nil
 }
 
-func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
-	m := &Month{ID: id}
+func (DB) getMonth(tx *pg.Tx, id uint) (*models.Month, error) {
+	m := &models.Month{ID: id}
 	err := tx.Model(m).
 		Relation("Incomes", orderByID).
 		Relation("MonthlyPayments", orderByID).
@@ -260,37 +227,37 @@ func orderByID(q *orm.Query) (*orm.Query, error) {
 
 // checkMonth checks if Month with passed id exists
 func (db DB) checkMonth(id uint) (ok bool) {
-	m := &Month{ID: id}
+	m := &models.Month{ID: id}
 	return db.checkModel(m)
 }
 
 // checkDay checks if Dat with passed id exists
 func (db DB) checkDay(id uint) (ok bool) {
-	d := &Day{ID: id}
+	d := &models.Day{ID: id}
 	return db.checkModel(d)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkIncome(id uint) (ok bool) {
-	st := &Income{ID: id}
+	st := &models.Income{ID: id}
 	return db.checkModel(st)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkMonthlyPayment(id uint) (ok bool) {
-	st := &MonthlyPayment{ID: id}
+	st := &models.MonthlyPayment{ID: id}
 	return db.checkModel(st)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkSpend(id uint) (ok bool) {
-	st := &Spend{ID: id}
+	st := &models.Spend{ID: id}
 	return db.checkModel(st)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkSpendType(id uint) (ok bool) {
-	st := &SpendType{ID: id}
+	st := &models.SpendType{ID: id}
 	return db.checkModel(st)
 }
 

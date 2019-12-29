@@ -8,7 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
+	. "github.com/ShoshinNikita/budget_manager/internal/db/models"
 )
 
 func TestAddMonthlyPayment(t *testing.T) {

@@ -1,57 +1,11 @@
 package db
 
 import (
-	"context"
-
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
-	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/money"
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
-
-var (
-	_ orm.BeforeInsertHook = (*Spend)(nil)
-	_ orm.BeforeUpdateHook = (*Spend)(nil)
-)
-
-// Spend contains information about spends
-type Spend struct {
-	// MonthID is a foreign key to Days table
-	DayID uint `json:"day_id"`
-
-	ID uint `pg:",pk" json:"-"`
-
-	Title  string      `json:"title"`
-	TypeID uint        `json:"type_id,omitempty"`
-	Type   *SpendType  `pg:"fk:type_id" json:"type,omitempty"`
-	Notes  string      `json:"notes,omitempty"`
-	Cost   money.Money `json:"cost"`
-}
-
-func (in *Spend) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Check Title
-	if in.Title == "" {
-		return ctx, badRequestError(errors.New("title can't be empty"))
-	}
-
-	// Skip Type
-
-	// Skip Notes
-
-	// Check Cost
-	if in.Cost <= 0 {
-		return ctx, badRequestError(errors.Errorf("invalid income: '%d'", in.Cost))
-	}
-
-	return ctx, nil
-}
-
-func (in *Spend) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	return in.BeforeInsert(ctx)
-}
-
-// -----------------------------------------------------------------------------
 
 type AddSpendArgs struct {
 	DayID  uint
@@ -103,7 +57,7 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 }
 
 func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
-	spend := &Spend{
+	spend := &models.Spend{
 		DayID:  args.DayID,
 		Title:  args.Title,
 		TypeID: args.TypeID,
@@ -111,6 +65,9 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 		Cost:   args.Cost,
 	}
 
+	if err := spend.Check(); err != nil {
+		return 0, badRequestError(err)
+	}
 	err := tx.Insert(spend)
 	if err != nil {
 		return 0, errorWrap(err, "can't insert Spend")
@@ -133,7 +90,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 		return ErrSpendNotExist
 	}
 
-	spend := &Spend{ID: args.ID}
+	spend := &models.Spend{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Select(spend)
 		if err != nil {
@@ -174,7 +131,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 	return nil
 }
 
-func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
+func (DB) editSpend(tx *pg.Tx, spend *models.Spend, args EditSpendArgs) error {
 	if args.Title != nil {
 		spend.Title = *args.Title
 	}
@@ -188,6 +145,9 @@ func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
 		spend.Cost = *args.Cost
 	}
 
+	if err := spend.Check(); err != nil {
+		return badRequestError(err)
+	}
 	return tx.Update(spend)
 }
 
@@ -197,7 +157,7 @@ func (db DB) RemoveSpend(id uint) error {
 		return ErrSpendNotExist
 	}
 
-	spend := &Spend{ID: id}
+	spend := &models.Spend{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Remove Spend
 		err = tx.Model(spend).Column("day_id").WherePK().Select()

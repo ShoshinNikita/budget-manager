@@ -1,42 +1,13 @@
 package db
 
 import (
-	"context"
-
+	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
-	"github.com/pkg/errors"
 )
-
-var (
-	_ orm.BeforeInsertHook = (*SpendType)(nil)
-	_ orm.BeforeUpdateHook = (*SpendType)(nil)
-)
-
-// SpendType contains information about spend type
-type SpendType struct {
-	ID   uint   `pg:",pk" json:"id"`
-	Name string `json:"name"`
-}
-
-func (in *SpendType) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Check Name
-	if in.Name == "" {
-		return ctx, badRequestError(errors.Errorf("name can't be empty"))
-	}
-
-	return ctx, nil
-}
-
-func (in *SpendType) BeforeUpdate(ctx context.Context) (context.Context, error) {
-	return in.BeforeInsert(ctx)
-}
-
-// -----------------------------------------------------------------------------
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(id uint) (*SpendType, error) {
-	spendType := &SpendType{ID: id}
+func (db DB) GetSpendType(id uint) (*models.SpendType, error) {
+	spendType := &models.SpendType{ID: id}
 	err := db.db.Select(spendType)
 	if err != nil {
 		err = errorWrapf(err, "can't select Spend Type with id '%d'", id)
@@ -48,8 +19,8 @@ func (db DB) GetSpendType(id uint) (*SpendType, error) {
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes() ([]SpendType, error) {
-	spendTypes := []SpendType{}
+func (db DB) GetSpendTypes() ([]models.SpendType, error) {
+	spendTypes := []models.SpendType{}
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
 		err = errorWrap(err, "can't select Spend Types")
@@ -62,8 +33,11 @@ func (db DB) GetSpendTypes() ([]SpendType, error) {
 
 // AddSpendType adds new Spend Type
 func (db DB) AddSpendType(name string) (typeID uint, err error) {
-	spendType := &SpendType{Name: name}
+	spendType := &models.SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		if err := spendType.Check(); err != nil {
+			return badRequestError(err)
+		}
 		err = tx.Insert(spendType)
 		if err != nil {
 			err = errorWrap(err, "can't insert a new Spend Type")
@@ -89,8 +63,11 @@ func (db DB) EditSpendType(id uint, newName string) error {
 		return ErrSpendTypeNotExist
 	}
 
-	spendType := &SpendType{ID: id, Name: newName}
+	spendType := &models.SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		if err := spendType.Check(); err != nil {
+			return badRequestError(err)
+		}
 		err = tx.Update(spendType)
 		if err != nil {
 			err = errorWrap(err, "can't insert a new Spend Type")
@@ -116,7 +93,7 @@ func (db DB) RemoveSpendType(id uint) error {
 		return ErrSpendTypeNotExist
 	}
 
-	spendType := &SpendType{ID: id}
+	spendType := &models.SpendType{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Delete(spendType)
 		if err != nil {
@@ -127,7 +104,7 @@ func (db DB) RemoveSpendType(id uint) error {
 
 		// Reset Type IDs
 
-		_, err = tx.Model((*MonthlyPayment)(nil)).
+		_, err = tx.Model((*models.MonthlyPayment)(nil)).
 			Set("type_id = 0").
 			Where("type_id = ?", id).
 			Update()
@@ -137,7 +114,7 @@ func (db DB) RemoveSpendType(id uint) error {
 			return err
 		}
 
-		_, err = tx.Model((*Spend)(nil)).
+		_, err = tx.Model((*models.Spend)(nil)).
 			Set("type_id = 0").
 			Where("type_id = ?", id).
 			Update()
