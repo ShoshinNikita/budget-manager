@@ -4,6 +4,7 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
@@ -25,31 +26,29 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 		// Add Spend
 		id, err = db.addSpend(tx, args)
 		if err != nil {
-			err = errorWrap(err, "can't add a new Spend")
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't add a new Spend"),
+				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
 		// Recompute Month budget
 
 		monthID, err := db.GetMonthIDByDayID(args.DayID)
 		if err != nil {
-			return errorWrap(err, "can't get Month which contains Day with passed dayID")
+			return errors.Wrap(err,
+				errors.WithMsg("can't get Month which contains Day with passed dayID"),
+				errors.WithType(errors.AppError))
 		}
 
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return 0, internalError(err)
-		}
+		db.log.Error(err)
 		return 0, err
 	}
 
@@ -65,12 +64,12 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 		Cost:   args.Cost,
 	}
 
-	if err := spend.Check(); err != nil {
-		return 0, badRequestError(err)
+	if err := checkModel(spend); err != nil {
+		return 0, err
 	}
 	err := tx.Insert(spend)
 	if err != nil {
-		return 0, errorWrap(err, "can't insert Spend")
+		return 0, err
 	}
 
 	return spend.ID, nil
@@ -94,37 +93,37 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Select(spend)
 		if err != nil {
-			return errorWrap(err, "can't select Spend with passed id")
+			return errors.Wrap(err,
+				errors.WithMsg("can't select Spend with passed id"),
+				errors.WithType(errors.AppError))
 		}
 
 		// Edit Spend
 		err = db.editSpend(tx, spend, args)
 		if err != nil {
-			err = errorWrap(err, "can't edit Spend with passed id")
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't edit the Spend"),
+				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
 		// Recompute Month budget
 
 		monthID, err := db.GetMonthIDByDayID(spend.DayID)
 		if err != nil {
-			return errorWrap(err, "can't get Month which contains Day with passed dayID")
+			return errors.Wrap(err,
+				errors.WithMsg("can't get Month which contains Day with passed dayID"),
+				errors.WithType(errors.AppError))
 		}
 
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
+		db.log.Error(err)
 		return err
 	}
 
@@ -145,8 +144,8 @@ func (DB) editSpend(tx *pg.Tx, spend *models.Spend, args EditSpendArgs) error {
 		spend.Cost = *args.Cost
 	}
 
-	if err := spend.Check(); err != nil {
-		return badRequestError(err)
+	if err := checkModel(spend); err != nil {
+		return err
 	}
 	return tx.Update(spend)
 }
@@ -159,37 +158,40 @@ func (db DB) RemoveSpend(id uint) error {
 
 	spend := &models.Spend{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		// Remove Spend
+		// Select day id
 		err = tx.Model(spend).Column("day_id").WherePK().Select()
 		if err != nil {
-			return errorWrap(err, "can't select Spend with passed id")
+			return errors.Wrap(err,
+				errors.WithMsg("can't select Spend with passed id"),
+				errors.WithType(errors.AppError))
 		}
 
+		// Remove Spend
 		err = tx.Delete(spend)
 		if err != nil {
-			return errorWrap(err, "can't delete Spend with passed id")
+			return errors.Wrap(err,
+				errors.WithMsg("can't delete Spend with passed id"),
+				errors.WithType(errors.AppError))
 		}
 
 		// Recompute Month budget
 
 		monthID, err := db.GetMonthIDByDayID(spend.DayID)
 		if err != nil {
-			return errorWrap(err, "can't get Month which contains Day with passed dayID")
+			return errors.Wrap(err,
+				errors.WithMsg("can't get Month which contains Day with passed dayID"),
+				errors.WithType(errors.AppError))
 		}
 
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
+		db.log.Error(err)
 		return err
 	}
 

@@ -150,7 +150,7 @@ func TestDeleteSpendType(t *testing.T) {
 	// Check Spend Types
 	for _, t := range spendTypes {
 		_, err := db.GetSpendType(t.ID)
-		require.Equal(pg.ErrNoRows, errors.Cause(err))
+		require.Equal("Spend Type with passed id doesn't exist", err.Error())
 	}
 
 	// Try to delete Spend Type with invalid id

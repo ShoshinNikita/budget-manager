@@ -1,9 +1,9 @@
 package models
 
 import (
+	"errors"
+	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
@@ -73,7 +73,7 @@ func (in Income) Check() error {
 
 	// Check Income
 	if in.Income <= 0 {
-		return errors.Errorf("invalid income: '%d'", in.Income)
+		return fmt.Errorf("invalid income: '%d'", in.Income)
 	}
 
 	return nil
@@ -110,7 +110,7 @@ func (in MonthlyPayment) Check() error {
 
 	// Check Cost
 	if in.Cost <= 0 {
-		return errors.Errorf("invalid income: '%d'", in.Cost)
+		return fmt.Errorf("invalid cost: '%d'", in.Cost)
 	}
 
 	return nil
@@ -147,7 +147,7 @@ func (in Spend) Check() error {
 
 	// Check Cost
 	if in.Cost <= 0 {
-		return errors.Errorf("invalid income: '%d'", in.Cost)
+		return fmt.Errorf("invalid cost: '%d'", in.Cost)
 	}
 
 	return nil
@@ -167,7 +167,7 @@ type SpendType struct {
 func (in SpendType) Check() error {
 	// Check Name
 	if in.Name == "" {
-		return errors.Errorf("name can't be empty")
+		return fmt.Errorf("name can't be empty")
 	}
 
 	return nil

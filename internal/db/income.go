@@ -4,6 +4,7 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
@@ -24,25 +25,21 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 		// Add a new Income
 		incomeID, err = db.addIncome(tx, args)
 		if err != nil {
-			err = errorWrap(err, "can't add income")
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't add a new Income"),
+				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
 		// Recompute Month budget
 		err = db.recomputeMonth(tx, args.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return 0, internalError(err)
-		}
+		db.log.Error(err)
 		return 0, err
 	}
 
@@ -58,12 +55,11 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 		Income: args.Income,
 	}
 
-	if err := in.Check(); err != nil {
-		return 0, badRequestError(err)
+	if err := checkModel(in); err != nil {
+		return 0, err
 	}
 	err = tx.Insert(in)
 	if err != nil {
-		err = errorWrap(err, "can't insert a new row")
 		return 0, err
 	}
 
@@ -90,36 +86,29 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		err = tx.Select(in)
 		if err != nil {
 			if err == pg.ErrNoRows {
-				err = ErrIncomeNotExist
-			} else {
-				err = errorWrapf(err, "can't select Income with passed id '%d'", args.ID)
+				return ErrIncomeNotExist
 			}
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err, errors.WithMsg("can't select Income"), errors.WithType(errors.AppError))
 		}
 
 		// Edit Income
 		err = db.editIncome(tx, in, args)
 		if err != nil {
-			err = errorWrap(err, "can't edit Income")
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't edit the Income"),
+				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
 		// Recompute Month budget
 		err = db.recomputeMonth(tx, in.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
+		db.log.Error(err)
 		return err
 	}
 
@@ -137,12 +126,12 @@ func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
 		in.Income = *args.Income
 	}
 
-	if err := in.Check(); err != nil {
-		return badRequestError(err)
+	if err := checkModel(in); err != nil {
+		return err
 	}
 	err := tx.Update(in)
 	if err != nil {
-		return errorWrap(err, "can't update Income")
+		return err
 	}
 
 	return nil
@@ -165,33 +154,29 @@ func (db DB) RemoveIncome(id uint) error {
 			return in.MonthID, nil
 		}()
 		if err != nil {
-			err = errorWrap(err, "can't select Income with passed id")
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't select Income with passed id"),
+				errors.WithType(errors.AppError))
 		}
 
 		// Remove income
 		err = db.removeIncome(tx, id)
 		if err != nil {
-			err = errorWrap(err, "can't remove Income with passed id")
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't remove Income with passed id"),
+				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
 		// Recompute Month budget
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		if !IsBadRequestError(err) {
-			return internalError(err)
-		}
+		db.log.Error(err)
 		return err
 	}
 

@@ -5,28 +5,41 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
-	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
 )
 
 // Errors
 
 var (
-	ErrMonthNotExist          = badRequestError(errors.New("month with passed id doesn't exist"))
-	ErrDayNotExist            = badRequestError(errors.New("day with passed id doesn't exist"))
-	ErrIncomeNotExist         = badRequestError(errors.New("income with passed id doesn't exist"))
-	ErrMonthlyPaymentNotExist = badRequestError(errors.New("monthly payment with passed id doesn't exist"))
-	ErrSpendNotExist          = badRequestError(errors.New("spend with passed id doesn't exist"))
-	ErrSpendTypeNotExist      = badRequestError(errors.New("spend type with passed id doesn't exist"))
+	ErrMonthNotExist = errors.New("Month with passed id doesn't exist",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
+	ErrDayNotExist = errors.New("Day with passed id doesn't exist",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
+	ErrIncomeNotExist = errors.New("Income with passed id doesn't exist",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
+	ErrMonthlyPaymentNotExist = errors.New("Monthly Payment with passed id doesn't exist",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
+	ErrSpendNotExist = errors.New("Spend with passed id doesn't exist",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
+	ErrSpendTypeNotExist = errors.New("Spend Type with passed id doesn't exist",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
 )
 
 // Common errors
 
 func errRecomputeBudget(err error) error {
-	const msg = "can't recompute month budget"
-	return internalErrorWrap(err, msg)
+	return errors.Wrap(err,
+		errors.WithMsg("can't recompute month budget"),
+		errors.WithType(errors.AppError))
 }
 
 // -----------------------------------------------------------------------------
@@ -42,7 +55,9 @@ func (db DB) GetMonth(id uint) (m *models.Month, err error) {
 		if err == pg.ErrNoRows {
 			return nil, ErrMonthNotExist
 		}
-		return nil, internalErrorWrap(err, "can't select month with passed id")
+		return nil, errors.Wrap(err,
+			errors.WithMsg("can't select month with passed id"),
+			errors.WithType(errors.AppError))
 	}
 
 	return m, nil
@@ -56,7 +71,9 @@ func (db DB) GetMonthID(year, month int) (uint, error) {
 			return 0, ErrMonthNotExist
 		}
 
-		return 0, internalErrorWrap(err, "can't select Month with passed year and month")
+		return 0, errors.Wrap(err,
+			errors.WithMsg("can't select Month with passed year and month"),
+			errors.WithType(errors.AppError))
 	}
 
 	return m.ID, nil
@@ -70,7 +87,9 @@ func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
 			return 0, ErrDayNotExist
 		}
 
-		return 0, internalErrorWrap(err, "can't select day with passed id")
+		return 0, errors.Wrap(err,
+			errors.WithMsg("can't select day with passed id"),
+			errors.WithType(errors.AppError))
 	}
 
 	return day.MonthID, nil
@@ -90,7 +109,9 @@ func (db DB) GetDay(id uint) (*models.Day, error) {
 		if err == pg.ErrNoRows {
 			return nil, ErrDayNotExist
 		}
-		return nil, internalErrorWrap(err, "can't select day with passed id")
+		return nil, errors.Wrap(err,
+			errors.WithMsg("can't select day with passed id"),
+			errors.WithType(errors.AppError))
 	}
 
 	return d, nil
@@ -102,7 +123,9 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 		if err == ErrMonthNotExist {
 			return 0, ErrMonthNotExist
 		}
-		return 0, internalError(errors.Wrap(err, "can't define month id with passed year and month"))
+		return 0, errors.Wrap(err,
+			errors.WithMsg("can't define month id with passed year and month"),
+			errors.WithType(errors.AppError))
 	}
 
 	d := &models.Day{}
@@ -114,7 +137,9 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 		if err == pg.ErrNoRows {
 			return 0, ErrDayNotExist
 		}
-		return 0, internalErrorWrap(err, "can't select day with passed id")
+		return 0, errors.Wrap(err,
+			errors.WithMsg("can't select day with passed id"),
+			errors.WithType(errors.AppError))
 	}
 
 	return d.ID, nil
@@ -128,7 +153,9 @@ func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
 func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
-		return errorWrapf(err, "can't select month")
+		return errors.Wrap(err,
+			errors.WithMsg("can't select month"),
+			errors.WithType(errors.AppError))
 	}
 
 	// Update Total Income
@@ -191,13 +218,17 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	// Update Month
 	err = tx.Update(m)
 	if err != nil {
-		return errorWrap(err, "can't update month")
+		return errors.Wrap(err,
+			errors.WithMsg("can't update month"),
+			errors.WithType(errors.AppError))
 	}
 
 	// Update Days
 	_, err = tx.Model(&m.Days).Update()
 	if err != nil {
-		return errorWrap(err, "can't update days")
+		return errors.Wrap(err,
+			errors.WithMsg("can't update days"),
+			errors.WithType(errors.AppError))
 	}
 
 	return nil
