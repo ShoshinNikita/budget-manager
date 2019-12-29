@@ -26,11 +26,9 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 		// Add Spend
 		id, err = db.addSpend(tx, args)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't add a new Spend"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute Month budget
@@ -44,14 +42,13 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return 0, err
 	}
 
@@ -104,11 +101,9 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 		// Edit Spend
 		err = db.editSpend(tx, spend, args)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't edit Spend with passed id"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute Month budget
@@ -122,14 +117,13 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return err
 	}
 
@@ -191,14 +185,13 @@ func (db DB) RemoveSpend(id uint) error {
 
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return err
 	}
 

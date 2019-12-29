@@ -26,24 +26,21 @@ func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) 
 		// Add Monthly Payment
 		id, err = db.addMonthlyPayment(tx, args)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't add new MonthlyPayment"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute month budget
 		err = db.recomputeMonth(tx, args.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return 0, err
 	}
 
@@ -90,37 +87,30 @@ func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
 		err = tx.Select(mp)
 		if err != nil {
 			if err == pg.ErrNoRows {
-				err = ErrMonthlyPaymentNotExist
-			} else {
-				err = errors.Wrap(err,
-					errors.WithMsg("can't get Monthly Payment with passed id"),
-					errors.WithType(errors.AppError))
+				return ErrMonthlyPaymentNotExist
 			}
-
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err,
+				errors.WithMsg("can't get Monthly Payment with passed id"),
+				errors.WithType(errors.AppError))
 		}
 
 		// Edit Monthly Payment
 		err = db.editMonthlyPayment(tx, mp, args)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't edit Monthly Payment"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute month budget
 		err = db.recomputeMonth(tx, mp.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return err
 	}
 
@@ -159,33 +149,28 @@ func (db DB) RemoveMonthlyPayment(id uint) error {
 		// Remove Monthly Payment
 		err = tx.Model(mp).Column("month_id").WherePK().Select()
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't select Monthly Payment with passed id"),
 				errors.WithType(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		err = tx.Delete(mp)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't remove Monthly Payment"),
 				errors.WithType(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute month budget
 		err = db.recomputeMonth(tx, mp.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return err
 	}
 

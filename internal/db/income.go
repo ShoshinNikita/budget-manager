@@ -25,24 +25,21 @@ func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
 		// Add a new Income
 		incomeID, err = db.addIncome(tx, args)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't add income"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute Month budget
 		err = db.recomputeMonth(tx, args.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return 0, err
 	}
 
@@ -89,35 +86,29 @@ func (db DB) EditIncome(args EditIncomeArgs) error {
 		err = tx.Select(in)
 		if err != nil {
 			if err == pg.ErrNoRows {
-				err = ErrIncomeNotExist
-			} else {
-				err = errors.Wrap(err, errors.WithMsg("can't select Income"), errors.WithType(errors.AppError))
+				return ErrIncomeNotExist
 			}
-			db.log.Error(err)
-			return err
+			return errors.Wrap(err, errors.WithMsg("can't select Income"), errors.WithType(errors.AppError))
 		}
 
 		// Edit Income
 		err = db.editIncome(tx, in, args)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't edit Income"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute Month budget
 		err = db.recomputeMonth(tx, in.MonthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return err
 	}
 
@@ -163,34 +154,29 @@ func (db DB) RemoveIncome(id uint) error {
 			return in.MonthID, nil
 		}()
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't select Income with passed id"),
 				errors.WithType(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Remove income
 		err = db.removeIncome(tx, id)
 		if err != nil {
-			err = errors.Wrap(err,
+			return errors.Wrap(err,
 				errors.WithMsg("can't remove Income with passed id"),
 				errors.WithTypeIfNotSet(errors.AppError))
-			db.log.Error(err)
-			return err
 		}
 
 		// Recompute Month budget
 		err = db.recomputeMonth(tx, monthID)
 		if err != nil {
-			err = errRecomputeBudget(err)
-			db.log.Error(err)
-			return err
+			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
+		db.log.Error(err)
 		return err
 	}
 
