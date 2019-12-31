@@ -23,7 +23,7 @@ clear: clear-local clear-docker
 
 clear-docker:
 	# Stop and remove containers and volumes
-	docker-compose -f ${DOCKER_COMPOSE} down -v
+	docker-compose -f ${DOCKER_COMPOSE} down -v || true
 
 clear-local:
 	docker stop budget_manager_postgres || true
