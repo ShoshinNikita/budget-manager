@@ -14,6 +14,9 @@ import (
 // Errors
 
 var (
+	ErrYearNotExist = errors.New("there're no records for passed year",
+		errors.WithOriginalError(), errors.WithType(errors.UserError),
+	)
 	ErrMonthNotExist = errors.New("Month with passed id doesn't exist",
 		errors.WithOriginalError(), errors.WithType(errors.UserError),
 	)
@@ -93,6 +96,29 @@ func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
 	}
 
 	return day.MonthID, nil
+}
+
+// GetMonths returns months of passed year. Months doesn't contains
+// relations (Incomes, Days and etc.)
+func (db DB) GetMonths(year int) ([]*models.Month, error) {
+	months := []*models.Month{}
+	err := db.db.Model(&months).
+		Where("year = ?", year).
+		Order("month ASC").
+		Select()
+	if err != nil {
+		if err == pg.ErrNoRows {
+			return nil, ErrYearNotExist
+		}
+		return nil, errors.Wrap(err,
+			errors.WithMsg("can't select months with passed year"),
+			errors.WithType(errors.AppError))
+	}
+	if len(months) == 0 {
+		return nil, ErrYearNotExist
+	}
+
+	return months, nil
 }
 
 // -----------------------------------------------------------------------------

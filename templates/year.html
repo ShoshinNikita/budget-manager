@@ -4,11 +4,293 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Budget Manager</title>
+	<title>{{.Year}} | Budget Manager</title>
+	<link rel="stylesheet" href="/static/css/common.css">
+
+	<style>
+		body {
+			height: 100vh;
+			margin: 0;
+			padding: 30px;
+			padding-bottom: 40px;
+		}
+
+		a:link.no-decoration {
+			text-decoration: none !important;
+		}
+
+		/* | App */
+
+		#app {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			display: flex;
+			flex-direction: column;
+			margin: 0 auto 30px;
+			max-width: 1800px;
+			min-height: 100%;
+			padding: 10px;
+			width: 100%;
+		}
+
+		/* || Header */
+
+		#header {
+			border-bottom: 1px solid var(--border-accent-color);
+			box-sizing: content-box;
+			font-size: 20px;
+			height: 35px;
+			line-height: 35px;
+			margin-bottom: 10px;
+			padding-bottom: 5px;
+		}
+
+		/* || Months */
+
+		#months-list {
+			display: grid;
+			grid-template-columns: repeat(6, 1fr);
+			column-gap: 20px;
+			row-gap: 20px;
+		}
+
+		.month,
+		.month--not-exist {
+			border: 1px solid var(--border-color);
+			border-radius: 5px;
+			cursor: pointer;
+			height: 120px;
+			padding: 7px;
+			padding-left: 10px;
+
+			transition-property: padding-left;
+			transition-duration: 0.175s;
+			transition-timing-function: ease-in-out;
+		}
+
+		.month:hover {
+			background-color: var(--hover-color);
+			padding-left: 15px;
+		}
+
+		.month--not-exist {
+			cursor: default;
+			opacity: 0.5;
+		}
+
+		.month__header {
+			font-size: 17px;
+		}
+
+		.month__results {
+			display: grid;
+			grid-template-columns: min-content max-content;
+			column-gap: 10px;
+			margin-top: 7px;
+		}
+
+		.month__results__value {
+			text-align: right;
+		}
+
+		/* || Year Overview */
+
+		#year-overview {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: 3fr 7fr;
+			height: 400px;
+			margin-top: 50px;
+		}
+
+		#year-overview__results__header {
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 20px;
+			margin-bottom: 10px;
+			text-align: center;
+		}
+
+		.year-overview__results__result {
+			column-gap: 10px;
+			display: grid;
+			grid-template-columns: 130px max-content;
+			font-size: 18px;
+			padding-left: 5px;
+		}
+
+		.year-overview__results__result__value {
+			text-align: right;
+		}
+
+		/* | Layouts */
+
+		/* For medium screens (1000px <= width < 1400px) */
+		@media (max-width: 1399px) {
+			#months-list {
+				grid-template-columns: repeat(3, 1fr);
+			}
+		}
+
+		/* For small screens (450px <= width < 1000px) */
+		@media (max-width: 999px) {
+			body {
+				padding: 15px;
+			}
+
+			#months-list {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			#year-overview {
+				display: none;
+			}
+		}
+
+		/* For smartphones (< 450px) */
+		@media (max-width: 449px) {
+			#months-list {
+				grid-template-columns: repeat(1, 1fr);
+			}
+		}
+	</style>
 </head>
 
 <body>
-	<h1>TODO (year)</h1>
+	<div id="app">
+		<div id="header">
+			<!-- Path like "Overview / 2019" -->
+			<div id="header__path">
+				<span> <a href="/overview">Overview</a> </span>
+				<span class="noselect"> / </span>
+				<span>{{.Year}}</span>
+			</div>
+		</div>
+
+		<div id="months-list">
+			{{range .Months}}
+
+			{{if ne .ID 0}}
+			<!-- Show month overview -->
+
+			<!-- Use the number of a month instead of the name -->
+			<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
+				<div class="month" title="Go to the month">
+					<div class="month__header">{{.Month}} {{.Year}}</div>
+					<div class="month__results">
+						<div>Income:</div>
+						<div class="month__results__value money--gain">{{.TotalIncome}}</div>
+						<div>Spend:</div>
+						<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+						<div>Result:</div>
+						<div class="month__results__value">
+							{{if ge .Result 0}}
+							<span class="money--gain">{{.Result}}</span>
+							{{else}}
+							<span class="money--lose">{{.Result}}</span>
+							{{end}}
+						</div>
+					</div>
+				</div>
+			</a>
+			{{else}}
+			<!-- Just show a stub -->
+			<div class="month--not-exist" title="No data for the month">
+				<div class="month__header">{{.Month}} {{.Year}}</div>
+			</div>
+			{{end}}
+			{{end}}
+		</div>
+
+		<div id="year-overview">
+			<div id="year-overview__results">
+				<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
+
+				<div class="year-overview__results__result">
+					<div>Annual Income:</div>
+					<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
+
+					<div>Annual Spend:</div>
+					<div class="year-overview__results__result__value money--lose">{{.AnnualSpend}}</div>
+
+					<div>Result:</div>
+					<div class="year-overview__results__result__value">
+						{{if ge .Result 0}}
+						<span class="money--gain">{{.Result}}</span>
+						{{else}}
+						<span class="money--lose">{{.Result}}</span>
+						{{end}}
+					</div>
+				</div>
+			</div>
+
+			<!--
+				There's a bug when width is 100%. Div isn't decreasing width if we resize screen.
+				So, use 99% for width.
+			-->
+			<div style="position: relative; width: 99%;">
+				<canvas id="year-overview__chart"></canvas>
+			</div>
+		</div>
+	</div>
+
+	<script src="/static/chart.js/chart.min.js"></script>
+
+	<script>
+		const monthsResults = JSON.parse(`{{.Months}}`);
+		const monthsNames = ["January", "February", "March", "April", "May", "June",
+			"July", "August", "September", "October", "November", "December"];
+
+		// Create the chart
+		const ctx = document.getElementById("year-overview__chart").getContext("2d");
+		new Chart(ctx, {
+			type: "line",
+			data: {
+				labels: monthsNames,
+				datasets: [
+					// Incomes
+					{
+						data: monthsResults.map(v => v["total_income"]),
+						borderColor: "green",
+						backgroundColor: "#00ff0018", // green with alpha
+					},
+					// Spends
+					{
+						data: monthsResults.map(v => -v["total_spend"]),
+						borderColor: "crimson",
+						backgroundColor: "#dc143c18", // crimson with alpha
+					}
+				],
+			},
+			options: {
+				// Hide legend
+				legend: { display: false },
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune elements
+				elements: {
+					// Change bezier curves
+					line: { tension: 0.2 },
+					point: { hitRadius: 5 }
+				},
+				// Change font size of ticks
+				scales: {
+					xAxes: [{ ticks: { fontSize: 14 } }],
+					yAxes: [{ ticks: { fontSize: 14 } }]
+				},
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+				},
+				// Other
+				maintainAspectRatio: false,
+			}
+		});
+	</script>
 </body>
 
 </html>

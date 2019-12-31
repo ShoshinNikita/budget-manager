@@ -4,7 +4,7 @@
 	--font-color: #000000dd;
 	--border-color: #88888830;
 	--border-accent-color: #88888860;
-	--hover-color: #d3d3d340;
+	--hover-color: #e4e4e420;
 }
 
 /* | Common */
@@ -99,7 +99,9 @@ a:link:hover {
 
 /* | Money */
 
-.money::after {
+.money::after,
+.money--gain::after,
+.money--lose::after {
 	color: black;
 	content: "⛁";
 	margin-left: 3px;
