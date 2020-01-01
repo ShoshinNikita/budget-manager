@@ -164,7 +164,8 @@ func TestEditIncome(t *testing.T) {
 		args := AddIncomeArgs{
 			MonthID: in.MonthID, Title: in.Title, Notes: in.Notes, Income: in.Income,
 		}
-		db.AddIncome(args)
+		_, err := db.AddIncome(args)
+		require.Nil(err)
 	}
 
 	// Edit Incomes

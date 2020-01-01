@@ -24,6 +24,7 @@ func initDB(require *require.Assertions) *DB {
 		Host:     dbHost,
 		Port:     dbPort,
 		User:     dbUser,
+		Password: dbPassword,
 		Database: dbDatabase,
 	}
 	db, err := NewDB(config, log)

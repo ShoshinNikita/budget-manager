@@ -57,7 +57,7 @@ func TestAddSpendType(t *testing.T) {
 		require.Equal(t.SpendType, *spendType)
 	}
 
-	var allSpendTypes []SpendType
+	allSpendTypes := make([]SpendType, 0, len(spendTypes))
 	for _, t := range spendTypes {
 		if t.isError {
 			continue
@@ -144,7 +144,8 @@ func TestDeleteSpendType(t *testing.T) {
 
 	// Delete all Spend Type
 	for _, t := range spendTypes {
-		db.RemoveSpendType(t.ID)
+		err := db.RemoveSpendType(t.ID)
+		require.Nil(err)
 	}
 
 	// Check Spend Types
