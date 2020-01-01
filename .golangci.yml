@@ -1,5 +1,7 @@
 run:
   concurrency: 4
+  build-tags:
+    - integration
 
 linters:
   enable-all: true
@@ -13,6 +15,12 @@ linters-settings:
     lines: 80
 
 issues:
+  exclude:
+    # Ignore underscores in test functions
+    - "use underscores in Go names; (?:func|type) (?:T|t)est"
+    # Ignore long functions in tests
+    - "Function '(?:T|t)est.*' is too long"
+
   # Display all issues
   max-issues-per-linter: 0
   max-same-issues: 0
