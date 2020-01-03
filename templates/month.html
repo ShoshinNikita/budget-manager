@@ -158,15 +158,21 @@
 			margin-bottom: 30px;
 		}
 
-		.detailed-info__days__calendar__day {
+		.detailed-info__days__calendar__day,
+		.detailed-info__days__calendar__day--disabled {
 			border: 1px solid var(--border-color);
 			border-radius: 5px;
+			height: 60px;
 			padding: 3px;
 		}
 
 		.detailed-info__days__calendar__day:hover {
 			background-color: var(--hover-color);
 			cursor: pointer;
+		}
+
+		.detailed-info__days__calendar__day--disabled {
+			opacity: 0.2;
 		}
 
 		.detailed-info__days__calendar__day__number {
@@ -794,11 +800,64 @@
 		// Global variables
 		// ----------------------------------------------------
 
+		const Year = Number("{{.Year}}")
 		const MonthID = Number("{{.ID}}");
+		const MonthNumber = Number("{{printf `%d` .Month.Month}}")
 
 		// ----------------------------------------------------
 		// Days
 		// ----------------------------------------------------
+
+		// Fill weeks in calendar: add days of previous and next months if needed
+		window.addEventListener("load", () => {
+			const calendar = document.getElementById("detailed-info__days__calendar");
+			if (calendar === null) {
+				console.error("couldn't get element with id 'detailed-info__days__calendar'");
+				return;
+			}
+
+			// Add days of the previous month
+
+			const previousMonth = new Date(Year, MonthNumber - 1, 0);
+			const daysInPreviousMonth = previousMonth.getDate();
+			const previousMonthName = previousMonth.toLocaleString("default", { month: "long" });
+
+			// Weeks are started from Monday
+			const monthBeginning = new Date(Year, MonthNumber - 1);
+			const firstDayNumber = (monthBeginning.getDay() + 6) % 7;
+
+			for (let i = 0; i < firstDayNumber; i++) {
+				const div = document.createElement("div");
+				div.classList.add("detailed-info__days__calendar__day--disabled", "noselect");
+
+				const title = document.createElement("div");
+				title.classList.add("detailed-info__days__calendar__day__number");
+				title.textContent = `${daysInPreviousMonth - i} ${previousMonthName}`;
+
+				div.append(title);
+				calendar.prepend(div);
+			}
+
+			// Add days of the next month
+
+			const nextMonth = new Date(Year, MonthNumber);
+			const nextMonthName = nextMonth.toLocaleString("default", { month: "long" });
+
+			// Weeks are started from Monday
+			const lastDayNumber = (nextMonth.getDay() + 6) % 7;
+
+			for (let i = 0; i < 7 - lastDayNumber; i++) {
+				const div = document.createElement("div");
+				div.classList.add("detailed-info__days__calendar__day--disabled", "noselect");
+
+				const title = document.createElement("div");
+				title.classList.add("detailed-info__days__calendar__day__number");
+				title.textContent = `${i + 1} ${nextMonthName}`;
+
+				div.append(title);
+				calendar.append(div);
+			}
+		})
 
 		// Select day
 		window.addEventListener("load", () => {
