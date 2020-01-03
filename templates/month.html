@@ -158,6 +158,15 @@
 			margin-bottom: 30px;
 		}
 
+		.detailed-info__days__calendar__week-day-name {
+			border-bottom: 1px solid var(--border-color);
+			font-size: 14px;
+			margin: auto;
+			padding: 0 10px;
+			text-align: center;
+			width: min-content;
+		}
+
 		.detailed-info__days__calendar__day,
 		.detailed-info__days__calendar__day--disabled {
 			border: 1px solid var(--border-color);
@@ -856,6 +865,15 @@
 
 				div.append(title);
 				calendar.append(div);
+			}
+
+			// Add name of week days
+			const weekDayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+			for (const name of weekDayNames.reverse()) {
+				const div = document.createElement("div");
+				div.classList.add("detailed-info__days__calendar__week-day-name", "noselect")
+				div.textContent = name;
+				calendar.prepend(div);
 			}
 		})
 
