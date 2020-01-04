@@ -158,9 +158,26 @@
 			margin-bottom: 30px;
 		}
 
-		.detailed-info__days__calendar__day {
+		.detailed-info__days__calendar__week-day-name,
+		.detailed-info__days__calendar__week-day-name--short {
+			border-bottom: 1px solid var(--border-color);
+			font-size: 14px;
+			margin: auto;
+			padding: 0 10px;
+			text-align: center;
+			width: min-content;
+		}
+
+		.detailed-info__days__calendar__week-day-name--short {
+			display: none;
+			padding: 0 5px;
+		}
+
+		.detailed-info__days__calendar__day,
+		.detailed-info__days__calendar__day--disabled {
 			border: 1px solid var(--border-color);
 			border-radius: 5px;
+			height: 60px;
 			padding: 3px;
 		}
 
@@ -169,10 +186,22 @@
 			cursor: pointer;
 		}
 
-		.detailed-info__days__calendar__day__number {
-			left: 5px;
+		.detailed-info__days__calendar__day--disabled {
+			opacity: 0.2;
+		}
+
+		.detailed-info__days__calendar__day__info {
+			display: flex;
 			margin-bottom: 5px;
-			top: 5px;
+		}
+
+		.detailed-info__days__calendar__day__info__number::after {
+			content: " ";
+			display: inline;
+			/*
+				Without 'white-space: pre' the space isn't displayed: https://stackoverflow.com/a/40963855
+			*/
+			white-space: pre;
 		}
 
 		.detailed-info__days__calendar__day__summary {
@@ -276,16 +305,48 @@
 
 		/* | Layouts */
 
-		/* For small screens (< 1000px) */
-		@media (max-width: 999px) {
-			body {
-				padding: 15px;
+		/* For large screens (>= 1350px) */
+		@media (min-width: 1350px) {
+			#header {
+				grid-template-columns: 325px auto;
 			}
 
+			#detailed-info {
+				grid-template-columns: 1fr 2fr;
+				grid-template-rows: 1fr 1fr;
+				grid-template-areas:
+					"incomes days"
+					"monthly-payments days";
+			}
+		}
+
+		/* For medium screens (<= 1350px) */
+		@media (max-width: 1350px) {
 			#app {
 				margin: 0;
 			}
 
+			body {
+				padding: 5px;
+			}
+
+			#header {
+				grid-template-columns: 250px auto;
+				font-size: 18px;
+				height: auto;
+			}
+
+			#detailed-info {
+				grid-template-columns: 1fr 1fr;
+				grid-template-rows: 1fr 2fr;
+				grid-template-areas:
+					"incomes monthly-payments"
+					"days days";
+			}
+		}
+
+		/* For small screens (<= 850px) */
+		@media (max-width: 850px) {
 			#header {
 				grid-template-columns: 100%;
 				grid-template-rows: repeat(2, minmax(min-content, max-content));
@@ -308,44 +369,22 @@
 				padding: 0;
 			}
 
-			#detailed-info__days__calendar {
-				grid-template-columns: repeat(4, 1fr);
+			.detailed-info__days__calendar__week-day-name {
+				display: none;
 			}
-		}
 
-		/* For medium screens (1000px <= width < 1400px) */
-		@media (min-width: 1000px) and (max-width: 1399px) {
-			#header {
-				grid-template-columns: 300px auto;
-				font-size: 18px;
+			.detailed-info__days__calendar__week-day-name--short {
+				display: block;
+			}
+
+			.detailed-info__days__calendar__day,
+			.detailed-info__days__calendar__day--disabled {
 				height: auto;
 			}
 
-			#detailed-info {
-				grid-template-columns: 2fr 3fr;
-				grid-template-rows: 1fr 1fr;
-				grid-template-areas:
-					"incomes days"
-					"monthly-payments days";
-			}
-
-			#detailed-info__days__calendar {
-				grid-template-columns: repeat(4, 1fr);
-			}
-		}
-
-		/* For large screens (1400 <= width) */
-		@media (min-width: 1400px) {
-			#header {
-				grid-template-columns: 325px auto;
-			}
-
-			#detailed-info {
-				grid-template-columns: 1fr 2fr;
-				grid-template-rows: 1fr 1fr;
-				grid-template-areas:
-					"incomes days"
-					"monthly-payments days";
+			.detailed-info__days__calendar__day__info__month-name,
+			.detailed-info__days__calendar__day__summary {
+				display: none;
 			}
 		}
 	</style>
@@ -536,8 +575,9 @@
 					<div id="id-calendar-day-{{.Day}}" class="detailed-info__days__calendar__day"
 						onclick="selectDay('{{.Day}}');">
 
-						<div class="detailed-info__days__calendar__day__number">
-							{{.Day}} {{$.Month.Month}}
+						<div class="detailed-info__days__calendar__day__info">
+							<div class="detailed-info__days__calendar__day__info__number">{{.Day}}</div>
+							<div class="detailed-info__days__calendar__day__info__month-name">{{$.Month.Month}}</div>
 						</div>
 
 						<div class="detailed-info__days__calendar__day__summary">
@@ -794,11 +834,87 @@
 		// Global variables
 		// ----------------------------------------------------
 
+		const Year = Number("{{.Year}}")
 		const MonthID = Number("{{.ID}}");
+		const MonthNumber = Number("{{printf `%d` .Month.Month}}")
 
 		// ----------------------------------------------------
 		// Days
 		// ----------------------------------------------------
+
+		// Fill weeks in calendar: add days of previous and next months if needed
+		window.addEventListener("load", () => {
+			const calendar = document.getElementById("detailed-info__days__calendar");
+			if (calendar === null) {
+				console.error("couldn't get element with id 'detailed-info__days__calendar'");
+				return;
+			}
+
+			const createCalendarDay = (dayNumber, monthName) => {
+				const div = document.createElement("div");
+				div.classList.add("detailed-info__days__calendar__day--disabled", "noselect");
+
+				const info = document.createElement("div");
+				info.classList.add("detailed-info__days__calendar__day__info");
+
+				const numberElem = document.createElement("div");
+				numberElem.classList.add("detailed-info__days__calendar__day__info__number");
+				numberElem.textContent = dayNumber;
+				info.append(numberElem);
+
+				const monthNameElem = document.createElement("div");
+				monthNameElem.classList.add("detailed-info__days__calendar__day__info__month-name");
+				monthNameElem.textContent = monthName;
+				info.append(monthNameElem);
+
+				div.append(info);
+
+				return div;
+			}
+
+			// Add days of the previous month
+
+			const previousMonth = new Date(Year, MonthNumber - 1, 0);
+			const daysInPreviousMonth = previousMonth.getDate();
+			const previousMonthName = previousMonth.toLocaleString("default", { month: "long" });
+
+			// Weeks are started from Monday
+			const monthBeginning = new Date(Year, MonthNumber - 1);
+			const firstDayNumber = (monthBeginning.getDay() + 6) % 7;
+
+			for (let i = 0; i < firstDayNumber; i++) {
+				const div = createCalendarDay(daysInPreviousMonth - i, previousMonthName);
+				calendar.prepend(div);
+			}
+
+			// Add days of the next month
+
+			const nextMonth = new Date(Year, MonthNumber);
+			const nextMonthName = nextMonth.toLocaleString("default", { month: "long" });
+
+			// Weeks are started from Monday
+			const lastDayNumber = (nextMonth.getDay() + 6) % 7;
+
+			for (let i = 0; i < 7 - lastDayNumber; i++) {
+				const div = createCalendarDay(i + 1, nextMonthName);
+				calendar.append(div);
+			}
+
+			// Add name of week days
+			const weekDayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+			const weekDayNamesShort = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+			for (let i = weekDayNames.length - 1; i >= 0; i--) {
+				let div = document.createElement("div");
+				div.classList.add("detailed-info__days__calendar__week-day-name", "noselect")
+				div.textContent = weekDayNames[i];
+				calendar.prepend(div);
+
+				div = document.createElement("div");
+				div.classList.add("detailed-info__days__calendar__week-day-name--short", "noselect")
+				div.textContent = weekDayNamesShort[i];
+				calendar.prepend(div);
+			}
+		})
 
 		// Select day
 		window.addEventListener("load", () => {
