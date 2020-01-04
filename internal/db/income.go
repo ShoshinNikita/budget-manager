@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
@@ -16,7 +18,7 @@ type AddIncomeArgs struct {
 }
 
 // AddIncome adds a new income with passed params
-func (db DB) AddIncome(args AddIncomeArgs) (incomeID uint, err error) {
+func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, err error) {
 	if !db.checkMonth(args.MonthID) {
 		return 0, ErrMonthNotExist
 	}
@@ -74,7 +76,7 @@ type EditIncomeArgs struct {
 }
 
 // EditIncome edits income with passed id, nil args are ignored
-func (db DB) EditIncome(args EditIncomeArgs) error {
+func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 	if !db.checkIncome(args.ID) {
 		return ErrIncomeNotExist
 	}
@@ -138,7 +140,7 @@ func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
 }
 
 // RemoveIncome removes income with passed id
-func (db DB) RemoveIncome(id uint) error {
+func (db DB) RemoveIncome(_ context.Context, id uint) error {
 	if !db.checkIncome(id) {
 		return ErrIncomeNotExist
 	}

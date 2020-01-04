@@ -1,13 +1,15 @@
 package db
 
 import (
+	"context"
+
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
 	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/go-pg/pg/v9"
 )
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(id uint) (*models.SpendType, error) {
+func (db DB) GetSpendType(_ context.Context, id uint) (*models.SpendType, error) {
 	spendType := &models.SpendType{ID: id}
 	err := db.db.Select(spendType)
 	if err != nil {
@@ -29,7 +31,7 @@ func (db DB) GetSpendType(id uint) (*models.SpendType, error) {
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes() ([]models.SpendType, error) {
+func (db DB) GetSpendTypes(_ context.Context) ([]models.SpendType, error) {
 	spendTypes := []models.SpendType{}
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
@@ -44,7 +46,7 @@ func (db DB) GetSpendTypes() ([]models.SpendType, error) {
 }
 
 // AddSpendType adds new Spend Type
-func (db DB) AddSpendType(name string) (typeID uint, err error) {
+func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err error) {
 	spendType := &models.SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
@@ -69,7 +71,7 @@ func (db DB) AddSpendType(name string) (typeID uint, err error) {
 }
 
 // EditSpendType modifies existing Spend Type
-func (db DB) EditSpendType(id uint, newName string) error {
+func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
 	if !db.checkSpendType(id) {
 		return ErrSpendTypeNotExist
 	}
@@ -98,7 +100,7 @@ func (db DB) EditSpendType(id uint, newName string) error {
 }
 
 // RemoveSpendType removes Spend Type with passed id
-func (db DB) RemoveSpendType(id uint) error {
+func (db DB) RemoveSpendType(_ context.Context, id uint) error {
 	if !db.checkSpendType(id) {
 		return ErrSpendTypeNotExist
 	}

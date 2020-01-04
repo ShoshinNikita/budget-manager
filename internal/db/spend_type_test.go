@@ -3,6 +3,7 @@
 package db
 
 import (
+	"context"
 	"testing"
 
 	"github.com/go-pg/pg/v9"
@@ -37,7 +38,7 @@ func TestAddSpendType(t *testing.T) {
 
 	// Add Spend Types
 	for _, t := range spendTypes {
-		id, err := db.AddSpendType(t.Name)
+		id, err := db.AddSpendType(context.Background(), t.Name)
 		if t.isError {
 			require.NotNil(err)
 			continue
@@ -48,7 +49,7 @@ func TestAddSpendType(t *testing.T) {
 
 	// Check Spend Types
 	for _, t := range spendTypes {
-		spendType, err := db.GetSpendType(t.ID)
+		spendType, err := db.GetSpendType(context.Background(), t.ID)
 		if t.isError {
 			require.NotNil(pg.ErrNoRows, errors.Cause(err))
 			continue
@@ -66,7 +67,7 @@ func TestAddSpendType(t *testing.T) {
 		allSpendTypes = append(allSpendTypes, t.SpendType)
 	}
 
-	dbSpendTypes, err := db.GetSpendTypes()
+	dbSpendTypes, err := db.GetSpendTypes(context.Background())
 	require.Nil(err)
 	require.ElementsMatch(allSpendTypes, dbSpendTypes)
 }
@@ -96,14 +97,14 @@ func TestEditSpendType(t *testing.T) {
 
 	// Add Spend Types
 	for _, t := range spendTypes {
-		id, err := db.AddSpendType(t.origin.Name)
+		id, err := db.AddSpendType(context.Background(), t.origin.Name)
 		require.Nil(err)
 		require.Equal(t.origin.ID, id)
 	}
 
 	// Edit Spend Types
 	for _, t := range spendTypes {
-		err := db.EditSpendType(t.edited.ID, t.edited.Name)
+		err := db.EditSpendType(context.Background(), t.edited.ID, t.edited.Name)
 		if t.isError {
 			require.NotNil(err)
 			continue
@@ -113,7 +114,7 @@ func TestEditSpendType(t *testing.T) {
 
 	// Check Spend Types
 	for _, t := range spendTypes {
-		spendType, err := db.GetSpendType(t.origin.ID)
+		spendType, err := db.GetSpendType(context.Background(), t.origin.ID)
 		if t.isError {
 			require.Equal(t.origin, *spendType)
 			continue
@@ -137,24 +138,24 @@ func TestDeleteSpendType(t *testing.T) {
 
 	// Add Spend Types
 	for _, t := range spendTypes {
-		id, err := db.AddSpendType(t.Name)
+		id, err := db.AddSpendType(context.Background(), t.Name)
 		require.Nil(err)
 		require.Equal(t.ID, id)
 	}
 
 	// Delete all Spend Type
 	for _, t := range spendTypes {
-		err := db.RemoveSpendType(t.ID)
+		err := db.RemoveSpendType(context.Background(), t.ID)
 		require.Nil(err)
 	}
 
 	// Check Spend Types
 	for _, t := range spendTypes {
-		_, err := db.GetSpendType(t.ID)
+		_, err := db.GetSpendType(context.Background(), t.ID)
 		require.Equal("Spend Type with passed id doesn't exist", err.Error())
 	}
 
 	// Try to delete Spend Type with invalid id
-	err := db.RemoveSpendType(20)
+	err := db.RemoveSpendType(context.Background(), 20)
 	require.NotNil(err)
 }

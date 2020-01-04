@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -37,7 +38,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	months, err := s.db.GetMonths(year)
+	months, err := s.db.GetMonths(context.Background(), year)
 	// Render the page even theare no months for passed year
 	if err != nil && err != db.ErrYearNotExist {
 		s.processDBError(w, err)
@@ -107,20 +108,20 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	monthID, err := s.db.GetMonthID(year, int(monthNumber))
+	monthID, err := s.db.GetMonthID(context.Background(), year, int(monthNumber))
 	if err != nil {
 		s.processDBError(w, err)
 		return
 	}
 
 	// Process
-	month, err := s.db.GetMonth(monthID)
+	month, err := s.db.GetMonth(context.Background(), monthID)
 	if err != nil {
 		s.processError(w, "can't select Month info", http.StatusInternalServerError, err)
 		return
 	}
 
-	spendTypes, err := s.db.GetSpendTypes()
+	spendTypes, err := s.db.GetSpendTypes(context.Background())
 	if err != nil {
 		s.processError(w, "can't get Spend Types", http.StatusInternalServerError, err)
 		return

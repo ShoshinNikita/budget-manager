@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
@@ -17,7 +19,7 @@ type AddMonthlyPaymentArgs struct {
 }
 
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(args AddMonthlyPaymentArgs) (id uint, err error) {
+func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
 		return 0, ErrMonthNotExist
 	}
@@ -77,7 +79,7 @@ type EditMonthlyPaymentArgs struct {
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(args EditMonthlyPaymentArgs) error {
+func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(args.ID) {
 		return ErrMonthlyPaymentNotExist
 	}
@@ -139,7 +141,7 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *models.MonthlyPayment, args EditMont
 }
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
-func (db DB) RemoveMonthlyPayment(id uint) error {
+func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 	if !db.checkMonthlyPayment(id) {
 		return ErrMonthlyPaymentNotExist
 	}

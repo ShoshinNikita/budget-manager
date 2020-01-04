@@ -3,6 +3,7 @@
 package db
 
 import (
+	"context"
 	"testing"
 
 	"github.com/go-pg/pg/v9"
@@ -59,7 +60,7 @@ func TestAddSpend(t *testing.T) {
 			Notes:  sp.Notes,
 			Cost:   sp.Cost,
 		}
-		id, err := db.AddSpend(args)
+		id, err := db.AddSpend(context.Background(), args)
 		if sp.isError {
 			require.NotNil(err)
 			continue
@@ -173,7 +174,7 @@ func TestEditSpend(t *testing.T) {
 			Notes:  sp.origin.Notes,
 			Cost:   sp.origin.Cost,
 		}
-		id, err := db.AddSpend(args)
+		id, err := db.AddSpend(context.Background(), args)
 		require.Nil(err)
 		require.Equal(uint(i+1), id)
 	}
@@ -201,7 +202,7 @@ func TestEditSpend(t *testing.T) {
 			Notes:  &sp.edited.Notes,
 			Cost:   &sp.edited.Cost,
 		}
-		err := db.EditSpend(args)
+		err := db.EditSpend(context.Background(), args)
 		if sp.isError {
 			require.NotNil(err)
 			continue
@@ -276,7 +277,7 @@ func TestDeleteSpend(t *testing.T) {
 			Notes:  sp.Notes,
 			Cost:   sp.Cost,
 		}
-		id, err := db.AddSpend(args)
+		id, err := db.AddSpend(context.Background(), args)
 		require.Nil(err)
 		require.Equal(uint(i+1), id)
 	}
@@ -296,7 +297,7 @@ func TestDeleteSpend(t *testing.T) {
 			continue
 		}
 
-		err := db.RemoveSpend(sp.ID)
+		err := db.RemoveSpend(context.Background(), sp.ID)
 		if sp.isError {
 			require.NotNil(err)
 			continue
@@ -331,7 +332,7 @@ func checkTotalSpend(db *DB, require *require.Assertions, f func() int64) {
 		totalSpend = -totalSpend
 	}
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(totalSpend, m.TotalSpend.ToInt())
 }
