@@ -3,6 +3,7 @@
 package db
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -68,7 +69,7 @@ func TestAddIncome(t *testing.T) {
 			Notes:   in.Notes,
 			Income:  in.Income.Income,
 		}
-		id, err := db.AddIncome(args)
+		id, err := db.AddIncome(context.Background(), args)
 		if in.isError {
 			require.NotNil(err)
 			continue
@@ -101,7 +102,7 @@ func TestAddIncome(t *testing.T) {
 		return b / int64(daysInMonth(time.Now()))
 	}()
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 }
@@ -164,7 +165,7 @@ func TestEditIncome(t *testing.T) {
 		args := AddIncomeArgs{
 			MonthID: in.MonthID, Title: in.Title, Notes: in.Notes, Income: in.Income,
 		}
-		_, err := db.AddIncome(args)
+		_, err := db.AddIncome(context.Background(), args)
 		require.Nil(err)
 	}
 
@@ -176,7 +177,7 @@ func TestEditIncome(t *testing.T) {
 			Notes:  &in.Notes,
 			Income: &in.Income.Income,
 		}
-		err := db.EditIncome(args)
+		err := db.EditIncome(context.Background(), args)
 		if in.isError {
 			require.NotNil(err)
 			continue
@@ -208,7 +209,7 @@ func TestEditIncome(t *testing.T) {
 		return b / int64(daysInMonth(time.Now()))
 	}()
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 }
@@ -234,13 +235,13 @@ func TestRemoveIncome(t *testing.T) {
 			Notes:   in.Notes,
 			Income:  in.Income,
 		}
-		id, err := db.AddIncome(args)
+		id, err := db.AddIncome(context.Background(), args)
 		require.Nil(err)
 		require.Equal(uint(i+1), id)
 	}
 
 	// Remove Income with id = 1
-	err := db.RemoveIncome(1)
+	err := db.RemoveIncome(context.Background(), 1)
 	require.Nil(err)
 
 	// Check daily budget (without Income with id = 1)
@@ -256,11 +257,11 @@ func TestRemoveIncome(t *testing.T) {
 		return b / int64(daysInMonth(time.Now()))
 	}()
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 
 	// Try to remove Income with invalid id
-	err = db.RemoveIncome(100)
+	err = db.RemoveIncome(context.Background(), 100)
 	require.NotNil(err)
 }

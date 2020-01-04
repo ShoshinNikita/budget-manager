@@ -3,6 +3,7 @@
 package db
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -20,7 +21,9 @@ func TestAddMonthlyPayment(t *testing.T) {
 
 	// Prepare
 	var income = money.FromInt(50000)
-	_, err := db.AddIncome(AddIncomeArgs{MonthID: monthID, Title: "1", Income: income})
+	_, err := db.AddIncome(
+		context.Background(), AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
+	)
 	require.Nil(err)
 
 	payments := []struct {
@@ -82,7 +85,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 			Notes:   p.Notes,
 			Cost:    p.Cost,
 		}
-		id, err := db.AddMonthlyPayment(args)
+		id, err := db.AddMonthlyPayment(context.Background(), args)
 		if p.isError {
 			require.NotNil(err)
 			continue
@@ -112,7 +115,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 		return b / int64(daysInMonth(time.Now()))
 	}()
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 }
@@ -125,7 +128,9 @@ func TestEditMonthlyPayment(t *testing.T) {
 
 	// Prepare
 	var income = money.FromInt(50000)
-	_, err := db.AddIncome(AddIncomeArgs{MonthID: monthID, Title: "1", Income: income})
+	_, err := db.AddIncome(
+		context.Background(), AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
+	)
 	require.Nil(err)
 
 	payments := []struct {
@@ -193,7 +198,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 			Notes:   p.origin.Notes,
 			Cost:    p.origin.Cost,
 		}
-		id, err := db.AddMonthlyPayment(args)
+		id, err := db.AddMonthlyPayment(context.Background(), args)
 		require.Nil(err)
 		require.Equal(p.origin.ID, id)
 	}
@@ -211,7 +216,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 			Notes:  &p.edited.Notes,
 			Cost:   &p.edited.Cost,
 		}
-		err := db.EditMonthlyPayment(args)
+		err := db.EditMonthlyPayment(context.Background(), args)
 		if p.isError {
 			require.NotNil(err)
 			continue
@@ -244,14 +249,16 @@ func TestEditMonthlyPayment(t *testing.T) {
 		return b / int64(daysInMonth(time.Now()))
 	}()
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 
 	// Try to edit Monthly Payment with invalid id
 	title := "title"
 	cost := money.FromInt(2000)
-	err = db.EditMonthlyPayment(EditMonthlyPaymentArgs{ID: 20, Title: &title, Cost: &cost})
+	err = db.EditMonthlyPayment(
+		context.Background(), EditMonthlyPaymentArgs{ID: 20, Title: &title, Cost: &cost},
+	)
 	require.NotNil(err)
 }
 
@@ -300,7 +307,7 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 			Notes:   p.Notes,
 			Cost:    p.Cost,
 		}
-		id, err := db.AddMonthlyPayment(args)
+		id, err := db.AddMonthlyPayment(context.Background(), args)
 		require.Nil(err)
 		require.Equal(p.ID, id)
 	}
@@ -310,11 +317,11 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 		if !p.shouldDelete {
 			continue
 		}
-		err := db.RemoveMonthlyPayment(p.ID)
+		err := db.RemoveMonthlyPayment(context.Background(), p.ID)
 		require.Nil(err)
 	}
 	// Try to remove with invalid id
-	err := db.RemoveMonthlyPayment(10)
+	err := db.RemoveMonthlyPayment(context.Background(), 10)
 	require.NotNil(err)
 
 	// Check daily budget
@@ -328,7 +335,7 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 		return b / int64(daysInMonth(time.Now()))
 	}()
 
-	m, err := db.GetMonth(monthID)
+	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
 	require.Equal(dailyBudget, m.DailyBudget.ToInt())
 }

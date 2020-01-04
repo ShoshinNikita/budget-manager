@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-pg/pg/v9"
@@ -49,7 +50,7 @@ func errRecomputeBudget(err error) error {
 // Month
 // -----------------------------------------------------------------------------
 
-func (db DB) GetMonth(id uint) (m *models.Month, err error) {
+func (db DB) GetMonth(_ context.Context, id uint) (m *models.Month, err error) {
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
 		m, err = db.getMonth(tx, id)
 		return err
@@ -66,7 +67,7 @@ func (db DB) GetMonth(id uint) (m *models.Month, err error) {
 	return m, nil
 }
 
-func (db DB) GetMonthID(year, month int) (uint, error) {
+func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
 	m := &models.Month{}
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
@@ -82,9 +83,9 @@ func (db DB) GetMonthID(year, month int) (uint, error) {
 	return m.ID, nil
 }
 
-func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
+func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, error) {
 	day := &models.Day{ID: dayID}
-	err := db.db.Model(day).Column("month_id").WherePK().Select()
+	err := tx.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
 			return 0, ErrDayNotExist
@@ -100,7 +101,7 @@ func (db DB) GetMonthIDByDayID(dayID uint) (uint, error) {
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(year int) ([]*models.Month, error) {
+func (db DB) GetMonths(_ context.Context, year int) ([]*models.Month, error) {
 	months := []*models.Month{}
 	err := db.db.Model(&months).
 		Where("year = ?", year).
@@ -125,7 +126,7 @@ func (db DB) GetMonths(year int) ([]*models.Month, error) {
 // Day
 // -----------------------------------------------------------------------------
 
-func (db DB) GetDay(id uint) (*models.Day, error) {
+func (db DB) GetDay(_ context.Context, id uint) (*models.Day, error) {
 	d := &models.Day{ID: id}
 	err := db.db.Model(d).
 		Relation("Spends", orderByID).
@@ -143,8 +144,8 @@ func (db DB) GetDay(id uint) (*models.Day, error) {
 	return d, nil
 }
 
-func (db DB) GetDayIDByDate(year int, month int, day int) (uint, error) {
-	monthID, err := db.GetMonthID(year, month)
+func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {
+	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
 		if err == ErrMonthNotExist {
 			return 0, ErrMonthNotExist

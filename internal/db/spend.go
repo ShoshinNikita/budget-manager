@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+
 	"github.com/go-pg/pg/v9"
 
 	"github.com/ShoshinNikita/budget_manager/internal/db/models"
@@ -17,7 +19,7 @@ type AddSpendArgs struct {
 }
 
 // AddSpend adds a new Spend
-func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
+func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err error) {
 	if !db.checkDay(args.DayID) {
 		return 0, ErrDayNotExist
 	}
@@ -33,7 +35,7 @@ func (db DB) AddSpend(args AddSpendArgs) (id uint, err error) {
 
 		// Recompute Month budget
 
-		monthID, err := db.GetMonthIDByDayID(args.DayID)
+		monthID, err := db.getMonthIDByDayID(ctx, tx, args.DayID)
 		if err != nil {
 			return errors.Wrap(err,
 				errors.WithMsg("can't get Month which contains Day with passed dayID"),
@@ -84,7 +86,7 @@ type EditSpendArgs struct {
 }
 
 // EditSpend edits existeng Spend
-func (db DB) EditSpend(args EditSpendArgs) error {
+func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
 	if !db.checkSpend(args.ID) {
 		return ErrSpendNotExist
 	}
@@ -108,7 +110,7 @@ func (db DB) EditSpend(args EditSpendArgs) error {
 
 		// Recompute Month budget
 
-		monthID, err := db.GetMonthIDByDayID(spend.DayID)
+		monthID, err := db.getMonthIDByDayID(ctx, tx, spend.DayID)
 		if err != nil {
 			return errors.Wrap(err,
 				errors.WithMsg("can't get Month which contains Day with passed dayID"),
@@ -151,7 +153,7 @@ func (DB) editSpend(tx *pg.Tx, spend *models.Spend, args EditSpendArgs) error {
 }
 
 // RemoveSpend removes Spend with passed id
-func (db DB) RemoveSpend(id uint) error {
+func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 	if !db.checkSpend(id) {
 		return ErrSpendNotExist
 	}
@@ -176,7 +178,7 @@ func (db DB) RemoveSpend(id uint) error {
 
 		// Recompute Month budget
 
-		monthID, err := db.GetMonthIDByDayID(spend.DayID)
+		monthID, err := db.getMonthIDByDayID(ctx, tx, spend.DayID)
 		if err != nil {
 			return errors.Wrap(err,
 				errors.WithMsg("can't get Month which contains Day with passed dayID"),
