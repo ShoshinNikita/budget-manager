@@ -18,6 +18,15 @@
 			padding-bottom: 40px;
 		}
 
+		table th,
+		td {
+			word-break: keep-all;
+		}
+
+		table th {
+			white-space: nowrap;
+		}
+
 		/* || Actions */
 
 		div.actions-horizontal-list {
@@ -65,8 +74,17 @@
 			width: 100%;
 		}
 
-		.header__stats {
-			margin-right: 10px;
+		#header__stats {
+			column-gap: 15px;
+			display: grid;
+			grid-template-columns: repeat(3, min-content);
+		}
+
+		.header__stats__stat {
+			column-gap: 5px;
+			display: grid;
+			grid-template-columns: repeat(2, min-content);
+			white-space: nowrap;
 		}
 
 		#header__type-manager {
@@ -96,8 +114,8 @@
 			border-radius: 3px;
 			display: flex;
 			flex-direction: column;
-			overflow-x: auto;
 			height: 100%;
+			overflow-x: auto;
 		}
 
 		.detailed-info__block__header {
@@ -233,6 +251,10 @@
 			padding: 0 10px;
 		}
 
+		.detailed-info__days__day__spends {
+			overflow-x: auto;
+		}
+
 		.detailed-info__days__day__result {
 			font-size: 18px;
 			margin: 10px 10px 10px 0;
@@ -345,8 +367,12 @@
 			}
 		}
 
-		/* For small screens (<= 850px) */
-		@media (max-width: 850px) {
+		/* For small screens (<= 900px) */
+		@media (max-width: 900px) {
+			#app {
+				height: auto;
+			}
+
 			#header {
 				grid-template-columns: 100%;
 				grid-template-rows: repeat(2, minmax(min-content, max-content));
@@ -355,9 +381,19 @@
 				line-height: 18px;
 			}
 
+			#header__stats {
+				grid-template-columns: min-content;
+				grid-template-rows: repeat(3, min-content);
+			}
+
+			.header__stats__stat {
+				grid-template-columns: min-content auto;
+				text-align: right;
+			}
+
 			#detailed-info {
 				grid-template-columns: 100%;
-				grid-template-rows: 2fr 2fr 3fr;
+				grid-template-rows: repeat(2, minmax(auto, 250px)) auto;
 				grid-template-areas:
 					"incomes"
 					"monthly-payments"
@@ -403,18 +439,26 @@
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->
-			<div>
-				<span class="noselect">Incomes:</span>
-				<span class="header__stats money--gain">{{.TotalIncome}}</span>
-				<span class="noselect">Spends:</span>
-				<span class="header__stats money--lose">{{.TotalSpend}}</span>
-				<span class="noselect">Result:</span>
-				<!-- .Result > 0 -->
-				{{if ge .Result 0}}
-				<span class="header__stats money--gain">{{.Result}}</span>
-				{{else}}
-				<span class="header__stats money--lose">{{.Result}}</span>
-				{{end}}
+			<div id="header__stats">
+				<div class="header__stats__stat">
+					<div class="noselect">Incomes:</div>
+					<div class="money--gain">{{.TotalIncome}}</div>
+				</div>
+
+				<div class="header__stats__stat">
+					<div class="noselect">Spends:</div>
+					<div class="money--lose">{{.TotalSpend}}</div>
+				</div>
+
+				<div class="header__stats__stat">
+					<div class="noselect">Result:</div>
+					<!-- .Result > 0 -->
+					{{if ge .Result 0}}
+					<div class="money--gain">{{.Result}}</div>
+					{{else}}
+					<div class="money--lose">{{.Result}}</div>
+					{{end}}
+				</div>
 			</div>
 
 			<div id="header__type-manager" class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
@@ -602,7 +646,7 @@
 						{{.Day}} {{$.Month.Month}}
 					</div>
 
-					<div>
+					<div class="detailed-info__days__day__spends">
 						<table>
 							<tr>
 								<th class="noselect">Title</th>
