@@ -96,6 +96,7 @@ func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
 
 func (s *Server) Prepare() {
 	router := mux.NewRouter()
+	router.StrictSlash(true)
 
 	// Add middlewares
 
