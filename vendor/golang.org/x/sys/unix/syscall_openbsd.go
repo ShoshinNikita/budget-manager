@@ -18,8 +18,6 @@ import (
 	"unsafe"
 )
 
-//sys	sysctl(mib []_C_int, old *byte, oldlen *uintptr, new *byte, newlen uintptr) (err error) = SYS___SYSCTL
-
 // SockaddrDatalink implements the Sockaddr interface for AF_LINK type sockets.
 type SockaddrDatalink struct {
 	Len    uint8
@@ -180,6 +178,8 @@ func setattrlistTimes(path string, times []Timespec, flags int) error {
 
 //sys	ioctl(fd int, req uint, arg uintptr) (err error)
 
+//sys   sysctl(mib []_C_int, old *byte, oldlen *uintptr, new *byte, newlen uintptr) (err error) = SYS___SYSCTL
+
 //sys	ppoll(fds *PollFd, nfds int, timeout *Timespec, sigmask *Sigset_t) (n int, err error)
 
 func Ppoll(fds []PollFd, timeout *Timespec, sigmask *Sigset_t) (n int, err error) {
@@ -248,6 +248,7 @@ func Uname(uname *Utsname) error {
 //sys	Close(fd int) (err error)
 //sys	Dup(fd int) (nfd int, err error)
 //sys	Dup2(from int, to int) (err error)
+//sys	Dup3(from int, to int, flags int) (err error)
 //sys	Exit(code int)
 //sys	Faccessat(dirfd int, path string, mode uint32, flags int) (err error)
 //sys	Fchdir(fd int) (err error)
@@ -352,7 +353,6 @@ func Uname(uname *Utsname) error {
 // clock_settime
 // closefrom
 // execve
-// fcntl
 // fhopen
 // fhstat
 // fhstatfs

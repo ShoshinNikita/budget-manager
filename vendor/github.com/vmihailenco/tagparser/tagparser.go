@@ -1,6 +1,8 @@
 package tagparser
 
-import "github.com/vmihailenco/tagparser/internal/parser"
+import (
+	"github.com/vmihailenco/tagparser/internal/parser"
+)
 
 type Tag struct {
 	Name    string
@@ -90,8 +92,10 @@ func (p *tagParser) parseValue() {
 		c = p.Read()
 		switch c {
 		case '\\':
-			c = p.Read()
+			b = append(b, p.Read())
+		case '(':
 			b = append(b, c)
+			b = p.readBrackets(b)
 		case ',':
 			p.Skip(' ')
 			p.setTagOption(p.key, string(b))
@@ -102,6 +106,30 @@ func (p *tagParser) parseValue() {
 		}
 	}
 	p.setTagOption(p.key, string(b))
+}
+
+func (p *tagParser) readBrackets(b []byte) []byte {
+	var lvl int
+loop:
+	for p.Valid() {
+		c := p.Read()
+		switch c {
+		case '\\':
+			b = append(b, p.Read())
+		case '(':
+			b = append(b, c)
+			lvl++
+		case ')':
+			b = append(b, c)
+			lvl--
+			if lvl < 0 {
+				break loop
+			}
+		default:
+			b = append(b, c)
+		}
+	}
+	return b
 }
 
 func (p *tagParser) parseQuotedValue() {

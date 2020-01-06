@@ -5,10 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/vmihailenco/tagparser"
-
-	"github.com/go-pg/urlstruct/internal"
+	"github.com/codemodus/kace"
 	"github.com/go-pg/zerochecker"
+	"github.com/vmihailenco/tagparser"
 )
 
 type OpCode int
@@ -25,9 +24,11 @@ const (
 )
 
 type Field struct {
-	Type   reflect.Type
-	Name   string
-	Index  []int
+	Type  reflect.Type
+	Name  string
+	Index []int
+	Tag   *tagparser.Tag
+
 	Column string
 	Op     OpCode
 
@@ -35,49 +36,28 @@ type Field struct {
 	required bool
 	noWhere  bool
 
-	scanValue   ScannerFunc
+	scanValue   scannerFunc
 	isZeroValue zerochecker.Func
 }
 
-func newField(meta *StructInfo, sf reflect.StructField) *Field {
-	f := &Field{
-		Type:  sf.Type,
-		Name:  sf.Name,
-		Index: sf.Index,
-	}
-
-	ufTag := tagparser.Parse(sf.Tag.Get("urlstruct"))
-	if ufTag.Name == "-" {
-		return nil
-	}
-	if ufTag.Name != "" {
-		f.Name = ufTag.Name
-	}
-
-	_, f.required = ufTag.Options["required"]
-	_, f.noDecode = ufTag.Options["nodecode"]
-	_, f.noWhere = ufTag.Options["nowhere"]
+func (f *Field) init() {
+	_, f.required = f.Tag.Options["required"]
+	_, f.noDecode = f.Tag.Options["nodecode"]
+	_, f.noWhere = f.Tag.Options["nowhere"]
 	if f.required && f.noWhere {
 		err := fmt.Errorf("urlstruct: required and nowhere tags can't be set together")
 		panic(err)
 	}
 
-	name := internal.Underscore(f.Name)
 	const sep = "_"
-	f.Column, f.Op = splitColumnOperator(name, sep)
+	f.Column, f.Op = splitColumnOperator(kace.Snake(f.Name), sep)
 
 	if f.Type.Kind() == reflect.Slice {
-		f.scanValue = sliceScanner(sf.Type)
+		f.scanValue = sliceScanner(f.Type)
 	} else {
-		f.scanValue = scanner(sf.Type)
+		f.scanValue = scanner(f.Type)
 	}
-	f.isZeroValue = zerochecker.Checker(sf.Type)
-
-	if f.scanValue == nil || f.isZeroValue == nil {
-		return nil
-	}
-
-	return f
+	f.isZeroValue = zerochecker.Checker(f.Type)
 }
 
 func (f *Field) Value(strct reflect.Value) reflect.Value {
@@ -85,7 +65,7 @@ func (f *Field) Value(strct reflect.Value) reflect.Value {
 }
 
 func (f *Field) Omit(value reflect.Value) bool {
-	return !f.required && f.noWhere || f.isZeroValue(value)
+	return !f.required && (f.noWhere || f.isZeroValue(value))
 }
 
 func splitColumnOperator(s, sep string) (string, OpCode) {

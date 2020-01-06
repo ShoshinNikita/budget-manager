@@ -20,7 +20,9 @@ var (
 	mapStringStringType = reflect.TypeOf((*map[string]string)(nil)).Elem()
 )
 
-func scanner(typ reflect.Type) ScannerFunc {
+type scannerFunc func(v reflect.Value, values []string) error
+
+func scanner(typ reflect.Type) scannerFunc {
 	if typ == timeType {
 		return scanTime
 	}
@@ -64,7 +66,7 @@ func scanner(typ reflect.Type) ScannerFunc {
 	return nil
 }
 
-func sliceScanner(typ reflect.Type) ScannerFunc {
+func sliceScanner(typ reflect.Type) scannerFunc {
 	switch typ.Elem().Kind() {
 	case reflect.Int:
 		return scanIntSlice
