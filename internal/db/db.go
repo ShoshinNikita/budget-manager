@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 )
 
 const (

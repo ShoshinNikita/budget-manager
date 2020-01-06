@@ -11,7 +11,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	pkgErrors "github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 // --------------------------------------------------

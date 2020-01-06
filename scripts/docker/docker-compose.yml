@@ -1,11 +1,11 @@
 version: "3.7"
 
 services:
-  budget_manager:
+  budget-manager:
     build:
       context: ../..
       dockerfile: ./scripts/docker/Dockerfile
-    container_name: budget_manager_app
+    container_name: budget-manager
     environment:
       DEBUG: "true"
       DB_HOST: postgres
@@ -19,7 +19,7 @@ services:
 
   postgres:
     image: postgres
-    container_name: budget_manager_postgres
+    container_name: budget-manager_postgres
     environment:
       POSTGRES_USER: postgres
       # Empty password

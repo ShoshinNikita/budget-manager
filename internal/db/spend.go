@@ -5,9 +5,9 @@ import (
 
 	"github.com/go-pg/pg/v9"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/models"
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 type AddSpendArgs struct {

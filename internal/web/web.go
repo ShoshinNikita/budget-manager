@@ -12,8 +12,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
-	"github.com/ShoshinNikita/budget_manager/internal/web/templates"
+	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
 // -------------------------------------------------

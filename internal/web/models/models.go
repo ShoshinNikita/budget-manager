@@ -4,7 +4,7 @@ package models
 import (
 	"time"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 )
 
 // -------------------------------------------------

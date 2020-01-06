@@ -10,9 +10,9 @@ import (
 	"github.com/caarlos0/env/v6"
 	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
-	"github.com/ShoshinNikita/budget_manager/internal/logger"
-	"github.com/ShoshinNikita/budget_manager/internal/web"
+	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
 func main() {
