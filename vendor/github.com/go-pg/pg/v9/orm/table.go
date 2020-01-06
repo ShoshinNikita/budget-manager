@@ -2,7 +2,6 @@ package orm
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net"
 	"reflect"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/segmentio/encoding/json"
 
 	"github.com/jinzhu/inflection"
 	"github.com/vmihailenco/tagparser"
@@ -20,14 +21,15 @@ import (
 )
 
 const (
-	AfterScanHookFlag = uint16(1) << iota
-	AfterSelectHookFlag
-	BeforeInsertHookFlag
-	AfterInsertHookFlag
-	BeforeUpdateHookFlag
-	AfterUpdateHookFlag
-	BeforeDeleteHookFlag
-	AfterDeleteHookFlag
+	beforeScanHookFlag = uint16(1) << iota
+	afterScanHookFlag
+	afterSelectHookFlag
+	beforeInsertHookFlag
+	afterInsertHookFlag
+	beforeUpdateHookFlag
+	afterUpdateHookFlag
+	beforeDeleteHookFlag
+	afterDeleteHookFlag
 	discardUnknownColumnsFlag
 )
 
@@ -98,29 +100,32 @@ func newTable(typ reflect.Type) *Table {
 	t.Alias = quoteIdent(t.ModelName)
 
 	typ = reflect.PtrTo(t.Type)
+	if typ.Implements(beforeScanHookType) {
+		t.setFlag(beforeScanHookFlag)
+	}
 	if typ.Implements(afterScanHookType) {
-		t.setFlag(AfterScanHookFlag)
+		t.setFlag(afterScanHookFlag)
 	}
 	if typ.Implements(afterSelectHookType) {
-		t.setFlag(AfterSelectHookFlag)
+		t.setFlag(afterSelectHookFlag)
 	}
 	if typ.Implements(beforeInsertHookType) {
-		t.setFlag(BeforeInsertHookFlag)
+		t.setFlag(beforeInsertHookFlag)
 	}
 	if typ.Implements(afterInsertHookType) {
-		t.setFlag(AfterInsertHookFlag)
+		t.setFlag(afterInsertHookFlag)
 	}
 	if typ.Implements(beforeUpdateHookType) {
-		t.setFlag(BeforeUpdateHookFlag)
+		t.setFlag(beforeUpdateHookFlag)
 	}
 	if typ.Implements(afterUpdateHookType) {
-		t.setFlag(AfterUpdateHookFlag)
+		t.setFlag(afterUpdateHookFlag)
 	}
 	if typ.Implements(beforeDeleteHookType) {
-		t.setFlag(BeforeDeleteHookFlag)
+		t.setFlag(beforeDeleteHookFlag)
 	}
 	if typ.Implements(afterDeleteHookType) {
-		t.setFlag(AfterDeleteHookFlag)
+		t.setFlag(afterDeleteHookFlag)
 	}
 
 	for _, hook := range oldHooks {
@@ -464,9 +469,6 @@ func (t *Table) newField(f reflect.StructField, index []int) *Field {
 	} else if _, ok := pgTag.Options["hstore"]; ok {
 		field.append = types.HstoreAppender(f.Type)
 		field.scan = types.HstoreScanner(f.Type)
-	} else if _, ok := pgTag.Options["hstore"]; ok {
-		field.append = types.HstoreAppender(f.Type)
-		field.scan = types.HstoreScanner(f.Type)
 	} else if field.SQLType == pgTypeBigint && field.Type.Kind() == reflect.Uint64 {
 		if f.Type.Kind() == reflect.Ptr {
 			field.append = appendUintPtrAsInt
@@ -474,6 +476,9 @@ func (t *Table) newField(f reflect.StructField, index []int) *Field {
 			field.append = appendUintAsInt
 		}
 		field.scan = types.Scanner(f.Type)
+	} else if _, ok := pgTag.Options["msgpack"]; ok {
+		field.append = msgpackAppender(f.Type)
+		field.scan = msgpackScanner(f.Type)
 	} else {
 		field.append = types.Appender(f.Type)
 		field.scan = types.Scanner(f.Type)
@@ -992,8 +997,11 @@ func scanJSONValue(v reflect.Value, rd types.Reader, n int) error {
 		return fmt.Errorf("pg: Scan(non-pointer %s)", v.Type())
 	}
 
+	// Zero value so it works with SelectOrInsert.
+	//TODO: better handle slices
+	v.Set(reflect.New(v.Type()).Elem())
+
 	if n == -1 {
-		v.Set(reflect.New(v.Type()).Elem())
 		return nil
 	}
 

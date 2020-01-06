@@ -189,6 +189,17 @@ func (j *join) appendBaseAlias(b []byte) []byte {
 	return append(b, j.BaseModel.Table().Alias...)
 }
 
+func (j *join) appendSoftDelete(b []byte, flags queryFlag) []byte {
+	b = append(b, '.')
+	b = append(b, j.JoinModel.Table().SoftDeleteField.Column...)
+	if hasFlag(flags, deletedFlag) {
+		b = append(b, " IS NOT NULL"...)
+	} else {
+		b = append(b, " IS NULL"...)
+	}
+	return b
+}
+
 func appendAlias(b []byte, j *join) []byte {
 	if j.hasParent() {
 		b = appendAlias(b, j.Parent)
@@ -245,14 +256,13 @@ func (j *join) appendHasOneJoin(fmter QueryFormatter, b []byte, q *Query) (_ []b
 		b = append(b, '(')
 	}
 	if j.Rel.Type == HasOneRelation {
-		joinTable := j.Rel.JoinTable
 		for i, fk := range j.Rel.FKs {
 			if i > 0 {
 				b = append(b, " AND "...)
 			}
 			b = j.appendAlias(b)
 			b = append(b, '.')
-			b = append(b, joinTable.PKs[i].Column...)
+			b = append(b, j.Rel.JoinTable.PKs[i].Column...)
 			b = append(b, " = "...)
 			b = j.appendBaseAlias(b)
 			b = append(b, '.')
@@ -291,8 +301,8 @@ func (j *join) appendHasOneJoin(fmter QueryFormatter, b []byte, q *Query) (_ []b
 
 	if isSoftDelete {
 		b = append(b, " AND "...)
-		b = j.appendBaseAlias(b)
-		b = q.appendSoftDelete(b)
+		b = j.appendAlias(b)
+		b = j.appendSoftDelete(b, q.flags)
 	}
 
 	return b, nil

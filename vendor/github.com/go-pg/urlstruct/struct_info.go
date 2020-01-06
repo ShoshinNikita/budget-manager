@@ -1,48 +1,37 @@
 package urlstruct
 
 import (
+	"fmt"
 	"net/url"
 	"reflect"
-	"strings"
 
+	"github.com/codemodus/kace"
 	"github.com/vmihailenco/tagparser"
 )
-
-var unmarshalerType = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
 
 type Unmarshaler interface {
 	UnmarshalValues(url.Values) error
 }
 
-type unmarshalerField struct {
-	Index []int
-}
+//------------------------------------------------------------------------------
 
 type StructInfo struct {
 	TableName string
 	Fields    []*Field
+	structs   map[string][]int
 
-	isUnmarshaler bool
-	unmarshalers  []*unmarshalerField
+	isUnmarshaler      bool
+	unknownFieldsIndex []int
+	unmarshalerIndexes [][]int
 }
 
 func newStructInfo(typ reflect.Type) *StructInfo {
 	sinfo := &StructInfo{
-		Fields: make([]*Field, 0, typ.NumField()),
+		Fields:        make([]*Field, 0, typ.NumField()),
+		isUnmarshaler: isUnmarshaler(reflect.PtrTo(typ)),
 	}
 	addFields(sinfo, typ, nil)
 	return sinfo
-}
-
-func (s *StructInfo) decode(strct reflect.Value, name string, values []string) error {
-	name = strings.TrimPrefix(name, ":")
-	name = strings.TrimSuffix(name, "[]")
-
-	field := s.Field(name)
-	if field == nil || field.noDecode {
-		return nil
-	}
-	return field.scanValue(field.Value(strct), values)
 }
 
 func (s *StructInfo) Field(name string) *Field {
@@ -56,14 +45,12 @@ func (s *StructInfo) Field(name string) *Field {
 }
 
 func addFields(sinfo *StructInfo, typ reflect.Type, baseIndex []int) {
-	if baseIndex != nil {
-		baseIndex = baseIndex[:len(baseIndex):len(baseIndex)]
-	}
-
-	sinfo.isUnmarshaler = isUnmarshaler(typ)
-
 	for i := 0; i < typ.NumField(); i++ {
 		sf := typ.Field(i)
+		if sf.PkgPath != "" && !sf.Anonymous {
+			continue
+		}
+
 		if sf.Anonymous {
 			tag := sf.Tag.Get("urlstruct")
 			if tag == "-" {
@@ -81,36 +68,81 @@ func addFields(sinfo *StructInfo, typ reflect.Type, baseIndex []int) {
 			addFields(sinfo, sfType, sf.Index)
 
 			if isUnmarshaler(reflect.PtrTo(sfType)) {
-				sinfo.unmarshalers = append(sinfo.unmarshalers, &unmarshalerField{
-					Index: append(baseIndex, sf.Index...),
-				})
+				index := joinIndex(baseIndex, sf.Index)
+				sinfo.unmarshalerIndexes = append(sinfo.unmarshalerIndexes, index)
 			}
-
-			continue
-		}
-
-		if sf.Name == "tableName" {
-			tag := tagparser.Parse(sf.Tag.Get("urlstruct"))
-			name, _ := tagparser.Unquote(tag.Name)
-			sinfo.TableName = name
-			continue
-		}
-
-		f := newField(sinfo, sf)
-		if f != nil {
-			if len(baseIndex) > 0 {
-				f.Index = append(baseIndex, f.Index...)
-			}
-			sinfo.Fields = append(sinfo.Fields, f)
-		}
-
-		if isUnmarshaler(reflect.PtrTo(sf.Type)) {
-			sinfo.unmarshalers = append(sinfo.unmarshalers, &unmarshalerField{
-				Index: append(baseIndex, sf.Index...),
-			})
+		} else {
+			addField(sinfo, sf, baseIndex)
 		}
 	}
 }
+
+func addField(sinfo *StructInfo, sf reflect.StructField, baseIndex []int) {
+	tagStr := sf.Tag.Get("urlstruct")
+	if tagStr == "-" {
+		return
+	}
+	tag := tagparser.Parse(tagStr)
+	if tag.Name == "-" {
+		return
+	}
+
+	if sf.Name == "tableName" {
+		name, _ := tagparser.Unquote(tag.Name)
+		sinfo.TableName = name
+		return
+	}
+
+	if _, ok := tag.Options["unknown"]; ok {
+		if sf.Type != mapType {
+			err := fmt.Errorf("urlstruct: got %s for unknown fields, wanted %s",
+				sf.Type, mapType)
+			panic(err)
+		}
+		sinfo.unknownFieldsIndex = joinIndex(baseIndex, sf.Index)
+		return
+	}
+
+	name := tag.Name
+	if name == "" {
+		name = sf.Name
+	}
+	index := joinIndex(baseIndex, sf.Index)
+
+	if sf.Type.Kind() == reflect.Struct {
+		if sinfo.structs == nil {
+			sinfo.structs = make(map[string][]int)
+		}
+		sinfo.structs[kace.Snake(name)] = append(baseIndex, sf.Index...)
+	}
+
+	if isUnmarshaler(reflect.PtrTo(sf.Type)) {
+		sinfo.unmarshalerIndexes = append(sinfo.unmarshalerIndexes, index)
+	}
+
+	f := &Field{
+		Type:  sf.Type,
+		Name:  name,
+		Index: index,
+		Tag:   tag,
+	}
+	f.init()
+	if f.scanValue != nil && f.isZeroValue != nil {
+		sinfo.Fields = append(sinfo.Fields, f)
+	}
+}
+
+func joinIndex(base, idx []int) []int {
+	if len(base) == 0 {
+		return idx
+	}
+	r := make([]int, 0, len(base)+len(idx))
+	r = append(r, base...)
+	r = append(r, idx...)
+	return r
+}
+
+//------------------------------------------------------------------------------
 
 var (
 	urlValuesType = reflect.TypeOf((*url.Values)(nil)).Elem()
@@ -129,4 +161,26 @@ func isUnmarshaler(typ reflect.Type) bool {
 		}
 	}
 	return false
+}
+
+//------------------------------------------------------------------------------
+
+var mapType = reflect.TypeOf((*map[string][]string)(nil)).Elem()
+
+type fieldMap struct {
+	m map[string][]string
+}
+
+func newFieldMap(v reflect.Value) *fieldMap {
+	if v.IsNil() {
+		v.Set(reflect.MakeMap(mapType))
+	}
+	return &fieldMap{
+		m: v.Interface().(map[string][]string),
+	}
+}
+
+func (fm fieldMap) Decode(name string, values []string) error {
+	fm.m[name] = values
+	return nil
 }
