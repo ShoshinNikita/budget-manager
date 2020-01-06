@@ -14,9 +14,9 @@ import (
 	"github.com/ShoshinNikita/go-clog/v3"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
-	dbModels "github.com/ShoshinNikita/budget_manager/internal/db/models"
-	"github.com/ShoshinNikita/budget_manager/internal/web/models"
+	"github.com/ShoshinNikita/budget-manager/internal/db"
+	dbModels "github.com/ShoshinNikita/budget-manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
 
 const (

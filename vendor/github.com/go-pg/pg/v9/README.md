@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/go-pg/pg.svg?branch=master)](https://travis-ci.org/go-pg/pg)
 [![GoDoc](https://godoc.org/github.com/go-pg/pg?status.svg)](https://godoc.org/github.com/go-pg/pg)
 
-## Features:
+## Features
 
 - Basic types: integers, floats, string, bool, time.Time, net.IP, net.IPNet.
 - sql.NullBool, sql.NullString, sql.NullInt64, sql.NullFloat64 and [pg.NullTime](http://godoc.org/github.com/go-pg/pg#NullTime).
@@ -32,15 +32,20 @@
 - [Creating tables from structs](https://godoc.org/github.com/go-pg/pg#example-DB-CreateTable).
 - [ForEach](https://godoc.org/github.com/go-pg/pg#example-DB-Model-ForEach) that calls a function for each row returned by the query without loading all rows into the memory.
 - Works with PgBouncer in transaction pooling mode.
-- [Migrations](https://github.com/go-pg/migrations).
+
+## Ecosystem
+
+- Migrations by [vmihailenco](https://github.com/go-pg/migrations) and [robinjoseph08](https://github.com/robinjoseph08/go-pg-migrations).
 - [Sharding](https://github.com/go-pg/sharding).
 - [Model generator from SQL tables](https://github.com/dizzyfool/genna).
+- [urlstruct](https://github.com/go-pg/urlstruct) to decode `url.Values` into structs.
 
 ## Get Started
 
 go-pg requires a Go version with [Modules](https://github.com/golang/go/wiki/Modules) support and uses import versioning. So please make sure to initialize a Go module before installing go-pg:
 
 ```shell
+go mod init github.com/my/repo
 go get github.com/go-pg/pg/v9
 ```
 

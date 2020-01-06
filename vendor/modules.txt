@@ -4,52 +4,74 @@ github.com/ShoshinNikita/go-clog/v3
 github.com/abbot/go-http-auth
 # github.com/caarlos0/env/v6 v6.1.0
 github.com/caarlos0/env/v6
+# github.com/codemodus/kace v0.5.1
+github.com/codemodus/kace
+github.com/codemodus/kace/ktrie
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
-# github.com/fatih/color v1.7.0
+# github.com/fatih/color v1.8.0
 github.com/fatih/color
-# github.com/go-pg/pg/v9 v9.0.0-beta.15
+# github.com/go-pg/pg/v9 v9.1.1
 github.com/go-pg/pg/v9
 github.com/go-pg/pg/v9/internal
 github.com/go-pg/pg/v9/internal/parser
 github.com/go-pg/pg/v9/internal/pool
 github.com/go-pg/pg/v9/orm
 github.com/go-pg/pg/v9/types
-# github.com/go-pg/urlstruct v0.2.5
+# github.com/go-pg/urlstruct v0.2.10
 github.com/go-pg/urlstruct
-github.com/go-pg/urlstruct/internal
-# github.com/go-pg/zerochecker v0.1.1
+# github.com/go-pg/zerochecker v0.1.1 => github.com/go-pg/zerochecker v0.1.2-0.20190924102134-549b3bbf317c
 github.com/go-pg/zerochecker
+# github.com/golang/protobuf v1.3.2
+github.com/golang/protobuf/proto
 # github.com/gorilla/mux v1.7.3
 github.com/gorilla/mux
 # github.com/jinzhu/inflection v1.0.0
 github.com/jinzhu/inflection
 # github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.10
+# github.com/mattn/go-isatty v0.0.11
 github.com/mattn/go-isatty
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/robfig/cron/v3 v3.0.0
+# github.com/robfig/cron/v3 v3.0.1
 github.com/robfig/cron/v3
+# github.com/segmentio/encoding v0.1.8
+github.com/segmentio/encoding/ascii
+github.com/segmentio/encoding/json
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/vmihailenco/tagparser v0.1.0
+# github.com/vmihailenco/msgpack/v4 v4.3.1
+github.com/vmihailenco/msgpack/v4
+github.com/vmihailenco/msgpack/v4/codes
+# github.com/vmihailenco/tagparser v0.1.1
 github.com/vmihailenco/tagparser
 github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
-# golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
+# golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
-# golang.org/x/net v0.0.0-20190420063019-afa5a82059c6
+# golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 golang.org/x/net/context
-# golang.org/x/sys v0.0.0-20191018095205-727590c5006e
+# golang.org/x/sys v0.0.0-20200106162015-b016eb3dc98e
 golang.org/x/sys/unix
-# gopkg.in/yaml.v2 v2.2.2
+# google.golang.org/appengine v1.6.5
+google.golang.org/appengine
+google.golang.org/appengine/datastore
+google.golang.org/appengine/datastore/internal/cloudkey
+google.golang.org/appengine/datastore/internal/cloudpb
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/app_identity
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/modules
+google.golang.org/appengine/internal/remote_api
+# gopkg.in/yaml.v2 v2.2.4
 gopkg.in/yaml.v2
 # mellium.im/sasl v0.2.1
 mellium.im/sasl

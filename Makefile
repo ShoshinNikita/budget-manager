@@ -9,7 +9,7 @@ run-docker: clear
 		--build \
 		--force-recreate \
 		--renew-anon-volumes \
-		--exit-code-from budget_manager
+		--exit-code-from budget-manager
 
 run-local: clear
 	# Run Postgres
@@ -26,7 +26,7 @@ clear-docker:
 	docker-compose -f ${DOCKER_COMPOSE} down -v || true
 
 clear-local:
-	docker stop budget_manager_postgres || true
+	docker stop budget-manager_postgres || true
 
 # Tests
 
@@ -41,18 +41,18 @@ test-integ:
 
 	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
 	go test -mod=vendor -count=1 -p=1 --tags=integration -v \
-		-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget_manager/... \
+		-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/... \
 		./...
 	go tool cover -func=cover.out
 	rm cover.out
 
 	# Stop and remove DB
-	docker stop budget_manager_postgres
+	docker stop budget-manager_postgres
 
 # Other
 
 build:
-	go build -mod vendor -o bin/budget_manager cmd/budget_manager/main.go
+	go build -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint

@@ -8,9 +8,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
-	"github.com/ShoshinNikita/budget_manager/internal/db/models"
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 const (
