@@ -3,9 +3,10 @@ package db
 import (
 	"context"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db/models"
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
 	"github.com/go-pg/pg/v9"
+
+	"github.com/ShoshinNikita/budget-manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 // GetSpendType returns Spend Type with passed id

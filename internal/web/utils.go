@@ -6,8 +6,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget_manager/internal/web/models"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
 
 const formatMsg = "caller: '%s', msg: '%s', error: '%s'"
@@ -52,7 +52,7 @@ func (s Server) processError(w http.ResponseWriter, respMsg string, code int, in
 	json.NewEncoder(w).Encode(resp) // nolint:errcheck
 }
 
-const prefixForTrim = "github.com/ShoshinNikita/budget_manager/"
+const prefixForTrim = "github.com/ShoshinNikita/budget-manager/"
 
 func getCallerFunc(skip int) string {
 	pc, _, _, ok := runtime.Caller(skip)

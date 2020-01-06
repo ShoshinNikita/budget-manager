@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker stop budget_manager_postgres
+docker stop budget-manager_postgres
 
 MOUNT=""
 MODE=${1:-full}
@@ -27,7 +27,7 @@ case $MODE in
 esac
 
 docker run --rm -d \
-	--name budget_manager_postgres \
+	--name budget-manager_postgres \
 	-p "5432:5432" \
 	${MOUNT} \
 	-e POSTGRES_USER=postgres \

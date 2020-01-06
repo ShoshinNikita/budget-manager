@@ -1,4 +1,4 @@
-module github.com/ShoshinNikita/budget_manager
+module github.com/ShoshinNikita/budget-manager
 
 go 1.13
 

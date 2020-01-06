@@ -6,9 +6,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ShoshinNikita/budget_manager/internal/db"
-	"github.com/ShoshinNikita/budget_manager/internal/logger"
-	"github.com/ShoshinNikita/budget_manager/internal/web"
+	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
 func TestConfig(t *testing.T) {

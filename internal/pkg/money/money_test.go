@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	. "github.com/ShoshinNikita/budget_manager/internal/pkg/money"
+	. "github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 func TestConvertMoney(t *testing.T) {

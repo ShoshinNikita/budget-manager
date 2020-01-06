@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 // ----------------------------------------------------

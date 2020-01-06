@@ -10,8 +10,8 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
 
-	. "github.com/ShoshinNikita/budget_manager/internal/db/models"
-	"github.com/ShoshinNikita/budget_manager/internal/pkg/money"
+	. "github.com/ShoshinNikita/budget-manager/internal/db/models"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 func TestAddIncome(t *testing.T) {

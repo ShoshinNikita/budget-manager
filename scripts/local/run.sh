@@ -10,4 +10,4 @@ export SERVER_SKIP_AUTH="true"
 # user:qwerty,admin:admin
 # export SERVER_CREDENTIALS="user:\$apr1\$cpHMFyv.\$BSB0aaF3bOrTC2f3V2VYG/,admin:\$apr1\$t6YLYGF6\$M05uLevUvoHOopO6AUOEj/"
 
-go run -mod vendor cmd/budget_manager/main.go
+go run -mod vendor cmd/budget-manager/main.go
