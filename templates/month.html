@@ -195,8 +195,7 @@
 		.detailed-info__days__calendar__day--disabled {
 			border: 1px solid var(--border-color);
 			border-radius: 3px;
-			height: 60px;
-			padding: 3px;
+			padding: 5px 7px;
 		}
 
 		.detailed-info__days__calendar__day:hover {
@@ -210,7 +209,6 @@
 
 		.detailed-info__days__calendar__day__info {
 			display: flex;
-			margin-bottom: 5px;
 		}
 
 		.detailed-info__days__calendar__day__info__number::after {
@@ -222,18 +220,18 @@
 			white-space: pre;
 		}
 
-		.detailed-info__days__calendar__day__summary {
-			display: grid;
-			grid-template-columns: repeat(2, auto);
+		.detailed-info__days__calendar__day__info__spend-number {
+			display: flex;
 		}
 
-		.detailed-info__days__calendar__day__summary__spends-number {
-			text-align: left;
+		.detailed-info__days__calendar__day__info__spend-number::before {
+			content: "·";
+			margin-left: 5px;
+			padding-right: 5px;
 		}
 
-		.detailed-info__days__calendar__day__summary__saldo {
+		.detailed-info__days__calendar__day__saldo {
 			text-align: right;
-			padding-right: 3px;
 		}
 
 		.detailed-info__days__day {
@@ -418,8 +416,13 @@
 				height: auto;
 			}
 
+			.detailed-info__days__calendar__day__info__number {
+				margin: auto;
+			}
+
 			.detailed-info__days__calendar__day__info__month-name,
-			.detailed-info__days__calendar__day__summary {
+			.detailed-info__days__calendar__day__info__spend-number,
+			.detailed-info__days__calendar__day__saldo {
 				display: none;
 			}
 		}
@@ -621,20 +624,18 @@
 
 						<div class="detailed-info__days__calendar__day__info">
 							<div class="detailed-info__days__calendar__day__info__number">{{.Day}}</div>
-							<div class="detailed-info__days__calendar__day__info__month-name">{{$.Month.Month}}</div>
-						</div>
-
-						<div class="detailed-info__days__calendar__day__summary">
-							<div class="detailed-info__days__calendar__day__summary__spends-number" title="Spends">
+							<div class="detailed-info__days__calendar__day__info__month-name">{{call $.ToShortMonth $.Month.Month}}</div>
+							<div class="detailed-info__days__calendar__day__info__spend-number" title="Spends">
 								{{len .Spends}}
 							</div>
-							<div class="detailed-info__days__calendar__day__summary__saldo" title="Saldo">
-								{{if ge .Saldo 0}}
-								<span class="money--gain">{{.Saldo}}</span>
-								{{else}}
-								<span class="money--lose">{{.Saldo}}</span>
-								{{end}}
-							</div>
+						</div>
+
+						<div class="detailed-info__days__calendar__day__saldo" title="Saldo">
+							{{if ge .Saldo 0}}
+							<span class="money--gain">{{.Saldo}}</span>
+							{{else}}
+							<span class="money--lose">{{.Saldo}}</span>
+							{{end}}
 						</div>
 					</div>
 					{{end}}
@@ -908,6 +909,9 @@
 
 				const monthNameElem = document.createElement("div");
 				monthNameElem.classList.add("detailed-info__days__calendar__day__info__month-name");
+				if (monthName.length > 4) {
+					monthName = monthName.slice(0, 3);
+				}
 				monthNameElem.textContent = monthName;
 				info.append(monthNameElem);
 
