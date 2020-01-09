@@ -2,16 +2,16 @@ DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 
 # Run
 
-run: run-docker
+run: run-local
 
-run-docker: clear
+run-docker: stop
 	docker-compose -f ${DOCKER_COMPOSE} up \
 		--build \
 		--force-recreate \
 		--renew-anon-volumes \
 		--exit-code-from budget-manager
 
-run-local: clear
+run-local: stop
 	# Run Postgres
 	./scripts/local/postgres.sh
 	# Run Budget Manager
@@ -19,13 +19,13 @@ run-local: clear
 
 # Clear
 
-clear: clear-local clear-docker
+stop: stop-local stop-docker
 
-clear-docker:
+stop-docker:
 	# Stop and remove containers and volumes
 	docker-compose -f ${DOCKER_COMPOSE} down -v || true
 
-clear-local:
+stop-local:
 	docker stop budget-manager_postgres || true
 
 # Tests
@@ -35,7 +35,7 @@ test: test-integ
 test-unit:
 	go test -mod vendor -count 1 -v ./...
 
-test-integ:
+test-integ: stop
 	# Run Postgres
 	./scripts/local/postgres.sh test
 
