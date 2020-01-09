@@ -32,7 +32,7 @@
 
 ### Run
 
-You can run local version with `make run` (or `make run-docker`) with Docker. If you don't want to use Docker, you can build and run **Budget Manager** with `make run-local` (this target uses `go run` command)
+You can run a local version with `make run-docker` with Docker. If you don't want to use Docker, you can build and run **Budget Manager** with `make` (or `make run-local`)
 
 After the launch you can use [`tools/api.rest`](tools/api.rest) file to make basic API requests. More info about the `.rest` and `.http` files:
 
@@ -43,7 +43,9 @@ Also you can use [`tools/fill_db.go`](tools/fill_db.go) script to fill the DB. T
 
 ```bash
 # Run Budget Manager
-make run
+make
+# Or
+make run-docker
 
 # Add test data
 go run tools/fill_db.go
