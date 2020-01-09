@@ -2,7 +2,7 @@ DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 
 # Run
 
-run: run-docker
+run: run-local
 
 run-docker: clear
 	docker-compose -f ${DOCKER_COMPOSE} up \
