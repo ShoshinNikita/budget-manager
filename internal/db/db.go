@@ -43,12 +43,16 @@ func NewDB(config Config, log *clog.Logger) (*DB, error) {
 
 	// Try to ping the DB
 	for i := 0; i < connectRetries; i++ {
-		log.Debugf("ping DB, try #%d", i+1)
+		if i != 0 {
+			log.Debugf("ping DB, try #%d", i+1)
+		}
+
 		if ping(db) {
 			break
 		}
 		log.Debug("couldn't ping DB")
 		if i+1 == connectRetries {
+			// Don't sleep extra time
 			return nil, errors.New("database is down")
 		}
 
