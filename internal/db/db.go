@@ -15,7 +15,7 @@ import (
 
 const (
 	connectRetries      = 5
-	connectRetryTimeout = time.Second
+	connectRetryTimeout = 2 * time.Second
 )
 
 type Config struct {
