@@ -71,6 +71,7 @@
 			margin-bottom: 10px;
 			padding-bottom: 5px;
 			position: relative;
+			row-gap: 5px;
 			width: 100%;
 		}
 
@@ -343,6 +344,7 @@
 		/* For medium screens (<= 1350px) */
 		@media (max-width: 1350px) {
 			#app {
+				border: none;
 				margin: 0;
 			}
 
@@ -399,7 +401,6 @@
 			}
 
 			.detailed-info__block__header {
-				font-size: 14px;
 				padding: 0;
 			}
 
@@ -727,7 +728,7 @@
 					</div>
 
 					<div class="detailed-info__days__day__result">
-						<span>Saldo:</span>
+						<span class="noselect">Saldo:</span>
 						{{if ge .Saldo 0}}
 						<span class="money--gain">{{.Saldo}}</span>
 						{{else}}
