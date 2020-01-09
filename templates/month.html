@@ -18,6 +18,15 @@
 			padding-bottom: 40px;
 		}
 
+		table th,
+		td {
+			word-break: keep-all;
+		}
+
+		table th {
+			white-space: nowrap;
+		}
+
 		/* || Actions */
 
 		div.actions-horizontal-list {
@@ -39,7 +48,7 @@
 
 		#app {
 			border: 1px solid var(--border-color);
-			border-radius: 5px;
+			border-radius: 3px;
 			display: flex;
 			flex-direction: column;
 			height: 100%;
@@ -62,11 +71,21 @@
 			margin-bottom: 10px;
 			padding-bottom: 5px;
 			position: relative;
+			row-gap: 5px;
 			width: 100%;
 		}
 
-		.header__stats {
-			margin-right: 10px;
+		#header__stats {
+			column-gap: 15px;
+			display: grid;
+			grid-template-columns: repeat(3, min-content);
+		}
+
+		.header__stats__stat {
+			column-gap: 5px;
+			display: grid;
+			grid-template-columns: repeat(2, min-content);
+			white-space: nowrap;
 		}
 
 		#header__type-manager {
@@ -96,8 +115,8 @@
 			border-radius: 3px;
 			display: flex;
 			flex-direction: column;
-			overflow-x: auto;
 			height: 100%;
+			overflow-x: auto;
 		}
 
 		.detailed-info__block__header {
@@ -176,9 +195,8 @@
 		.detailed-info__days__calendar__day,
 		.detailed-info__days__calendar__day--disabled {
 			border: 1px solid var(--border-color);
-			border-radius: 5px;
-			height: 60px;
-			padding: 3px;
+			border-radius: 3px;
+			padding: 5px 7px;
 		}
 
 		.detailed-info__days__calendar__day:hover {
@@ -192,7 +210,6 @@
 
 		.detailed-info__days__calendar__day__info {
 			display: flex;
-			margin-bottom: 5px;
 		}
 
 		.detailed-info__days__calendar__day__info__number::after {
@@ -204,25 +221,25 @@
 			white-space: pre;
 		}
 
-		.detailed-info__days__calendar__day__summary {
-			display: grid;
-			grid-template-columns: repeat(2, auto);
+		.detailed-info__days__calendar__day__info__spend-number {
+			display: flex;
 		}
 
-		.detailed-info__days__calendar__day__summary__spends-number {
-			text-align: left;
+		.detailed-info__days__calendar__day__info__spend-number::before {
+			content: "·";
+			margin-left: 5px;
+			padding-right: 5px;
 		}
 
-		.detailed-info__days__calendar__day__summary__saldo {
+		.detailed-info__days__calendar__day__saldo {
 			text-align: right;
-			padding-right: 3px;
 		}
 
 		.detailed-info__days__day {
 			/* Hidden by default */
 			display: none;
 			border: 1px solid var(--border-color);
-			border-radius: 5px;
+			border-radius: 3px;
 			padding: 3px;
 		}
 
@@ -231,6 +248,10 @@
 			font-size: 18px;
 			margin: 5px 0px 10px;
 			padding: 0 10px;
+		}
+
+		.detailed-info__days__day__spends {
+			overflow-x: auto;
 		}
 
 		.detailed-info__days__day__result {
@@ -254,7 +275,7 @@
 
 		.modal-window {
 			background-color: white;
-			border-radius: 5px;
+			border-radius: 3px;
 			box-shadow: 0px 0px 10px 10px #00000020;
 			display: none;
 			margin: 9vh auto 5vh;
@@ -323,6 +344,7 @@
 		/* For medium screens (<= 1350px) */
 		@media (max-width: 1350px) {
 			#app {
+				border: none;
 				margin: 0;
 			}
 
@@ -345,8 +367,12 @@
 			}
 		}
 
-		/* For small screens (<= 850px) */
-		@media (max-width: 850px) {
+		/* For small screens (<= 900px) */
+		@media (max-width: 900px) {
+			#app {
+				height: auto;
+			}
+
 			#header {
 				grid-template-columns: 100%;
 				grid-template-rows: repeat(2, minmax(min-content, max-content));
@@ -355,9 +381,19 @@
 				line-height: 18px;
 			}
 
+			#header__stats {
+				grid-template-columns: min-content;
+				grid-template-rows: repeat(3, min-content);
+			}
+
+			.header__stats__stat {
+				grid-template-columns: min-content auto;
+				text-align: right;
+			}
+
 			#detailed-info {
 				grid-template-columns: 100%;
-				grid-template-rows: 2fr 2fr 3fr;
+				grid-template-rows: repeat(2, minmax(auto, 250px)) auto;
 				grid-template-areas:
 					"incomes"
 					"monthly-payments"
@@ -365,7 +401,6 @@
 			}
 
 			.detailed-info__block__header {
-				font-size: 14px;
 				padding: 0;
 			}
 
@@ -382,8 +417,13 @@
 				height: auto;
 			}
 
+			.detailed-info__days__calendar__day__info__number {
+				margin: auto;
+			}
+
 			.detailed-info__days__calendar__day__info__month-name,
-			.detailed-info__days__calendar__day__summary {
+			.detailed-info__days__calendar__day__info__spend-number,
+			.detailed-info__days__calendar__day__saldo {
 				display: none;
 			}
 		}
@@ -403,18 +443,26 @@
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->
-			<div>
-				<span class="noselect">Incomes:</span>
-				<span class="header__stats money--gain">{{.TotalIncome}}</span>
-				<span class="noselect">Spends:</span>
-				<span class="header__stats money--lose">{{.TotalSpend}}</span>
-				<span class="noselect">Result:</span>
-				<!-- .Result > 0 -->
-				{{if ge .Result 0}}
-				<span class="header__stats money--gain">{{.Result}}</span>
-				{{else}}
-				<span class="header__stats money--lose">{{.Result}}</span>
-				{{end}}
+			<div id="header__stats">
+				<div class="header__stats__stat">
+					<div class="noselect">Incomes:</div>
+					<div class="money--gain">{{.TotalIncome}}</div>
+				</div>
+
+				<div class="header__stats__stat">
+					<div class="noselect">Spends:</div>
+					<div class="money--lose">{{.TotalSpend}}</div>
+				</div>
+
+				<div class="header__stats__stat">
+					<div class="noselect">Result:</div>
+					<!-- .Result > 0 -->
+					{{if ge .Result 0}}
+					<div class="money--gain">{{.Result}}</div>
+					{{else}}
+					<div class="money--lose">{{.Result}}</div>
+					{{end}}
+				</div>
 			</div>
 
 			<div id="header__type-manager" class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
@@ -577,20 +625,18 @@
 
 						<div class="detailed-info__days__calendar__day__info">
 							<div class="detailed-info__days__calendar__day__info__number">{{.Day}}</div>
-							<div class="detailed-info__days__calendar__day__info__month-name">{{$.Month.Month}}</div>
-						</div>
-
-						<div class="detailed-info__days__calendar__day__summary">
-							<div class="detailed-info__days__calendar__day__summary__spends-number" title="Spends">
+							<div class="detailed-info__days__calendar__day__info__month-name">{{call $.ToShortMonth $.Month.Month}}</div>
+							<div class="detailed-info__days__calendar__day__info__spend-number" title="Spends">
 								{{len .Spends}}
 							</div>
-							<div class="detailed-info__days__calendar__day__summary__saldo" title="Saldo">
-								{{if ge .Saldo 0}}
-								<span class="money--gain">{{.Saldo}}</span>
-								{{else}}
-								<span class="money--lose">{{.Saldo}}</span>
-								{{end}}
-							</div>
+						</div>
+
+						<div class="detailed-info__days__calendar__day__saldo" title="Saldo">
+							{{if ge .Saldo 0}}
+							<span class="money--gain">{{.Saldo}}</span>
+							{{else}}
+							<span class="money--lose">{{.Saldo}}</span>
+							{{end}}
 						</div>
 					</div>
 					{{end}}
@@ -602,7 +648,7 @@
 						{{.Day}} {{$.Month.Month}}
 					</div>
 
-					<div>
+					<div class="detailed-info__days__day__spends">
 						<table>
 							<tr>
 								<th class="noselect">Title</th>
@@ -682,7 +728,7 @@
 					</div>
 
 					<div class="detailed-info__days__day__result">
-						<span>Saldo:</span>
+						<span class="noselect">Saldo:</span>
 						{{if ge .Saldo 0}}
 						<span class="money--gain">{{.Saldo}}</span>
 						{{else}}
@@ -864,6 +910,9 @@
 
 				const monthNameElem = document.createElement("div");
 				monthNameElem.classList.add("detailed-info__days__calendar__day__info__month-name");
+				if (monthName.length > 4) {
+					monthName = monthName.slice(0, 3);
+				}
 				monthNameElem.textContent = monthName;
 				info.append(monthNameElem);
 

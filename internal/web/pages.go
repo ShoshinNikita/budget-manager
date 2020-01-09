@@ -129,10 +129,13 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 
 	resp := struct {
 		*models.Month
-		SpendTypes []models.SpendType
+
+		SpendTypes   []models.SpendType
+		ToShortMonth func(time.Month) string
 	}{
-		Month:      month,
-		SpendTypes: spendTypes,
+		Month:        month,
+		SpendTypes:   spendTypes,
+		ToShortMonth: toShortMonth,
 	}
 	if err := s.tplStore.Execute(monthTemplatePath, w, resp); err != nil {
 		// TODO: use special 500 page
@@ -179,4 +182,13 @@ func getMonth(r *http.Request) (month time.Month, ok bool) {
 	}
 
 	return month, true
+}
+
+func toShortMonth(m time.Month) string {
+	month := m.String()
+	// Don't trim June and July
+	if len(month) > 4 {
+		month = m.String()[:3]
+	}
+	return month
 }
