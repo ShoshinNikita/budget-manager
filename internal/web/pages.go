@@ -41,7 +41,8 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	months, err := s.db.GetMonths(context.Background(), year)
 	// Render the page even theare no months for passed year
 	if err != nil && err != db.ErrYearNotExist {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -110,7 +111,8 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 
 	monthID, err := s.db.GetMonthID(context.Background(), year, int(monthNumber))
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
