@@ -2,6 +2,7 @@
 package templates
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	htmlTemplate "html/template"
@@ -50,9 +51,19 @@ func (t *TemplateStore) Get(path string) *htmlTemplate.Template {
 }
 
 // Execute executes template with passed path. It panics, if template doesn't exist
+// Execute checks for errors before writing into w: it executes template into
+// temporary buffer and copies data if everything is fine
 func (t *TemplateStore) Execute(path string, w io.Writer, data interface{}) error {
 	tpl := t.getFunc(path)
-	return tpl.tpl.ExecuteTemplate(w, tpl.Name, data)
+
+	buff := bytes.NewBuffer(nil)
+	err := tpl.tpl.ExecuteTemplate(buff, tpl.Name, data)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(w, buff)
+	return err
 }
 
 // -------------------------------------------------

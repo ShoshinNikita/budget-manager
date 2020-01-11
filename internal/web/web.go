@@ -3,6 +3,8 @@ package web
 import (
 	"context"
 	"encoding"
+	htmlTemplate "html/template"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -69,11 +71,16 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 type Server struct {
 	log      *clog.Logger
 	db       *db.DB
-	tplStore *templates.TemplateStore
+	tplStore TemplateStore
 
 	server *http.Server
 
 	config Config
+}
+
+type TemplateStore interface {
+	Get(path string) *htmlTemplate.Template
+	Execute(path string, w io.Writer, data interface{}) error
 }
 
 func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
