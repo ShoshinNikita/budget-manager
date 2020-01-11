@@ -2,6 +2,9 @@ package logger
 
 import "github.com/ShoshinNikita/go-clog/v3"
 
+// {year}/{month}/{day} {hour}:{minute}:{second}
+const timeLayout = "2006/01/02 15:04:05"
+
 type Config struct {
 	// Mode is a mode of Logger. Valid options: prod, production, dev, develop.
 	// Default value is prod
@@ -23,13 +26,18 @@ func New(cnf Config, debug bool) *clog.Logger {
 		loggerConfig = clog.NewDevConfig()
 	}
 
-	// Use production mode by default
-	log := loggerConfig.SetLevel(logLevelFromString(cnf.Level)).Build()
+	// Set passed log level
+	loggerConfig.SetLevel(logLevelFromString(cnf.Level))
+
+	// Always use dev config in debug mode
 	if debug {
-		log = clog.NewDevConfig().SetLevel(clog.LevelDebug).Build()
+		loggerConfig = clog.NewDevConfig().SetLevel(clog.LevelDebug)
 	}
 
-	return log
+	// Set custom time layout
+	loggerConfig.SetTimeLayout(timeLayout)
+
+	return loggerConfig.Build()
 }
 
 func logLevelFromString(lvl string) clog.LogLevel {
