@@ -47,6 +47,21 @@ func (s Server) processError(w http.ResponseWriter, respMsg string, code int, in
 	json.NewEncoder(w).Encode(resp) // nolint:errcheck
 }
 
+// processErrorWithPage is similar to 'processError', but it shows error page instead of returning json
+func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code int, internalErr error) {
+	if internalErr != nil {
+		s.log.Errorf(formatMsg, getCallerFunc(2), respMsg, internalErr)
+	}
+
+	data := map[string]interface{}{
+		"Code":    code,
+		"Message": respMsg,
+	}
+	if err := s.tplStore.Execute(errorPageTemplatePath, w, data); err != nil {
+		s.processError(w, executeErrorMessage, http.StatusInternalServerError, err)
+	}
+}
+
 const prefixForTrim = "github.com/ShoshinNikita/budget-manager/"
 
 func getCallerFunc(skip int) string {
