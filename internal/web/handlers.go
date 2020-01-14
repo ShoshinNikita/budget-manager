@@ -47,7 +47,8 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	// Process
 	month, err := s.db.GetMonth(context.Background(), monthID)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -98,7 +99,8 @@ func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok 
 		context.Background(), *yearAndMonthReq.Year, int(*yearAndMonthReq.Month),
 	)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return 0, false
 	}
 
@@ -123,7 +125,8 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	// Process
 	day, err := s.db.GetDay(context.Background(), dayID)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -174,7 +177,8 @@ func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bo
 		context.Background(), *dateReq.Year, int(*dateReq.Month), *dateReq.Day,
 	)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return 0, false
 	}
 
@@ -209,7 +213,8 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddIncome(context.Background(), args)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -254,7 +259,8 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditIncome(context.Background(), args)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -287,7 +293,8 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveIncome(context.Background(), req.ID)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -331,7 +338,8 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddMonthlyPayment(context.Background(), args)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -377,7 +385,8 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditMonthlyPayment(context.Background(), args)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -410,7 +419,8 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveMonthlyPayment(context.Background(), req.ID)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -454,7 +464,8 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddSpend(context.Background(), args)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -500,7 +511,8 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditSpend(context.Background(), args)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -533,7 +545,8 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveSpend(context.Background(), req.ID)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -561,7 +574,8 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	// Process
 	types, err := s.db.GetSpendTypes(context.Background())
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -597,7 +611,8 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	// Process
 	id, err := s.db.AddSpendType(context.Background(), req.Name)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -633,7 +648,8 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.EditSpendType(context.Background(), req.ID, req.Name)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 
@@ -666,7 +682,8 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	// Process
 	err := s.db.RemoveSpendType(context.Background(), req.ID)
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processError(w, msg, code, err)
 		return
 	}
 

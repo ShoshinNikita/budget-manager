@@ -12,12 +12,11 @@ import (
 
 const formatMsg = "caller: '%s', msg: '%s', error: '%s'"
 
-func (s Server) processDBError(w http.ResponseWriter, err error) {
-	var (
-		code          = http.StatusInternalServerError
-		msg           = err.Error()
-		originalError = errors.GetOriginalError(err).Error()
-	)
+// parseDBError parses DB error and returns vars for passing into 'Server.processError' method
+func (s Server) parseDBError(err error) (msg string, code int, originalErr error) {
+	msg = err.Error()
+	code = http.StatusInternalServerError
+	originalErr = errors.GetOriginalError(err)
 
 	errType, ok := errors.GetErrorType(err)
 	if !ok {
@@ -25,18 +24,14 @@ func (s Server) processDBError(w http.ResponseWriter, err error) {
 		msg = errors.DefaultErrorMessage
 	}
 
-	switch errType {
-	case errors.UserError:
-		// Don't log user errors
+	if errType == errors.UserError {
 		code = http.StatusBadRequest
-	default:
-		s.log.Errorf(formatMsg, getCallerFunc(2), msg, originalError)
+		// 'originalErr' and 'msg' contain the same message. So, we can set 'originalErr' to nil
+		// to skip logging in 'processError' method
+		originalErr = nil
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	resp := models.Response{Success: false, Error: msg}
-	json.NewEncoder(w).Encode(resp) // nolint:errcheck
+	return msg, code, originalErr
 }
 
 // processError logs error and writes models.Response. If internalErr is nil,
@@ -50,6 +45,21 @@ func (s Server) processError(w http.ResponseWriter, respMsg string, code int, in
 	w.WriteHeader(code)
 	resp := models.Response{Success: false, Error: respMsg}
 	json.NewEncoder(w).Encode(resp) // nolint:errcheck
+}
+
+// processErrorWithPage is similar to 'processError', but it shows error page instead of returning json
+func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code int, internalErr error) {
+	if internalErr != nil {
+		s.log.Errorf(formatMsg, getCallerFunc(2), respMsg, internalErr)
+	}
+
+	data := map[string]interface{}{
+		"Code":    code,
+		"Message": respMsg,
+	}
+	if err := s.tplStore.Execute(errorPageTemplatePath, w, data); err != nil {
+		s.processError(w, executeErrorMessage, http.StatusInternalServerError, err)
+	}
 }
 
 const prefixForTrim = "github.com/ShoshinNikita/budget-manager/"

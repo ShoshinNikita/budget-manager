@@ -14,17 +14,23 @@ import (
 )
 
 const (
-	overviewTemplatePath = "./templates/overview.html"
-	yearTemplatePath     = "./templates/year.html"
-	monthTemplatePath    = "./templates/month.html"
+	overviewTemplatePath  = "./templates/overview.html"
+	yearTemplatePath      = "./templates/year.html"
+	monthTemplatePath     = "./templates/month.html"
+	errorPageTemplatePath = "./templates/error_page.html"
+)
+
+const (
+	executeErrorMessage     = "Can't execute template"
+	invalidURLMessagePrefix = "Invalid URL: "
+	dbErrorMessagePrefix    = "DB error: "
 )
 
 // GET /overview
 //
 func (s Server) overviewPage(w http.ResponseWriter, r *http.Request) {
 	if err := s.tplStore.Execute(overviewTemplatePath, w, nil); err != nil {
-		// TODO: use special 500 page
-		s.processError(w, "can't load template", http.StatusInternalServerError, err)
+		s.processErrorWithPage(w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
@@ -33,15 +39,15 @@ func (s Server) overviewPage(w http.ResponseWriter, r *http.Request) {
 func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	year, ok := getYear(r)
 	if !ok {
-		// TODO: use special 404 page
-		s.processError(w, "invalid year was passed", http.StatusBadRequest, nil)
+		s.processErrorWithPage(w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil)
 		return
 	}
 
 	months, err := s.db.GetMonths(context.Background(), year)
 	// Render the page even theare no months for passed year
 	if err != nil && err != db.ErrYearNotExist {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processErrorWithPage(w, dbErrorMessagePrefix+msg, code, err)
 		return
 	}
 
@@ -87,8 +93,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		"Result":       result,
 	}
 	if err := s.tplStore.Execute(yearTemplatePath, w, resp); err != nil {
-		// TODO: use special 500 page
-		s.processError(w, "can't load template", http.StatusInternalServerError, err)
+		s.processErrorWithPage(w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
@@ -97,33 +102,32 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	year, ok := getYear(r)
 	if !ok {
-		// TODO: use special 404 page
-		s.processError(w, "invalid year was passed", http.StatusBadRequest, nil)
+		s.processErrorWithPage(w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil)
 		return
 	}
 	monthNumber, ok := getMonth(r)
 	if !ok {
-		// TODO: use special 404 page
-		s.processError(w, "invalid month was passed", http.StatusBadRequest, nil)
+		s.processErrorWithPage(w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest, nil)
 		return
 	}
 
 	monthID, err := s.db.GetMonthID(context.Background(), year, int(monthNumber))
 	if err != nil {
-		s.processDBError(w, err)
+		msg, code, err := s.parseDBError(err)
+		s.processErrorWithPage(w, dbErrorMessagePrefix+msg, code, err)
 		return
 	}
 
 	// Process
 	month, err := s.db.GetMonth(context.Background(), monthID)
 	if err != nil {
-		s.processError(w, "can't select Month info", http.StatusInternalServerError, err)
+		s.processErrorWithPage(w, dbErrorMessagePrefix+"can't get Month info", http.StatusInternalServerError, err)
 		return
 	}
 
 	spendTypes, err := s.db.GetSpendTypes(context.Background())
 	if err != nil {
-		s.processError(w, "can't get Spend Types", http.StatusInternalServerError, err)
+		s.processErrorWithPage(w, dbErrorMessagePrefix+"can't get list of Spend Types", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -138,8 +142,7 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 		ToShortMonth: toShortMonth,
 	}
 	if err := s.tplStore.Execute(monthTemplatePath, w, resp); err != nil {
-		// TODO: use special 500 page
-		s.processError(w, "can't load template", http.StatusInternalServerError, err)
+		s.processErrorWithPage(w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 

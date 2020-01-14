@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Error | Budget Manager</title>
+
+	<link rel="stylesheet" href="/static/css/common.css">
+
+	<style>
+		#error {
+			margin: auto;
+			width: 750px;
+		}
+
+		#error__oops {
+			text-align: center;
+		}
+
+		#error__oops__icon {
+			margin-top: 50px;
+			pointer-events: none;
+		}
+
+		#error__oops__icon>svg {
+			height: 100px;
+			opacity: 0.8;
+			width: 100px;
+		}
+
+		#error__oops__message {
+			font-size: 45px;
+		}
+
+		#error__details {
+			color: #666666;
+			margin-top: 30px;
+		}
+
+		#error__details__code {
+			color: #666666;
+			font-size: 30px;
+			margin-bottom: 5px;
+			text-align: center;
+		}
+
+		#error__details__message {
+			border-left: 3px solid #66666630;
+			color: #666666;
+			margin: auto;
+			max-width: 70%;
+			padding: 5px 0 5px 10px;
+			width: max-content;
+		}
+
+		@media (max-width: 750px) {
+			#error {
+				width: 100%;
+			}
+
+			#error__oops__icon {
+				margin-top: 10px;
+			}
+
+			#error__oops__icon>svg {
+				height: 50px;
+				width: 50px;
+			}
+
+			#error__oops__message {
+				font-size: 30px;
+			}
+
+			#error__details {
+				margin-top: 15px;
+			}
+
+			#error__details__code {
+				font-size: 25px;
+			}
+
+			#error__details__message {
+				max-width: 90%;
+				padding: 5px 0 5px 10px;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div id="error">
+		<div id="error__oops">
+			<div id="error__oops__icon" class="feather-icon">
+				<svg>
+					<use xlink:href="/static/feather/feather-sprite.svg#alert-circle" />
+				</svg>
+			</div>
+			<div id="error__oops__message" class="noselect">Oops! Something went wrong</div>
+		</div>
+
+		<div id="error__details">
+			<div id="error__details__code" title="Error code">{{.Code}}</div>
+			<div id="error__details__message" title="Error message">{{.Message}}</div>
+		</div>
+	</div>
+</body>
+
+</html>
