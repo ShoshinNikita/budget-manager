@@ -38,7 +38,7 @@ func main() {
 type App struct {
 	config Config
 
-	db     *db.DB
+	db     Database
 	log    *clog.Logger
 	server *web.Server
 }
@@ -49,6 +49,13 @@ type Config struct {
 	Logger logger.Config
 	DB     db.Config
 	Server web.Config
+}
+
+type Database interface {
+	Prepare() error
+	Shutdown() error
+
+	web.Database
 }
 
 // NewApp returns a new instance of App

@@ -15,6 +15,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
@@ -70,7 +71,7 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 
 type Server struct {
 	log      *clog.Logger
-	db       *db.DB
+	db       Database
 	tplStore TemplateStore
 
 	server *http.Server
@@ -78,12 +79,44 @@ type Server struct {
 	config Config
 }
 
+type Database interface {
+	// Month
+	GetMonths(ctx context.Context, year int) ([]*models.Month, error)
+	GetMonth(ctx context.Context, id uint) (*models.Month, error)
+	GetMonthID(ctx context.Context, year, month int) (id uint, err error)
+
+	// Day
+	GetDay(ctx context.Context, id uint) (*models.Day, error)
+	GetDayIDByDate(ctx context.Context, year, month, day int) (id uint, err error)
+
+	// Income
+	AddIncome(ctx context.Context, args db.AddIncomeArgs) (id uint, err error)
+	EditIncome(ctx context.Context, args db.EditIncomeArgs) error
+	RemoveIncome(ctx context.Context, id uint) error
+
+	// Monthly Payment
+	AddMonthlyPayment(ctx context.Context, args db.AddMonthlyPaymentArgs) (id uint, err error)
+	EditMonthlyPayment(ctx context.Context, args db.EditMonthlyPaymentArgs) error
+	RemoveMonthlyPayment(ctx context.Context, id uint) error
+
+	// Spend
+	AddSpend(ctx context.Context, args db.AddSpendArgs) (id uint, err error)
+	EditSpend(ctx context.Context, args db.EditSpendArgs) error
+	RemoveSpend(ctx context.Context, id uint) error
+
+	// Spend Type
+	GetSpendTypes(ctx context.Context) ([]models.SpendType, error)
+	AddSpendType(ctx context.Context, name string) (id uint, err error)
+	EditSpendType(ctx context.Context, id uint, newName string) error
+	RemoveSpendType(ctx context.Context, id uint) error
+}
+
 type TemplateStore interface {
 	Get(path string) *htmlTemplate.Template
 	Execute(path string, w io.Writer, data interface{}) error
 }
 
-func NewServer(cnf Config, db *db.DB, log *clog.Logger, debug bool) *Server {
+func NewServer(cnf Config, db Database, log *clog.Logger, debug bool) *Server {
 	if debug {
 		// Load templates every request
 		cnf.CacheTemplates = false
