@@ -6,7 +6,6 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
@@ -42,7 +41,7 @@ func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, er
 }
 
 func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
-	in := &models.Income{
+	in := &Income{
 		MonthID: args.MonthID,
 
 		Title:  args.Title,
@@ -67,7 +66,7 @@ func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 		return ErrIncomeNotExist
 	}
 
-	in := &models.Income{ID: args.ID}
+	in := &Income{ID: args.ID}
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Select Income
@@ -103,7 +102,7 @@ func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 	return nil
 }
 
-func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
+func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 	if args.Title != nil {
 		in.Title = *args.Title
 	}
@@ -133,7 +132,7 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		monthID, err := func() (uint, error) {
-			in := &models.Income{ID: id}
+			in := &Income{ID: id}
 			err = tx.Model(in).Column("month_id").WherePK().Select()
 			if err != nil {
 				return 0, err
@@ -172,6 +171,6 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 }
 
 func (DB) removeIncome(tx *pg.Tx, id uint) error {
-	in := &models.Income{ID: id}
+	in := &Income{ID: id}
 	return tx.Delete(in)
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
@@ -50,7 +49,7 @@ func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err erro
 }
 
 func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
-	spend := &models.Spend{
+	spend := &Spend{
 		DayID:  args.DayID,
 		Title:  args.Title,
 		TypeID: args.TypeID,
@@ -75,7 +74,7 @@ func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
 		return ErrSpendNotExist
 	}
 
-	spend := &models.Spend{ID: args.ID}
+	spend := &Spend{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Select(spend)
 		if err != nil {
@@ -116,7 +115,7 @@ func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
 	return nil
 }
 
-func (DB) editSpend(tx *pg.Tx, spend *models.Spend, args EditSpendArgs) error {
+func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
 	if args.Title != nil {
 		spend.Title = *args.Title
 	}
@@ -142,7 +141,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		return ErrSpendNotExist
 	}
 
-	spend := &models.Spend{ID: id}
+	spend := &Spend{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Select day id
 		err = tx.Model(spend).Column("day_id").WherePK().Select()

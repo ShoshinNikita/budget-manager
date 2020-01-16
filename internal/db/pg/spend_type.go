@@ -6,13 +6,12 @@ import (
 	"github.com/go-pg/pg/v9"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(_ context.Context, id uint) (*models.SpendType, error) {
-	spendType := &models.SpendType{ID: id}
+func (db DB) GetSpendType(_ context.Context, id uint) (*SpendType, error) {
+	spendType := &SpendType{ID: id}
 	err := db.db.Select(spendType)
 	if err != nil {
 		if err == pg.ErrNoRows {
@@ -33,8 +32,8 @@ func (db DB) GetSpendType(_ context.Context, id uint) (*models.SpendType, error)
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(_ context.Context) ([]models.SpendType, error) {
-	spendTypes := []models.SpendType{}
+func (db DB) GetSpendTypes(_ context.Context) ([]SpendType, error) {
+	spendTypes := []SpendType{}
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
 		err = errors.Wrap(err,
@@ -49,7 +48,7 @@ func (db DB) GetSpendTypes(_ context.Context) ([]models.SpendType, error) {
 
 // AddSpendType adds new Spend Type
 func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err error) {
-	spendType := &models.SpendType{Name: name}
+	spendType := &SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
 			return errors.Wrap(err, errors.WithMsg("can't add a new Spend Type"))
@@ -78,7 +77,7 @@ func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
 		return ErrSpendTypeNotExist
 	}
 
-	spendType := &models.SpendType{ID: id, Name: newName}
+	spendType := &SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
 			return errors.Wrap(err, errors.WithMsg("can't edit the Spend Type"))
@@ -107,7 +106,7 @@ func (db DB) RemoveSpendType(_ context.Context, id uint) error {
 		return ErrSpendTypeNotExist
 	}
 
-	spendType := &models.SpendType{ID: id}
+	spendType := &SpendType{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Delete(spendType)
 		if err != nil {
@@ -118,7 +117,7 @@ func (db DB) RemoveSpendType(_ context.Context, id uint) error {
 
 		// Reset Type IDs
 
-		_, err = tx.Model((*models.MonthlyPayment)(nil)).
+		_, err = tx.Model((*MonthlyPayment)(nil)).
 			Set("type_id = 0").
 			Where("type_id = ?", id).
 			Update()
@@ -128,7 +127,7 @@ func (db DB) RemoveSpendType(_ context.Context, id uint) error {
 				errors.WithType(errors.AppError))
 		}
 
-		_, err = tx.Model((*models.Spend)(nil)).
+		_, err = tx.Model((*Spend)(nil)).
 			Set("type_id = 0").
 			Where("type_id = ?", id).
 			Update()

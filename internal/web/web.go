@@ -15,7 +15,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
@@ -81,12 +80,12 @@ type Server struct {
 
 type Database interface {
 	// Month
-	GetMonths(ctx context.Context, year int) ([]*models.Month, error)
-	GetMonth(ctx context.Context, id uint) (*models.Month, error)
+	GetMonths(ctx context.Context, year int) ([]*db.Month, error)
+	GetMonth(ctx context.Context, id uint) (*db.Month, error)
 	GetMonthID(ctx context.Context, year, month int) (id uint, err error)
 
 	// Day
-	GetDay(ctx context.Context, id uint) (*models.Day, error)
+	GetDay(ctx context.Context, id uint) (*db.Day, error)
 	GetDayIDByDate(ctx context.Context, year, month, day int) (id uint, err error)
 
 	// Income
@@ -105,7 +104,7 @@ type Database interface {
 	RemoveSpend(ctx context.Context, id uint) error
 
 	// Spend Type
-	GetSpendTypes(ctx context.Context) ([]models.SpendType, error)
+	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
 	AddSpendType(ctx context.Context, name string) (id uint, err error)
 	EditSpendType(ctx context.Context, id uint, newName string) error
 	RemoveSpendType(ctx context.Context, id uint) error

@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db/models"
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
 func TestAddSpendType(t *testing.T) {

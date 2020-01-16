@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
 const (
@@ -76,13 +76,13 @@ func (db *DB) Prepare() error {
 	err := createTables(
 		db.db,
 
-		&models.Month{}, &orm.CreateTableOptions{IfNotExists: true},
-		&models.Income{}, &orm.CreateTableOptions{IfNotExists: true},
-		&models.MonthlyPayment{}, &orm.CreateTableOptions{IfNotExists: true},
+		&Month{}, &orm.CreateTableOptions{IfNotExists: true},
+		&Income{}, &orm.CreateTableOptions{IfNotExists: true},
+		&MonthlyPayment{}, &orm.CreateTableOptions{IfNotExists: true},
 
-		&models.Day{}, &orm.CreateTableOptions{IfNotExists: true},
-		&models.Spend{}, &orm.CreateTableOptions{IfNotExists: true},
-		&models.SpendType{}, &orm.CreateTableOptions{IfNotExists: true},
+		&Day{}, &orm.CreateTableOptions{IfNotExists: true},
+		&Spend{}, &orm.CreateTableOptions{IfNotExists: true},
+		&SpendType{}, &orm.CreateTableOptions{IfNotExists: true},
 	)
 
 	err = errors.Wrap(err, "couldn't create tables")
@@ -118,13 +118,13 @@ func (db *DB) Prepare() error {
 // DropDB drops all tables and relations. USE ONLY IN TESTS!
 func (db *DB) DropDB() error {
 	return dropTables(db.db,
-		&models.Month{}, &orm.DropTableOptions{IfExists: true},
-		&models.Income{}, &orm.DropTableOptions{IfExists: true},
-		&models.MonthlyPayment{}, &orm.DropTableOptions{IfExists: true},
+		&Month{}, &orm.DropTableOptions{IfExists: true},
+		&Income{}, &orm.DropTableOptions{IfExists: true},
+		&MonthlyPayment{}, &orm.DropTableOptions{IfExists: true},
 
-		&models.Day{}, &orm.DropTableOptions{IfExists: true},
-		&models.Spend{}, &orm.DropTableOptions{IfExists: true},
-		&models.SpendType{}, &orm.DropTableOptions{IfExists: true},
+		&Day{}, &orm.DropTableOptions{IfExists: true},
+		&Spend{}, &orm.DropTableOptions{IfExists: true},
+		&SpendType{}, &orm.DropTableOptions{IfExists: true},
 	)
 }
 
@@ -132,7 +132,7 @@ func (db *DB) initCurrentMonth() error {
 	now := time.Now()
 	year, month, _ := now.Date()
 
-	err := db.db.Model(&models.Month{}).
+	err := db.db.Model(&Month{}).
 		Column("id").
 		Where("year = ? AND month = ?", year, month).
 		Select()
@@ -143,7 +143,7 @@ func (db *DB) initCurrentMonth() error {
 		// Add current month
 		db.log.Debug("init the current month")
 
-		currentMonth := &models.Month{Year: year, Month: month}
+		currentMonth := &Month{Year: year, Month: month}
 		err = db.db.Insert(currentMonth)
 		if err != nil {
 			err = errors.Wrap(err, "can't init current month")
@@ -156,9 +156,9 @@ func (db *DB) initCurrentMonth() error {
 
 		// Add days for the current month
 		daysNumber := daysInMonth(now)
-		days := make([]*models.Day, daysNumber)
+		days := make([]*Day, daysNumber)
 		for i := range days {
-			days[i] = &models.Day{MonthID: monthID, Day: i + 1, Saldo: 0}
+			days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
 		}
 
 		err = db.db.Insert(&days)

@@ -8,7 +8,6 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
@@ -17,7 +16,7 @@ import (
 // Month
 // -----------------------------------------------------------------------------
 
-func (db DB) GetMonth(_ context.Context, id uint) (m *models.Month, err error) {
+func (db DB) GetMonth(_ context.Context, id uint) (m *Month, err error) {
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
 		m, err = db.getMonth(tx, id)
 		return err
@@ -35,7 +34,7 @@ func (db DB) GetMonth(_ context.Context, id uint) (m *models.Month, err error) {
 }
 
 func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
-	m := &models.Month{}
+	m := &Month{}
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
@@ -51,7 +50,7 @@ func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
 }
 
 func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, error) {
-	day := &models.Day{ID: dayID}
+	day := &Day{ID: dayID}
 	err := tx.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
@@ -68,8 +67,8 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(_ context.Context, year int) ([]*models.Month, error) {
-	months := []*models.Month{}
+func (db DB) GetMonths(_ context.Context, year int) ([]*Month, error) {
+	months := []*Month{}
 	err := db.db.Model(&months).
 		Where("year = ?", year).
 		Order("month ASC").
@@ -93,8 +92,8 @@ func (db DB) GetMonths(_ context.Context, year int) ([]*models.Month, error) {
 // Day
 // -----------------------------------------------------------------------------
 
-func (db DB) GetDay(_ context.Context, id uint) (*models.Day, error) {
-	d := &models.Day{ID: id}
+func (db DB) GetDay(_ context.Context, id uint) (*Day, error) {
+	d := &Day{ID: id}
 	err := db.db.Model(d).
 		Relation("Spends", orderByID).
 		Relation("Spends.Type").
@@ -122,7 +121,7 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 			errors.WithType(errors.AppError))
 	}
 
-	d := &models.Day{}
+	d := &Day{}
 	err = db.db.Model(d).
 		Column("id").
 		Where("month_id = ? AND day = ?", monthID, day).
@@ -228,8 +227,8 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	return nil
 }
 
-func (DB) getMonth(tx *pg.Tx, id uint) (*models.Month, error) {
-	m := &models.Month{ID: id}
+func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
+	m := &Month{ID: id}
 	err := tx.Model(m).
 		Relation("Incomes", orderByID).
 		Relation("MonthlyPayments", orderByID).
@@ -252,37 +251,37 @@ func orderByID(q *orm.Query) (*orm.Query, error) {
 
 // checkMonth checks if Month with passed id exists
 func (db DB) checkMonth(id uint) (ok bool) {
-	m := &models.Month{ID: id}
+	m := &Month{ID: id}
 	return db.checkModel(m)
 }
 
 // checkDay checks if Dat with passed id exists
 func (db DB) checkDay(id uint) (ok bool) {
-	d := &models.Day{ID: id}
+	d := &Day{ID: id}
 	return db.checkModel(d)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkIncome(id uint) (ok bool) {
-	st := &models.Income{ID: id}
+	st := &Income{ID: id}
 	return db.checkModel(st)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkMonthlyPayment(id uint) (ok bool) {
-	st := &models.MonthlyPayment{ID: id}
+	st := &MonthlyPayment{ID: id}
 	return db.checkModel(st)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkSpend(id uint) (ok bool) {
-	st := &models.Spend{ID: id}
+	st := &Spend{ID: id}
 	return db.checkModel(st)
 }
 
 // checkSpendType checks if Spend Type with passed id exists
 func (db DB) checkSpendType(id uint) (ok bool) {
-	st := &models.SpendType{ID: id}
+	st := &SpendType{ID: id}
 	return db.checkModel(st)
 }
 
