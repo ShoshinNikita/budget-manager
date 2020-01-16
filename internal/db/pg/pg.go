@@ -1,3 +1,4 @@
+// Package pg provides a PostgreSQL implementation for DB
 package pg
 
 import (
