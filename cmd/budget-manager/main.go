@@ -47,7 +47,10 @@ type Config struct {
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
 	Logger logger.Config
-	DB     pg.Config
+
+	DBType     string `env:"DB_TYPE" envDefault:"postgres"`
+	PostgresDB pg.Config
+
 	Server web.Config
 }
 
@@ -100,11 +103,17 @@ func (app *App) prepareDB() (err error) {
 	// Connect
 	app.log.Debug("connect to the db...")
 
-	// TODO: add db type
-	app.db, err = pg.NewDB(app.config.DB, app.log.WithPrefix("[database]"))
-	if err != nil {
-		return errors.Wrap(err, "couldn't connect to the db")
+	switch app.config.DBType {
+	case "postgres", "postgresql":
+		app.log.Debug("db type is PostgreSQL")
+		app.db, err = pg.NewDB(app.config.PostgresDB, app.log.WithPrefix("[database]"))
+	default:
+		err = errors.New("unsupported DB type")
 	}
+	if err != nil {
+		return errors.Wrap(err, "couldn't create DB connection")
+	}
+
 	app.log.Debug("connection is ready")
 
 	// Prepare the db

@@ -18,6 +18,7 @@ func TestConfig(t *testing.T) {
 		{"DEBUG", "true"},
 		{"LOGGER_MODE", "develop"},
 		{"LOGGER_LEVEL", "fatal"},
+		{"DB_TYPE", "mongodb"},
 		{"DB_HOST", "example.com"},
 		{"DB_PORT", "8888"},
 		{"DB_USER", "user"},
@@ -36,7 +37,8 @@ func TestConfig(t *testing.T) {
 			Level: "fatal",
 			Mode:  "develop",
 		},
-		DB: pg.Config{
+		DBType: "mongodb",
+		PostgresDB: pg.Config{
 			Host:     "example.com",
 			Port:     8888,
 			User:     "user",

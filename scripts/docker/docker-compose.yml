@@ -8,6 +8,7 @@ services:
     container_name: budget-manager
     environment:
       DEBUG: "true"
+      DB_TYPE: postgres
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: postgres
