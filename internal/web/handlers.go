@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
