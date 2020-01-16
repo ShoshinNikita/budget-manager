@@ -47,7 +47,7 @@ type Config struct {
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
 	Logger logger.Config
-	DB     db.Config
+	DB     pg.Config
 	Server web.Config
 }
 
@@ -99,7 +99,9 @@ func (app *App) prepareLogger() {
 func (app *App) prepareDB() (err error) {
 	// Connect
 	app.log.Debug("connect to the db...")
-	app.db, err = db.NewDB(app.config.DB, app.log.WithPrefix("[database]"))
+
+	// TODO: add db type
+	app.db, err = pg.NewDB(app.config.DB, app.log.WithPrefix("[database]"))
 	if err != nil {
 		return errors.Wrap(err, "couldn't connect to the db")
 	}

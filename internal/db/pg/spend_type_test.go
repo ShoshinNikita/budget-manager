@@ -1,6 +1,6 @@
 // +build integration
 
-package db
+package pg
 
 import (
 	"context"

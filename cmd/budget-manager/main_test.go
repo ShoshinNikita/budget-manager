@@ -36,7 +36,7 @@ func TestConfig(t *testing.T) {
 			Level: "fatal",
 			Mode:  "develop",
 		},
-		DB: db.Config{
+		DB: pg.Config{
 			Host:     "example.com",
 			Port:     8888,
 			User:     "user",
