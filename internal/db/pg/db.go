@@ -19,11 +19,11 @@ const (
 )
 
 type Config struct {
-	Host     string `env:"DB_HOST" envDefault:"localhost"`
-	Port     int    `env:"DB_PORT" envDefault:"5432"`
-	User     string `env:"DB_USER" envDefault:"postgres"`
-	Password string `env:"DB_PASSWORD"`
-	Database string `env:"DB_DATABASE" envDefault:"postgres"`
+	Host     string `env:"DB_PG_HOST" envDefault:"localhost"`
+	Port     int    `env:"DB_PG_PORT" envDefault:"5432"`
+	User     string `env:"DB_PG_USER" envDefault:"postgres"`
+	Password string `env:"DB_PG_PASSWORD"`
+	Database string `env:"DB_PG_DATABASE" envDefault:"postgres"`
 }
 
 type DB struct {

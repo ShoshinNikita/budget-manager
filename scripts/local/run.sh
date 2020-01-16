@@ -2,10 +2,10 @@
 
 export DEBUG="true"
 export DB_TYPE="postgres"
-export DB_HOST="localhost"
-export DB_PORT="5432"
-export DB_USER="postgres"
-export DB_DATABASE="postgres"
+export DB_PG_HOST="localhost"
+export DB_PG_PORT="5432"
+export DB_PG_USER="postgres"
+export DB_PG_DATABASE="postgres"
 export SERVER_PORT="8080"
 export SERVER_SKIP_AUTH="true"
 # user:qwerty,admin:admin
