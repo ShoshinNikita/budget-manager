@@ -10,6 +10,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
 
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 	. "github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )

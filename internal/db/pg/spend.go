@@ -5,18 +5,10 @@ import (
 
 	"github.com/go-pg/pg/v9"
 
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
-
-type AddSpendArgs struct {
-	DayID  uint
-	Title  string
-	TypeID uint   // optional
-	Notes  string // optional
-	Cost   money.Money
-}
 
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err error) {
@@ -75,14 +67,6 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 	}
 
 	return spend.ID, nil
-}
-
-type EditSpendArgs struct {
-	ID     uint
-	Title  *string
-	TypeID *uint
-	Notes  *string
-	Cost   *money.Money
 }
 
 // EditSpend edits existeng Spend

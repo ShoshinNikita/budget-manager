@@ -5,18 +5,10 @@ import (
 
 	"github.com/go-pg/pg/v9"
 
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
-
-type AddMonthlyPaymentArgs struct {
-	MonthID uint
-	Title   string
-	TypeID  uint
-	Notes   string
-	Cost    money.Money
-}
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
@@ -67,15 +59,6 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 	}
 
 	return mp.ID, nil
-}
-
-type EditMonthlyPaymentArgs struct {
-	ID uint
-
-	Title  *string
-	TypeID *uint
-	Notes  *string
-	Cost   *money.Money
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment

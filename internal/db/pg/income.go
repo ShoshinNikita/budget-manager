@@ -5,17 +5,10 @@ import (
 
 	"github.com/go-pg/pg/v9"
 
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
-
-type AddIncomeArgs struct {
-	MonthID uint
-	Title   string
-	Notes   string
-	Income  money.Money
-}
 
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, err error) {
@@ -66,13 +59,6 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 	}
 
 	return in.ID, nil
-}
-
-type EditIncomeArgs struct {
-	ID     uint
-	Title  *string
-	Notes  *string
-	Income *money.Money
 }
 
 // EditIncome edits income with passed id, nil args are ignored
