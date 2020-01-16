@@ -7,44 +7,11 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 
+	. "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
-
-// Errors
-
-var (
-	ErrYearNotExist = errors.New("there're no records for passed year",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-	ErrMonthNotExist = errors.New("Month with passed id doesn't exist",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-	ErrDayNotExist = errors.New("Day with passed id doesn't exist",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-	ErrIncomeNotExist = errors.New("Income with passed id doesn't exist",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-	ErrMonthlyPaymentNotExist = errors.New("Monthly Payment with passed id doesn't exist",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-	ErrSpendNotExist = errors.New("Spend with passed id doesn't exist",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-	ErrSpendTypeNotExist = errors.New("Spend Type with passed id doesn't exist",
-		errors.WithOriginalError(), errors.WithType(errors.UserError),
-	)
-)
-
-// Common errors
-
-func errRecomputeBudget(err error) error {
-	return errors.Wrap(err,
-		errors.WithMsg("can't recompute month budget"),
-		errors.WithType(errors.AppError))
-}
 
 // -----------------------------------------------------------------------------
 // Month
@@ -326,4 +293,12 @@ func (db DB) checkModel(model interface{}) (ok bool) {
 		return false
 	}
 	return true
+}
+
+// Other
+
+func errRecomputeBudget(err error) error {
+	return errors.Wrap(err,
+		errors.WithMsg("can't recompute month budget"),
+		errors.WithType(errors.AppError))
 }
