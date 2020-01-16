@@ -14,8 +14,8 @@ import (
 	"github.com/ShoshinNikita/go-clog/v3"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
-	dbModels "github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
 
@@ -1055,7 +1055,7 @@ func TestHandlers_SpendType(t *testing.T) {
 	}
 
 	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
-		want := []dbModels.SpendType{
+		want := []db.SpendType{
 			{ID: 1, Name: "first type"},
 			{ID: 2, Name: "second type"},
 		}
@@ -1151,7 +1151,7 @@ func TestHandlers_SpendType(t *testing.T) {
 	}
 
 	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
-		want := []dbModels.SpendType{
+		want := []db.SpendType{
 			{ID: 1, Name: "updated name"},
 			{ID: 2, Name: "second type"},
 		}
@@ -1293,10 +1293,10 @@ func TestMiddlewares_Auth(t *testing.T) {
 	log := clog.NewDevLogger()
 
 	// DB
-	dbConfig := db.Config{
+	dbConfig := pg.Config{
 		Host: dbHost, Port: dbPort, User: dbUser, Password: dbPassword, Database: dbDatabase,
 	}
-	db, err := db.NewDB(dbConfig, log)
+	db, err := pg.NewDB(dbConfig, log)
 	globalRequire.Nil(err)
 	err = db.DropDB()
 	globalRequire.Nil(err)
@@ -1390,13 +1390,13 @@ func initServer(require *require.Assertions) *Server {
 	log := clog.NewDevLogger()
 
 	// DB
-	dbConfig := db.Config{
+	dbConfig := pg.Config{
 		Host:     dbHost,
 		Port:     dbPort,
 		User:     dbUser,
 		Database: dbDatabase,
 	}
-	db, err := db.NewDB(dbConfig, log)
+	db, err := pg.NewDB(dbConfig, log)
 	require.Nil(err)
 	err = db.DropDB()
 	require.Nil(err)
@@ -1412,10 +1412,10 @@ func initServer(require *require.Assertions) *Server {
 }
 
 func cleanUp(require *require.Assertions, server *Server) {
-	err := server.db.DropDB()
+	err := server.db.(*pg.DB).DropDB()
 	require.Nil(err)
 
-	err = server.db.Shutdown()
+	err = server.db.(*pg.DB).Shutdown()
 	require.Nil(err)
 
 	// There's nothing to shutdown
