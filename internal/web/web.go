@@ -146,6 +146,7 @@ func (s *Server) Prepare() {
 	} else {
 		s.log.Warn("auth is disabled")
 	}
+	router.Use(s.requestIDMeddleware)
 
 	// Add API routes
 	s.log.Debug("add routes")

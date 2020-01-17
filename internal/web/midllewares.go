@@ -7,6 +7,8 @@ import (
 
 	auth "github.com/abbot/go-http-auth"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // basicAuthMiddleware checks whether user is authorized
@@ -47,6 +49,23 @@ func cacheMiddleware(h http.Handler, maxAge time.Duration) http.Handler {
 
 		w.Header().Set("Expires", expTime.Format(http.TimeFormat))
 		w.Header().Set("Cache-Control", "private, "+maxAgeString)
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+const requestIDHeader = "X-Request-ID"
+
+// requestIDMeddleware generates a new request id and inserts it into the request context
+func (Server) requestIDMeddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqID := request_id.New()
+		if headerValue := r.Header.Get(requestIDHeader); headerValue != "" {
+			reqID = request_id.RequestID(headerValue)
+		}
+
+		ctx := request_id.ToContext(r.Context(), reqID)
+		r = r.WithContext(ctx)
 
 		h.ServeHTTP(w, r)
 	})
