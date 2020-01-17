@@ -1,7 +1,6 @@
 package web
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 	"time"
@@ -42,7 +41,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	months, err := s.db.GetMonths(context.Background(), year)
+	months, err := s.db.GetMonths(r.Context(), year)
 	// Render the page even theare no months for passed year
 	if err != nil && err != db.ErrYearNotExist {
 		msg, code, err := s.parseDBError(err)
@@ -116,7 +115,7 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	monthID, err := s.db.GetMonthID(context.Background(), year, int(monthNumber))
+	monthID, err := s.db.GetMonthID(r.Context(), year, int(monthNumber))
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
 		s.processErrorWithPage(w, dbErrorMessagePrefix+msg, code, err)
@@ -124,13 +123,13 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process
-	month, err := s.db.GetMonth(context.Background(), monthID)
+	month, err := s.db.GetMonth(r.Context(), monthID)
 	if err != nil {
 		s.processErrorWithPage(w, dbErrorMessagePrefix+"can't get Month info", http.StatusInternalServerError, err)
 		return
 	}
 
-	spendTypes, err := s.db.GetSpendTypes(context.Background())
+	spendTypes, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
 		s.processErrorWithPage(w, dbErrorMessagePrefix+"can't get list of Spend Types", http.StatusInternalServerError, err)
 		return
