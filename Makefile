@@ -1,8 +1,22 @@
 DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 
+run: run-local
+
+# Build
+
+build:
+	go build -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
+
+build-docker:
+	docker-compose -f ${DOCKER_COMPOSE} build
+
 # Run
 
-run: run-local
+run-local: stop
+	# Run Postgres
+	./scripts/local/postgres.sh
+	# Run Budget Manager
+	./scripts/local/run.sh
 
 run-docker: stop
 	docker-compose -f ${DOCKER_COMPOSE} up \
@@ -11,22 +25,16 @@ run-docker: stop
 		--renew-anon-volumes \
 		--exit-code-from budget-manager
 
-run-local: stop
-	# Run Postgres
-	./scripts/local/postgres.sh
-	# Run Budget Manager
-	./scripts/local/run.sh
-
 # Clear
 
 stop: stop-local stop-docker
 
+stop-local:
+	docker stop budget-manager_postgres || true
+
 stop-docker:
 	# Stop and remove containers and volumes
 	docker-compose -f ${DOCKER_COMPOSE} down -v || true
-
-stop-local:
-	docker stop budget-manager_postgres || true
 
 # Tests
 
@@ -50,9 +58,6 @@ test-integ: stop
 	docker stop budget-manager_postgres
 
 # Other
-
-build:
-	go build -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
