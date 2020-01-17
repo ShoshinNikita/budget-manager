@@ -1,9 +1,18 @@
-FROM golang:1.13.5-alpine3.10 as builder
+# Global workdir variable
+ARG WORKDIR=/go/src/github.com/ShoshinNikita/budget-manager
+
+
+#
+# Build a binary file
+#
+
+FROM golang:1.13.5-alpine3.10 as backend-builder
+ARG WORKDIR
 
 ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 
-WORKDIR /go/src/github.com/ShoshinNikita/budget-manager
+WORKDIR ${WORKDIR}
 
 # Copy dependencies (for better caching)
 COPY vendor ./vendor
@@ -14,10 +23,12 @@ COPY go.sum .
 COPY cmd ./cmd
 COPY internal ./internal
 
+# Build
 RUN go build -mod vendor -o ./bin/budget-manager ./cmd/budget-manager/main.go
 
 
 FROM alpine:3.9
+ARG WORKDIR
 
 WORKDIR /srv
 
@@ -26,7 +37,7 @@ COPY static ./static
 # Copy 'templates' directory
 COPY templates ./templates
 # Copy binaries
-COPY --from=builder /go/src/github.com/ShoshinNikita/budget-manager/bin .
+COPY --from=backend-builder ${WORKDIR}/bin .
 
 EXPOSE 8080
 
