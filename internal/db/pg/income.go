@@ -1,21 +1,13 @@
-package db
+package pg
 
 import (
 	"context"
 
 	"github.com/go-pg/pg/v9"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
+	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
-
-type AddIncomeArgs struct {
-	MonthID uint
-	Title   string
-	Notes   string
-	Income  money.Money
-}
 
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, err error) {
@@ -49,7 +41,7 @@ func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, er
 }
 
 func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
-	in := &models.Income{
+	in := &Income{
 		MonthID: args.MonthID,
 
 		Title:  args.Title,
@@ -68,20 +60,13 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 	return in.ID, nil
 }
 
-type EditIncomeArgs struct {
-	ID     uint
-	Title  *string
-	Notes  *string
-	Income *money.Money
-}
-
 // EditIncome edits income with passed id, nil args are ignored
 func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 	if !db.checkIncome(args.ID) {
 		return ErrIncomeNotExist
 	}
 
-	in := &models.Income{ID: args.ID}
+	in := &Income{ID: args.ID}
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Select Income
@@ -117,7 +102,7 @@ func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 	return nil
 }
 
-func (DB) editIncome(tx *pg.Tx, in *models.Income, args EditIncomeArgs) error {
+func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 	if args.Title != nil {
 		in.Title = *args.Title
 	}
@@ -147,7 +132,7 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		monthID, err := func() (uint, error) {
-			in := &models.Income{ID: id}
+			in := &Income{ID: id}
 			err = tx.Model(in).Column("month_id").WherePK().Select()
 			if err != nil {
 				return 0, err
@@ -186,6 +171,6 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 }
 
 func (DB) removeIncome(tx *pg.Tx, id uint) error {
-	in := &models.Income{ID: id}
+	in := &Income{ID: id}
 	return tx.Delete(in)
 }

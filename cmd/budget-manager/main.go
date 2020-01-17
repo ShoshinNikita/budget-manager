@@ -10,7 +10,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	"github.com/pkg/errors"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
@@ -38,7 +38,7 @@ func main() {
 type App struct {
 	config Config
 
-	db     *db.DB
+	db     Database
 	log    *clog.Logger
 	server *web.Server
 }
@@ -47,8 +47,18 @@ type Config struct {
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
 	Logger logger.Config
-	DB     db.Config
+
+	DBType     string `env:"DB_TYPE" envDefault:"postgres"`
+	PostgresDB pg.Config
+
 	Server web.Config
+}
+
+type Database interface {
+	Prepare() error
+	Shutdown() error
+
+	web.Database
 }
 
 // NewApp returns a new instance of App
@@ -92,10 +102,18 @@ func (app *App) prepareLogger() {
 func (app *App) prepareDB() (err error) {
 	// Connect
 	app.log.Debug("connect to the db...")
-	app.db, err = db.NewDB(app.config.DB, app.log.WithPrefix("[database]"))
-	if err != nil {
-		return errors.Wrap(err, "couldn't connect to the db")
+
+	switch app.config.DBType {
+	case "postgres", "postgresql":
+		app.log.Debug("db type is PostgreSQL")
+		app.db, err = pg.NewDB(app.config.PostgresDB, app.log.WithPrefix("[database]"))
+	default:
+		err = errors.New("unsupported DB type")
 	}
+	if err != nil {
+		return errors.Wrap(err, "couldn't create DB connection")
+	}
+
 	app.log.Debug("connection is ready")
 
 	// Prepare the db

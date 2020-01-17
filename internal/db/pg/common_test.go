@@ -1,6 +1,6 @@
 // +build integration
 
-package db
+package pg
 
 import (
 	clog "github.com/ShoshinNikita/go-clog/v3"

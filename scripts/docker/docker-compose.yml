@@ -8,10 +8,11 @@ services:
     container_name: budget-manager
     environment:
       DEBUG: "true"
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_DATABASE: postgres
+      DB_TYPE: postgres
+      DB_PG_HOST: postgres
+      DB_PG_PORT: 5432
+      DB_PG_USER: postgres
+      DB_PG_DATABASE: postgres
       SERVER_PORT: 8080
       SERVER_SKIP_AUTH: "true"
     ports:

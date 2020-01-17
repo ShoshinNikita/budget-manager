@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -53,9 +52,9 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 
 	// Display all months. Months without data in DB have zero id
 
-	allMonths := make([]*models.Month, 12)
+	allMonths := make([]*db.Month, 12)
 	for month := time.January; month <= time.December; month++ {
-		allMonths[month-1] = &models.Month{
+		allMonths[month-1] = &db.Month{
 			ID:    0,
 			Year:  year,
 			Month: month,
@@ -132,9 +131,9 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := struct {
-		*models.Month
+		*db.Month
 
-		SpendTypes   []models.SpendType
+		SpendTypes   []db.SpendType
 		ToShortMonth func(time.Month) string
 	}{
 		Month:        month,

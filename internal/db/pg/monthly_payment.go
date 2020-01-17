@@ -1,22 +1,13 @@
-package db
+package pg
 
 import (
 	"context"
 
 	"github.com/go-pg/pg/v9"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db/models"
+	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
-
-type AddMonthlyPaymentArgs struct {
-	MonthID uint
-	Title   string
-	TypeID  uint
-	Notes   string
-	Cost    money.Money
-}
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
@@ -50,7 +41,7 @@ func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (i
 }
 
 func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err error) {
-	mp := &models.MonthlyPayment{
+	mp := &MonthlyPayment{
 		MonthID: args.MonthID,
 		Title:   args.Title,
 		Notes:   args.Notes,
@@ -69,22 +60,13 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 	return mp.ID, nil
 }
 
-type EditMonthlyPaymentArgs struct {
-	ID uint
-
-	Title  *string
-	TypeID *uint
-	Notes  *string
-	Cost   *money.Money
-}
-
 // EditMonthlyPayment modifies existing Monthly Payment
 func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(args.ID) {
 		return ErrMonthlyPaymentNotExist
 	}
 
-	mp := &models.MonthlyPayment{ID: args.ID}
+	mp := &MonthlyPayment{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Select(mp)
 		if err != nil {
@@ -119,7 +101,7 @@ func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) 
 	return nil
 }
 
-func (DB) editMonthlyPayment(tx *pg.Tx, mp *models.MonthlyPayment, args EditMonthlyPaymentArgs) error {
+func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaymentArgs) error {
 	if args.Title != nil {
 		mp.Title = *args.Title
 	}
@@ -146,7 +128,7 @@ func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 		return ErrMonthlyPaymentNotExist
 	}
 
-	mp := &models.MonthlyPayment{ID: id}
+	mp := &MonthlyPayment{ID: id}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		// Remove Monthly Payment
 		err = tx.Model(mp).Column("month_id").WherePK().Select()
