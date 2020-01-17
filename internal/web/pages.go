@@ -84,12 +84,18 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	// Use Add because 'annualSpend' is negative
 	result := annualIncome.Add(annualSpend)
 
-	resp := map[string]interface{}{
-		"Year":         year,
-		"Months":       allMonths,
-		"AnnualIncome": annualIncome,
-		"AnnualSpend":  annualSpend,
-		"Result":       result,
+	resp := struct {
+		Year         int
+		Months       []*models.Month
+		AnnualIncome money.Money
+		AnnualSpend  money.Money
+		Result       money.Money
+	}{
+		Year:         year,
+		Months:       allMonths,
+		AnnualIncome: annualIncome,
+		AnnualSpend:  annualSpend,
+		Result:       result,
 	}
 	if err := s.tplStore.Execute(yearTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(w, executeErrorMessage, http.StatusInternalServerError, err)

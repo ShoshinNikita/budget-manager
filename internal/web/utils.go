@@ -53,9 +53,12 @@ func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code
 		s.log.Errorf(formatMsg, getCallerFunc(2), respMsg, internalErr)
 	}
 
-	data := map[string]interface{}{
-		"Code":    code,
-		"Message": respMsg,
+	data := struct {
+		Code    int
+		Message string
+	}{
+		Code:    code,
+		Message: respMsg,
 	}
 	if err := s.tplStore.Execute(errorPageTemplatePath, w, data); err != nil {
 		s.processError(w, executeErrorMessage, http.StatusInternalServerError, err)
