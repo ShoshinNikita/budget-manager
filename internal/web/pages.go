@@ -86,7 +86,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 
 	resp := struct {
 		Year         int
-		Months       []*models.Month
+		Months       []*db.Month
 		AnnualIncome money.Money
 		AnnualSpend  money.Money
 		Result       money.Money
