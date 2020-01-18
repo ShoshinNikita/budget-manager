@@ -56,6 +56,17 @@
 			width: max-content;
 		}
 
+		#links {
+			font-size: 25px;
+			margin: 50px auto;
+			text-align: center;
+			width: max-content;
+		}
+
+		#links__github br {
+			display: none;
+		}
+
 		@media (max-width: 750px) {
 			#error {
 				width: 100%;
@@ -86,6 +97,10 @@
 				font-size: 18px;
 				max-width: 90%;
 			}
+
+			#links__github br {
+				display: block;
+			}
 		}
 	</style>
 </head>
@@ -113,6 +128,16 @@
 				</div>
 			</div>
 		</div>
+	</div>
+
+	<div id="links">
+		<a href="/">Go to the current Month</a>
+		<span id="links__github">
+			<br>
+			<span>or</span>
+			<br>
+			<a href="https://github.com/ShoshinNikita/budget-manager/issues">Create an issue</a>
+		</span>
 	</div>
 </body>
 
