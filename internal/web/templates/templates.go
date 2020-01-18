@@ -77,7 +77,7 @@ func (t *TemplateStore) getFromCache(path string) *template {
 
 	if tpl, ok := t.templates[path]; ok {
 		// Can use cache
-		t.log.Debugf("get template '%s' from cache", path)
+		t.log.WithField("path", path).Debug("get template from cache")
 		return tpl
 	}
 
@@ -89,7 +89,7 @@ func (t *TemplateStore) getFromCache(path string) *template {
 
 // getFromDisk loads template from disk
 func (t *TemplateStore) getFromDisk(path string) *template {
-	t.log.Debugf("load template '%s' from disk", path)
+	t.log.WithField("path", path).Debug("load template from disk")
 
 	// Don't use 'template.ParseFiles' method to support files with the same name
 	data, err := ioutil.ReadFile(path)

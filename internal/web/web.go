@@ -166,10 +166,8 @@ func (s Server) ListenAndServer() error {
 	s.log.Info("start server")
 
 	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		err = errors.Wrap(err, "ListenAndServe returned error")
-
-		s.log.Error(err)
-		return err
+		s.log.WithError(err).Error("server error")
+		return errors.Wrap(err, "server error")
 	}
 
 	return nil
@@ -181,7 +179,7 @@ func (s Server) Shutdown() error {
 
 	err := s.server.Shutdown(ctx)
 	if err != nil {
-		s.log.Errorf("can't shutdown server gracefully: %s", err)
+		s.log.WithError(err).Errorf("coudln't shutdown server gracefully")
 	}
 
 	return err

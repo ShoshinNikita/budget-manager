@@ -6,6 +6,7 @@ import (
 	"time"
 
 	auth "github.com/abbot/go-http-auth"
+	"github.com/sirupsen/logrus"
 )
 
 // basicAuthMiddleware checks whether user is authorized
@@ -20,14 +21,19 @@ func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
 	})
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := s.log.WithFields(logrus.Fields{
+			"ip":  r.RemoteAddr,
+			"url": r.URL,
+		})
+
 		if username := basicAuthenticator.CheckAuth(r); username == "" {
 			// Auth has failed
-			s.log.Errorf("invalid auth request from '%s' to '%s'", r.RemoteAddr, r.URL)
+			log.Error("invalid auth request")
 			basicAuthenticator.RequireAuth(w, r)
 			return
 		}
 
-		s.log.Debugf("successful auth from '%s' to '%s'", r.RemoteAddr, r.URL)
+		log.Debug("successful auth request")
 		h.ServeHTTP(w, r)
 	})
 }
