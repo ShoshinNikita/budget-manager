@@ -8,11 +8,13 @@ import (
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(_ context.Context, id uint) (*SpendType, error) {
-	log := db.log.WithField("id", id)
+func (db DB) GetSpendType(ctx context.Context, id uint) (*SpendType, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
 
 	spendType := &SpendType{ID: id}
 	err := db.db.Select(spendType)
@@ -27,7 +29,7 @@ func (db DB) GetSpendType(_ context.Context, id uint) (*SpendType, error) {
 				errors.WithType(errors.AppError))
 		}
 
-		log.WithError(err).Error("couldn't get Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't get Spend Type")
 		return nil, err
 	}
 
@@ -36,8 +38,8 @@ func (db DB) GetSpendType(_ context.Context, id uint) (*SpendType, error) {
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(_ context.Context) ([]SpendType, error) {
-	log := db.log
+func (db DB) GetSpendTypes(ctx context.Context) ([]SpendType, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
 
 	spendTypes := []SpendType{}
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
@@ -46,7 +48,7 @@ func (db DB) GetSpendTypes(_ context.Context) ([]SpendType, error) {
 			errors.WithMsg("can't select Spend Types"),
 			errors.WithType(errors.AppError))
 
-		log.WithError(err).Error("coudln't get all Spend Types")
+		log.WithError(errors.GetOriginalError(err)).Error("coudln't get all Spend Types")
 		return nil, err
 	}
 
@@ -55,8 +57,9 @@ func (db DB) GetSpendTypes(_ context.Context) ([]SpendType, error) {
 }
 
 // AddSpendType adds new Spend Type
-func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err error) {
-	log := db.log.WithField("name", name)
+func (db DB) AddSpendType(ctx context.Context, name string) (typeID uint, err error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("name", name)
 
 	spendType := &SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -74,7 +77,7 @@ func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err erro
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudln't add a new Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("coudln't add a new Spend Type")
 		return 0, err
 	}
 
@@ -83,11 +86,9 @@ func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err erro
 }
 
 // EditSpendType modifies existing Spend Type
-func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
-	log := db.log.WithFields(logrus.Fields{
-		"id":       id,
-		"new_name": newName,
-	})
+func (db DB) EditSpendType(ctx context.Context, id uint, newName string) error {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{"id": id, "new_name": newName})
 
 	if !db.checkSpendType(id) {
 		err := ErrSpendTypeNotExist
@@ -111,7 +112,7 @@ func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudldn't edit the Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("coudldn't edit the Spend Type")
 		return err
 	}
 
@@ -120,8 +121,9 @@ func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
 }
 
 // RemoveSpendType removes Spend Type with passed id
-func (db DB) RemoveSpendType(_ context.Context, id uint) error {
-	log := db.log.WithField("id", id)
+func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
 
 	if !db.checkSpendType(id) {
 		err := ErrSpendTypeNotExist
@@ -163,7 +165,7 @@ func (db DB) RemoveSpendType(_ context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudln't remove the Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove the Spend Type")
 		return err
 	}
 

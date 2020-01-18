@@ -6,46 +6,62 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
+	"github.com/sirupsen/logrus"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // -----------------------------------------------------------------------------
 // Month
 // -----------------------------------------------------------------------------
 
-func (db DB) GetMonth(_ context.Context, id uint) (m *Month, err error) {
+func (db DB) GetMonth(ctx context.Context, id uint) (m *Month, err error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
+
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
 		m, err = db.getMonth(tx, id)
 		return err
 	})
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return nil, ErrMonthNotExist
+			err := ErrMonthNotExist
+			log.Error(err)
+			return nil, err
 		}
-		return nil, errors.Wrap(err,
-			errors.WithMsg("can't select month with passed id"),
-			errors.WithType(errors.AppError))
+
+		const msg = "couldn't select month with passed id"
+		log.WithError(err).Error(msg)
+		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
 
+	log.Debug("return the Month")
 	return m, nil
 }
 
-func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
+func (db DB) GetMonthID(ctx context.Context, year, month int) (uint, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{"year": year, "month": month})
+
 	m := &Month{}
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return 0, ErrMonthNotExist
+			err := ErrMonthNotExist
+			log.Error(err)
+			return 0, err
 		}
 
-		return 0, errors.Wrap(err,
-			errors.WithMsg("can't select Month with passed year and month"),
-			errors.WithType(errors.AppError))
+		const msg = "couldn't select Month with passed year and month"
+		log.WithError(err).Error(msg)
+		return 0, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
 
+	log = log.WithField("id", m.ID)
+	log.Debug("return the Month id")
 	return m.ID, nil
 }
 
@@ -58,7 +74,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 		}
 
 		return 0, errors.Wrap(err,
-			errors.WithMsg("can't select day with passed id"),
+			errors.WithMsg("coudln't select day with passed id"),
 			errors.WithType(errors.AppError))
 	}
 
@@ -67,7 +83,10 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(_ context.Context, year int) ([]*Month, error) {
+func (db DB) GetMonths(ctx context.Context, year int) ([]*Month, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("year", year)
+
 	months := []*Month{}
 	err := db.db.Model(&months).
 		Where("year = ?", year).
@@ -75,16 +94,22 @@ func (db DB) GetMonths(_ context.Context, year int) ([]*Month, error) {
 		Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return nil, ErrYearNotExist
+			err := ErrYearNotExist
+			log.Error(err)
+			return nil, err
 		}
-		return nil, errors.Wrap(err,
-			errors.WithMsg("can't select months with passed year"),
-			errors.WithType(errors.AppError))
+
+		const msg = "couldn't select months with passed year"
+		log.WithError(err).Error(msg)
+		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
 	if len(months) == 0 {
-		return nil, ErrYearNotExist
+		err := ErrYearNotExist
+		log.Error(err)
+		return nil, err
 	}
 
+	log.Debug("return all Months")
 	return months, nil
 }
 
@@ -92,7 +117,10 @@ func (db DB) GetMonths(_ context.Context, year int) ([]*Month, error) {
 // Day
 // -----------------------------------------------------------------------------
 
-func (db DB) GetDay(_ context.Context, id uint) (*Day, error) {
+func (db DB) GetDay(ctx context.Context, id uint) (*Day, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
+
 	d := &Day{ID: id}
 	err := db.db.Model(d).
 		Relation("Spends", orderByID).
@@ -100,26 +128,38 @@ func (db DB) GetDay(_ context.Context, id uint) (*Day, error) {
 		WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return nil, ErrDayNotExist
+			err := ErrDayNotExist
+			log.Error(err)
+			return nil, err
 		}
-		return nil, errors.Wrap(err,
-			errors.WithMsg("can't select day with passed id"),
-			errors.WithType(errors.AppError))
+
+		const msg = "couldn't select day with passed id"
+		log.WithError(err).Error(msg)
+		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
 
+	log.Debug("return Day")
 	return d, nil
 }
 
 func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{"year": year, "month": "month", "day": day})
+
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
 		if err == ErrMonthNotExist {
-			return 0, ErrMonthNotExist
+			err := ErrMonthNotExist
+			log.Error(err)
+			return 0, err
 		}
-		return 0, errors.Wrap(err,
-			errors.WithMsg("can't define month id with passed year and month"),
-			errors.WithType(errors.AppError))
+
+		const msg = "couldn't define month id with passed year and month"
+		log.WithError(err).Error(msg)
+		return 0, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
+
+	log = log.WithField("month_id", monthID)
 
 	d := &Day{}
 	err = db.db.Model(d).
@@ -128,13 +168,16 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return 0, ErrDayNotExist
+			err := ErrDayNotExist
+			log.Error(err)
+			return 0, err
 		}
-		return 0, errors.Wrap(err,
-			errors.WithMsg("can't select day with passed id"),
-			errors.WithType(errors.AppError))
+		const msg = "couldn't select day with passed id"
+		log.WithError(err).Error(msg)
+		return 0, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
 
+	log.Debug("return Day id")
 	return d.ID, nil
 }
 

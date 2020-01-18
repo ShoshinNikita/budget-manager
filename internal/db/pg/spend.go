@@ -8,15 +8,14 @@ import (
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err error) {
-	log := db.log.WithFields(logrus.Fields{
-		"day_id":  args.DayID,
-		"title":   args.Title,
-		"type_id": args.TypeID,
-		"cost":    args.Cost,
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
+		"day_id": args.DayID, "title": args.Title, "type_id": args.TypeID, "cost": args.Cost,
 	})
 
 	if !db.checkDay(args.DayID) {
@@ -51,7 +50,7 @@ func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err erro
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudln't create a new Spend")
+		log.WithError(errors.GetOriginalError(err)).Error("coudln't create a new Spend")
 		return 0, err
 	}
 
@@ -81,11 +80,9 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 
 // EditSpend edits existeng Spend
 func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
-	log := db.log.WithFields(logrus.Fields{
-		"id":          args.ID,
-		"new_title":   args.Title,
-		"new_type_id": args.TypeID,
-		"new_cost":    args.Cost,
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
+		"id": args.ID, "new_title": args.Title, "new_type_id": args.TypeID, "new_cost": args.Cost,
 	})
 
 	if !db.checkSpend(args.ID) {
@@ -128,7 +125,7 @@ func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudldn't edit the Spend")
+		log.WithError(errors.GetOriginalError(err)).Error("coudldn't edit the Spend")
 		return err
 	}
 
@@ -158,7 +155,8 @@ func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
 
 // RemoveSpend removes Spend with passed id
 func (db DB) RemoveSpend(ctx context.Context, id uint) error {
-	log := db.log.WithField("id", id)
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
 
 	if !db.checkSpend(id) {
 		err := ErrSpendNotExist
@@ -201,7 +199,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudln't remove the Spend")
+		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove the Spend")
 		return err
 	}
 
