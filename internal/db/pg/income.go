@@ -8,14 +8,14 @@ import (
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddIncome adds a new income with passed params
-func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, err error) {
-	log := db.log.WithFields(logrus.Fields{
-		"month_id": args.MonthID,
-		"title":    args.Title,
-		"income":   args.Income,
+func (db DB) AddIncome(ctx context.Context, args AddIncomeArgs) (incomeID uint, err error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
+		"month_id": args.MonthID, "title": args.Title, "income": args.Income,
 	})
 
 	if !db.checkMonth(args.MonthID) {
@@ -42,7 +42,7 @@ func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, er
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't add a new Income")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't add a new Income")
 		return 0, err
 	}
 
@@ -71,8 +71,9 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 }
 
 // EditIncome edits income with passed id, nil args are ignored
-func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
-	log := db.log.WithFields(logrus.Fields{
+func (db DB) EditIncome(ctx context.Context, args EditIncomeArgs) error {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
 		"id":         args.ID,
 		"new_title":  args.Title,
 		"new_income": args.Income,
@@ -113,7 +114,7 @@ func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't edit Income")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't edit Income")
 		return err
 	}
 
@@ -144,8 +145,9 @@ func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 }
 
 // RemoveIncome removes income with passed id
-func (db DB) RemoveIncome(_ context.Context, id uint) error {
-	log := db.log.WithField("id", id)
+func (db DB) RemoveIncome(ctx context.Context, id uint) error {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
 
 	if !db.checkIncome(id) {
 		err := ErrIncomeNotExist
@@ -186,7 +188,7 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("coudln't remove Income")
+		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove Income")
 		return err
 	}
 

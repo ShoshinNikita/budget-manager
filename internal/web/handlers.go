@@ -1,7 +1,6 @@
 package web
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
 
@@ -45,16 +45,17 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process
-	month, err := s.db.GetMonth(context.Background(), monthID)
+	month, err := s.db.GetMonth(r.Context(), monthID)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.GetMonthResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		Month: *month,
 	}
@@ -62,14 +63,14 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
 func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok bool) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		s.processError(w, "couldn't read body", http.StatusBadRequest, err)
+		s.processError(r.Context(), w, "couldn't read body", http.StatusBadRequest, err)
 		return 0, false
 	}
 
@@ -77,7 +78,7 @@ func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok 
 	idReq := &models.GetMonthReq{}
 	// We have to use json.NewDecoder because there are several types of request
 	if err := json.Unmarshal(body, idReq); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return 0, false
 	}
 	if idReq.ID != nil {
@@ -87,20 +88,20 @@ func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok 
 	// Try to use models.GetMonthByYearAndMonthReq
 	yearAndMonthReq := &models.GetMonthByYearAndMonthReq{}
 	if err := json.Unmarshal(body, yearAndMonthReq); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return 0, false
 	}
 	if yearAndMonthReq.Year == nil || yearAndMonthReq.Month == nil {
-		s.processError(w, "invalid request: no id or year and month were passed", http.StatusBadRequest, nil)
+		s.processError(r.Context(), w, "invalid request: no id or year and month were passed", http.StatusBadRequest, nil)
 		return 0, false
 	}
 
 	id, err = s.db.GetMonthID(
-		context.Background(), *yearAndMonthReq.Year, int(*yearAndMonthReq.Month),
+		r.Context(), *yearAndMonthReq.Year, int(*yearAndMonthReq.Month),
 	)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return 0, false
 	}
 
@@ -123,16 +124,17 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Process
-	day, err := s.db.GetDay(context.Background(), dayID)
+	day, err := s.db.GetDay(r.Context(), dayID)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.GetDayResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		Day: *day,
 	}
@@ -140,14 +142,14 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
 func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bool) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		s.processError(w, "couldn't read body", http.StatusBadRequest, err)
+		s.processError(r.Context(), w, "couldn't read body", http.StatusBadRequest, err)
 		return 0, false
 	}
 
@@ -155,7 +157,7 @@ func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bo
 	idReqreq := &models.GetDayReq{}
 	// We have to use json.NewDecoder because there are several types of request
 	if err := json.Unmarshal(body, idReqreq); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return 0, false
 	}
 	if idReqreq.ID != nil {
@@ -165,20 +167,21 @@ func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bo
 	// Try to use models.GetDayByDateReq
 	dateReq := &models.GetDayByDateReq{}
 	if err := json.Unmarshal(body, dateReq); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return 0, false
 	}
 	if dateReq.Year == nil || dateReq.Month == nil || dateReq.Day == nil {
-		s.processError(w, "invalid request: no id or year, month and day were passed", http.StatusBadRequest, nil)
+		s.processError(r.Context(), w, "invalid request: no id or year, month and day were passed",
+			http.StatusBadRequest, nil)
 		return 0, false
 	}
 
 	id, err = s.db.GetDayIDByDate(
-		context.Background(), *dateReq.Year, int(*dateReq.Month), *dateReq.Day,
+		r.Context(), *dateReq.Year, int(*dateReq.Month), *dateReq.Day,
 	)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return 0, false
 	}
 
@@ -200,7 +203,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.AddIncomeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
@@ -211,16 +214,17 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 		Notes:   req.Notes,
 		Income:  money.FromFloat(req.Income),
 	}
-	id, err := s.db.AddIncome(context.Background(), args)
+	id, err := s.db.AddIncome(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.AddIncomeResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		ID: id,
 	}
@@ -228,7 +232,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -243,7 +247,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.EditIncomeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
@@ -257,21 +261,22 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 		income := money.FromFloat(*req.Income)
 		args.Income = &income
 	}
-	err := s.db.EditIncome(context.Background(), args)
+	err := s.db.EditIncome(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -286,26 +291,27 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.RemoveIncomeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
 	// Process
-	err := s.db.RemoveIncome(context.Background(), req.ID)
+	err := s.db.RemoveIncome(r.Context(), req.ID)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -324,7 +330,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.AddMonthlyPaymentReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
@@ -336,16 +342,17 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 		Notes:   req.Notes,
 		Cost:    money.FromFloat(req.Cost),
 	}
-	id, err := s.db.AddMonthlyPayment(context.Background(), args)
+	id, err := s.db.AddMonthlyPayment(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.AddMonthlyPaymentResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		ID: id,
 	}
@@ -353,7 +360,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -368,7 +375,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.EditMonthlyPaymentReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
@@ -383,21 +390,22 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 		cost := money.FromFloat(*req.Cost)
 		args.Cost = &cost
 	}
-	err := s.db.EditMonthlyPayment(context.Background(), args)
+	err := s.db.EditMonthlyPayment(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -412,26 +420,27 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.RemoveMonthlyPaymentReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
 	// Process
-	err := s.db.RemoveMonthlyPayment(context.Background(), req.ID)
+	err := s.db.RemoveMonthlyPayment(r.Context(), req.ID)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -450,7 +459,7 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.AddSpendReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
@@ -462,16 +471,17 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 		Notes:  req.Notes,
 		Cost:   money.FromFloat(req.Cost),
 	}
-	id, err := s.db.AddSpend(context.Background(), args)
+	id, err := s.db.AddSpend(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.AddSpendResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		ID: id,
 	}
@@ -479,7 +489,7 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -494,7 +504,7 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.EditSpendReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
@@ -509,21 +519,22 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 		cost := money.FromFloat(*req.Cost)
 		args.Cost = &cost
 	}
-	err := s.db.EditSpend(context.Background(), args)
+	err := s.db.EditSpend(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -538,26 +549,27 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.RemoveSpendReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
 	// Process
-	err := s.db.RemoveSpend(context.Background(), req.ID)
+	err := s.db.RemoveSpend(r.Context(), req.ID)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -572,16 +584,17 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	// Process
-	types, err := s.db.GetSpendTypes(context.Background())
+	types, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.GetSpendTypesResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		SpendTypes: types,
 	}
@@ -589,7 +602,7 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -604,21 +617,22 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.AddSpendTypeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
 	// Process
-	id, err := s.db.AddSpendType(context.Background(), req.Name)
+	id, err := s.db.AddSpendType(r.Context(), req.Name)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.AddSpendTypeResp{
 		Response: models.Response{
-			Success: true,
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
 		},
 		ID: id,
 	}
@@ -626,7 +640,7 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -641,26 +655,27 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.EditSpendTypeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
 	// Process
-	err := s.db.EditSpendType(context.Background(), req.ID, req.Name)
+	err := s.db.EditSpendType(r.Context(), req.ID, req.Name)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 
@@ -675,26 +690,27 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	// Decode
 	req := &models.RemoveSpendTypeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
-		s.processError(w, errDecodeRequest, http.StatusBadRequest, err)
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
 
 	// Process
-	err := s.db.RemoveSpendType(context.Background(), req.ID)
+	err := s.db.RemoveSpendType(r.Context(), req.ID)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processError(w, msg, code, err)
+		s.processError(r.Context(), w, msg, code, err)
 		return
 	}
 
 	resp := models.Response{
-		Success: true,
+		RequestID: request_id.FromContext(r.Context()).ToString(),
+		Success:   true,
 	}
 
 	// Encode
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		s.processError(w, errEncodeResponse, http.StatusInternalServerError, err)
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
 	}
 }
 

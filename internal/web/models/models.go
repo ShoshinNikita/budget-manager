@@ -15,8 +15,9 @@ type Request struct {
 }
 
 type Response struct {
-	Success bool   `json:"success"`
-	Error   string `json:"error,omitempty"` // optional
+	RequestID string `json:"request_id"`
+	Success   bool   `json:"success"`
+	Error     string `json:"error,omitempty"` // optional
 }
 
 // -------------------------------------------------

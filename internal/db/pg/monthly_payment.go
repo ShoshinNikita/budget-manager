@@ -8,15 +8,14 @@ import (
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
-	log := db.log.WithFields(logrus.Fields{
-		"month_id": args.MonthID,
-		"title":    args.Title,
-		"type_id":  args.TypeID,
-		"cost":     args.Cost,
+func (db DB) AddMonthlyPayment(ctx context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
+		"month_id": args.MonthID, "title": args.Title, "type_id": args.TypeID, "cost": args.Cost,
 	})
 
 	if !db.checkMonth(args.MonthID) {
@@ -43,7 +42,7 @@ func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (i
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't add a new Monthly Payment")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't add a new Monthly Payment")
 		return 0, err
 	}
 
@@ -72,12 +71,10 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) error {
-	log := db.log.WithFields(logrus.Fields{
-		"id":          args.ID,
-		"new_title":   args.Title,
-		"new_type_id": args.TypeID,
-		"new_cost":    args.Cost,
+func (db DB) EditMonthlyPayment(ctx context.Context, args EditMonthlyPaymentArgs) error {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
+		"id": args.ID, "new_title": args.Title, "new_type_id": args.TypeID, "new_cost": args.Cost,
 	})
 
 	if !db.checkMonthlyPayment(args.ID) {
@@ -114,7 +111,7 @@ func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) 
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't edit the Monthly Payment")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't edit the Monthly Payment")
 		return err
 	}
 
@@ -144,8 +141,9 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaym
 }
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
-func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
-	log := db.log.WithField("id", id)
+func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithField("id", id)
 
 	if !db.checkMonthlyPayment(id) {
 		err := ErrMonthlyPaymentNotExist
@@ -179,7 +177,7 @@ func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't remove the Monthly Payment")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove the Monthly Payment")
 		return err
 	}
 

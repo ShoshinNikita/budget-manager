@@ -7,6 +7,8 @@ import (
 
 	auth "github.com/abbot/go-http-auth"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // basicAuthMiddleware checks whether user is authorized
@@ -21,14 +23,12 @@ func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
 	})
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := s.log.WithFields(logrus.Fields{
-			"ip":  r.RemoteAddr,
-			"url": r.URL,
-		})
+		log := request_id.FromContextToLogger(r.Context(), s.log)
+		log = log.WithFields(logrus.Fields{"ip": r.RemoteAddr, "url": r.URL})
 
 		if username := basicAuthenticator.CheckAuth(r); username == "" {
 			// Auth has failed
-			log.Error("invalid auth request")
+			log.Warn("invalid auth request")
 			basicAuthenticator.RequireAuth(w, r)
 			return
 		}
@@ -50,4 +50,65 @@ func cacheMiddleware(h http.Handler, maxAge time.Duration) http.Handler {
 
 		h.ServeHTTP(w, r)
 	})
+}
+
+const requestIDHeader = "X-Request-ID"
+
+// requestIDMeddleware generates a new request id and inserts it into the request context
+func (Server) requestIDMeddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		reqID := request_id.New()
+		if headerValue := r.Header.Get(requestIDHeader); headerValue != "" {
+			reqID = request_id.RequestID(headerValue)
+		}
+
+		ctx := request_id.ToContext(r.Context(), reqID)
+		r = r.WithContext(ctx)
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+func (s Server) loggingMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := request_id.FromContextToLogger(r.Context(), s.log)
+		log = log.WithFields(logrus.Fields{"method": r.Method, "url": r.URL.Path})
+
+		log.Debug("start request")
+
+		respWriter := NewResponseWriter(w)
+		now := time.Now()
+		h.ServeHTTP(respWriter, r)
+		since := time.Since(now)
+
+		log.WithFields(logrus.Fields{
+			"time":           since,
+			"status_code":    respWriter.statusCode,
+			"content_length": respWriter.contentLength,
+		}).Debugf("finish request")
+	})
+}
+
+type ResponseWriter struct {
+	http.ResponseWriter
+
+	statusCode    int
+	contentLength int
+}
+
+func NewResponseWriter(w http.ResponseWriter) *ResponseWriter {
+	return &ResponseWriter{
+		ResponseWriter: w,
+		statusCode:     http.StatusOK,
+	}
+}
+
+func (w *ResponseWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (w *ResponseWriter) Write(data []byte) (int, error) {
+	w.contentLength += len(data)
+	return w.ResponseWriter.Write(data)
 }

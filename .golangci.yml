@@ -6,9 +6,10 @@ run:
 linters:
   enable-all: true
   disable:
-    - wsl
     - dupl
     - godox
+    - whitespace
+    - wsl
 
 linters-settings:
   funlen:
@@ -16,6 +17,8 @@ linters-settings:
 
 issues:
   exclude:
+    # Ignore underscores in package names
+    - "use(?: an)? underscores? in package names?"
     # Ignore underscores in test functions
     - "use underscores in Go names; (?:func|type) (?:T|t)est"
     # Ignore long functions in tests
