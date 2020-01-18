@@ -11,7 +11,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ShoshinNikita/go-clog/v3"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
@@ -1290,7 +1290,8 @@ func TestMiddlewares_Auth(t *testing.T) {
 	// Init custom server
 
 	// Logger
-	log := clog.NewDevLogger()
+	log := logrus.New()
+	log.SetLevel(logrus.ErrorLevel)
 
 	// DB
 	dbConfig := pg.Config{
@@ -1387,7 +1388,8 @@ func TestMiddlewares_Auth(t *testing.T) {
 
 func initServer(require *require.Assertions) *Server {
 	// Logger
-	log := clog.NewDevLogger()
+	log := logrus.New()
+	log.SetLevel(logrus.ErrorLevel)
 
 	// DB
 	dbConfig := pg.Config{

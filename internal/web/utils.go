@@ -8,9 +8,8 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
+	"github.com/sirupsen/logrus"
 )
-
-const formatMsg = "caller: '%s', msg: '%s', error: '%s'"
 
 // parseDBError parses DB error and returns vars for passing into 'Server.processError' method
 func (s Server) parseDBError(err error) (msg string, code int, originalErr error) {
@@ -38,7 +37,7 @@ func (s Server) parseDBError(err error) (msg string, code int, originalErr error
 // it just writes models.Response
 func (s Server) processError(w http.ResponseWriter, respMsg string, code int, internalErr error) {
 	if internalErr != nil {
-		s.log.Errorf(formatMsg, getCallerFunc(2), respMsg, internalErr)
+		s.logError(respMsg, code, internalErr)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -50,7 +49,7 @@ func (s Server) processError(w http.ResponseWriter, respMsg string, code int, in
 // processErrorWithPage is similar to 'processError', but it shows error page instead of returning json
 func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code int, internalErr error) {
 	if internalErr != nil {
-		s.log.Errorf(formatMsg, getCallerFunc(2), respMsg, internalErr)
+		s.logError(respMsg, code, internalErr)
 	}
 
 	data := struct {
@@ -63,6 +62,15 @@ func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code
 	if err := s.tplStore.Execute(errorPageTemplatePath, w, data); err != nil {
 		s.processError(w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
+}
+
+func (s Server) logError(respMsg string, code int, internalErr error) {
+	s.log.WithFields(logrus.Fields{
+		"caller": getCallerFunc(3),
+		"msg":    respMsg,
+		"code":   code,
+		"error":  internalErr,
+	}).Error("request error")
 }
 
 const prefixForTrim = "github.com/ShoshinNikita/budget-manager/"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export DEBUG="true"
+export LOGGER_MODE="develop"
 export DB_TYPE="postgres"
 export DB_PG_HOST="localhost"
 export DB_PG_PORT="5432"

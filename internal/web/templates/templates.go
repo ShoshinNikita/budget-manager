@@ -10,12 +10,12 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"github.com/ShoshinNikita/go-clog/v3"
+	"github.com/sirupsen/logrus"
 )
 
 // TemplateStore is used for serving *template.Template. It provides in-memory template caching
 type TemplateStore struct {
-	log *clog.Logger
+	log logrus.FieldLogger
 
 	templates map[string]*template
 	mux       *sync.Mutex
@@ -30,7 +30,7 @@ type template struct {
 }
 
 // NewTemplateStore inits new Template Store
-func NewTemplateStore(log *clog.Logger, cacheTemplates bool) *TemplateStore {
+func NewTemplateStore(log logrus.FieldLogger, cacheTemplates bool) *TemplateStore {
 	store := &TemplateStore{
 		templates: make(map[string]*template),
 		mux:       new(sync.Mutex),
@@ -77,7 +77,7 @@ func (t *TemplateStore) getFromCache(path string) *template {
 
 	if tpl, ok := t.templates[path]; ok {
 		// Can use cache
-		t.log.Debugf("get template '%s' from cache", path)
+		t.log.WithField("path", path).Debug("get template from cache")
 		return tpl
 	}
 
@@ -89,7 +89,7 @@ func (t *TemplateStore) getFromCache(path string) *template {
 
 // getFromDisk loads template from disk
 func (t *TemplateStore) getFromDisk(path string) *template {
-	t.log.Debugf("load template '%s' from disk", path)
+	t.log.WithField("path", path).Debug("load template from disk")
 
 	// Don't use 'template.ParseFiles' method to support files with the same name
 	data, err := ioutil.ReadFile(path)

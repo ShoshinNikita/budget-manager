@@ -3,7 +3,7 @@
 package pg
 
 import (
-	clog "github.com/ShoshinNikita/go-clog/v3"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +18,8 @@ const (
 const monthID = 1
 
 func initDB(require *require.Assertions) *DB {
-	log := clog.NewProdConfig().SetLevel(clog.LevelWarn).Build()
+	log := logrus.New()
+	log.SetLevel(logrus.ErrorLevel)
 
 	config := Config{
 		Host:     dbHost,

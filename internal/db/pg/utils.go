@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	clog "github.com/ShoshinNikita/go-clog/v3"
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	pkgErrors "github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
@@ -115,13 +115,13 @@ func daysInMonth(t time.Time) int {
 // --------------------------------------------------
 
 type cronLogger struct {
-	log *clog.Logger
+	log logrus.FieldLogger
 }
 
 // Info logs routine messages about cron's operation.
 func (c cronLogger) Info(msg string, keysAndValues ...interface{}) {
 	args := buildStringFromKeysAndValues(keysAndValues...)
-	c.log.Info(msg, args)
+	c.log.Debug(msg, args)
 }
 
 // Error logs an error condition.
