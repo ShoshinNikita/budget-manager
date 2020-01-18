@@ -50,7 +50,8 @@ func (db DB) GetMonthID(ctx context.Context, year, month int) (uint, error) {
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := ErrMonthNotExist
+			err := errors.New("there's no such Month",
+				errors.WithOriginalError(), errors.WithType(errors.UserError))
 			log.Error(err)
 			return 0, err
 		}
