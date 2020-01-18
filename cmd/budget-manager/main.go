@@ -81,14 +81,14 @@ func (app *App) PrepareComponents() error {
 	app.log.Info("logger is initialized")
 
 	// DB
-	app.log.Info("prepare database...")
+	app.log.Info("prepare database")
 	if err := app.prepareDB(); err != nil {
 		return errors.Wrap(err, "database init error")
 	}
 	app.log.Info("database is initialized")
 
 	// Web Server
-	app.log.Info("prepare web server...")
+	app.log.Info("prepare web server")
 	app.prepareWebServer()
 	app.log.Info("web server is initialized")
 
@@ -101,7 +101,7 @@ func (app *App) prepareLogger() {
 
 func (app *App) prepareDB() (err error) {
 	// Connect
-	app.log.Debug("connect to the db...")
+	app.log.Debug("connect to the db")
 
 	switch app.config.DBType {
 	case "postgres", "postgresql":
@@ -117,7 +117,7 @@ func (app *App) prepareDB() (err error) {
 	app.log.Debug("connection is ready")
 
 	// Prepare the db
-	app.log.Debug("prepare db...")
+	app.log.Debug("prepare db")
 	err = app.db.Prepare()
 	if err != nil {
 		return errors.Wrap(err, "couldn't prepare the db")
@@ -153,7 +153,7 @@ func (app *App) Run() (appErr error) {
 		app.log.Warn("got an interrupt signal")
 	case err := <-webServerError:
 		appErr = err
-		app.log.Warnf("server is down: %s", err)
+		app.log.WithError(err).Warn("server is down")
 	}
 
 	app.Shutdown()
@@ -163,20 +163,20 @@ func (app *App) Run() (appErr error) {
 
 // Shutdown shutdowns the app components
 func (app *App) Shutdown() {
-	app.log.Info("shutdown components...")
+	app.log.Info("shutdown components")
 
 	// Server
 	app.log.Info("shutdown web server")
 	err := app.server.Shutdown()
 	if err != nil {
-		app.log.Errorf("can't shutdown the db gracefully: %s", err)
+		app.log.WithError(err).Error("can't shutdown the server gracefully")
 	}
 
 	// Database
 	app.log.Info("shutdown the database")
 	err = app.db.Shutdown()
 	if err != nil {
-		app.log.Errorf("can't shutdown the db gracefully: %s", err)
+		app.log.WithError(err).Error("can't shutdown the db gracefully")
 	}
 
 	app.log.Info("shutdowns are completed")
