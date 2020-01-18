@@ -8,8 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// RequestID is a hex string with random content. It doesn't correspond UUID format based on RFC 4122
-// because it is overkill for such small project. Also it can be easily modified to match RFC 4122
+// RequestID is a random hex string. It doesn't correspond to UUID RFC 4122 format because it would be
+// an overkill for such small project. Also it can be easily modified to match RFC 4122
 type RequestID string
 
 func (r RequestID) ToString() string {
