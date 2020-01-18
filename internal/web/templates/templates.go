@@ -3,6 +3,7 @@ package templates
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	htmlTemplate "html/template"
@@ -20,7 +21,7 @@ type TemplateStore struct {
 	templates map[string]*template
 	mux       *sync.Mutex
 
-	getFunc func(path string) *template
+	getFunc func(ctx context.Context, path string) *template
 }
 
 // template is an internal wrapper for *template.Template
@@ -46,16 +47,17 @@ func NewTemplateStore(log logrus.FieldLogger, cacheTemplates bool) *TemplateStor
 }
 
 // Get returns template with passed path. It panics, if template doesn't exist
-func (t *TemplateStore) Get(path string) *htmlTemplate.Template {
-	return t.getFunc(path).tpl
+func (t *TemplateStore) Get(ctx context.Context, path string) *htmlTemplate.Template {
+	return t.getFunc(ctx, path).tpl
 }
 
 // Execute executes template with passed path. It panics, if template doesn't exist
 // Execute checks for errors before writing into w: it executes template into
 // temporary buffer and copies data if everything is fine
-func (t *TemplateStore) Execute(path string, w io.Writer, data interface{}) error {
-	tpl := t.getFunc(path)
+func (t *TemplateStore) Execute(ctx context.Context, path string,
+	w io.Writer, data interface{}) error {
 
+	tpl := t.getFunc(ctx, path)
 	buff := bytes.NewBuffer(nil)
 	err := tpl.tpl.ExecuteTemplate(buff, tpl.Name, data)
 	if err != nil {
@@ -71,7 +73,7 @@ func (t *TemplateStore) Execute(path string, w io.Writer, data interface{}) erro
 // -------------------------------------------------
 
 // getFromCache tries to use cache for template. If template wasn't loaded, it calls 'getFromDisk' method
-func (t *TemplateStore) getFromCache(path string) *template {
+func (t *TemplateStore) getFromCache(ctx context.Context, path string) *template {
 	t.mux.Lock()
 	defer t.mux.Unlock()
 
@@ -82,13 +84,13 @@ func (t *TemplateStore) getFromCache(path string) *template {
 	}
 
 	// Have to load from disk
-	tpl := t.getFromDisk(path)
+	tpl := t.getFromDisk(ctx, path)
 	t.templates[path] = tpl
 	return tpl
 }
 
 // getFromDisk loads template from disk
-func (t *TemplateStore) getFromDisk(path string) *template {
+func (t *TemplateStore) getFromDisk(ctx context.Context, path string) *template {
 	t.log.WithField("path", path).Debug("load template from disk")
 
 	// Don't use 'template.ParseFiles' method to support files with the same name

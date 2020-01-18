@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"runtime"
@@ -47,7 +48,9 @@ func (s Server) processError(w http.ResponseWriter, respMsg string, code int, in
 }
 
 // processErrorWithPage is similar to 'processError', but it shows error page instead of returning json
-func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code int, internalErr error) {
+func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
+	respMsg string, code int, internalErr error) {
+
 	if internalErr != nil {
 		s.logError(respMsg, code, internalErr)
 	}
@@ -59,7 +62,7 @@ func (s Server) processErrorWithPage(w http.ResponseWriter, respMsg string, code
 		Code:    code,
 		Message: respMsg,
 	}
-	if err := s.tplStore.Execute(errorPageTemplatePath, w, data); err != nil {
+	if err := s.tplStore.Execute(ctx, errorPageTemplatePath, w, data); err != nil {
 		s.processError(w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }

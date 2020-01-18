@@ -111,8 +111,8 @@ type Database interface {
 }
 
 type TemplateStore interface {
-	Get(path string) *htmlTemplate.Template
-	Execute(path string, w io.Writer, data interface{}) error
+	Get(ctx context.Context, path string) *htmlTemplate.Template
+	Execute(ctx context.Context, path string, w io.Writer, data interface{}) error
 }
 
 func NewServer(cnf Config, db Database, log logrus.FieldLogger, debug bool) *Server {
