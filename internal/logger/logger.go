@@ -1,6 +1,11 @@
 package logger
 
 import (
+	"bytes"
+	"fmt"
+	"sort"
+
+	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,7 +34,7 @@ func New(cnf Config, debug bool) *logrus.Logger {
 	case "dev", "develop":
 		fallthrough
 	default:
-		log.SetFormatter(&logrus.TextFormatter{})
+		log.SetFormatter(DevFormatter{})
 	}
 
 	// Always use debug level in debug mode
@@ -54,5 +59,103 @@ func logLevelFromString(lvl string) logrus.Level {
 		return logrus.FatalLevel
 	default:
 		return logrus.InfoLevel
+	}
+}
+
+type DevFormatter struct{}
+
+var _ logrus.Formatter = DevFormatter{}
+
+// Format formats
+func (DevFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	buff := &bytes.Buffer{}
+	if entry.Buffer != nil {
+		buff = entry.Buffer
+	}
+
+	// Write time
+	buff.WriteString(color.HiGreenString(entry.Time.Format(timeLayout)))
+	buff.WriteByte(' ')
+
+	// Write level
+	buff.Write(logLevelToString(entry.Level))
+	buff.WriteByte(' ')
+
+	// Write message
+	buff.WriteString(entry.Message)
+	buff.WriteByte(' ')
+
+	// Sort data keys
+	keys := make([]string, 0, len(entry.Data))
+	for k := range entry.Data {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// Write data
+	coloredPrintf := logLevelToPrintfFunction(entry.Level)
+	for _, k := range keys {
+		v := entry.Data[k]
+
+		buff.WriteString(coloredPrintf(k))
+		buff.WriteByte('=')
+		fmt.Fprint(buff, v)
+		buff.WriteByte(' ')
+	}
+
+	buff.WriteByte('\n')
+	return buff.Bytes(), nil
+}
+
+// nolint:gochecknoglobals
+var (
+	coloredTraceLvl = []byte(color.HiMagentaString("[TRC]"))
+	coloredDebugLvl = []byte(color.HiMagentaString("[DBG]"))
+	coloredInfoLvl  = []byte(color.CyanString("[INF]"))
+	coloredWarnLvl  = []byte(color.YellowString("[WRN]"))
+	coloredErrLvl   = []byte(color.RedString("[ERR]"))
+	coloredPanicLvl = []byte(color.New(color.BgRed).Sprint("[PNC]"))
+	coloredFatalLvl = []byte(color.New(color.BgRed).Sprint("[FAT]"))
+)
+
+func logLevelToString(lvl logrus.Level) []byte {
+	switch lvl {
+	case logrus.TraceLevel:
+		return coloredTraceLvl
+	case logrus.DebugLevel:
+		return coloredDebugLvl
+	case logrus.InfoLevel:
+		return coloredInfoLvl
+	case logrus.WarnLevel:
+		return coloredWarnLvl
+	case logrus.ErrorLevel:
+		return coloredErrLvl
+	case logrus.PanicLevel:
+		return coloredPanicLvl
+	case logrus.FatalLevel:
+		return coloredFatalLvl
+	default:
+		return []byte("[...]")
+	}
+}
+
+func logLevelToPrintfFunction(lvl logrus.Level) func(format string, a ...interface{}) string {
+	switch lvl {
+	case logrus.TraceLevel:
+		return color.YellowString
+	case logrus.DebugLevel:
+		return color.HiMagentaString
+	case logrus.InfoLevel:
+		return color.CyanString
+	case logrus.WarnLevel:
+		return color.YellowString
+	case logrus.ErrorLevel:
+		return color.RedString
+	case logrus.FatalLevel:
+		return color.New(color.BgRed).Sprintf
+	case logrus.PanicLevel:
+		return color.New(color.BgRed).Sprintf
+	default:
+		return color.New().Sprintf
 	}
 }
