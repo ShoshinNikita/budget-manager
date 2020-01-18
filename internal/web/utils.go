@@ -7,9 +7,11 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
 
 // parseDBError parses DB error and returns vars for passing into 'Server.processError' method
@@ -36,14 +38,20 @@ func (s Server) parseDBError(err error) (msg string, code int, originalErr error
 
 // processError logs error and writes models.Response. If internalErr is nil,
 // it just writes models.Response
-func (s Server) processError(w http.ResponseWriter, respMsg string, code int, internalErr error) {
+func (s Server) processError(ctx context.Context, w http.ResponseWriter, respMsg string,
+	code int, internalErr error) {
+
 	if internalErr != nil {
 		s.logError(respMsg, code, internalErr)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	resp := models.Response{Success: false, Error: respMsg}
+	resp := models.Response{
+		RequestID: request_id.FromContext(ctx).ToString(),
+		Success:   false,
+		Error:     respMsg,
+	}
 	json.NewEncoder(w).Encode(resp) // nolint:errcheck
 }
 
@@ -63,7 +71,7 @@ func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
 		Message: respMsg,
 	}
 	if err := s.tplStore.Execute(ctx, errorPageTemplatePath, w, data); err != nil {
-		s.processError(w, executeErrorMessage, http.StatusInternalServerError, err)
+		s.processError(ctx, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
