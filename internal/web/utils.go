@@ -64,11 +64,13 @@ func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
 	}
 
 	data := struct {
-		Code    int
-		Message string
+		Code      int
+		RequestID request_id.RequestID
+		Message   string
 	}{
-		Code:    code,
-		Message: respMsg,
+		Code:      code,
+		RequestID: request_id.FromContext(ctx),
+		Message:   respMsg,
 	}
 	if err := s.tplStore.Execute(ctx, errorPageTemplatePath, w, data); err != nil {
 		s.processError(ctx, w, executeErrorMessage, http.StatusInternalServerError, err)

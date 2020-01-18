@@ -34,23 +34,25 @@
 		}
 
 		#error__details {
-			color: #666666;
 			margin-top: 30px;
 		}
 
-		#error__details__code {
+		#error__details * {
 			color: #666666;
+		}
+
+		#error__details__code {
 			font-size: 30px;
 			margin-bottom: 5px;
 			text-align: center;
 		}
 
-		#error__details__message {
+		#error__details__info {
 			border-left: 3px solid #66666630;
-			color: #666666;
+			font-size: 20px;
 			margin: auto;
 			max-width: 70%;
-			padding: 5px 0 5px 10px;
+			padding: 10px 0 10px 10px;
 			width: max-content;
 		}
 
@@ -80,9 +82,9 @@
 				font-size: 25px;
 			}
 
-			#error__details__message {
+			#error__details__info {
+				font-size: 18px;
 				max-width: 90%;
-				padding: 5px 0 5px 10px;
 			}
 		}
 	</style>
@@ -101,7 +103,15 @@
 
 		<div id="error__details">
 			<div id="error__details__code" title="Error code">{{.Code}}</div>
-			<div id="error__details__message" title="Error message">{{.Message}}</div>
+
+			<div id="error__details__info">
+				<div id="error__details__info__message" title="Error message">{{.Message}}</div>
+				<br>
+				<div id="error__details__info__request-id">
+					<span>Request ID:</span>
+					<span title="Request ID">{{.RequestID}}</span>
+				</div>
+			</div>
 		</div>
 	</div>
 </body>
