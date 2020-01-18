@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/sirupsen/logrus"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
@@ -11,8 +12,17 @@ import (
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
+	log := db.log.WithFields(logrus.Fields{
+		"month_id": args.MonthID,
+		"title":    args.Title,
+		"type_id":  args.TypeID,
+		"cost":     args.Cost,
+	})
+
 	if !db.checkMonth(args.MonthID) {
-		return 0, ErrMonthNotExist
+		err := ErrMonthNotExist
+		log.Error(err)
+		return 0, err
 	}
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -33,10 +43,11 @@ func (db DB) AddMonthlyPayment(_ context.Context, args AddMonthlyPaymentArgs) (i
 		return nil
 	})
 	if err != nil {
-		db.log.Error(err)
+		log.WithError(err).Error("couldn't add a new Monthly Payment")
 		return 0, err
 	}
 
+	log.WithField("monthly_payment_id", id).Info("a new Monthly Payment was successfully created")
 	return id, nil
 }
 
@@ -62,8 +73,17 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 
 // EditMonthlyPayment modifies existing Monthly Payment
 func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) error {
+	log := db.log.WithFields(logrus.Fields{
+		"id":          args.ID,
+		"new_title":   args.Title,
+		"new_type_id": args.TypeID,
+		"new_cost":    args.Cost,
+	})
+
 	if !db.checkMonthlyPayment(args.ID) {
-		return ErrMonthlyPaymentNotExist
+		err := ErrMonthlyPaymentNotExist
+		log.Error(err)
+		return err
 	}
 
 	mp := &MonthlyPayment{ID: args.ID}
@@ -94,10 +114,11 @@ func (db DB) EditMonthlyPayment(_ context.Context, args EditMonthlyPaymentArgs) 
 		return nil
 	})
 	if err != nil {
-		db.log.Error(err)
+		log.WithError(err).Error("couldn't edit the Monthly Payment")
 		return err
 	}
 
+	log.Info("the Monthly Payment was successfully edited")
 	return nil
 }
 
@@ -124,8 +145,12 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaym
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
 func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
+	log := db.log.WithField("id", id)
+
 	if !db.checkMonthlyPayment(id) {
-		return ErrMonthlyPaymentNotExist
+		err := ErrMonthlyPaymentNotExist
+		log.Error(err)
+		return err
 	}
 
 	mp := &MonthlyPayment{ID: id}
@@ -154,9 +179,10 @@ func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		db.log.Error(err)
+		log.WithError(err).Error("couldn't remove the Monthly Payment")
 		return err
 	}
 
+	log.Info("the Monthly Payment was successfully removed")
 	return nil
 }

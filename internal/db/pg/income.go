@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/sirupsen/logrus"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
@@ -11,8 +12,16 @@ import (
 
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, err error) {
+	log := db.log.WithFields(logrus.Fields{
+		"month_id": args.MonthID,
+		"title":    args.Title,
+		"income":   args.Income,
+	})
+
 	if !db.checkMonth(args.MonthID) {
-		return 0, ErrMonthNotExist
+		err := ErrMonthNotExist
+		log.Error(err)
+		return 0, err
 	}
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -33,10 +42,11 @@ func (db DB) AddIncome(_ context.Context, args AddIncomeArgs) (incomeID uint, er
 		return nil
 	})
 	if err != nil {
-		db.log.Error(err)
+		log.WithError(err).Error("couldn't add a new Income")
 		return 0, err
 	}
 
+	log.WithField("id", incomeID).Info("a new Income was successfully created")
 	return incomeID, nil
 }
 
@@ -62,8 +72,16 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 
 // EditIncome edits income with passed id, nil args are ignored
 func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
+	log := db.log.WithFields(logrus.Fields{
+		"id":         args.ID,
+		"new_title":  args.Title,
+		"new_income": args.Income,
+	})
+
 	if !db.checkIncome(args.ID) {
-		return ErrIncomeNotExist
+		err := ErrIncomeNotExist
+		log.Error(err)
+		return err
 	}
 
 	in := &Income{ID: args.ID}
@@ -95,10 +113,11 @@ func (db DB) EditIncome(_ context.Context, args EditIncomeArgs) error {
 		return nil
 	})
 	if err != nil {
-		db.log.Error(err)
+		log.WithError(err).Error("couldn't edit Income")
 		return err
 	}
 
+	log.Info("the Income was successfully edited")
 	return nil
 }
 
@@ -126,8 +145,12 @@ func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
 
 // RemoveIncome removes income with passed id
 func (db DB) RemoveIncome(_ context.Context, id uint) error {
+	log := db.log.WithField("id", id)
+
 	if !db.checkIncome(id) {
-		return ErrIncomeNotExist
+		err := ErrIncomeNotExist
+		log.Error(err)
+		return err
 	}
 
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -163,10 +186,11 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		db.log.Error(err)
+		log.WithError(err).Error("coudln't remove Income")
 		return err
 	}
 
+	log.Info("the Income was successfully removed")
 	return nil
 }
 

@@ -35,20 +35,27 @@ type DB struct {
 
 // NewDB creates a new connection to the db and pings it
 func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
-	db := pg.Connect(&pg.Options{
-		Addr:     config.Host + ":" + strconv.Itoa(config.Port),
-		User:     config.User,
-		Password: config.Password,
-		Database: config.Database,
-	})
+	db := &DB{
+		log: log.WithField("db_type", "pg"),
+		db: pg.Connect(&pg.Options{
+			Addr:     config.Host + ":" + strconv.Itoa(config.Port),
+			User:     config.User,
+			Password: config.Password,
+			Database: config.Database,
+		}),
+		cron: cron.New(
+			cron.WithLogger(cronLogger{log: log.WithField("component", "cron")}),
+		),
+	}
 
 	// Try to ping the DB
 	for i := 0; i < connectRetries; i++ {
+		log := db.log.WithField("try", i+1)
 		if i != 0 {
-			log.Debugf("ping DB, try #%d", i+1)
+			log.Debug("ping DB")
 		}
 
-		if ping(db) {
+		if ping(db.db) {
 			break
 		}
 		log.Debug("couldn't ping DB")
@@ -60,11 +67,7 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 		time.Sleep(connectRetryTimeout)
 	}
 
-	cron := cron.New(cron.WithLogger(cronLogger{
-		log: log.WithField("component", "cron"),
-	}))
-
-	return &DB{db: db, log: log, cron: cron}, nil
+	return db, nil
 }
 
 // Prepare prepares the database:
@@ -90,7 +93,7 @@ func (db *DB) Prepare() error {
 
 	err = errors.Wrap(err, "couldn't create tables")
 	if err != nil {
-		db.log.Error(err)
+		db.log.WithError(err).Error("coudln't create tables")
 		return err
 	}
 
@@ -103,13 +106,12 @@ func (db *DB) Prepare() error {
 	_, err = db.cron.AddFunc("@monthly", func() {
 		err = db.initCurrentMonth()
 		if err != nil {
-			db.log.Errorf("can't init the new month: %v", err)
+			db.log.WithError(err).Error("couldn't init a new month")
 		}
 	})
 	if err != nil {
-		err = errors.Wrap(err, "can't add function to cron")
-		db.log.Error(err)
-		return err
+		db.log.WithError(err).Error("can't add function to cron")
+		return errors.Wrap(err, "could't add function to cron")
 	}
 
 	// Start cron
@@ -139,37 +141,40 @@ func (db *DB) initCurrentMonth() error {
 		Column("id").
 		Where("year = ? AND month = ?", year, month).
 		Select()
+	if err == nil {
+		return nil
+	}
+	if err != pg.ErrNoRows {
+		db.log.WithError(err).Error("couldn't select the current month")
+		return err
+	}
 
-	if err == pg.ErrNoRows {
-		// We have to init the current month
+	// We have to init the current month
+	log := db.log
 
-		// Add current month
-		db.log.Debug("init the current month")
+	// Add current month
+	log.Debug("init the current month")
 
-		currentMonth := &Month{Year: year, Month: month}
-		err = db.db.Insert(currentMonth)
-		if err != nil {
-			err = errors.Wrap(err, "can't init current month")
-			db.log.Error(err)
-			return err
-		}
+	currentMonth := &Month{Year: year, Month: month}
+	if err = db.db.Insert(currentMonth); err != nil {
+		log.WithError(err).Error("could't init the current month")
+		return errors.Wrap(err, "could't init the current month")
+	}
 
-		monthID := currentMonth.ID
-		db.log.Debugf("current month id: '%d'", monthID)
+	monthID := currentMonth.ID
+	log = log.WithField("month_id", monthID)
+	log.Debug("current month was successfully inited")
 
-		// Add days for the current month
-		daysNumber := daysInMonth(now)
-		days := make([]*Day, daysNumber)
-		for i := range days {
-			days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
-		}
+	// Add days for the current month
+	daysNumber := daysInMonth(now)
+	days := make([]*Day, daysNumber)
+	for i := range days {
+		days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
+	}
 
-		err = db.db.Insert(&days)
-		if err != nil {
-			err = errors.Wrap(err, "can't insert days for current month")
-			db.log.Error(err)
-			return err
-		}
+	if err = db.db.Insert(&days); err != nil {
+		log.WithError(err).Error("couldn't insert days for current month")
+		return errors.Wrap(err, "couldn't insert days for current month")
 	}
 
 	return nil
@@ -178,7 +183,7 @@ func (db *DB) initCurrentMonth() error {
 // Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
 	// cron
-	db.log.Debug("wait to stop cron jobs...")
+	db.log.Debug("wait to stop cron jobs")
 	ctx := db.cron.Stop()
 	<-ctx.Done()
 	db.log.Debug("all cron jobs were stopped")

@@ -121,7 +121,7 @@ type cronLogger struct {
 // Info logs routine messages about cron's operation.
 func (c cronLogger) Info(msg string, keysAndValues ...interface{}) {
 	args := buildStringFromKeysAndValues(keysAndValues...)
-	c.log.Info(msg, args)
+	c.log.Debug(msg, args)
 }
 
 // Error logs an error condition.
