@@ -36,7 +36,7 @@ func FromContext(ctx context.Context) RequestID {
 	return New()
 }
 
-// ToContext
+// ToContext returns a context based on passed one with injected request id
 func ToContext(ctx context.Context, reqID RequestID) context.Context {
 	return context.WithValue(ctx, requestIDContextKey{}, reqID)
 }
