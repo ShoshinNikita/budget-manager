@@ -10,12 +10,12 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"github.com/ShoshinNikita/go-clog/v3"
+	"github.com/sirupsen/logrus"
 )
 
 // TemplateStore is used for serving *template.Template. It provides in-memory template caching
 type TemplateStore struct {
-	log *clog.Logger
+	log logrus.FieldLogger
 
 	templates map[string]*template
 	mux       *sync.Mutex
@@ -30,7 +30,7 @@ type template struct {
 }
 
 // NewTemplateStore inits new Template Store
-func NewTemplateStore(log *clog.Logger, cacheTemplates bool) *TemplateStore {
+func NewTemplateStore(log logrus.FieldLogger, cacheTemplates bool) *TemplateStore {
 	store := &TemplateStore{
 		templates: make(map[string]*template),
 		mux:       new(sync.Mutex),

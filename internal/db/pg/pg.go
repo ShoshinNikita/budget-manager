@@ -5,11 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	clog "github.com/ShoshinNikita/go-clog/v3"
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
+	"github.com/sirupsen/logrus"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 )
@@ -30,11 +30,11 @@ type Config struct {
 type DB struct {
 	db   *pg.DB
 	cron *cron.Cron
-	log  *clog.Logger
+	log  logrus.FieldLogger
 }
 
 // NewDB creates a new connection to the db and pings it
-func NewDB(config Config, log *clog.Logger) (*DB, error) {
+func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 	db := pg.Connect(&pg.Options{
 		Addr:     config.Host + ":" + strconv.Itoa(config.Port),
 		User:     config.User,
@@ -60,7 +60,9 @@ func NewDB(config Config, log *clog.Logger) (*DB, error) {
 		time.Sleep(connectRetryTimeout)
 	}
 
-	cron := cron.New(cron.WithLogger(cronLogger{log: log.WithPrefix("[cron]")}))
+	cron := cron.New(cron.WithLogger(cronLogger{
+		log: log.WithField("component", "cron"),
+	}))
 
 	return &DB{db: db, log: log, cron: cron}, nil
 }

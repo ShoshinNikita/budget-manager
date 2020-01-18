@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ShoshinNikita/go-clog/v3"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
@@ -69,7 +69,7 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 // -------------------------------------------------
 
 type Server struct {
-	log      *clog.Logger
+	log      logrus.FieldLogger
 	db       Database
 	tplStore TemplateStore
 
@@ -115,7 +115,7 @@ type TemplateStore interface {
 	Execute(path string, w io.Writer, data interface{}) error
 }
 
-func NewServer(cnf Config, db Database, log *clog.Logger, debug bool) *Server {
+func NewServer(cnf Config, db Database, log logrus.FieldLogger, debug bool) *Server {
 	if debug {
 		// Load templates every request
 		cnf.CacheTemplates = false
@@ -126,10 +126,12 @@ func NewServer(cnf Config, db Database, log *clog.Logger, debug bool) *Server {
 
 	//nolint:gosimple
 	return &Server{
-		db:       db,
-		log:      log,
-		tplStore: templates.NewTemplateStore(log.WithPrefix("[template store]"), cnf.CacheTemplates),
-		config:   cnf,
+		db:  db,
+		log: log,
+		tplStore: templates.NewTemplateStore(
+			log.WithField("component", "template store"), cnf.CacheTemplates,
+		),
+		config: cnf,
 	}
 }
 

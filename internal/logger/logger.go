@@ -1,6 +1,8 @@
 package logger
 
-import "github.com/ShoshinNikita/go-clog/v3"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 // {year}/{month}/{day} {hour}:{minute}:{second}
 const timeLayout = "2006/01/02 15:04:05"
@@ -15,44 +17,42 @@ type Config struct {
 	Level string `env:"LOGGER_LEVEL" envDefault:"info"`
 }
 
-func New(cnf Config, debug bool) *clog.Logger {
-	var loggerConfig *clog.Config
-	switch cnf.Mode {
-	case "prod", "production":
-		loggerConfig = clog.NewProdConfig()
-	case "dev", "develop":
-		loggerConfig = clog.NewDevConfig()
-	default:
-		loggerConfig = clog.NewDevConfig()
-	}
+func New(cnf Config, debug bool) *logrus.Logger {
+	log := logrus.New()
 
 	// Set passed log level
-	loggerConfig.SetLevel(logLevelFromString(cnf.Level))
+	log.SetLevel(logLevelFromString(cnf.Level))
 
-	// Always use dev config in debug mode
-	if debug {
-		loggerConfig = clog.NewDevConfig().SetLevel(clog.LevelDebug)
+	switch cnf.Mode {
+	case "prod", "production":
+		log.SetFormatter(&logrus.JSONFormatter{})
+	case "dev", "develop":
+		fallthrough
+	default:
+		log.SetFormatter(&logrus.TextFormatter{})
 	}
 
-	// Set custom time layout
-	loggerConfig.SetTimeLayout(timeLayout)
+	// Always use debug level in debug mode
+	if debug {
+		log.SetLevel(logrus.DebugLevel)
+	}
 
-	return loggerConfig.Build()
+	return log
 }
 
-func logLevelFromString(lvl string) clog.LogLevel {
+func logLevelFromString(lvl string) logrus.Level {
 	switch lvl {
 	case "dbg", "debug":
-		return clog.LevelDebug
+		return logrus.DebugLevel
 	case "inf", "info":
-		return clog.LevelInfo
+		return logrus.InfoLevel
 	case "warn", "warning":
-		return clog.LevelWarn
+		return logrus.WarnLevel
 	case "err", "error":
-		return clog.LevelError
+		return logrus.ErrorLevel
 	case "fatal":
-		return clog.LevelFatal
+		return logrus.FatalLevel
 	default:
-		return clog.LevelInfo
+		return logrus.InfoLevel
 	}
 }

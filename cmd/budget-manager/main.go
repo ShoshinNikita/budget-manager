@@ -6,9 +6,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ShoshinNikita/go-clog/v3"
 	"github.com/caarlos0/env/v6"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -39,7 +39,7 @@ type App struct {
 	config Config
 
 	db     Database
-	log    *clog.Logger
+	log    logrus.FieldLogger
 	server *web.Server
 }
 
@@ -106,7 +106,7 @@ func (app *App) prepareDB() (err error) {
 	switch app.config.DBType {
 	case "postgres", "postgresql":
 		app.log.Debug("db type is PostgreSQL")
-		app.db, err = pg.NewDB(app.config.PostgresDB, app.log.WithPrefix("[database]"))
+		app.db, err = pg.NewDB(app.config.PostgresDB, app.log.WithField("component", "database"))
 	default:
 		err = errors.New("unsupported DB type")
 	}
@@ -129,7 +129,7 @@ func (app *App) prepareDB() (err error) {
 
 func (app *App) prepareWebServer() {
 	app.server = web.NewServer(
-		app.config.Server, app.db, app.log.WithPrefix("[server]"), app.config.Debug,
+		app.config.Server, app.db, app.log.WithField("component", "server"), app.config.Debug,
 	)
 	app.server.Prepare()
 }
