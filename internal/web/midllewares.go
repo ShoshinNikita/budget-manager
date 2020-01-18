@@ -23,14 +23,12 @@ func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
 	})
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := s.log.WithFields(logrus.Fields{
-			"ip":  r.RemoteAddr,
-			"url": r.URL,
-		})
+		log := request_id.FromContextToLogger(r.Context(), s.log)
+		log = log.WithFields(logrus.Fields{"ip": r.RemoteAddr, "url": r.URL})
 
 		if username := basicAuthenticator.CheckAuth(r); username == "" {
 			// Auth has failed
-			log.Error("invalid auth request")
+			log.Warn("invalid auth request")
 			basicAuthenticator.RequireAuth(w, r)
 			return
 		}

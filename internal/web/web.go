@@ -140,12 +140,12 @@ func (s *Server) Prepare() {
 	router.StrictSlash(true)
 
 	// Add middlewares
+	router.Use(s.requestIDMeddleware)
 	if !s.config.SkipAuth {
 		router.Use(s.basicAuthMiddleware)
 	} else {
 		s.log.Warn("auth is disabled")
 	}
-	router.Use(s.requestIDMeddleware)
 	router.Use(s.loggingMiddleware)
 
 	// Add API routes
