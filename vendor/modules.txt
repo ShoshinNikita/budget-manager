@@ -7,7 +7,7 @@ github.com/caarlos0/env/v6
 # github.com/codemodus/kace v0.5.1
 github.com/codemodus/kace
 github.com/codemodus/kace/ktrie
-# github.com/davecgh/go-spew v1.1.0
+# github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.8.0
 github.com/fatih/color
@@ -28,6 +28,8 @@ github.com/golang/protobuf/proto
 github.com/gorilla/mux
 # github.com/jinzhu/inflection v1.0.0
 github.com/jinzhu/inflection
+# github.com/konsorten/go-windows-terminal-sequences v1.0.1
+github.com/konsorten/go-windows-terminal-sequences
 # github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.11
@@ -41,6 +43,8 @@ github.com/robfig/cron/v3
 # github.com/segmentio/encoding v0.1.8
 github.com/segmentio/encoding/ascii
 github.com/segmentio/encoding/json
+# github.com/sirupsen/logrus v1.4.2
+github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
