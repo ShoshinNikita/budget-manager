@@ -122,7 +122,7 @@
 		.detailed-info__block__header {
 			border-bottom: 1px solid var(--border-accent-color);
 			margin: 0 5px 5px;
-			font-size: 18px;
+			font-size: 20px;
 			padding-bottom: 5px;
 			text-align: center;
 		}
@@ -245,9 +245,9 @@
 
 		.detailed-info__days__day__date {
 			border-bottom: 1px solid var(--border-accent-color);
-			font-size: 18px;
+			font-size: 20px;
 			margin: 5px 0px 10px;
-			padding: 0 10px;
+			padding: 0 10px 5px;
 		}
 
 		.detailed-info__days__day__spends {
@@ -401,6 +401,7 @@
 			}
 
 			.detailed-info__block__header {
+				font-size: 18px;
 				padding: 0;
 			}
 
@@ -425,6 +426,10 @@
 			.detailed-info__days__calendar__day__info__spend-number,
 			.detailed-info__days__calendar__day__saldo {
 				display: none;
+			}
+
+			.detailed-info__days__day__date {
+				font-size: 18px;
 			}
 		}
 	</style>
@@ -545,9 +550,8 @@
 							<th class="detailed-info__block__table__header-title noselect">Title</th>
 							<th class="noselect">Notes</th>
 							<th class="noselect">Type</th>
-							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px">
-								Cost,
-							</th>
+							<th class="detailed-info__block__table__header-cost money noselect"
+								style="width: 90px">Cost,</th>
 							<th class="detailed-info__block__table__header-actions"></th>
 						</tr>
 
@@ -654,7 +658,7 @@
 								<th class="noselect">Title</th>
 								<th class="noselect">Notes</th>
 								<th class="noselect">Type</th>
-								<th class="money noselect" style="width: 100px;">Cost</th>
+								<th class="money noselect" style="width: 100px;">Cost,</th>
 								<th class="detailed-info__block__table__header-actions"></th>
 							</tr>
 
