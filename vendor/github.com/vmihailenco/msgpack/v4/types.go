@@ -2,6 +2,7 @@ package msgpack
 
 import (
 	"encoding"
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
@@ -27,8 +28,8 @@ var (
 )
 
 type (
-	encoderFunc = func(*Encoder, reflect.Value) error
-	decoderFunc = func(*Decoder, reflect.Value) error
+	encoderFunc func(*Encoder, reflect.Value) error
+	decoderFunc func(*Decoder, reflect.Value) error
 )
 
 var (
@@ -51,8 +52,10 @@ func Register(value interface{}, enc encoderFunc, dec decoderFunc) {
 
 //------------------------------------------------------------------------------
 
-var structs = newStructCache(false)
-var jsonStructs = newStructCache(true)
+var (
+	structs     = newStructCache(false)
+	jsonStructs = newStructCache(true)
+)
 
 type structCache struct {
 	m sync.Map
@@ -103,7 +106,7 @@ func (f *field) EncodeValue(e *Encoder, strct reflect.Value) error {
 }
 
 func (f *field) DecodeValue(d *Decoder, strct reflect.Value) error {
-	v := fieldByIndexNewIfNil(strct, f.index)
+	v := fieldByIndexAlloc(strct, f.index)
 	return f.decoder(d, v)
 }
 
@@ -127,14 +130,17 @@ func newFields(typ reflect.Type) *fields {
 }
 
 func (fs *fields) Add(field *field) {
-	if _, ok := fs.Map[field.name]; ok {
-		log.Printf("msgpack: %s already has field=%s", fs.Type, field.name)
-	}
-
+	fs.warnIfFieldExists(field.name)
 	fs.Map[field.name] = field
 	fs.List = append(fs.List, field)
 	if field.omitEmpty {
 		fs.hasOmitEmpty = true
+	}
+}
+
+func (fs *fields) warnIfFieldExists(name string) {
+	if _, ok := fs.Map[name]; ok {
+		log.Printf("msgpack: %s already has field=%s", fs.Type, name)
 	}
 }
 
@@ -188,8 +194,23 @@ func getFields(typ reflect.Type, useJSONTag bool) *fields {
 			name:      tag.Name,
 			index:     f.Index,
 			omitEmpty: omitEmpty || tag.HasOption("omitempty"),
-			encoder:   getEncoder(f.Type),
-			decoder:   getDecoder(f.Type),
+		}
+
+		if tag.HasOption("intern") {
+			switch f.Type.Kind() {
+			case reflect.Interface:
+				field.encoder = encodeInternInterfaceValue
+				field.decoder = decodeInternInterfaceValue
+			case reflect.String:
+				field.encoder = encodeInternStringValue
+				field.decoder = decodeInternStringValue
+			default:
+				err := fmt.Errorf("msgpack: intern strings are not supported on %s", f.Type)
+				panic(err)
+			}
+		} else {
+			field.encoder = getEncoder(f.Type)
+			field.decoder = getDecoder(f.Type)
 		}
 
 		if field.name == "" {
@@ -214,12 +235,19 @@ func getFields(typ reflect.Type, useJSONTag bool) *fields {
 		}
 
 		fs.Add(field)
+
+		if alias, ok := tag.Options["alias"]; ok {
+			fs.warnIfFieldExists(alias)
+			fs.Map[alias] = field
+		}
 	}
 	return fs
 }
 
-var encodeStructValuePtr uintptr
-var decodeStructValuePtr uintptr
+var (
+	encodeStructValuePtr uintptr
+	decodeStructValuePtr uintptr
+)
 
 //nolint:gochecknoinits
 func init() {
@@ -317,7 +345,7 @@ func fieldByIndex(v reflect.Value, index []int) (_ reflect.Value, isNil bool) {
 	return v, false
 }
 
-func fieldByIndexNewIfNil(v reflect.Value, index []int) reflect.Value {
+func fieldByIndexAlloc(v reflect.Value, index []int) reflect.Value {
 	if len(index) == 1 {
 		return v.Field(index[0])
 	}

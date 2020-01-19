@@ -16,7 +16,7 @@ github.com/go-pg/pg/v9/internal/parser
 github.com/go-pg/pg/v9/internal/pool
 github.com/go-pg/pg/v9/orm
 github.com/go-pg/pg/v9/types
-# github.com/go-pg/urlstruct v0.2.10
+# github.com/go-pg/urlstruct v0.2.11
 github.com/go-pg/urlstruct
 # github.com/go-pg/zerochecker v0.1.1 => github.com/go-pg/zerochecker v0.1.2-0.20190924102134-549b3bbf317c
 github.com/go-pg/zerochecker
@@ -26,19 +26,19 @@ github.com/golang/protobuf/proto
 github.com/gorilla/mux
 # github.com/jinzhu/inflection v1.0.0
 github.com/jinzhu/inflection
-# github.com/konsorten/go-windows-terminal-sequences v1.0.1
+# github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
 # github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.11
 github.com/mattn/go-isatty
-# github.com/pkg/errors v0.8.1
+# github.com/pkg/errors v0.9.1
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/robfig/cron/v3 v3.0.1
 github.com/robfig/cron/v3
-# github.com/segmentio/encoding v0.1.8
+# github.com/segmentio/encoding v0.1.9
 github.com/segmentio/encoding/ascii
 github.com/segmentio/encoding/json
 # github.com/sirupsen/logrus v1.4.2
@@ -46,20 +46,20 @@ github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/vmihailenco/msgpack/v4 v4.3.1
+# github.com/vmihailenco/msgpack/v4 v4.3.5
 github.com/vmihailenco/msgpack/v4
 github.com/vmihailenco/msgpack/v4/codes
 # github.com/vmihailenco/tagparser v0.1.1
 github.com/vmihailenco/tagparser
 github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
-# golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876
+# golang.org/x/crypto v0.0.0-20200117160349-530e935923ad
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
-# golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+# golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
 golang.org/x/net/context
-# golang.org/x/sys v0.0.0-20200106162015-b016eb3dc98e
+# golang.org/x/sys v0.0.0-20200117145432-59e60aa80a0c
 golang.org/x/sys/unix
 # google.golang.org/appengine v1.6.5
 google.golang.org/appengine

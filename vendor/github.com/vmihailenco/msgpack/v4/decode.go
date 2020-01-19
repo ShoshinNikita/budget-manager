@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/vmihailenco/msgpack/v4/codes"
@@ -23,17 +24,25 @@ type bufReader interface {
 	io.ByteScanner
 }
 
-func newBufReader(r io.Reader) bufReader {
-	if br, ok := r.(bufReader); ok {
-		return br
-	}
-	return bufio.NewReader(r)
+//------------------------------------------------------------------------------
+
+var decPool = sync.Pool{
+	New: func() interface{} {
+		return NewDecoder(nil)
+	},
 }
 
 // Unmarshal decodes the MessagePack-encoded data and stores the result
 // in the value pointed to by v.
 func Unmarshal(data []byte, v interface{}) error {
-	return NewDecoder(bytes.NewReader(data)).Decode(v)
+	dec := decPool.Get().(*Decoder)
+
+	dec.Reset(bytes.NewReader(data))
+	err := dec.Decode(v)
+
+	decPool.Put(dec)
+
+	return err
 }
 
 // A Decoder reads and decodes MessagePack values from an input stream.
@@ -45,8 +54,11 @@ type Decoder struct {
 	extLen int
 	rec    []byte // accumulates read data if not nil
 
-	useLoose   bool
-	useJSONTag bool
+	intern []string
+
+	useLoose              bool
+	useJSONTag            bool
+	disallowUnknownFields bool
 
 	decodeMapFunc func(*Decoder) (interface{}, error)
 }
@@ -58,8 +70,27 @@ type Decoder struct {
 // by passing a reader that implements io.ByteScanner interface.
 func NewDecoder(r io.Reader) *Decoder {
 	d := new(Decoder)
-	d.resetReader(r)
+	d.Reset(r)
 	return d
+}
+
+// Reset discards any buffered data, resets all state, and switches the buffered
+// reader to read from r.
+func (d *Decoder) Reset(r io.Reader) {
+	if br, ok := r.(bufReader); ok {
+		d.r = br
+		d.s = br
+	} else if br, ok := d.r.(*bufio.Reader); ok {
+		br.Reset(r)
+	} else {
+		br := bufio.NewReader(r)
+		d.r = br
+		d.s = br
+	}
+
+	if d.intern != nil {
+		d.intern = d.intern[:0]
+	}
 }
 
 func (d *Decoder) SetDecodeMapFunc(fn func(*Decoder) (interface{}, error)) {
@@ -80,21 +111,17 @@ func (d *Decoder) UseJSONTag(flag bool) *Decoder {
 	return d
 }
 
+// DisallowUnknownFields causes the Decoder to return an error when the destination
+// is a struct and the input contains object keys which do not match any
+// non-ignored, exported fields in the destination.
+func (d *Decoder) DisallowUnknownFields() {
+	d.disallowUnknownFields = true
+}
+
 // Buffered returns a reader of the data remaining in the Decoder's buffer.
 // The reader is valid until the next call to Decode.
 func (d *Decoder) Buffered() io.Reader {
 	return d.r
-}
-
-func (d *Decoder) Reset(r io.Reader) error {
-	d.resetReader(r)
-	return nil
-}
-
-func (d *Decoder) resetReader(r io.Reader) {
-	reader := newBufReader(r)
-	d.r = reader
-	d.s = reader
 }
 
 //nolint:gocyclo
@@ -533,10 +560,7 @@ func readN(r io.Reader, b []byte, n int) ([]byte, error) {
 
 	var pos int
 	for {
-		alloc := n - len(b)
-		if alloc > bytesAllocLimit {
-			alloc = bytesAllocLimit
-		}
+		alloc := min(n-len(b), bytesAllocLimit)
 		b = append(b, make([]byte, alloc)...)
 
 		_, err := io.ReadFull(r, b[pos:])

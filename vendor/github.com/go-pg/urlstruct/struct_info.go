@@ -47,6 +47,18 @@ func (s *StructInfo) Field(name string) *Field {
 func addFields(sinfo *StructInfo, typ reflect.Type, baseIndex []int) {
 	for i := 0; i < typ.NumField(); i++ {
 		sf := typ.Field(i)
+
+		if sf.Name == "tableName" {
+			tag := tagparser.Parse(sf.Tag.Get("urlstruct"))
+			if tag.Name == "-" {
+				continue
+			}
+
+			name, _ := tagparser.Unquote(tag.Name)
+			sinfo.TableName = name
+			continue
+		}
+
 		if sf.PkgPath != "" && !sf.Anonymous {
 			continue
 		}
@@ -78,18 +90,8 @@ func addFields(sinfo *StructInfo, typ reflect.Type, baseIndex []int) {
 }
 
 func addField(sinfo *StructInfo, sf reflect.StructField, baseIndex []int) {
-	tagStr := sf.Tag.Get("urlstruct")
-	if tagStr == "-" {
-		return
-	}
-	tag := tagparser.Parse(tagStr)
+	tag := tagparser.Parse(sf.Tag.Get("urlstruct"))
 	if tag.Name == "-" {
-		return
-	}
-
-	if sf.Name == "tableName" {
-		name, _ := tagparser.Unquote(tag.Name)
-		sinfo.TableName = name
 		return
 	}
 
