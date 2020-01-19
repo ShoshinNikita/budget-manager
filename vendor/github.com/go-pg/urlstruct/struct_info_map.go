@@ -25,6 +25,9 @@ type structInfoMap struct {
 }
 
 func (m *structInfoMap) DescribeStruct(typ reflect.Type) *StructInfo {
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
 	if typ.Kind() != reflect.Struct {
 		panic(fmt.Errorf("got %s, wanted %s", typ.Kind(), reflect.Struct))
 	}
