@@ -12,6 +12,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
@@ -136,7 +137,10 @@ func (app *App) prepareWebServer() {
 
 // Run runs web server and waits for a server error or an interrupt signal
 func (app *App) Run() (appErr error) {
-	app.log.Info("start app")
+	app.log.WithFields(logrus.Fields{
+		"version":  version.Version,
+		"git_hash": version.GitHash,
+	}).Info("start app")
 
 	// Start the application
 	webServerError := make(chan error, 1)
