@@ -69,6 +69,7 @@ func (Server) requestIDMeddleware(h http.Handler) http.Handler {
 	})
 }
 
+// loggingMiddleware logs all HTTP requests. It also logs execution time, content length and status code
 func (s Server) loggingMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -76,7 +77,7 @@ func (s Server) loggingMiddleware(h http.Handler) http.Handler {
 
 		log.Debug("start request")
 
-		respWriter := NewResponseWriter(w)
+		respWriter := newResponseWriter(w)
 		now := time.Now()
 		h.ServeHTTP(respWriter, r)
 		since := time.Since(now)
@@ -85,30 +86,32 @@ func (s Server) loggingMiddleware(h http.Handler) http.Handler {
 			"time":           since,
 			"status_code":    respWriter.statusCode,
 			"content_length": respWriter.contentLength,
-		}).Debugf("finish request")
+		}).Debug("finish request")
 	})
 }
 
-type ResponseWriter struct {
+// responseWriter implents 'http.ResponseWriter' interface and contains the information
+// about status code and content length
+type responseWriter struct {
 	http.ResponseWriter
 
 	statusCode    int
 	contentLength int
 }
 
-func NewResponseWriter(w http.ResponseWriter) *ResponseWriter {
-	return &ResponseWriter{
+func newResponseWriter(w http.ResponseWriter) *responseWriter {
+	return &responseWriter{
 		ResponseWriter: w,
 		statusCode:     http.StatusOK,
 	}
 }
 
-func (w *ResponseWriter) WriteHeader(statusCode int) {
+func (w *responseWriter) WriteHeader(statusCode int) {
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
-func (w *ResponseWriter) Write(data []byte) (int, error) {
+func (w *responseWriter) Write(data []byte) (int, error) {
 	w.contentLength += len(data)
 	return w.ResponseWriter.Write(data)
 }
