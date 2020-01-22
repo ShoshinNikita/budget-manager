@@ -1,3 +1,5 @@
+// Package version contains global variables which must be set during the build process
+// For example, version and commit hash
 package version
 
 // nolint:gochecknoglobals
