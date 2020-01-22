@@ -34,7 +34,7 @@ func New(cnf Config, debug bool) *logrus.Logger {
 	case "dev", "develop":
 		fallthrough
 	default:
-		log.SetFormatter(DevFormatter{})
+		log.SetFormatter(devFormatter{})
 	}
 
 	// Always use debug level in debug mode
@@ -45,6 +45,7 @@ func New(cnf Config, debug bool) *logrus.Logger {
 	return log
 }
 
+// logLevelFromString converts passed string to logrus log level
 func logLevelFromString(lvl string) logrus.Level {
 	switch lvl {
 	case "dbg", "debug":
@@ -62,12 +63,13 @@ func logLevelFromString(lvl string) logrus.Level {
 	}
 }
 
-type DevFormatter struct{}
+// devFormatter is used as a log formatter in the developer mode
+type devFormatter struct{}
 
-var _ logrus.Formatter = DevFormatter{}
+var _ logrus.Formatter = devFormatter{}
 
-// Format formats
-func (DevFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+// Format formats '*logrus.Entry'
+func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	buff := &bytes.Buffer{}
 	if entry.Buffer != nil {
 		buff = entry.Buffer
@@ -107,6 +109,8 @@ func (DevFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
+// Ready to print colored log levels
+//
 // nolint:gochecknoglobals
 var (
 	coloredTraceLvl = []byte(color.HiMagentaString("[TRC]"))
@@ -118,6 +122,8 @@ var (
 	coloredFatalLvl = []byte(color.New(color.BgRed).Sprint("[FAT]"))
 )
 
+// logLevelToString converts logrus log level to colored string
+// It returns bytes for greater convenience
 func logLevelToString(lvl logrus.Level) []byte {
 	switch lvl {
 	case logrus.TraceLevel:
@@ -139,6 +145,8 @@ func logLevelToString(lvl logrus.Level) []byte {
 	}
 }
 
+// logLevelToPrintfFunction returns a function to print colored output according to
+// passed logrus log level
 func logLevelToPrintfFunction(lvl logrus.Level) func(format string, a ...interface{}) string {
 	switch lvl {
 	case logrus.TraceLevel:
