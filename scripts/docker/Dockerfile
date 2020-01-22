@@ -24,7 +24,8 @@ COPY cmd ./cmd
 COPY internal ./internal
 
 # Build
-RUN go build -mod vendor -o ./bin/budget-manager ./cmd/budget-manager/main.go
+ARG LDFLAGS
+RUN go build -ldflags "${LDFLAGS}" -mod vendor -o ./bin/budget-manager ./cmd/budget-manager/main.go
 
 
 #

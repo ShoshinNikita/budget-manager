@@ -1,24 +1,26 @@
+MODULE_PATH=github.com/ShoshinNikita/budget-manager
 DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 
 run: run-local
 
 # Build
 
-build:
-	go build -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
+build: export-ldflags
+	go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
-build-docker:
-	docker-compose -f ${DOCKER_COMPOSE} build
+build-docker: TAG?=budget-manager:latest
+build-docker: export-ldflags
+	@ docker build -f scripts/docker/Dockerfile -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # Run
 
-run-local: stop
+run-local: stop export-ldflags
 	# Run Postgres
 	./scripts/local/postgres.sh
 	# Run Budget Manager
 	./scripts/local/run.sh
 
-run-docker: stop
+run-docker: stop export-ldflags
 	docker-compose -f ${DOCKER_COMPOSE} up \
 		--build \
 		--force-recreate \
@@ -58,6 +60,24 @@ test-integ: stop
 	docker stop budget-manager_postgres
 
 # Other
+
+# export-ldflags exports LDFLAGS env variable. It is used during the build process to set version
+# and git hash. It can be used as a dependency target
+#
+# For example, we have target 'build':
+#
+#  build: export-ldflags
+#    go build -ldflags "${LDFLAGS}" main.go
+#
+# We can use it as 'make build VERSION=v1.0.0'. Then, next command will be executed:
+#
+#  go build -ldflags "-X 'main.Version=v1.0.0' -X 'main.GitHash=some_hash'" main.go
+#
+export-ldflags: GIT_HASH=$(shell git log -1 --pretty="format:%h")
+export-ldflags: VERSION?=unknown
+export-ldflags:
+	$(eval export LDFLAGS=-X '${MODULE_PATH}/internal/pkg/version.Version=${VERSION}' -X '${MODULE_PATH}/internal/pkg/version.GitHash=${GIT_HASH}')
+	@ echo Use this ldflags: ${LDFLAGS}
 
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
