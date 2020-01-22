@@ -7,7 +7,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
@@ -78,9 +77,8 @@ func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
 
 func (s Server) logError(respMsg string, code int, internalErr error) {
 	s.log.WithFields(logrus.Fields{
-		"caller": caller.GetFormattedCaller(3),
-		"msg":    respMsg,
-		"code":   code,
-		"error":  internalErr,
+		"msg":   respMsg,
+		"code":  code,
+		"error": internalErr,
 	}).Error("request error")
 }
