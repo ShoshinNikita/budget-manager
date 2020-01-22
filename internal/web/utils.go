@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"runtime"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
@@ -79,25 +78,9 @@ func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
 
 func (s Server) logError(respMsg string, code int, internalErr error) {
 	s.log.WithFields(logrus.Fields{
-		"caller": getCallerFunc(3),
+		"caller": caller.GetFormattedCaller(3),
 		"msg":    respMsg,
 		"code":   code,
 		"error":  internalErr,
 	}).Error("request error")
-}
-
-const prefixForTrim = "github.com/ShoshinNikita/budget-manager/"
-
-func getCallerFunc(skip int) string {
-	pc, _, _, ok := runtime.Caller(skip)
-	details := runtime.FuncForPC(pc)
-	if ok && details != nil {
-		// something like "github.com/username/project/internal/web.Service.Ping"
-		funcName := details.Name()
-
-		// trim "github.com/username/project/"
-		return strings.TrimPrefix(funcName, prefixForTrim)
-	}
-
-	return ""
 }
