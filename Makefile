@@ -8,8 +8,9 @@ run: run-local
 build: export-ldflags
 	go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
+build-docker: TAG?=budget-manager:latest
 build-docker: export-ldflags
-	docker-compose -f ${DOCKER_COMPOSE} build
+	@ docker build -f scripts/docker/Dockerfile -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # Run
 
