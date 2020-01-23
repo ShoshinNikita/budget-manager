@@ -23,12 +23,9 @@ You can find more screenshots [here](./docs/images/README.md)
 - [Development](#development)
   - [Run](#run)
   - [Test](#test)
-- [API](#api)
-  - [General](#general)
-  - [Income](#income)
-  - [Monthly Payment](#monthly-payment)
-  - [Spend](#spend)
-  - [Spend Type](#spend-type)
+- [Endpoints](#endpoints)
+  - [Pages](#pages)
+  - [API](#api)
 
 ## Install
 
@@ -79,7 +76,7 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 | Env Var                  | Default value | Description                                                                                                                                                                                                                                                                                                          |
 | ------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `DEBUG`                  | `false`       | Is Debug Mode on                                                                                                                                                                                                                                                                                                     |
-| `LOGGER_MODE`            | `prod`        | Logger mode. Available options: `prod` (or `production`), `dev` (or `develop`).                                                                                                                                                                                                                                      | **** |
+| `LOGGER_MODE`            | `prod`        | Logger mode. Available options: `prod` (or `production`), `dev` (or `develop`).                                                                                                                                                                                                                                      |
 | `LOGGER_LEVEL`           | `info`        | Min level of log messages. Available options: `debug`, `info`, `warn`, `error`, `fatal`.<br><br>**Note:** level is always `debug` when Debug Mode is on                                                                                                                                                              |
 | `DB_TYPE`                | `postgres`    | Database type. Only `postgres` is available now                                                                                                                                                                                                                                                                      |
 | `DB_PG_HOST`             | `localhost`   | Host for connection to the db                                                                                                                                                                                                                                                                                        |
@@ -131,13 +128,23 @@ make test
 make test-integ
 ```
 
-## API
+## Endpoints
+
+### Pages
+
+You can find screenshots of pages [here](./docs/images/README.md)
+
+- `/overview` - Overview Page (it is not ready yet)
+- `/overview/{year}` - Year Page
+- `/overview/{year}/{month_number}` - Month Page
+
+### API
 
 All endpoints return json response with `Content-Type: application/json` header.
 
 Requests and responses can be found in [internal/web/models](internal/web/models/models.go) package
 
-### General
+#### General
 
 - `GET /api/months` - get month
 
@@ -149,7 +156,7 @@ Requests and responses can be found in [internal/web/models](internal/web/models
   **Request:** `models.GetDayReq` or `models.GetDayByDate`  
   **Response:** `models.GetDayResp` or `models.Response`
 
-### Income
+#### Income
 
 - `POST /api/incomes` - add a new income
 
@@ -166,7 +173,7 @@ Requests and responses can be found in [internal/web/models](internal/web/models
   **Request:** `models.RemoveIncomeReq`  
   **Response:** `models.Response`
 
-### Monthly Payment
+#### Monthly Payment
 
 - `POST /api/monthly-payments` - add new Monthly Payment
 
@@ -183,7 +190,7 @@ Requests and responses can be found in [internal/web/models](internal/web/models
   **Request:** `models.DeleteMonthlyPaymentReq`  
   **Response:** `models.Response`
 
-### Spend
+#### Spend
 
 - `POST /api/spends` - add new Spend
 
@@ -200,7 +207,7 @@ Requests and responses can be found in [internal/web/models](internal/web/models
   **Request:** `models.RemoveSpendReq`  
   **Response:** `models.Response`
 
-### Spend Type
+#### Spend Type
 
 - `GET /api/spend-types` - get list of all Spend Types
 
