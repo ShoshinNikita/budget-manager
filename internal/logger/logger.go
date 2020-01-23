@@ -3,10 +3,13 @@ package logger
 import (
 	"bytes"
 	"fmt"
+	"runtime"
 	"sort"
 
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
 )
 
 // {year}/{month}/{day} {hour}:{minute}:{second}
@@ -24,13 +27,19 @@ type Config struct {
 
 func New(cnf Config, debug bool) *logrus.Logger {
 	log := logrus.New()
+	log.SetReportCaller(true)
 
 	// Set passed log level
 	log.SetLevel(logLevelFromString(cnf.Level))
 
 	switch cnf.Mode {
 	case "prod", "production":
-		log.SetFormatter(&logrus.JSONFormatter{})
+		log.SetFormatter(&logrus.JSONFormatter{
+			CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+				// Skip file field
+				return caller.FormatCaller(frame.Func), ""
+			},
+		})
 	case "dev", "develop":
 		fallthrough
 	default:
@@ -86,6 +95,11 @@ func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// Write message
 	buff.WriteString(entry.Message)
 	buff.WriteByte(' ')
+
+	// Add the caller to fields
+	if entry.HasCaller() {
+		entry.Data["func"] = caller.FormatCaller(entry.Caller.Func)
+	}
 
 	// Sort data keys
 	keys := make([]string, 0, len(entry.Data))
