@@ -18,6 +18,7 @@ You can find more screenshots [here](./docs/images/README.md)
 
 ***
 
+- [Install](#install)
 - [Configuration](#configuration)
 - [Development](#development)
   - [Run](#run)
@@ -30,6 +31,50 @@ You can find more screenshots [here](./docs/images/README.md)
   - [Spend Type](#spend-type)
 
 ***
+
+## Install
+
+You need [Docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) (optional)
+
+1. Create `docker-compose.yml` with the following content (you can find more setting in [Configuration](#configuration) section):
+
+    ```yaml
+    version: "2.4"
+
+    services:
+      budget-manager:
+        image: docker.pkg.github.com/shoshinnikita/budget-manager/budget-manager:latest
+        container_name: budget-manager
+        environment:
+          DB_TYPE: postgres
+          DB_PG_HOST: postgres
+          DB_PG_PORT: 5432
+          DB_PG_USER: postgres
+          DB_PG_PASSWORD: very_strong_password
+          DB_PG_DATABASE: postgres
+          SERVER_PORT: 8080
+          SERVER_CREDENTIALS: your creadentials # more info in 'Configuration' section
+        ports:
+          - "8080:8080"
+
+      postgres:
+        image: postgres
+        container_name: budget-manager_postgres
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: very_strong_password
+          POSTGRES_DB: postgres
+        volumes:
+          # Store data in ./var/pg_data directory
+          - type: bind
+            source: ./var/pg_data
+            target: /var/lib/postgresql/data
+        command: -c "log_statement=all"
+    ```
+
+2. Run `docker-compose up -d`
+3. Go to `http://localhost:8080` (change the port if needed)
+4. Profit!
 
 ## Configuration
 
