@@ -4,13 +4,13 @@
 
 ![Month Page](./docs/images/month_page_large.png)
 
-It was inspired by [Poor-Man's Budgeting Spreadsheet](https://www.reddit.com/r/personalfinance/comments/2tymvf/poormans_budgeting_spreadsheet/) and [You have less money than you think (rus)](https://journal.tinkoff.ru/spreadsheet/). These projects have a fatal flaw: you can't add multiple spends in a single day. This project resolves this issue
+It was inspired by [Poor-Man's Budgeting Spreadsheet](https://www.reddit.com/r/personalfinance/comments/2tymvf/poormans_budgeting_spreadsheet/) and [You have less money than you think (rus)](https://journal.tinkoff.ru/spreadsheet/). These projects have a fatal flaw: you can't add multiple spends in a single day. **Budger Manager** resolves that issue
 
 **Features:**
 
 - **Easy-to-use** - simple and intuitive UI
 
-- **Lightweight** - backend is written on [Go](https://golang.org/), HTML is rendered with [Go templates](https://golang.org/pkg/text/template/). Vanilla JavaScript is used just to make frontend interactive. So, JS code is very primitive and lightweight: it won't devour all your CPU and RAM (even with Chrome 😉)
+- **Lightweight** - backend is written in [Go](https://golang.org/), HTML is prepared with [Go templates](https://golang.org/pkg/text/template/). Vanilla JavaScript is used just to make frontend interactive. So, JS code is very primitive and lightweight: it won't devour all your CPU and RAM (even with Chrome 😉)
 
 - **Self-hosted** - you don't need to trust any proprietary software to store your financial information
 
@@ -34,7 +34,7 @@ You can find more screenshots [here](./docs/images/README.md)
 
 You need [Docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) (optional)
 
-1. Create `docker-compose.yml` with the following content (you can find more setting in [Configuration](#configuration) section):
+1. Create `docker-compose.yml` with the following content (you can find more settings in [Configuration](#configuration) section):
 
     ```yaml
     version: "2.4"
@@ -51,7 +51,7 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
           DB_PG_PASSWORD: very_strong_password
           DB_PG_DATABASE: postgres
           SERVER_PORT: 8080
-          SERVER_CREDENTIALS: your creadentials # more info in 'Configuration' section
+          SERVER_CREDENTIALS: your credentials # more info in 'Configuration' section
         ports:
           - "8080:8080"
 
