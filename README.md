@@ -30,8 +30,6 @@ You can find more screenshots [here](./docs/images/README.md)
   - [Spend](#spend)
   - [Spend Type](#spend-type)
 
-***
-
 ## Install
 
 You need [Docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) (optional)
