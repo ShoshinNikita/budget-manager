@@ -1,5 +1,19 @@
 # Budget Manager
 
+**Budger Manager** is an easy-to-use, lightweight and self-hosted solution to track your finances
+
+It was inspired by [Poor-Man's Budgeting Spreadsheet](https://www.reddit.com/r/personalfinance/comments/2tymvf/poormans_budgeting_spreadsheet/) and [You have less money than you think (rus)](https://journal.tinkoff.ru/spreadsheet/). These projects have a fatal flaw: you can't add multiple spends in a single day. This project resolves this issue
+
+**Features:**
+
+- **Easy-to-use** - simple and intuitive UI
+
+- **Lightweight** - backend is written on [Go](https://golang.org/), HTML is rendered with [Go templates](https://golang.org/pkg/text/template/). Vanilla JavaScript is used just to make frontend interactive. So, JS code is very primitive and lightweight: it won't devour all your CPU and RAM (even with Chrome 😉)
+
+- **Self-hosted** - you don't need to trust any proprietary software to store your financial information
+
+***
+
 - [Configuration](#configuration)
 - [Development](#development)
   - [Run](#run)
@@ -10,6 +24,8 @@
   - [Monthly Payment](#monthly-payment)
   - [Spend](#spend)
   - [Spend Type](#spend-type)
+
+***
 
 ## Configuration
 
