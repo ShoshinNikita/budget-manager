@@ -71,12 +71,12 @@ test-integ: stop
 #
 # We can use it as 'make build VERSION=v1.0.0'. Then, next command will be executed:
 #
-#  go build -ldflags "-X 'main.Version=v1.0.0' -X 'main.GitHash=some_hash'" main.go
+#  go build -ldflags "-s -w -X 'main.Version=v1.0.0' -X 'main.GitHash=some_hash'" main.go
 #
 export-ldflags: GIT_HASH=$(shell git log -1 --pretty="format:%h")
 export-ldflags: VERSION?=unknown
 export-ldflags:
-	$(eval export LDFLAGS=-X '${MODULE_PATH}/internal/pkg/version.Version=${VERSION}' -X '${MODULE_PATH}/internal/pkg/version.GitHash=${GIT_HASH}')
+	$(eval export LDFLAGS=-s -w -X '${MODULE_PATH}/internal/pkg/version.Version=${VERSION}' -X '${MODULE_PATH}/internal/pkg/version.GitHash=${GIT_HASH}')
 	@ echo Use this ldflags: ${LDFLAGS}
 
 lint:
