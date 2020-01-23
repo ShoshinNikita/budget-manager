@@ -1,4 +1,4 @@
-version: "3.7"
+version: "2.4"
 
 services:
   budget-manager:
@@ -35,7 +35,7 @@ services:
         target: /var/lib/postgresql/data
       # Use this volume to store data in ./var/pg_data directory
       # - type: bind
-      #   source: ./var/pg_data
+      #   source: ../../var/pg_data
       #   target: /var/lib/postgresql/data
     command: -c "log_statement=all"
 
