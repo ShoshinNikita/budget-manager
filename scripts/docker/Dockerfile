@@ -65,6 +65,4 @@ COPY --from=frontend-builder ${WORKDIR}/templates ./templates
 # Copy binaries
 COPY --from=backend-builder ${WORKDIR}/bin .
 
-EXPOSE 8080
-
 ENTRYPOINT [ "/srv/budget-manager" ]
