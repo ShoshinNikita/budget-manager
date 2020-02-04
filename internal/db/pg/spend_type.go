@@ -38,7 +38,7 @@ func (db DB) GetSpendType(ctx context.Context, id uint) (*SpendType, error) {
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(ctx context.Context) ([]SpendType, error) {
+func (db DB) GetSpendTypes(ctx context.Context) ([]*SpendType, error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 
 	spendTypes := []SpendType{}
