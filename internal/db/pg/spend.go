@@ -6,20 +6,20 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
+	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddSpend adds a new Spend
-func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err error) {
+func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint, err error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithFields(logrus.Fields{
 		"day_id": args.DayID, "title": args.Title, "type_id": args.TypeID, "cost": args.Cost,
 	})
 
 	if !db.checkDay(args.DayID) {
-		err := ErrDayNotExist
+		err := db_common.ErrDayNotExist
 		log.Error(err)
 		return 0, err
 	}
@@ -58,7 +58,7 @@ func (db DB) AddSpend(ctx context.Context, args AddSpendArgs) (id uint, err erro
 	return id, nil
 }
 
-func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
+func (DB) addSpend(tx *pg.Tx, args db_common.AddSpendArgs) (uint, error) {
 	spend := &Spend{
 		DayID:  args.DayID,
 		Title:  args.Title,
@@ -79,14 +79,14 @@ func (DB) addSpend(tx *pg.Tx, args AddSpendArgs) (uint, error) {
 }
 
 // EditSpend edits existeng Spend
-func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
+func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithFields(logrus.Fields{
 		"id": args.ID, "new_title": args.Title, "new_type_id": args.TypeID, "new_cost": args.Cost,
 	})
 
 	if !db.checkSpend(args.ID) {
-		err := ErrSpendNotExist
+		err := db_common.ErrSpendNotExist
 		log.Error(err)
 		return err
 	}
@@ -133,7 +133,7 @@ func (db DB) EditSpend(ctx context.Context, args EditSpendArgs) error {
 	return nil
 }
 
-func (DB) editSpend(tx *pg.Tx, spend *Spend, args EditSpendArgs) error {
+func (DB) editSpend(tx *pg.Tx, spend *Spend, args db_common.EditSpendArgs) error {
 	if args.Title != nil {
 		spend.Title = *args.Title
 	}
@@ -159,7 +159,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 	log = log.WithField("id", id)
 
 	if !db.checkSpend(id) {
-		err := ErrSpendNotExist
+		err := db_common.ErrSpendNotExist
 		log.Error(err)
 		return err
 	}

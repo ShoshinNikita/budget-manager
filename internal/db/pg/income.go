@@ -6,20 +6,20 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
+	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddIncome adds a new income with passed params
-func (db DB) AddIncome(ctx context.Context, args AddIncomeArgs) (incomeID uint, err error) {
+func (db DB) AddIncome(ctx context.Context, args db_common.AddIncomeArgs) (incomeID uint, err error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithFields(logrus.Fields{
 		"month_id": args.MonthID, "title": args.Title, "income": args.Income,
 	})
 
 	if !db.checkMonth(args.MonthID) {
-		err := ErrMonthNotExist
+		err := db_common.ErrMonthNotExist
 		log.Error(err)
 		return 0, err
 	}
@@ -50,7 +50,7 @@ func (db DB) AddIncome(ctx context.Context, args AddIncomeArgs) (incomeID uint, 
 	return incomeID, nil
 }
 
-func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
+func (DB) addIncome(tx *pg.Tx, args db_common.AddIncomeArgs) (incomeID uint, err error) {
 	in := &Income{
 		MonthID: args.MonthID,
 
@@ -71,7 +71,7 @@ func (DB) addIncome(tx *pg.Tx, args AddIncomeArgs) (incomeID uint, err error) {
 }
 
 // EditIncome edits income with passed id, nil args are ignored
-func (db DB) EditIncome(ctx context.Context, args EditIncomeArgs) error {
+func (db DB) EditIncome(ctx context.Context, args db_common.EditIncomeArgs) error {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithFields(logrus.Fields{
 		"id":         args.ID,
@@ -80,7 +80,7 @@ func (db DB) EditIncome(ctx context.Context, args EditIncomeArgs) error {
 	})
 
 	if !db.checkIncome(args.ID) {
-		err := ErrIncomeNotExist
+		err := db_common.ErrIncomeNotExist
 		log.Error(err)
 		return err
 	}
@@ -92,7 +92,7 @@ func (db DB) EditIncome(ctx context.Context, args EditIncomeArgs) error {
 		err = tx.Select(in)
 		if err != nil {
 			if err == pg.ErrNoRows {
-				return ErrIncomeNotExist
+				return db_common.ErrIncomeNotExist
 			}
 			return errors.Wrap(err, errors.WithMsg("can't select Income"), errors.WithType(errors.AppError))
 		}
@@ -122,7 +122,7 @@ func (db DB) EditIncome(ctx context.Context, args EditIncomeArgs) error {
 	return nil
 }
 
-func (DB) editIncome(tx *pg.Tx, in *Income, args EditIncomeArgs) error {
+func (DB) editIncome(tx *pg.Tx, in *Income, args db_common.EditIncomeArgs) error {
 	if args.Title != nil {
 		in.Title = *args.Title
 	}
@@ -150,7 +150,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 	log = log.WithField("id", id)
 
 	if !db.checkIncome(id) {
-		err := ErrIncomeNotExist
+		err := db_common.ErrIncomeNotExist
 		log.Error(err)
 		return err
 	}

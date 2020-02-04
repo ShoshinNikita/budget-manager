@@ -6,13 +6,13 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
+	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(ctx context.Context, id uint) (*SpendType, error) {
+func (db DB) GetSpendType(ctx context.Context, id uint) (*db_common.SpendType, error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithField("id", id)
 
@@ -34,11 +34,11 @@ func (db DB) GetSpendType(ctx context.Context, id uint) (*SpendType, error) {
 	}
 
 	log.Debug("return the Spend Types")
-	return spendType, nil
+	return spendType.ToCommon(), nil
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(ctx context.Context) ([]*SpendType, error) {
+func (db DB) GetSpendTypes(ctx context.Context) ([]*db_common.SpendType, error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 
 	spendTypes := []SpendType{}
@@ -53,7 +53,11 @@ func (db DB) GetSpendTypes(ctx context.Context) ([]*SpendType, error) {
 	}
 
 	log.Debug("return all Spend Types")
-	return spendTypes, nil
+	res := make([]*db_common.SpendType, 0, len(spendTypes))
+	for i := range spendTypes {
+		res = append(res, spendTypes[i].ToCommon())
+	}
+	return res, nil
 }
 
 // AddSpendType adds new Spend Type
@@ -91,7 +95,7 @@ func (db DB) EditSpendType(ctx context.Context, id uint, newName string) error {
 	log = log.WithFields(logrus.Fields{"id": id, "new_name": newName})
 
 	if !db.checkSpendType(id) {
-		err := ErrSpendTypeNotExist
+		err := db_common.ErrSpendTypeNotExist
 		log.Error(err)
 		return err
 	}
@@ -126,7 +130,7 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 	log = log.WithField("id", id)
 
 	if !db.checkSpendType(id) {
-		err := ErrSpendTypeNotExist
+		err := db_common.ErrSpendTypeNotExist
 		log.Error(err)
 		return err
 	}
