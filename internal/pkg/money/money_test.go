@@ -17,7 +17,9 @@ func TestConvertMoney(t *testing.T) {
 	t.Run("float to int", testConvertMoney_FloatToInt)
 }
 
-func testConvertMoney_IntToInt(t *testing.T) { // nolint:stylecheck,golint
+func testConvertMoney_IntToInt(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {
@@ -38,7 +40,9 @@ func testConvertMoney_IntToInt(t *testing.T) { // nolint:stylecheck,golint
 	}
 }
 
-func testConvertMoney_FloatToFloat(t *testing.T) { // nolint:stylecheck,golint
+func testConvertMoney_FloatToFloat(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {
@@ -60,7 +64,9 @@ func testConvertMoney_FloatToFloat(t *testing.T) { // nolint:stylecheck,golint
 	}
 }
 
-func testConvertMoney_IntToFloat(t *testing.T) { // nolint:stylecheck,golint
+func testConvertMoney_IntToFloat(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {
@@ -81,7 +87,9 @@ func testConvertMoney_IntToFloat(t *testing.T) { // nolint:stylecheck,golint
 	}
 }
 
-func testConvertMoney_FloatToInt(t *testing.T) { // nolint:stylecheck,golint
+func testConvertMoney_FloatToInt(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {
@@ -103,6 +111,8 @@ func testConvertMoney_FloatToInt(t *testing.T) { // nolint:stylecheck,golint
 }
 
 func TestAdd(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {
@@ -159,6 +169,8 @@ func TestAdd(t *testing.T) {
 }
 
 func TestSub(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {
@@ -215,6 +227,8 @@ func TestSub(t *testing.T) {
 }
 
 func TestDivide(t *testing.T) {
+	t.Parallel()
+
 	t.Run("common divides", func(t *testing.T) {
 		require := require.New(t)
 
@@ -256,7 +270,9 @@ func TestJSON(t *testing.T) {
 	t.Run("Unmarshal", testJSON_Unmarshal)
 }
 
-func testJSON_Marshal(t *testing.T) { // nolint:stylecheck,golint
+func testJSON_Marshal(t *testing.T) {
+	t.Parallel()
+
 	type testStruct struct {
 		Money Money `json:"money"`
 	}
@@ -296,7 +312,9 @@ func testJSON_Marshal(t *testing.T) { // nolint:stylecheck,golint
 	}
 }
 
-func testJSON_Unmarshal(t *testing.T) { // nolint:stylecheck,golint
+func testJSON_Unmarshal(t *testing.T) {
+	t.Parallel()
+
 	type testStruct struct {
 		Money Money `json:"money"`
 	}
@@ -335,6 +353,8 @@ func testJSON_Unmarshal(t *testing.T) { // nolint:stylecheck,golint
 }
 
 func TestFormat(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {

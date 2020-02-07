@@ -9,6 +9,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		errorMsg  string
 		options   []Option
@@ -92,6 +94,8 @@ func TestNew(t *testing.T) {
 }
 
 func TestWrap(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	originalErr := errors.New("original error")
