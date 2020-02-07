@@ -3,6 +3,8 @@
 package pg
 
 import (
+	"io/ioutil"
+
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
@@ -20,6 +22,8 @@ const monthID = 1
 func initDB(require *require.Assertions) *DB {
 	log := logrus.New()
 	log.SetLevel(logrus.ErrorLevel)
+	// Discard log messages in tests
+	log.SetOutput(ioutil.Discard)
 
 	config := Config{
 		Host:     dbHost,

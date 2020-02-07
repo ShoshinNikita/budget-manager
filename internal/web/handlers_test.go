@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -1350,6 +1351,8 @@ func TestMiddlewares_Auth(t *testing.T) {
 	// Logger
 	log := logrus.New()
 	log.SetLevel(logrus.ErrorLevel)
+	// Discard log messages in tests
+	log.SetOutput(ioutil.Discard)
 
 	// DB
 	dbConfig := pg.Config{
@@ -1448,6 +1451,8 @@ func initServer(require *require.Assertions) *Server {
 	// Logger
 	log := logrus.New()
 	log.SetLevel(logrus.ErrorLevel)
+	// Discard log messages in tests
+	log.SetOutput(ioutil.Discard)
 
 	// DB
 	dbConfig := pg.Config{
