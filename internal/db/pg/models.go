@@ -16,13 +16,18 @@ type Month struct {
 	Year  int
 	Month time.Month
 
-	Incomes         []*Income `pg:"fk:month_id"`
-	TotalIncome     money.Money
-	DailyBudget     money.Money
+	Incomes         []*Income         `pg:"fk:month_id"`
 	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
-	Days            []*Day            `pg:"fk:month_id"`
-	TotalSpend      money.Money
-	Result          money.Money
+
+	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
+	DailyBudget money.Money
+	Days        []*Day `pg:"fk:month_id"`
+
+	TotalIncome money.Money
+	// TotalSpend is a cost of all Monthly Payments and Spends
+	TotalSpend money.Money
+	// Result is TotalIncome - TotalSpend
+	Result money.Money
 }
 
 // ToCommon converts Month to common Month structure from
@@ -71,7 +76,8 @@ type Day struct {
 
 	ID uint
 
-	Day    int
+	Day int
+	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
 	Saldo  money.Money
 	Spends []*Spend `pg:"fk:day_id"`
 }
@@ -83,10 +89,9 @@ func (d *Day) ToCommon() *db_common.Day {
 		return nil
 	}
 	return &db_common.Day{
-		MonthID: d.MonthID,
-		ID:      d.ID,
-		Day:     d.Day,
-		Saldo:   d.Saldo,
+		ID:    d.ID,
+		Day:   d.Day,
+		Saldo: d.Saldo,
 		Spends: func() []*db_common.Spend {
 			spends := make([]*db_common.Spend, 0, len(d.Spends))
 			for i := range d.Spends {
@@ -109,6 +114,7 @@ type Income struct {
 	Income money.Money
 }
 
+// Check checks whether Income is valid (not empty title, positive income and etc.)
 func (in Income) Check() error {
 	// Check Title
 	if in.Title == "" {
@@ -132,11 +138,10 @@ func (in *Income) ToCommon() *db_common.Income {
 		return nil
 	}
 	return &db_common.Income{
-		MonthID: in.MonthID,
-		ID:      in.ID,
-		Title:   in.Title,
-		Notes:   in.Notes,
-		Income:  in.Income,
+		ID:     in.ID,
+		Title:  in.Title,
+		Notes:  in.Notes,
+		Income: in.Income,
 	}
 }
 
@@ -154,6 +159,7 @@ type MonthlyPayment struct {
 	Cost   money.Money
 }
 
+// Check checks whether Monthly Payment is valid (not empty title, positive cost and etc.)
 func (mp MonthlyPayment) Check() error {
 	// Check Title
 	if mp.Title == "" {
@@ -179,13 +185,11 @@ func (mp *MonthlyPayment) ToCommon() *db_common.MonthlyPayment {
 		return nil
 	}
 	return &db_common.MonthlyPayment{
-		MonthID: mp.MonthID,
-		ID:      mp.ID,
-		Title:   mp.Title,
-		TypeID:  mp.TypeID,
-		Type:    mp.Type.ToCommon(),
-		Notes:   mp.Notes,
-		Cost:    mp.Cost,
+		ID:    mp.ID,
+		Title: mp.Title,
+		Type:  mp.Type.ToCommon(),
+		Notes: mp.Notes,
+		Cost:  mp.Cost,
 	}
 }
 
@@ -203,6 +207,7 @@ type Spend struct {
 	Cost   money.Money
 }
 
+// Check checks whether Spend is valid (not empty title, positive cost and etc.)
 func (s Spend) Check() error {
 	// Check Title
 	if s.Title == "" {
@@ -228,13 +233,11 @@ func (s *Spend) ToCommon() *db_common.Spend {
 		return nil
 	}
 	return &db_common.Spend{
-		DayID:  s.DayID,
-		ID:     s.ID,
-		Title:  s.Title,
-		TypeID: s.TypeID,
-		Type:   s.Type.ToCommon(),
-		Notes:  s.Notes,
-		Cost:   s.Cost,
+		ID:    s.ID,
+		Title: s.Title,
+		Type:  s.Type.ToCommon(),
+		Notes: s.Notes,
+		Cost:  s.Cost,
 	}
 }
 
@@ -244,6 +247,7 @@ type SpendType struct {
 	Name string
 }
 
+// Check checks whether Spend Type is valid (not empty name)
 func (s SpendType) Check() error {
 	// Check Name
 	if s.Name == "" {
