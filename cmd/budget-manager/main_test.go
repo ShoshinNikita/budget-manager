@@ -12,6 +12,8 @@ import (
 )
 
 func TestConfig(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	envs := []struct{ key, value string }{

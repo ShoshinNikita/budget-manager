@@ -8,6 +8,8 @@ import (
 )
 
 func TestRequestID(t *testing.T) {
+	t.Parallel()
+
 	reqID := New()
 
 	// Insert and extract request id
