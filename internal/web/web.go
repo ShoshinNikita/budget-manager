@@ -104,7 +104,7 @@ type Database interface {
 	RemoveSpend(ctx context.Context, id uint) error
 
 	// Spend Type
-	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
+	GetSpendTypes(ctx context.Context) ([]*db.SpendType, error)
 	AddSpendType(ctx context.Context, name string) (id uint, err error)
 	EditSpendType(ctx context.Context, id uint, newName string) error
 	RemoveSpendType(ctx context.Context, id uint) error

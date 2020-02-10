@@ -10,8 +10,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
-
-	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
 )
 
 const (

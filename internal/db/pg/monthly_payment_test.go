@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db"
+	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -22,7 +22,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 	// Prepare
 	var income = money.FromInt(50000)
 	_, err := db.AddIncome(
-		context.Background(), AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
+		context.Background(), db_common.AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
 	)
 	require.Nil(err)
 
@@ -78,7 +78,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 
 	// Add Monthly Payments
 	for _, p := range payments {
-		args := AddMonthlyPaymentArgs{
+		args := db_common.AddMonthlyPaymentArgs{
 			MonthID: p.MonthID,
 			Title:   p.Title,
 			TypeID:  p.TypeID,
@@ -129,7 +129,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 	// Prepare
 	var income = money.FromInt(50000)
 	_, err := db.AddIncome(
-		context.Background(), AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
+		context.Background(), db_common.AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
 	)
 	require.Nil(err)
 
@@ -191,7 +191,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 
 	// Add Monthly Payments
 	for _, p := range payments {
-		args := AddMonthlyPaymentArgs{
+		args := db_common.AddMonthlyPaymentArgs{
 			MonthID: p.origin.MonthID,
 			Title:   p.origin.Title,
 			TypeID:  p.origin.TypeID,
@@ -209,7 +209,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 			continue
 		}
 
-		args := EditMonthlyPaymentArgs{
+		args := db_common.EditMonthlyPaymentArgs{
 			ID:     p.edited.ID,
 			Title:  &p.edited.Title,
 			TypeID: &p.edited.TypeID,
@@ -257,7 +257,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 	title := "title"
 	cost := money.FromInt(2000)
 	err = db.EditMonthlyPayment(
-		context.Background(), EditMonthlyPaymentArgs{ID: 20, Title: &title, Cost: &cost},
+		context.Background(), db_common.EditMonthlyPaymentArgs{ID: 20, Title: &title, Cost: &cost},
 	)
 	require.NotNil(err)
 }
@@ -300,7 +300,7 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 
 	// Add Monthly Payments
 	for _, p := range payments {
-		args := AddMonthlyPaymentArgs{
+		args := db_common.AddMonthlyPaymentArgs{
 			MonthID: p.MonthID,
 			Title:   p.Title,
 			TypeID:  p.TypeID,

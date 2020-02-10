@@ -8,7 +8,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/sirupsen/logrus"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
+	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
@@ -18,17 +18,21 @@ import (
 // Month
 // -----------------------------------------------------------------------------
 
-func (db DB) GetMonth(ctx context.Context, id uint) (m *Month, err error) {
+func (db DB) GetMonth(ctx context.Context, id uint) (month *db_common.Month, err error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithField("id", id)
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
-		m, err = db.getMonth(tx, id)
-		return err
+		pgMonth, err := db.getMonth(tx, id)
+		if err != nil {
+			return err
+		}
+		month = pgMonth.ToCommon()
+		return nil
 	})
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := ErrMonthNotExist
+			err := db_common.ErrMonthNotExist
 			log.Error(err)
 			return nil, err
 		}
@@ -39,7 +43,7 @@ func (db DB) GetMonth(ctx context.Context, id uint) (m *Month, err error) {
 	}
 
 	log.Debug("return the Month")
-	return m, nil
+	return month, nil
 }
 
 func (db DB) GetMonthID(ctx context.Context, year, month int) (uint, error) {
@@ -71,7 +75,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 	err := tx.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			return 0, ErrDayNotExist
+			return 0, db_common.ErrDayNotExist
 		}
 
 		return 0, errors.Wrap(err,
@@ -84,18 +88,18 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(ctx context.Context, year int) ([]*Month, error) {
+func (db DB) GetMonths(ctx context.Context, year int) ([]*db_common.Month, error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithField("year", year)
 
-	months := []*Month{}
-	err := db.db.Model(&months).
+	pgMonths := []*Month{}
+	err := db.db.Model(&pgMonths).
 		Where("year = ?", year).
 		Order("month ASC").
 		Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := ErrYearNotExist
+			err := db_common.ErrYearNotExist
 			log.Error(err)
 			return nil, err
 		}
@@ -104,13 +108,18 @@ func (db DB) GetMonths(ctx context.Context, year int) ([]*Month, error) {
 		log.WithError(err).Error(msg)
 		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
 	}
-	if len(months) == 0 {
-		err := ErrYearNotExist
+	if len(pgMonths) == 0 {
+		err := db_common.ErrYearNotExist
 		log.Error(err)
 		return nil, err
 	}
 
 	log.Debug("return all Months")
+
+	months := make([]*db_common.Month, 0, len(pgMonths))
+	for i := range pgMonths {
+		months = append(months, pgMonths[i].ToCommon())
+	}
 	return months, nil
 }
 
@@ -118,7 +127,7 @@ func (db DB) GetMonths(ctx context.Context, year int) ([]*Month, error) {
 // Day
 // -----------------------------------------------------------------------------
 
-func (db DB) GetDay(ctx context.Context, id uint) (*Day, error) {
+func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithField("id", id)
 
@@ -129,7 +138,7 @@ func (db DB) GetDay(ctx context.Context, id uint) (*Day, error) {
 		WherePK().Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := ErrDayNotExist
+			err := db_common.ErrDayNotExist
 			log.Error(err)
 			return nil, err
 		}
@@ -140,7 +149,7 @@ func (db DB) GetDay(ctx context.Context, id uint) (*Day, error) {
 	}
 
 	log.Debug("return Day")
-	return d, nil
+	return d.ToCommon(), nil
 }
 
 func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {
@@ -149,8 +158,8 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
-		if err == ErrMonthNotExist {
-			err := ErrMonthNotExist
+		if err == db_common.ErrMonthNotExist {
+			err := db_common.ErrMonthNotExist
 			log.Error(err)
 			return 0, err
 		}
@@ -169,7 +178,7 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := ErrDayNotExist
+			err := db_common.ErrDayNotExist
 			log.Error(err)
 			return 0, err
 		}

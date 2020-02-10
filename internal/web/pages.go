@@ -145,7 +145,7 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	resp := struct {
 		*db.Month
 
-		SpendTypes   []db.SpendType
+		SpendTypes   []*db.SpendType
 		ToShortMonth func(time.Month) string
 	}{
 		Month:        month,

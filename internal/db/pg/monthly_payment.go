@@ -6,20 +6,20 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/db" // nolint:stylecheck,golint
+	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(ctx context.Context, args AddMonthlyPaymentArgs) (id uint, err error) {
+func (db DB) AddMonthlyPayment(ctx context.Context, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithFields(logrus.Fields{
 		"month_id": args.MonthID, "title": args.Title, "type_id": args.TypeID, "cost": args.Cost,
 	})
 
 	if !db.checkMonth(args.MonthID) {
-		err := ErrMonthNotExist
+		err := db_common.ErrMonthNotExist
 		log.Error(err)
 		return 0, err
 	}
@@ -50,7 +50,7 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args AddMonthlyPaymentArgs) 
 	return id, nil
 }
 
-func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err error) {
+func (DB) addMonthlyPayment(tx *pg.Tx, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
 	mp := &MonthlyPayment{
 		MonthID: args.MonthID,
 		Title:   args.Title,
@@ -71,14 +71,14 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args AddMonthlyPaymentArgs) (id uint, err
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(ctx context.Context, args EditMonthlyPaymentArgs) error {
+func (db DB) EditMonthlyPayment(ctx context.Context, args db_common.EditMonthlyPaymentArgs) error {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithFields(logrus.Fields{
 		"id": args.ID, "new_title": args.Title, "new_type_id": args.TypeID, "new_cost": args.Cost,
 	})
 
 	if !db.checkMonthlyPayment(args.ID) {
-		err := ErrMonthlyPaymentNotExist
+		err := db_common.ErrMonthlyPaymentNotExist
 		log.Error(err)
 		return err
 	}
@@ -88,7 +88,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args EditMonthlyPaymentArgs
 		err = tx.Select(mp)
 		if err != nil {
 			if err == pg.ErrNoRows {
-				return ErrMonthlyPaymentNotExist
+				return db_common.ErrMonthlyPaymentNotExist
 			}
 			return errors.Wrap(err,
 				errors.WithMsg("can't get Monthly Payment with passed id"),
@@ -119,7 +119,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args EditMonthlyPaymentArgs
 	return nil
 }
 
-func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args EditMonthlyPaymentArgs) error {
+func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args db_common.EditMonthlyPaymentArgs) error {
 	if args.Title != nil {
 		mp.Title = *args.Title
 	}
@@ -146,7 +146,7 @@ func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
 	log = log.WithField("id", id)
 
 	if !db.checkMonthlyPayment(id) {
-		err := ErrMonthlyPaymentNotExist
+		err := db_common.ErrMonthlyPaymentNotExist
 		log.Error(err)
 		return err
 	}
