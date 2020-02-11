@@ -29,6 +29,9 @@ type Month struct {
 type Day struct {
 	ID uint `json:"id"`
 
+	Year  int        `json:"year"`
+	Month time.Month `json:"month"`
+
 	Day int `json:"day"`
 	// Saldo is DailyBudget - Cost of all Spends. It can be negative
 	Saldo  money.Money `json:"saldo"`
@@ -39,6 +42,9 @@ type Day struct {
 type Income struct {
 	ID uint `json:"id"`
 
+	Year  int        `json:"year"`
+	Month time.Month `json:"month"`
+
 	Title  string      `json:"title"`
 	Notes  string      `json:"notes,omitempty"`
 	Income money.Money `json:"income"`
@@ -47,6 +53,9 @@ type Income struct {
 // MonthlyPayment contains information about monthly payments (rent, Patreon and etc.)
 type MonthlyPayment struct {
 	ID uint `json:"id"`
+
+	Year  int        `json:"year"`
+	Month time.Month `json:"month"`
 
 	Title string      `json:"title"`
 	Type  *SpendType  `json:"type,omitempty"`
@@ -57,6 +66,10 @@ type MonthlyPayment struct {
 // Spend contains information about spends
 type Spend struct {
 	ID uint `json:"id"`
+
+	Year  int        `json:"year"`
+	Month time.Month `json:"month"`
+	Day   int        `json:"day"`
 
 	Title string      `json:"title"`
 	Type  *SpendType  `json:"type,omitempty"`
