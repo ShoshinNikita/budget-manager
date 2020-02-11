@@ -29,7 +29,7 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 		id, err = db.addSpend(tx, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't add a new Spend"),
+				errors.WithMsg("couldn't add a new Spend"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -38,7 +38,7 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 		monthID, err := db.getMonthIDByDayID(ctx, tx, args.DayID)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't get Month which contains Day with passed dayID"),
+				errors.WithMsg("couldn't get Month which contains Day with passed dayID"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -96,7 +96,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 		err = tx.Select(spend)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't select Spend with passed id"),
+				errors.WithMsg("couldn't select Spend with passed id"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -104,7 +104,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 		err = db.editSpend(tx, spend, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit the Spend"),
+				errors.WithMsg("couldn't edit the Spend"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -113,7 +113,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 		monthID, err := db.getMonthIDByDayID(ctx, tx, spend.DayID)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't get Month which contains Day with passed dayID"),
+				errors.WithMsg("couldn't get Month which contains Day with passed dayID"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -170,7 +170,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		err = tx.Model(spend).Column("day_id").WherePK().Select()
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't select Spend with passed id"),
+				errors.WithMsg("couldn't select Spend with passed id"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -178,7 +178,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		err = tx.Delete(spend)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't delete Spend with passed id"),
+				errors.WithMsg("couldn't delete Spend with passed id"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -187,7 +187,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		monthID, err := db.getMonthIDByDayID(ctx, tx, spend.DayID)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't get Month which contains Day with passed dayID"),
+				errors.WithMsg("couldn't get Month which contains Day with passed dayID"),
 				errors.WithType(errors.AppError))
 		}
 
