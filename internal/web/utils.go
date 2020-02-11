@@ -40,7 +40,7 @@ func (s Server) processError(ctx context.Context, w http.ResponseWriter, respMsg
 	code int, internalErr error) {
 
 	if internalErr != nil {
-		s.logError(respMsg, code, internalErr)
+		s.logError(ctx, respMsg, code, internalErr)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -58,7 +58,7 @@ func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
 	respMsg string, code int, internalErr error) {
 
 	if internalErr != nil {
-		s.logError(respMsg, code, internalErr)
+		s.logError(ctx, respMsg, code, internalErr)
 	}
 
 	data := struct {
@@ -75,10 +75,8 @@ func (s Server) processErrorWithPage(ctx context.Context, w http.ResponseWriter,
 	}
 }
 
-func (s Server) logError(respMsg string, code int, internalErr error) {
-	s.log.WithFields(logrus.Fields{
-		"msg":   respMsg,
-		"code":  code,
-		"error": internalErr,
-	}).Error("request error")
+func (s Server) logError(ctx context.Context, respMsg string, code int, internalErr error) {
+	log := request_id.FromContextToLogger(ctx, s.log)
+	log = log.WithFields(logrus.Fields{"msg": respMsg, "code": code, "error": internalErr})
+	log.Error("request error")
 }
