@@ -105,7 +105,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't add a new Income: title can't be empty",
+				Error:     "couldn't add a new Income: title can't be empty",
 				Success:   false,
 			},
 		},
@@ -120,7 +120,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't add a new Income: invalid income: '0'",
+				Error:     "couldn't add a new Income: invalid income: '0'",
 				Success:   false,
 			},
 		},
@@ -246,7 +246,7 @@ func testHandlers_Income_EditIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't edit the Income: invalid income: '0'",
+				Error:     "couldn't edit the Income: invalid income: '0'",
 				Success:   false,
 			},
 		},
@@ -429,7 +429,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't add a new Monthly Payment: title can't be empty",
+				Error:     "couldn't add a new Monthly Payment: title can't be empty",
 				Success:   false,
 			},
 		},
@@ -444,7 +444,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't add a new Monthly Payment: invalid cost: '0'",
+				Error:     "couldn't add a new Monthly Payment: invalid cost: '0'",
 				Success:   false,
 			},
 		},
@@ -572,7 +572,7 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't edit the Monthly Payment: invalid cost: '0'",
+				Error:     "couldn't edit the Monthly Payment: invalid cost: '0'",
 				Success:   false,
 			},
 		},
@@ -740,7 +740,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't add a new Spend: title can't be empty",
+				Error:     "couldn't add a new Spend: title can't be empty",
 				Success:   false,
 			},
 		},
@@ -752,7 +752,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't add a new Spend: invalid cost: '0'",
+				Error:     "couldn't add a new Spend: invalid cost: '0'",
 				Success:   false,
 			},
 		},
@@ -862,7 +862,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't edit the Spend: title can't be empty",
+				Error:     "couldn't edit the Spend: title can't be empty",
 				Success:   false,
 			},
 		},
@@ -892,7 +892,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "can't edit the Spend: invalid cost: '0'",
+				Error:     "couldn't edit the Spend: invalid cost: '0'",
 				Success:   false,
 			},
 		},
@@ -1053,7 +1053,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
-					Error:     "can't add a new Spend Type: name can't be empty",
+					Error:     "couldn't add a new Spend Type: name can't be empty",
 					Success:   false,
 				},
 			},
@@ -1164,7 +1164,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
-					Error:     "can't edit the Spend Type: name can't be empty",
+					Error:     "couldn't edit the Spend Type: name can't be empty",
 					Success:   false,
 				},
 			},

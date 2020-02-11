@@ -79,7 +79,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 		}
 
 		return 0, errors.Wrap(err,
-			errors.WithMsg("coudln't select day with passed id"),
+			errors.WithMsg("couldn't select day with passed id"),
 			errors.WithType(errors.AppError))
 	}
 
@@ -200,7 +200,7 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
 		return errors.Wrap(err,
-			errors.WithMsg("can't select month"),
+			errors.WithMsg("couldn't select month"),
 			errors.WithType(errors.AppError))
 	}
 
@@ -265,7 +265,7 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	err = tx.Update(m)
 	if err != nil {
 		return errors.Wrap(err,
-			errors.WithMsg("can't update month"),
+			errors.WithMsg("couldn't the update month"),
 			errors.WithType(errors.AppError))
 	}
 
@@ -273,7 +273,7 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	_, err = tx.Model(&m.Days).Update()
 	if err != nil {
 		return errors.Wrap(err,
-			errors.WithMsg("can't update days"),
+			errors.WithMsg("couldn't the update days"),
 			errors.WithType(errors.AppError))
 	}
 
@@ -351,6 +351,6 @@ func (db DB) checkModel(model interface{}) (ok bool) {
 
 func errRecomputeBudget(err error) error {
 	return errors.Wrap(err,
-		errors.WithMsg("can't recompute month budget"),
+		errors.WithMsg("couldn't recompute the month budget"),
 		errors.WithType(errors.AppError))
 }

@@ -6,7 +6,7 @@
 @port = 8080
 @baseUrl = {{schema}}://{{host}}:{{port}}
 @currentYear = {{$datetime "YYYY"}}
-@currentMonth = {{$datetime "MM"}}
+@currentMonth = {{$datetime "M"}}
 @dayID = 11
 @dayNumber = 11
 

@@ -173,14 +173,14 @@ func (app *App) Shutdown() {
 	app.log.Info("shutdown web server")
 	err := app.server.Shutdown()
 	if err != nil {
-		app.log.WithError(err).Error("can't shutdown the server gracefully")
+		app.log.WithError(err).Error("couldn't shutdown the server gracefully")
 	}
 
 	// Database
 	app.log.Info("shutdown the database")
 	err = app.db.Shutdown()
 	if err != nil {
-		app.log.WithError(err).Error("can't shutdown the db gracefully")
+		app.log.WithError(err).Error("couldn't shutdown the db gracefully")
 	}
 
 	app.log.Info("shutdowns are completed")

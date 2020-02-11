@@ -130,14 +130,14 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	month, err := s.db.GetMonth(r.Context(), monthID)
 	if err != nil {
 		s.processErrorWithPage(
-			r.Context(), w, dbErrorMessagePrefix+"can't get Month info", http.StatusInternalServerError, err,
+			r.Context(), w, dbErrorMessagePrefix+"couldn't get Month info", http.StatusInternalServerError, err,
 		)
 		return
 	}
 
 	spendTypes, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
-		s.processErrorWithPage(r.Context(), w, dbErrorMessagePrefix+"can't get list of Spend Types",
+		s.processErrorWithPage(r.Context(), w, dbErrorMessagePrefix+"couldn't get list of Spend Types",
 			http.StatusInternalServerError, err)
 		return
 	}

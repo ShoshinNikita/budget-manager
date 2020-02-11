@@ -45,7 +45,7 @@ func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 
 		err := db.CreateTable(model, opts)
 		if err != nil {
-			return pkgErrors.Wrap(err, "can't create table")
+			return pkgErrors.Wrap(err, "couldn't create a table")
 		}
 	}
 
@@ -79,7 +79,7 @@ func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
 
 		err := db.DropTable(model, opts)
 		if err != nil {
-			return pkgErrors.Wrap(err, "can't drop table")
+			return pkgErrors.Wrap(err, "couldn't drop a table")
 		}
 	}
 

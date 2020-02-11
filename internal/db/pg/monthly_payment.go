@@ -29,7 +29,7 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args db_common.AddMonthlyPay
 		id, err = db.addMonthlyPayment(tx, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't add a new Monthly Payment"),
+				errors.WithMsg("couldn't add a new Monthly Payment"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -91,7 +91,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args db_common.EditMonthlyP
 				return db_common.ErrMonthlyPaymentNotExist
 			}
 			return errors.Wrap(err,
-				errors.WithMsg("can't get Monthly Payment with passed id"),
+				errors.WithMsg("couldn't get Monthly Payment with passed id"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -99,7 +99,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args db_common.EditMonthlyP
 		err = db.editMonthlyPayment(tx, mp, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit the Monthly Payment"),
+				errors.WithMsg("couldn't edit the Monthly Payment"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -157,14 +157,14 @@ func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
 		err = tx.Model(mp).Column("month_id").WherePK().Select()
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't select Monthly Payment with passed id"),
+				errors.WithMsg("couldn't select Monthly Payment with passed id"),
 				errors.WithType(errors.AppError))
 		}
 
 		err = tx.Delete(mp)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't remove Monthly Payment"),
+				errors.WithMsg("couldn't remove Monthly Payment"),
 				errors.WithType(errors.AppError))
 		}
 

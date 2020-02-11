@@ -91,7 +91,7 @@ func (db *DB) Prepare() error {
 
 	err = errors.Wrap(err, "couldn't create tables")
 	if err != nil {
-		db.log.WithError(err).Error("coudln't create tables")
+		db.log.WithError(err).Error("couldn't create tables")
 		return err
 	}
 
@@ -108,8 +108,9 @@ func (db *DB) Prepare() error {
 		}
 	})
 	if err != nil {
-		db.log.WithError(err).Error("can't add function to cron")
-		return errors.Wrap(err, "could't add function to cron")
+		const msg = "couldn't add a function to cron"
+		db.log.WithError(err).Error(msg)
+		return errors.Wrap(err, msg)
 	}
 
 	// Start cron
@@ -155,8 +156,9 @@ func (db *DB) initCurrentMonth() error {
 
 	currentMonth := &Month{Year: year, Month: month}
 	if err = db.db.Insert(currentMonth); err != nil {
-		log.WithError(err).Error("could't init the current month")
-		return errors.Wrap(err, "could't init the current month")
+		const msg = "couldn't init the current month"
+		log.WithError(err).Error(msg)
+		return errors.Wrap(err, msg)
 	}
 
 	monthID := currentMonth.ID

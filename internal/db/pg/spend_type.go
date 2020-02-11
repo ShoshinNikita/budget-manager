@@ -25,7 +25,7 @@ func (db DB) GetSpendType(ctx context.Context, id uint) (*db_common.SpendType, e
 				errors.WithType(errors.UserError))
 		} else {
 			err = errors.Wrap(err,
-				errors.WithMsg("can't select Spend Type"),
+				errors.WithMsg("couldn't select Spend Type"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -45,10 +45,10 @@ func (db DB) GetSpendTypes(ctx context.Context) ([]*db_common.SpendType, error) 
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
 		err = errors.Wrap(err,
-			errors.WithMsg("can't select Spend Types"),
+			errors.WithMsg("couldn't select Spend Types"),
 			errors.WithType(errors.AppError))
 
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't get all Spend Types")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't get all Spend Types")
 		return nil, err
 	}
 
@@ -68,20 +68,20 @@ func (db DB) AddSpendType(ctx context.Context, name string) (typeID uint, err er
 	spendType := &SpendType{Name: name}
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
-			return errors.Wrap(err, errors.WithMsg("can't add a new Spend Type"))
+			return errors.Wrap(err, errors.WithMsg("couldn't add a new Spend Type"))
 		}
 
 		err = tx.Insert(spendType)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't add a new Spend Type"),
+				errors.WithMsg("couldn't add a new Spend Type"),
 				errors.WithType(errors.AppError))
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't add a new Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't add a new Spend Type")
 		return 0, err
 	}
 
@@ -103,13 +103,13 @@ func (db DB) EditSpendType(ctx context.Context, id uint, newName string) error {
 	spendType := &SpendType{ID: id, Name: newName}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		if err := checkModel(spendType); err != nil {
-			return errors.Wrap(err, errors.WithMsg("can't edit the Spend Type"))
+			return errors.Wrap(err, errors.WithMsg("couldn't edit the Spend Type"))
 		}
 
 		err = tx.Update(spendType)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit the Spend Type"),
+				errors.WithMsg("couldn't edit the Spend Type"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -140,7 +140,7 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 		err = tx.Delete(spendType)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't delete Spend Type"),
+				errors.WithMsg("couldn't delete Spend Type"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -152,7 +152,7 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 			Update()
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't reset Type IDs of Monthly Payments"),
+				errors.WithMsg("couldn't reset Type IDs of Monthly Payments"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -162,14 +162,14 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 			Update()
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't reset Type IDs of Spends"),
+				errors.WithMsg("couldn't reset Type IDs of Spends"),
 				errors.WithType(errors.AppError))
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove the Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove the Spend Type")
 		return err
 	}
 

@@ -29,7 +29,7 @@ func (db DB) AddIncome(ctx context.Context, args db_common.AddIncomeArgs) (incom
 		incomeID, err = db.addIncome(tx, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't add a new Income"),
+				errors.WithMsg("couldn't add a new Income"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -94,14 +94,14 @@ func (db DB) EditIncome(ctx context.Context, args db_common.EditIncomeArgs) erro
 			if err == pg.ErrNoRows {
 				return db_common.ErrIncomeNotExist
 			}
-			return errors.Wrap(err, errors.WithMsg("can't select Income"), errors.WithType(errors.AppError))
+			return errors.Wrap(err, errors.WithMsg("couldn't select Income"), errors.WithType(errors.AppError))
 		}
 
 		// Edit Income
 		err = db.editIncome(tx, in, args)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't edit the Income"),
+				errors.WithMsg("couldn't edit the Income"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -167,7 +167,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 		}()
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't select Income with passed id"),
+				errors.WithMsg("couldn't select Income with passed id"),
 				errors.WithType(errors.AppError))
 		}
 
@@ -175,7 +175,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 		err = db.removeIncome(tx, id)
 		if err != nil {
 			return errors.Wrap(err,
-				errors.WithMsg("can't remove Income with passed id"),
+				errors.WithMsg("couldn't remove Income with passed id"),
 				errors.WithTypeIfNotSet(errors.AppError))
 		}
 
@@ -188,7 +188,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove Income")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove Income")
 		return err
 	}
 
