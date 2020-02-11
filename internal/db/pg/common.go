@@ -79,7 +79,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 		}
 
 		return 0, errors.Wrap(err,
-			errors.WithMsg("coudln't select day with passed id"),
+			errors.WithMsg("couldn't select day with passed id"),
 			errors.WithType(errors.AppError))
 	}
 

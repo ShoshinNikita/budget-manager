@@ -48,7 +48,7 @@ func (db DB) GetSpendTypes(ctx context.Context) ([]*db_common.SpendType, error) 
 			errors.WithMsg("can't select Spend Types"),
 			errors.WithType(errors.AppError))
 
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't get all Spend Types")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't get all Spend Types")
 		return nil, err
 	}
 
@@ -81,7 +81,7 @@ func (db DB) AddSpendType(ctx context.Context, name string) (typeID uint, err er
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't add a new Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't add a new Spend Type")
 		return 0, err
 	}
 
@@ -169,7 +169,7 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove the Spend Type")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove the Spend Type")
 		return err
 	}
 

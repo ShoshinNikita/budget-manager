@@ -180,7 +180,7 @@ func (s Server) Shutdown() error {
 
 	err := s.server.Shutdown(ctx)
 	if err != nil {
-		s.log.WithError(err).Errorf("coudln't shutdown server gracefully")
+		s.log.WithError(err).Errorf("couldn't shutdown server gracefully")
 	}
 
 	return err

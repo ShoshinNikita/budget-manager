@@ -188,7 +188,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove Income")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove Income")
 		return err
 	}
 

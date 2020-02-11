@@ -91,7 +91,7 @@ func (db *DB) Prepare() error {
 
 	err = errors.Wrap(err, "couldn't create tables")
 	if err != nil {
-		db.log.WithError(err).Error("coudln't create tables")
+		db.log.WithError(err).Error("couldn't create tables")
 		return err
 	}
 

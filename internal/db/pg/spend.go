@@ -50,7 +50,7 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't create a new Spend")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't create a new Spend")
 		return 0, err
 	}
 
@@ -199,7 +199,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudln't remove the Spend")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove the Spend")
 		return err
 	}
 
