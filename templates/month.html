@@ -1055,7 +1055,7 @@
 		// Incomes
 
 		function addIncome() {
-			const income = getValue("new-income-income");
+			const income = replaceCommas(getValue("new-income-income"));
 			if (isNaN(income)) {
 				processError("income must be a number");
 				return;
@@ -1072,7 +1072,7 @@
 		}
 
 		function editIncome(id) {
-			const income = getValue("modal-window__edit-income__income");
+			const income = replaceCommas(getValue("modal-window__edit-income__income"));
 			if (isNaN(income)) {
 				processError("income must be a number");
 				return;
@@ -1103,7 +1103,7 @@
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue("new-monthly-payment-type");
 
-			const cost = getValue("new-monthly-payment-cost");
+			const cost = replaceCommas(getValue("new-monthly-payment-cost"));
 			if (isNaN(cost)) {
 				processError("cost must be a number");
 				return;
@@ -1124,7 +1124,7 @@
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue("modal-window__edit-monthly-payment__type");
 
-			const cost = getValue("modal-window__edit-monthly-payment__cost");
+			const cost = replaceCommas(getValue("modal-window__edit-monthly-payment__cost"));
 			if (isNaN(cost)) {
 				processError("cost must be a number");
 				return;
@@ -1156,7 +1156,7 @@
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue(`new-spend-type-${dayID}`);
 
-			const cost = getValue(`new-spend-cost-${dayID}`)
+			const cost = replaceCommas(getValue(`new-spend-cost-${dayID}`));
 			if (isNaN(cost)) {
 				processError("cost must be a number");
 				return;
@@ -1177,7 +1177,7 @@
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue("modal-window__edit-spend__type");
 
-			const cost = getValue("modal-window__edit-spend__cost");
+			const cost = replaceCommas(getValue("modal-window__edit-spend__cost"));
 			if (isNaN(cost)) {
 				processError("cost must be a number");
 				return;
@@ -1512,6 +1512,16 @@
 		function processError(error) {
 			console.error(error);
 			alert("Error: " + error);
+		}
+
+		/** replaceCommas replaces commas in passed string with points: 'qwe,rty,uio' -> 'qwe.rty,uio'.
+		 * It should be used to fix decimal separator: '15,5' -> '15.5'
+		 *
+		 * @param {string} s
+		 * @return {string} string with replaced commas
+		 */
+		function replaceCommas(s) {
+			return s.replace(",", ".");
 		}
 
 	</script>
