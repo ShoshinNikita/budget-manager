@@ -255,9 +255,12 @@
 		}
 
 		.detailed-info__days__day__result {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: repeat(2, max-content);
 			font-size: 18px;
+			justify-content: right;
 			margin: 10px 10px 10px 0;
-			text-align: right;
 		}
 
 		/* | Modal windows */
@@ -734,12 +737,25 @@
 					</div>
 
 					<div class="detailed-info__days__day__result">
-						<span class="noselect">Saldo:</span>
-						{{ if ge .Saldo 0 }}
-						<span class="money--gain">{{ .Saldo }}</span>
-						{{ else }}
-						<span class="money--lose">{{ .Saldo }}</span>
-						{{ end }}
+						<div>
+							<span class="noselect">Spent:</span>
+							<!-- Spends must be always <= 0 -->
+							{{ $totalCost := call $.SumSpendCosts .Spends }}
+							{{ if eq $totalCost 0 }}
+							<span class="money--gain">{{ $totalCost }}</span>
+							{{ else }}
+							<span class="money--lose">{{ $totalCost }}</span>
+							{{ end }}
+						</div>
+
+						<div>
+							<span class="noselect">Saldo:</span>
+							{{ if ge .Saldo 0 }}
+							<span class="money--gain">{{ .Saldo }}</span>
+							{{ else }}
+							<span class="money--lose">{{ .Saldo }}</span>
+							{{ end }}
+						</div>
 					</div>
 				</div>
 				{{ end }}
