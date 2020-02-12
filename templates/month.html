@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{.Month.Month}} {{.Year}} | Budget Manager</title>
+	<title>{{ .Month.Month }} {{ .Year }} | Budget Manager</title>
 
 	<link rel="stylesheet" href="/static/css/common.css">
 
@@ -255,9 +255,12 @@
 		}
 
 		.detailed-info__days__day__result {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: repeat(2, max-content);
 			font-size: 18px;
+			justify-content: right;
 			margin: 10px 10px 10px 0;
-			text-align: right;
 		}
 
 		/* | Modal windows */
@@ -442,31 +445,31 @@
 			<div id="header__path">
 				<span> <a href="/overview">Overview<a> </span>
 				<span class="noselect"> / </span>
-				<span> <a href="/overview/{{.Year}}">{{.Year}}</a> </span>
+				<span> <a href="/overview/{{ .Year }}">{{ .Year }}</a> </span>
 				<span class="noselect"> / </span>
-				<span> {{.Month.Month}} </span>
+				<span> {{ .Month.Month }} </span>
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->
 			<div id="header__stats">
 				<div class="header__stats__stat">
 					<div class="noselect">Incomes:</div>
-					<div class="money--gain">{{.TotalIncome}}</div>
+					<div class="money--gain">{{ .TotalIncome }}</div>
 				</div>
 
 				<div class="header__stats__stat">
 					<div class="noselect">Spends:</div>
-					<div class="money--lose">{{.TotalSpend}}</div>
+					<div class="money--lose">{{ .TotalSpend }}</div>
 				</div>
 
 				<div class="header__stats__stat">
 					<div class="noselect">Result:</div>
 					<!-- .Result > 0 -->
-					{{if ge .Result 0}}
-					<div class="money--gain">{{.Result}}</div>
-					{{else}}
-					<div class="money--lose">{{.Result}}</div>
-					{{end}}
+					{{ if ge .Result 0 }}
+					<div class="money--gain">{{ .Result }}</div>
+					{{ else }}
+					<div class="money--lose">{{ .Result }}</div>
+					{{ end }}
 				</div>
 			</div>
 
@@ -491,20 +494,20 @@
 							<th class="detailed-info__block__table__header-actions"></th>
 						</tr>
 
-						{{range .Incomes}}
+						{{ range .Incomes }}
 						<tr>
-							<td>{{.Title}}</td>
-							<td>{{.Notes}}</td>
-							<td>{{.Income}}</td>
+							<td>{{ .Title }}</td>
+							<td>{{ .Notes }}</td>
+							<td>{{ .Income }}</td>
 							<td>
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Edit"
-										onclick="showModalWindowToEditIncome('{{.ID}}', '{{.Title}}', '{{.Notes}}', '{{printf `%f` .Income}}')">
+										onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
 									</div>
-									<div class="feather-icon" title="Remove" onclick="removeIncome(Number('{{.ID}}'))">
+									<div class="feather-icon" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 										</svg>
@@ -512,7 +515,7 @@
 								</div>
 							</td>
 						</tr>
-						{{end}}
+						{{ end }}
 
 						<!-- Inputs for new Income -->
 						<tr>
@@ -555,28 +558,28 @@
 							<th class="detailed-info__block__table__header-actions"></th>
 						</tr>
 
-						{{range .MonthlyPayments}}
+						{{ range .MonthlyPayments }}
 						<tr>
-							<td>{{.Title}}</td>
-							<td>{{.Notes}}</td>
+							<td>{{ .Title }}</td>
+							<td>{{ .Notes }}</td>
 							<td>
-								{{if .Type}}
-								{{.Type.Name}}
-								{{else}}
+								{{ if .Type }}
+								{{ .Type.Name }}
+								{{ else }}
 								-
-								{{end}}
+								{{ end }}
 							</td>
-							<td>{{.Cost}}</td>
+							<td>{{ .Cost }}</td>
 							<td>
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Edit"
-										onclick="showModalWindowToEditMonthlyPayment('{{.ID}}', '{{.Title}}', '{{.Notes}}',
-											'{{if .Type}}{{.Type.ID}}{{else}}0{{end}}', '{{printf `%f` .Cost}}')">
+										onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
+											'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 										</svg>
 									</div>
-									<div class="feather-icon" title="Remove" onclick="removeMonthlyPayment(Number('{{.ID}}'))">
+									<div class="feather-icon" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
 										<svg>
 											<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 										</svg>
@@ -584,7 +587,7 @@
 								</div>
 							</td>
 						</tr>
-						{{end}}
+						{{ end }}
 
 						<!-- Inputs for new Monthly Payment -->
 						<tr>
@@ -599,9 +602,9 @@
 							<td>
 								<select id="new-monthly-payment-type" autocomplete="off">
 									<option value="0">-</option>
-									{{range $.SpendTypes}}
-									<option value="{{.ID}}">{{.Name}}</option>
-									{{end}}
+									{{ range $.SpendTypes }}
+									<option value="{{ .ID }}">{{ .Name }}</option>
+									{{ end }}
 								</select>
 							</td>
 							<td>
@@ -624,33 +627,33 @@
 			<!-- Days -->
 			<div id="detailed-info__days" class="detailed-info__block">
 				<div id="detailed-info__days__calendar">
-					{{range .Days}}
-					<div id="id-calendar-day-{{.Day}}" class="detailed-info__days__calendar__day"
-						onclick="selectDay('{{.Day}}');">
+					{{ range .Days }}
+					<div id="id-calendar-day-{{ .Day }}" class="detailed-info__days__calendar__day"
+						onclick="selectDay('{{ .Day }}');">
 
 						<div class="detailed-info__days__calendar__day__info">
-							<div class="detailed-info__days__calendar__day__info__number">{{.Day}}</div>
-							<div class="detailed-info__days__calendar__day__info__month-name">{{call $.ToShortMonth $.Month.Month}}</div>
+							<div class="detailed-info__days__calendar__day__info__number">{{ .Day }}</div>
+							<div class="detailed-info__days__calendar__day__info__month-name">{{ call $.ToShortMonth $.Month.Month }}</div>
 							<div class="detailed-info__days__calendar__day__info__spend-number" title="Spends">
-								{{len .Spends}}
+								{{ len .Spends }}
 							</div>
 						</div>
 
 						<div class="detailed-info__days__calendar__day__saldo" title="Saldo">
-							{{if ge .Saldo 0}}
-							<span class="money--gain">{{.Saldo}}</span>
-							{{else}}
-							<span class="money--lose">{{.Saldo}}</span>
-							{{end}}
+							{{ if ge .Saldo 0 }}
+							<span class="money--gain">{{ .Saldo }}</span>
+							{{ else }}
+							<span class="money--lose">{{ .Saldo }}</span>
+							{{ end }}
 						</div>
 					</div>
-					{{end}}
+					{{ end }}
 				</div>
 
-				{{range .Days}}
-				<div id="id-day-{{.Day}}" class="detailed-info__days__day">
+				{{ range .Days }}
+				<div id="id-day-{{ .Day }}" class="detailed-info__days__day">
 					<div class="detailed-info__days__day__date">
-						{{.Day}} {{$.Month.Month}}
+						{{ .Day }} {{ $.Month.Month }}
 					</div>
 
 					<div class="detailed-info__days__day__spends">
@@ -663,28 +666,28 @@
 								<th class="detailed-info__block__table__header-actions"></th>
 							</tr>
 
-							{{range .Spends}}
+							{{ range .Spends }}
 							<tr>
-								<td>{{.Title}}</td>
-								<td>{{.Notes}}</td>
+								<td>{{ .Title }}</td>
+								<td>{{ .Notes }}</td>
 								<td>
-									{{if .Type}}
-									{{.Type.Name}}
-									{{else}}
+									{{ if .Type }}
+									{{ .Type.Name }}
+									{{ else }}
 									-
-									{{end}}
+									{{ end }}
 								</td>
-								<td>{{.Cost}}</td>
+								<td>{{ .Cost }}</td>
 								<td>
 									<div class="actions-horizontal-list">
 										<div class="feather-icon" title="Edit"
-											onclick="showModalWindowToEditSpend('{{.ID}}', '{{.Title}}', '{{.Notes}}',
-												'{{if .Type}}{{.Type.ID}}{{else}}0{{end}}', '{{printf `%f` .Cost}}')">
+											onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
+												'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 											</svg>
 										</div>
-										<div class="feather-icon" title="Remove" onclick="removeSpend(Number('{{.ID}}'))">
+										<div class="feather-icon" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 											</svg>
@@ -692,37 +695,37 @@
 									</div>
 								</td>
 							</tr>
-							{{end}}
+							{{ end }}
 
 							<!--
 								Inputs for new Spend
 
-								We use '-{{.ID}}' suffix because we render all days, just hide them.
+								We use '-{{ .ID }}' suffix because we render all days, just hide them.
 								So, ids without this suffix wouldn't be unique. We use day id instead of
 								day number because we pass into 'addSpend' function day id.
 							-->
 							<tr>
 								<td>
-									<input type="text" id="new-spend-title-{{.ID}}" placeholder="Title" autocomplete="off">
+									<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off">
 								</td>
 								<td>
 									<input
-										type="text" id="new-spend-notes-{{.ID}}" placeholder="Notes" autocomplete="off">
+										type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes" autocomplete="off">
 								</td>
 								<td>
-									<select id="new-spend-type-{{.ID}}" autocomplete="off">
+									<select id="new-spend-type-{{ .ID }}" autocomplete="off">
 										<option value="0">-</option>
-										{{range $.SpendTypes}}
-										<option value="{{.ID}}">{{.Name}}</option>
-										{{end}}
+										{{ range $.SpendTypes }}
+										<option value="{{ .ID }}">{{ .Name }}</option>
+										{{ end }}
 									</select>
 								</td>
 								<td>
-									<input type="text" id="new-spend-cost-{{.ID}}" placeholder="Cost" autocomplete="off">
+									<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost" autocomplete="off">
 								</td>
 								<td>
 									<div class="actions-horizontal-list">
-										<div class="feather-icon" title="Add" onclick="addSpend(Number('{{.ID}}'))">
+										<div class="feather-icon" title="Add" onclick="addSpend(Number('{{ .ID }}'))">
 											<svg class="svg-icon-plus">
 												<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 											</svg>
@@ -734,15 +737,28 @@
 					</div>
 
 					<div class="detailed-info__days__day__result">
-						<span class="noselect">Saldo:</span>
-						{{if ge .Saldo 0}}
-						<span class="money--gain">{{.Saldo}}</span>
-						{{else}}
-						<span class="money--lose">{{.Saldo}}</span>
-						{{end}}
+						<div>
+							<span class="noselect">Spent:</span>
+							<!-- Spends must be always <= 0 -->
+							{{ $totalCost := call $.SumSpendCosts .Spends }}
+							{{ if eq $totalCost 0 }}
+							<span class="money--gain">{{ $totalCost }}</span>
+							{{ else }}
+							<span class="money--lose">{{ $totalCost }}</span>
+							{{ end }}
+						</div>
+
+						<div>
+							<span class="noselect">Saldo:</span>
+							{{ if ge .Saldo 0 }}
+							<span class="money--gain">{{ .Saldo }}</span>
+							{{ else }}
+							<span class="money--lose">{{ .Saldo }}</span>
+							{{ end }}
+						</div>
 					</div>
 				</div>
-				{{end}}
+				{{ end }}
 			</div>
 		</div>
 
@@ -791,9 +807,9 @@
 					<span class="noselect">Type:</span>
 					<select id="modal-window__edit-monthly-payment__type">
 						<option value="0">-</option>
-						{{range $.SpendTypes}}
-						<option value="{{.ID}}">{{.Name}}</option>
-						{{end}}
+						{{ range $.SpendTypes }}
+						<option value="{{ .ID }}">{{ .Name }}</option>
+						{{ end }}
 					</select>
 				</div>
 
@@ -826,9 +842,9 @@
 					<span class="noselect">Type:</span>
 					<select id="modal-window__edit-spend__type">
 						<option value="0">-</option>
-						{{range $.SpendTypes}}
-						<option value="{{.ID}}">{{.Name}}</option>
-						{{end}}
+						{{ range $.SpendTypes }}
+						<option value="{{ .ID }}">{{ .Name }}</option>
+						{{ end }}
 					</select>
 				</div>
 
@@ -847,25 +863,25 @@
 			<div id="modal-window__manage-types" class="modal-window">
 				<div class="modal-window__header noselect">Manage Spend Types</div>
 
-				{{range .SpendTypes}}
-				<div id="modal-window__manage-types__spend-type-{{.ID}}" class="modal-window__manage-types__spend-type">
-					<input type="text" id="edit-spend-type-name-{{.ID}}" value="{{.Name}}" autocomplete="off"
-						placeholder="{{.Name}}">
+				{{ range .SpendTypes }}
+				<div id="modal-window__manage-types__spend-type-{{ .ID }}" class="modal-window__manage-types__spend-type">
+					<input type="text" id="edit-spend-type-name-{{ .ID }}" value="{{ .Name }}" autocomplete="off"
+						placeholder="{{ .Name }}">
 
 					<div class="actions-horizontal-list">
-						<div class="feather-icon" title="Save" onclick="editSpendType('{{.ID}}', '{{.Name}}')">
+						<div class="feather-icon" title="Save" onclick="editSpendType('{{ .ID }}', '{{ .Name }}')">
 							<svg>
 								<use xlink:href="/static/feather/feather-sprite.svg#check" />
 							</svg>
 						</div>
-						<div class="feather-icon" title="Remove" onclick="removeSpendType(Number('{{.ID}}'))">
+						<div class="feather-icon" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
 							<svg>
 								<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 							</svg>
 						</div>
 					</div>
 				</div>
-				{{end}}
+				{{ end }}
 
 				<!-- New Spend Type -->
 				<div class="modal-window__manage-types__spend-type">
@@ -886,9 +902,9 @@
 		// Global variables
 		// ----------------------------------------------------
 
-		const Year = Number("{{.Year}}")
-		const MonthID = Number("{{.ID}}");
-		const MonthNumber = Number("{{printf `%d` .Month.Month}}")
+		const Year = Number("{{ .Year }}")
+		const MonthID = Number("{{ .ID }}");
+		const MonthNumber = Number("{{ printf `%d` .Month.Month }}")
 
 		// ----------------------------------------------------
 		// Days

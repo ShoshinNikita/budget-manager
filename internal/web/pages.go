@@ -145,16 +145,35 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	resp := struct {
 		*db.Month
 
-		SpendTypes   []*db.SpendType
-		ToShortMonth func(time.Month) string
+		SpendTypes    []*db.SpendType
+		ToShortMonth  func(time.Month) string
+		SumSpendCosts func([]*db.Spend) money.Money
 	}{
-		Month:        month,
-		SpendTypes:   spendTypes,
-		ToShortMonth: toShortMonth,
+		Month:         month,
+		SpendTypes:    spendTypes,
+		ToShortMonth:  toShortMonth,
+		SumSpendCosts: sumSpendCosts,
 	}
 	if err := s.tplStore.Execute(r.Context(), monthTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
+}
+
+func toShortMonth(m time.Month) string {
+	month := m.String()
+	// Don't trim June and July
+	if len(month) > 4 {
+		month = m.String()[:3]
+	}
+	return month
+}
+
+func sumSpendCosts(spends []*db.Spend) money.Money {
+	var m money.Money
+	for i := range spends {
+		m = m.Sub(spends[i].Cost)
+	}
+	return m
 }
 
 // -------------------------------------------------
@@ -196,13 +215,4 @@ func getMonth(r *http.Request) (month time.Month, ok bool) {
 	}
 
 	return month, true
-}
-
-func toShortMonth(m time.Month) string {
-	month := m.String()
-	// Don't trim June and July
-	if len(month) > 4 {
-		month = m.String()[:3]
-	}
-	return month
 }
