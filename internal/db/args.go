@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -61,4 +63,22 @@ type EditSpendArgs struct {
 	TypeID *uint
 	Notes  *string
 	Cost   *money.Money
+}
+
+// ----------------------------------------------------
+// Other
+// ----------------------------------------------------
+
+// SearchSpendsArgs is used to search spends. All fields are optional
+type SearchSpendsArgs struct {
+	Title string
+	Notes string
+
+	After  time.Time
+	Before time.Time
+
+	MinCost money.Money
+	MaxCost money.Money
+
+	TypeIDs []uint
 }
