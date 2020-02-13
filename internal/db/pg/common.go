@@ -131,25 +131,46 @@ func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
 	log := request_id.FromContextToLogger(ctx, db.log)
 	log = log.WithField("id", id)
 
-	d := &Day{ID: id}
-	err := db.db.Model(d).
-		Relation("Spends", orderByID).
-		Relation("Spends.Type").
-		WherePK().Select()
-	if err != nil {
-		if err == pg.ErrNoRows {
-			err := db_common.ErrDayNotExist
-			log.Error(err)
-			return nil, err
+	var (
+		day   *Day
+		year  int
+		month time.Month
+	)
+	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
+		day = &Day{ID: id}
+		err := tx.Model(day).
+			Relation("Spends", orderByID).
+			Relation("Spends.Type").
+			WherePK().Select()
+		if err != nil {
+			if err == pg.ErrNoRows {
+				return db_common.ErrDayNotExist
+			}
+			return errors.Wrap(err,
+				errors.WithMsg("couldn't select day with passed id"),
+				errors.WithType(errors.AppError))
 		}
 
-		const msg = "couldn't select day with passed id"
-		log.WithError(err).Error(msg)
-		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
+		// Get year and month
+		err = tx.Model((*Month)(nil)).
+			Column("year", "month").
+			Where("id = ?", day.MonthID).
+			Select(&year, &month)
+		if err != nil {
+			return errors.Wrap(err,
+				errors.WithMsg("couldn't get year and month of Month which contains passed Day"),
+				errors.WithType(errors.AppError))
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't get Day with passed id")
+		return nil, err
 	}
 
 	log.Debug("return Day")
-	return d.ToCommon(), nil
+	return day.ToCommon(year, month), nil
 }
 
 func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {

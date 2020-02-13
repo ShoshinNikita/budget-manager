@@ -48,21 +48,21 @@ func (m *Month) ToCommon() *db_common.Month {
 		Incomes: func() []*db_common.Income {
 			incomes := make([]*db_common.Income, 0, len(m.Incomes))
 			for i := range m.Incomes {
-				incomes = append(incomes, m.Incomes[i].ToCommon())
+				incomes = append(incomes, m.Incomes[i].ToCommon(m.Year, m.Month))
 			}
 			return incomes
 		}(),
 		MonthlyPayments: func() []*db_common.MonthlyPayment {
 			mp := make([]*db_common.MonthlyPayment, 0, len(m.MonthlyPayments))
 			for i := range m.MonthlyPayments {
-				mp = append(mp, m.MonthlyPayments[i].ToCommon())
+				mp = append(mp, m.MonthlyPayments[i].ToCommon(m.Year, m.Month))
 			}
 			return mp
 		}(),
 		Days: func() []*db_common.Day {
 			days := make([]*db_common.Day, 0, len(m.Days))
 			for i := range m.Days {
-				days = append(days, m.Days[i].ToCommon())
+				days = append(days, m.Days[i].ToCommon(m.Year, m.Month))
 			}
 			return days
 		}(),
@@ -84,18 +84,20 @@ type Day struct {
 
 // ToCommon converts Day to common Day structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (d *Day) ToCommon() *db_common.Day {
+func (d *Day) ToCommon(year int, month time.Month) *db_common.Day {
 	if d == nil {
 		return nil
 	}
 	return &db_common.Day{
 		ID:    d.ID,
+		Year:  year,
+		Month: month,
 		Day:   d.Day,
 		Saldo: d.Saldo,
 		Spends: func() []*db_common.Spend {
 			spends := make([]*db_common.Spend, 0, len(d.Spends))
 			for i := range d.Spends {
-				spends = append(spends, d.Spends[i].ToCommon())
+				spends = append(spends, d.Spends[i].ToCommon(year, month, d.Day))
 			}
 			return spends
 		}(),
@@ -133,12 +135,14 @@ func (in Income) Check() error {
 
 // ToCommon converts Income to common Income structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (in *Income) ToCommon() *db_common.Income {
+func (in *Income) ToCommon(year int, month time.Month) *db_common.Income {
 	if in == nil {
 		return nil
 	}
 	return &db_common.Income{
 		ID:     in.ID,
+		Year:   year,
+		Month:  month,
 		Title:  in.Title,
 		Notes:  in.Notes,
 		Income: in.Income,
@@ -180,12 +184,14 @@ func (mp MonthlyPayment) Check() error {
 
 // ToCommon converts MonthlyPayment to common MonthlyPayment structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (mp *MonthlyPayment) ToCommon() *db_common.MonthlyPayment {
+func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *db_common.MonthlyPayment {
 	if mp == nil {
 		return nil
 	}
 	return &db_common.MonthlyPayment{
 		ID:    mp.ID,
+		Year:  year,
+		Month: month,
 		Title: mp.Title,
 		Type:  mp.Type.ToCommon(),
 		Notes: mp.Notes,
@@ -228,12 +234,15 @@ func (s Spend) Check() error {
 
 // ToCommon converts Spend to common Spend structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (s *Spend) ToCommon() *db_common.Spend {
+func (s *Spend) ToCommon(year int, month time.Month, day int) *db_common.Spend {
 	if s == nil {
 		return nil
 	}
 	return &db_common.Spend{
 		ID:    s.ID,
+		Year:  year,
+		Month: month,
+		Day:   day,
 		Title: s.Title,
 		Type:  s.Type.ToCommon(),
 		Notes: s.Notes,
