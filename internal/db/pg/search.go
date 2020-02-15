@@ -1,11 +1,87 @@
 package pg
 
 import (
+	"context"
+	"time"
+
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
+	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
+
+func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) ([]*db_common.Spend, error) {
+	log := request_id.FromContextToLogger(ctx, db.log)
+	log = log.WithFields(logrus.Fields{
+		"title": args.Title, "notes": args.Notes, "after": args.After, "before": args.Before,
+		"min_cost": args.MinCost, "max_cost": args.MaxCost, "type_ids": args.TypeIDs,
+	})
+
+	var pgSpends []*searchSpendsModel
+
+	startTime := time.Now()
+	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
+		query := db.buildSearchSpendsQuery(tx, args)
+		if err := query.Select(&pgSpends); err != nil {
+			return errors.Wrap(err, errors.WithMsg("couldn't select Spends"), errors.WithType(errors.AppError))
+		}
+		return nil
+	})
+	if err != nil {
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't find spends")
+		return nil, err
+	}
+
+	// Convert the internal model to the common one
+	spends := make([]*db_common.Spend, 0, len(pgSpends))
+	for i := range pgSpends {
+		s := &db_common.Spend{
+			ID:    pgSpends[i].ID,
+			Year:  pgSpends[i].Year,
+			Month: pgSpends[i].Month,
+			Day:   pgSpends[i].Day,
+			Title: pgSpends[i].Title,
+			Notes: pgSpends[i].Notes,
+			Cost:  pgSpends[i].Cost,
+		}
+		if pgSpends[i].Type.ID != 0 {
+			// Don't check if a name is empty because Spend Types with non-zero id always have a name
+			s.Type = &db_common.SpendType{
+				ID:   pgSpends[i].Type.ID,
+				Name: pgSpends[i].Type.Name,
+			}
+		}
+		spends = append(spends, s)
+	}
+
+	log = log.WithFields(logrus.Fields{
+		"time":          time.Since(startTime),
+		"spend_numbers": len(spends),
+	})
+
+	log.Debug("return found Spends")
+	return spends, nil
+}
+
+type searchSpendsModel struct {
+	ID uint
+
+	Year  int
+	Month time.Month
+	Day   int
+
+	Title string
+	Notes string
+	Cost  money.Money
+	Type  struct {
+		ID   uint
+		Name string
+	}
+}
 
 // buildSearchSpendsQuery builds query to search spends
 //
