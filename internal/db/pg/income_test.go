@@ -99,7 +99,8 @@ func TestAddIncome(t *testing.T) {
 			}
 			b += in.Income.Income.ToInt()
 		}
-		return b / int64(daysInMonth(time.Now()))
+		now := time.Now()
+		return b / int64(daysInMonth(now.Year(), now.Month()))
 	}()
 
 	m, err := db.GetMonth(context.Background(), monthID)
@@ -206,7 +207,8 @@ func TestEditIncome(t *testing.T) {
 			}
 			b += in.Income.Income.ToInt()
 		}
-		return b / int64(daysInMonth(time.Now()))
+		now := time.Now()
+		return b / int64(daysInMonth(now.Year(), now.Month()))
 	}()
 
 	m, err := db.GetMonth(context.Background(), monthID)
@@ -254,7 +256,8 @@ func TestRemoveIncome(t *testing.T) {
 			b += in.Income.ToInt()
 		}
 
-		return b / int64(daysInMonth(time.Now()))
+		now := time.Now()
+		return b / int64(daysInMonth(now.Year(), now.Month()))
 	}()
 
 	m, err := db.GetMonth(context.Background(), monthID)
