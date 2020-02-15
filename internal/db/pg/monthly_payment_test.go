@@ -112,7 +112,8 @@ func TestAddMonthlyPayment(t *testing.T) {
 		for _, p := range payments {
 			b -= p.Cost.ToInt()
 		}
-		return b / int64(daysInMonth(time.Now()))
+		now := time.Now()
+		return b / int64(daysInMonth(now.Year(), now.Month()))
 	}()
 
 	m, err := db.GetMonth(context.Background(), monthID)
@@ -246,7 +247,8 @@ func TestEditMonthlyPayment(t *testing.T) {
 				b -= p.edited.Cost.ToInt()
 			}
 		}
-		return b / int64(daysInMonth(time.Now()))
+		now := time.Now()
+		return b / int64(daysInMonth(now.Year(), now.Month()))
 	}()
 
 	m, err := db.GetMonth(context.Background(), monthID)
@@ -332,7 +334,8 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 				b -= p.Cost.ToInt()
 			}
 		}
-		return b / int64(daysInMonth(time.Now()))
+		now := time.Now()
+		return b / int64(daysInMonth(now.Year(), now.Month()))
 	}()
 
 	m, err := db.GetMonth(context.Background(), monthID)

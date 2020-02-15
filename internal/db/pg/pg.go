@@ -133,25 +133,29 @@ func (db *DB) DropDB() error {
 }
 
 func (db *DB) initCurrentMonth() error {
-	now := time.Now()
-	year, month, _ := now.Date()
+	year, month, _ := time.Now().Date()
+	return db.addMonth(year, month)
+}
 
+func (db *DB) addMonth(year int, month time.Month) error {
 	err := db.db.Model(&Month{}).
 		Column("id").
 		Where("year = ? AND month = ?", year, month).
 		Select()
 	if err == nil {
+		// The month is already created
 		return nil
 	}
 	if err != pg.ErrNoRows {
-		db.log.WithError(err).Error("couldn't select the current month")
+		// Unexpected error
+		db.log.WithError(err).Error("unexpected error: couldn't select the current month")
 		return err
 	}
 
 	// We have to init the current month
 	log := db.log
 
-	// Add current month
+	// Add the current month
 	log.Debug("init the current month")
 
 	currentMonth := &Month{Year: year, Month: month}
@@ -166,7 +170,9 @@ func (db *DB) initCurrentMonth() error {
 	log.Debug("current month was successfully inited")
 
 	// Add days for the current month
-	daysNumber := daysInMonth(now)
+	log.Debug("init days of the current month")
+
+	daysNumber := daysInMonth(year, month)
 	days := make([]*Day, daysNumber)
 	for i := range days {
 		days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
@@ -176,6 +182,7 @@ func (db *DB) initCurrentMonth() error {
 		log.WithError(err).Error("couldn't insert days for current month")
 		return errors.Wrap(err, "couldn't insert days for current month")
 	}
+	log.Debug("days of the current month was successfully inited")
 
 	return nil
 }
