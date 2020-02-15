@@ -32,4 +32,5 @@ docker run --rm -d \
 	${MOUNT} \
 	-e POSTGRES_USER=postgres \
 	-e POSTGRES_DB=postgres \
+	-e POSTGRES_HOST_AUTH_METHOD=trust \
 	postgres:12-alpine -c "log_statement=all"

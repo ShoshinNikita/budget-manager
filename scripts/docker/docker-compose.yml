@@ -25,8 +25,9 @@ services:
     container_name: budget-manager_postgres
     environment:
       POSTGRES_USER: postgres
-      # Empty password
+      # Use empty password
       # POSTGRES_PASSWORD
+      POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: postgres
     volumes:
       # Use this volume to not store data
