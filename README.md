@@ -53,7 +53,7 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
           - "8080:8080"
 
       postgres:
-        image: postgres
+        image: postgres:12-alpine
         container_name: budget-manager_postgres
         environment:
           POSTGRES_USER: postgres
