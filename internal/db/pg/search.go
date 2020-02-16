@@ -127,11 +127,19 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 		Order("month.year").Order("month.month").Order("day.day").Order("spend.id")
 
 	if args.Title != "" {
-		query = query.Where("spend.title LIKE ?", args.Title)
+		title := "%" + args.Title + "%"
+		if args.TitleExactly {
+			title = args.Title
+		}
+		query = query.Where("spend.title LIKE ?", title)
 	}
 
 	if args.Notes != "" {
-		query = query.Where("spend.notes LIKE ?", args.Notes)
+		notes := "%" + args.Notes + "%"
+		if args.NotesExactly {
+			notes = args.Notes
+		}
+		query = query.Where("spend.notes LIKE ?", notes)
 	}
 
 	switch {

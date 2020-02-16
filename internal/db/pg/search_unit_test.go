@@ -57,17 +57,41 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		},
 		{
 			desc:     "specify title",
-			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'rent%')`),
+			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE '%rent%')`),
 			args: db_common.SearchSpendsArgs{
-				Title: "rent%",
+				Title: "rent",
+			},
+		},
+		{
+			desc:     "specify title (exactly)",
+			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'rent')`),
+			args: db_common.SearchSpendsArgs{
+				Title:        "rent",
+				TitleExactly: true,
+			},
+		},
+		{
+			desc:     "specify notes",
+			reqQuery: buildWhereQuery(`WHERE (spend.notes LIKE '%note%')`),
+			args: db_common.SearchSpendsArgs{
+				Notes: "note",
+			},
+		},
+		{
+			desc:     "specify notes (exactly)",
+			reqQuery: buildWhereQuery(`WHERE (spend.notes LIKE 'note')`),
+			args: db_common.SearchSpendsArgs{
+				Notes:        "note",
+				NotesExactly: true,
 			},
 		},
 		{
 			desc:     "specify title and notes",
-			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'rent%') AND (spend.notes LIKE '%note%')`),
+			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'rent') AND (spend.notes LIKE '%note%')`),
 			args: db_common.SearchSpendsArgs{
-				Title: "rent%",
-				Notes: "%note%",
+				Title:        "rent",
+				TitleExactly: true,
+				Notes:        "note",
 			},
 		},
 		{
@@ -131,21 +155,22 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		{
 			desc: "all args",
 			reqQuery: buildWhereQuery(`
-				WHERE (spend.title LIKE '123')
-				AND (spend.notes LIKE 'some note')
-				AND (make_date(month.year::int, month.month::int, day.day::int)
-					BETWEEN '2020-01-01 00:00:00+00:00:00' AND '2020-02-01 00:00:00+00:00:00')
-				AND (spend.cost BETWEEN 20000 AND 500000)
-				AND (spend.type_id IN (1,7))
+				WHERE (spend.title LIKE '%123%')
+				      AND (spend.notes LIKE 'some note')
+				      AND (make_date(month.year::int, month.month::int, day.day::int)
+				          BETWEEN '2020-01-01 00:00:00+00:00:00' AND '2020-02-01 00:00:00+00:00:00')
+				      AND (spend.cost BETWEEN 20000 AND 500000)
+				      AND (spend.type_id IN (1,7))
 			`),
 			args: db_common.SearchSpendsArgs{
-				Title:   "123",
-				Notes:   "some note",
-				After:   time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
-				Before:  time.Date(2020, time.February, 1, 0, 0, 0, 0, time.UTC),
-				MinCost: money.FromFloat(200),
-				MaxCost: money.FromFloat(5000),
-				TypeIDs: []uint{1, 7},
+				Title:        "123",
+				Notes:        "some note",
+				NotesExactly: true,
+				After:        time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC),
+				Before:       time.Date(2020, time.February, 1, 0, 0, 0, 0, time.UTC),
+				MinCost:      money.FromFloat(200),
+				MaxCost:      money.FromFloat(5000),
+				TypeIDs:      []uint{1, 7},
 			},
 		},
 	}

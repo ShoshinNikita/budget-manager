@@ -139,9 +139,9 @@ func TestSearchSpends(t *testing.T) {
 			},
 		},
 		{
-			desc: "get spends with 'first' in title",
+			desc: "get spends with 'first spend' in title",
 			args: db_common.SearchSpendsArgs{
-				Title: "first%",
+				Title: "first spend",
 			},
 			want: []*db_common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
@@ -154,9 +154,24 @@ func TestSearchSpends(t *testing.T) {
 			},
 		},
 		{
+			desc: "get spends with 'first spend' in title (exactly)",
+			args: db_common.SearchSpendsArgs{
+				Title:        "first spend",
+				TitleExactly: true,
+			},
+			want: []*db_common.Spend{
+				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
+				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
+				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
+				{ID: 5, Year: 2020, Month: time.January, Day: 1, Title: "first spend", Notes: "2020-01-01", Cost: FromInt(189), Type: secondSpendType},
+				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},
+				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
+			},
+		},
+		{
 			desc: "get spends with '2019-12-' in notes",
 			args: db_common.SearchSpendsArgs{
-				Notes: "2019-12-%",
+				Notes: "2019-12-",
 			},
 			want: []*db_common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
@@ -212,8 +227,8 @@ func TestSearchSpends(t *testing.T) {
 		{
 			desc: "complex request",
 			args: db_common.SearchSpendsArgs{
-				Title:   "%spend",
-				Notes:   "2020-%",
+				Title:   "spend",
+				Notes:   "2020-",
 				After:   time.Date(2020, time.January, 2, 0, 0, 0, 0, time.UTC),
 				Before:  time.Date(2020, time.February, 13, 0, 0, 0, 0, time.UTC),
 				MinCost: FromInt(100),
