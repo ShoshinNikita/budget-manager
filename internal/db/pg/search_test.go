@@ -239,6 +239,14 @@ func TestSearchSpends(t *testing.T) {
 				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
 			},
 		},
+		{
+			desc: "sql injection",
+			args: db_common.SearchSpendsArgs{
+				Title:        "first spend' OR 1=1--",
+				TitleExactly: true,
+			},
+			want: []*db_common.Spend{},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

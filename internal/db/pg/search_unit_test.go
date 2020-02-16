@@ -173,6 +173,14 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				TypeIDs:      []uint{1, 7},
 			},
 		},
+		{
+			desc:     "sql injection",
+			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'title''; OR 1=1--')`),
+			args: db_common.SearchSpendsArgs{
+				Title:        "title'; OR 1=1--",
+				TitleExactly: true,
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
