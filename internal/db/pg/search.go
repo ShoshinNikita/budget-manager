@@ -32,7 +32,7 @@ func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) 
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("couldn't find spends")
+		log.WithError(errors.GetOriginalError(err)).Error("couldn't select Spends")
 		return nil, err
 	}
 
@@ -59,8 +59,8 @@ func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) 
 	}
 
 	log = log.WithFields(logrus.Fields{
-		"time":          time.Since(startTime),
-		"spend_numbers": len(spends),
+		"time":         time.Since(startTime),
+		"spend_number": len(spends),
 	})
 
 	log.Debug("return found Spends")
@@ -101,8 +101,9 @@ type searchSpendsModel struct {
 //         LEFT JOIN spend_types AS spend_type
 //         ON spend_type.id = spend.type_id
 //
-//   WHERE make_date(month.year::int, month.month::int, day.day::int) BETWEEN ':after'::date AND ':before'::date
-//         AND title LIKE ':pattern'
+//   WHERE spend.title LIKE ':title_pattern'
+//         AND spend.notes LIKE 'notes_pattern'
+//         AND make_date(month.year::int, month.month::int, day.day::int) BETWEEN ':after'::date AND ':before'::date
 //         AND spend.cost BETWEEN :min AND :max
 //         AND spend.type_id IN (:type_ids)
 //
