@@ -22,11 +22,13 @@ import (
 // Config
 // -------------------------------------------------
 
-type Config struct {
+type Config struct { // nolint:maligned
+	Debug bool `env:"DEBUG" envDefault:"false"`
+
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
 
 	// CacheTemplates defines whether templates have to be loaded from disk every request.
-	// It is useful during development. So, it is always false when Debug mode is on
+	// It is useful during development
 	CacheTemplates bool `env:"SERVER_CACHE_TEMPLATES" envDefault:"true"`
 
 	// SkipAuth disables auth. Works only in Debug mode!
@@ -115,16 +117,7 @@ type TemplateStore interface {
 	Execute(ctx context.Context, path string, w io.Writer, data interface{}) error
 }
 
-func NewServer(cnf Config, db Database, log logrus.FieldLogger, debug bool) *Server {
-	if debug {
-		// Load templates every request
-		cnf.CacheTemplates = false
-	} else {
-		// Always false when Debug mode is off
-		cnf.SkipAuth = false
-	}
-
-	//nolint:gosimple
+func NewServer(cnf Config, db Database, log logrus.FieldLogger) *Server {
 	return &Server{
 		db:  db,
 		log: log,

@@ -15,7 +15,9 @@ import (
 // {year}/{month}/{day} {hour}:{minute}:{second}
 const timeLayout = "2006/01/02 15:04:05"
 
-type Config struct {
+type Config struct { // nolint:maligned
+	Debug bool `env:"DEBUG" envDefault:"false"`
+
 	// Mode is a mode of Logger. Valid options: prod, production, dev, develop.
 	// Default value is prod
 	Mode string `env:"LOGGER_MODE" envDefault:"prod"`
@@ -25,7 +27,7 @@ type Config struct {
 	Level string `env:"LOGGER_LEVEL" envDefault:"info"`
 }
 
-func New(cnf Config, debug bool) *logrus.Logger {
+func New(cnf Config) *logrus.Logger {
 	log := logrus.New()
 	log.SetReportCaller(true)
 
@@ -47,7 +49,7 @@ func New(cnf Config, debug bool) *logrus.Logger {
 	}
 
 	// Always use debug level in debug mode
-	if debug {
+	if cnf.Debug {
 		log.SetLevel(logrus.DebugLevel)
 	}
 
