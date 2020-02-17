@@ -97,7 +97,7 @@ func (app *App) PrepareComponents() error {
 }
 
 func (app *App) prepareLogger() {
-	app.log = logger.New(app.config.Logger, app.config.Debug)
+	app.log = logger.New(app.config.Logger)
 }
 
 func (app *App) prepareDB() (err error) {
