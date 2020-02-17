@@ -130,7 +130,7 @@ func (app *App) prepareDB() (err error) {
 
 func (app *App) prepareWebServer() {
 	app.server = web.NewServer(
-		app.config.Server, app.db, app.log.WithField("component", "server"), app.config.Debug,
+		app.config.Server, app.db, app.log.WithField("component", "server"),
 	)
 	app.server.Prepare()
 }

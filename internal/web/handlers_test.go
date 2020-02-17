@@ -1374,7 +1374,7 @@ func TestMiddlewares_Auth(t *testing.T) {
 			"user": "$apr1$AlLoM14i$KvDlySdft5ag86nvn6PKI0",
 		},
 	}
-	server := NewServer(config, db, log, true)
+	server := NewServer(config, db, log)
 	server.Prepare()
 
 	// Run tests
@@ -1470,7 +1470,7 @@ func initServer(require *require.Assertions) *Server {
 
 	// Server
 	config := Config{Port: 8080, SkipAuth: true}
-	server := NewServer(config, db, log, true)
+	server := NewServer(config, db, log)
 	server.Prepare()
 
 	return server
