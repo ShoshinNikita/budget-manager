@@ -72,10 +72,10 @@ type EditSpendArgs struct {
 // SearchSpendsArgs is used to search spends. All fields are optional
 type SearchSpendsArgs struct {
 	Title string
+	Notes string
+
 	// TitleExactly defines should we search exactly for the given title
 	TitleExactly bool
-
-	Notes string
 	// NotesExactly defines should we search exactly for the given notes
 	NotesExactly bool
 
