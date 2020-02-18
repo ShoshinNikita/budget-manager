@@ -18,8 +18,8 @@ func TestAddIncome(t *testing.T) {
 	require := require.New(t)
 
 	// Init db
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	incomes := []struct {
 		Income
@@ -112,8 +112,8 @@ func TestEditIncome(t *testing.T) {
 	require := require.New(t)
 
 	// Init db
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	incomes := []Income{
 		{ID: 1, MonthID: monthID, Title: "Salary", Income: money.FromInt(15000)},
@@ -220,8 +220,8 @@ func TestRemoveIncome(t *testing.T) {
 	require := require.New(t)
 
 	// Init db
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	incomes := []Income{
 		{ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not very big :(", Income: money.FromInt(30000)},

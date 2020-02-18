@@ -16,8 +16,8 @@ import (
 func TestAddMonthlyPayment(t *testing.T) {
 	require := require.New(t)
 
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	// Prepare
 	var income = money.FromInt(50000)
@@ -124,8 +124,8 @@ func TestAddMonthlyPayment(t *testing.T) {
 func TestEditMonthlyPayment(t *testing.T) {
 	require := require.New(t)
 
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	// Prepare
 	var income = money.FromInt(50000)
@@ -267,8 +267,8 @@ func TestEditMonthlyPayment(t *testing.T) {
 func TestRemoveMonthlyPayment(t *testing.T) {
 	require := require.New(t)
 
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	payments := []struct {
 		MonthlyPayment

@@ -17,8 +17,8 @@ func TestAddSpendType(t *testing.T) {
 	require := require.New(t)
 
 	// Init db
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	spendTypes := []struct {
 		SpendType
@@ -76,8 +76,8 @@ func TestEditSpendType(t *testing.T) {
 	require := require.New(t)
 
 	// Init db
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	spendTypes := []struct {
 		origin  SpendType
@@ -128,8 +128,8 @@ func TestDeleteSpendType(t *testing.T) {
 	require := require.New(t)
 
 	// Init db
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	spendTypes := []SpendType{
 		{ID: 1, Name: "first type"},

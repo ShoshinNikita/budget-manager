@@ -16,8 +16,8 @@ import (
 func TestAddSpend(t *testing.T) {
 	require := require.New(t)
 
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	spends := []struct {
 		Spend
@@ -97,8 +97,8 @@ func TestAddSpend(t *testing.T) {
 func TestEditSpend(t *testing.T) {
 	require := require.New(t)
 
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	spends := []struct {
 		origin  Spend
@@ -241,8 +241,8 @@ func TestEditSpend(t *testing.T) {
 func TestDeleteSpend(t *testing.T) {
 	require := require.New(t)
 
-	db := initDB(require)
-	defer cleanUp(require, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	spends := []struct {
 		Spend
