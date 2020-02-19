@@ -132,7 +132,7 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 		if args.TitleExactly {
 			title = args.Title
 		}
-		query = query.Where("spend.title LIKE ?", title)
+		query = query.Where("LOWER(spend.title) LIKE ?", title)
 	}
 
 	if args.Notes != "" {
@@ -140,7 +140,7 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 		if args.NotesExactly {
 			notes = args.Notes
 		}
-		query = query.Where("spend.notes LIKE ?", notes)
+		query = query.Where("LOWER(spend.notes) LIKE ?", notes)
 	}
 
 	switch {

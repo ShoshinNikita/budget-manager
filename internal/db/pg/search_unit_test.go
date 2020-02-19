@@ -57,14 +57,14 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		},
 		{
 			desc:     "specify title",
-			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE '%rent%')`),
+			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE '%rent%')`),
 			args: db_common.SearchSpendsArgs{
 				Title: "rent",
 			},
 		},
 		{
 			desc:     "specify title (exactly)",
-			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'rent')`),
+			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE 'rent')`),
 			args: db_common.SearchSpendsArgs{
 				Title:        "rent",
 				TitleExactly: true,
@@ -72,14 +72,14 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		},
 		{
 			desc:     "specify notes",
-			reqQuery: buildWhereQuery(`WHERE (spend.notes LIKE '%note%')`),
+			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.notes) LIKE '%note%')`),
 			args: db_common.SearchSpendsArgs{
 				Notes: "note",
 			},
 		},
 		{
 			desc:     "specify notes (exactly)",
-			reqQuery: buildWhereQuery(`WHERE (spend.notes LIKE 'note')`),
+			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.notes) LIKE 'note')`),
 			args: db_common.SearchSpendsArgs{
 				Notes:        "note",
 				NotesExactly: true,
@@ -87,7 +87,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		},
 		{
 			desc:     "specify title and notes",
-			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'rent') AND (spend.notes LIKE '%note%')`),
+			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE 'rent') AND (LOWER(spend.notes) LIKE '%note%')`),
 			args: db_common.SearchSpendsArgs{
 				Title:        "rent",
 				TitleExactly: true,
@@ -155,8 +155,8 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		{
 			desc: "all args",
 			reqQuery: buildWhereQuery(`
-				WHERE (spend.title LIKE '%123%')
-				      AND (spend.notes LIKE 'some note')
+				WHERE (LOWER(spend.title) LIKE '%123%')
+				      AND (LOWER(spend.notes) LIKE 'some note')
 				      AND (make_date(month.year::int, month.month::int, day.day::int)
 				          BETWEEN '2020-01-01 00:00:00+00:00:00' AND '2020-02-01 00:00:00+00:00:00')
 				      AND (spend.cost BETWEEN 20000 AND 500000)
@@ -175,7 +175,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		},
 		{
 			desc:     "sql injection",
-			reqQuery: buildWhereQuery(`WHERE (spend.title LIKE 'title''; OR 1=1--')`),
+			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE 'title''; OR 1=1--')`),
 			args: db_common.SearchSpendsArgs{
 				Title:        "title'; OR 1=1--",
 				TitleExactly: true,
