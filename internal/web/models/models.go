@@ -205,3 +205,39 @@ type RemoveSpendTypeReq struct {
 
 	ID uint `json:"id"`
 }
+
+// -------------------------------------------------
+// Other
+// -------------------------------------------------
+
+// SearchSpendsReq is used to search for spends, all fields are optional
+type SearchSpendsReq struct {
+	Request
+
+	// Title can be in any case. Search will be performed by lowercased value
+	Title string `json:"title,omitempty"`
+	// Notes can be in any case. Search will be performed by lowercased value
+	Notes string `json:"notes,omitempty"`
+
+	// TitleExactly defines should we search exactly for the given title
+	TitleExactly bool `json:"title_exactly,omitempty"`
+	// NotesExactly defines should we search exactly for the given notes
+	NotesExactly bool `json:"notes_exactly,omitempty"`
+
+	// After must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
+	After time.Time `json:"after,omitempty"`
+	// Before must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
+	Before time.Time `json:"before,omitempty"`
+
+	MinCost float64 `json:"min_cost,omitempty"`
+	MaxCost float64 `json:"max_cost,omitempty"`
+
+	// TypeIDs is a list of Spend Type ids to search for
+	TypeIDs []uint `json:"type_ids,omitempty"`
+}
+
+type SearchSpendsResp struct {
+	Response
+
+	Spends []*db.Spend `json:"spends"`
+}
