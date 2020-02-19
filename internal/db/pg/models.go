@@ -11,23 +11,25 @@ import (
 
 // Month represents month entity in PostgreSQL db
 type Month struct {
-	ID uint
+	tableName struct{} `pg:"months"` // nolint:structcheck,unused
 
-	Year  int
-	Month time.Month
+	ID uint `pg:"id,pk"`
+
+	Year  int        `pg:"year"`
+	Month time.Month `pg:"month"`
 
 	Incomes         []*Income         `pg:"fk:month_id"`
 	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
 
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
-	DailyBudget money.Money
-	Days        []*Day `pg:"fk:month_id"`
+	DailyBudget money.Money `pg:"daily_budget"`
+	Days        []*Day      `pg:"fk:month_id"`
 
-	TotalIncome money.Money
+	TotalIncome money.Money `pg:"total_income"`
 	// TotalSpend is a cost of all Monthly Payments and Spends
-	TotalSpend money.Money
+	TotalSpend money.Money `pg:"total_spend"`
 	// Result is TotalIncome - TotalSpend
-	Result money.Money
+	Result money.Money `pg:"result"`
 }
 
 // ToCommon converts Month to common Month structure from
@@ -71,15 +73,17 @@ func (m *Month) ToCommon() *db_common.Month {
 
 // Day represents day entity in PostgreSQL db
 type Day struct {
+	tableName struct{} `pg:"days"` // nolint:structcheck,unused
+
 	// MonthID is a foreign key to 'months' table
-	MonthID uint
+	MonthID uint `pg:"month_id"`
 
-	ID uint
+	ID uint `pg:"id,pk"`
 
-	Day int
+	Day int `pg:"day"`
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
-	Saldo  money.Money
-	Spends []*Spend `pg:"fk:day_id"`
+	Saldo  money.Money `pg:"saldo"`
+	Spends []*Spend    `pg:"fk:day_id"`
 }
 
 // ToCommon converts Day to common Day structure from
@@ -106,14 +110,16 @@ func (d *Day) ToCommon(year int, month time.Month) *db_common.Day {
 
 // Income represents income entity in PostgreSQL db
 type Income struct {
+	tableName struct{} `pg:"incomes"` // nolint:structcheck,unused
+
 	// MonthID is a foreign key to 'months' table
-	MonthID uint
+	MonthID uint `pg:"month_id"`
 
-	ID uint `pg:",pk"`
+	ID uint `pg:"id,pk"`
 
-	Title  string
-	Notes  string
-	Income money.Money
+	Title  string      `pg:"title"`
+	Notes  string      `pg:"notes"`
+	Income money.Money `pg:"income"`
 }
 
 // Check checks whether Income is valid (not empty title, positive income and etc.)
@@ -151,16 +157,18 @@ func (in *Income) ToCommon(year int, month time.Month) *db_common.Income {
 
 // MonthlyPayment represents monthly payment entity in PostgreSQL db
 type MonthlyPayment struct {
+	tableName struct{} `pg:"monthly_payments"` // nolint:structcheck,unused
+
 	// MonthID is a foreign key to 'months' table
-	MonthID uint
+	MonthID uint `pg:"month_id"`
 
-	ID uint `pg:",pk"`
+	ID uint `pg:"id,pk"`
 
-	Title  string
-	TypeID uint
-	Type   *SpendType `pg:"fk:type_id"`
-	Notes  string
-	Cost   money.Money
+	Title  string      `pg:"title"`
+	TypeID uint        `pg:"type_id"`
+	Type   *SpendType  `pg:"fk:type_id"`
+	Notes  string      `pg:"notes"`
+	Cost   money.Money `pg:"cost"`
 }
 
 // Check checks whether Monthly Payment is valid (not empty title, positive cost and etc.)
@@ -201,16 +209,18 @@ func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *db_common.Monthl
 
 // Spend represents spend entity in PostgreSQL db
 type Spend struct {
+	tableName struct{} `pg:"spends"` // nolint:structcheck,unused
+
 	// DayID is a foreign key to 'days' table
-	DayID uint
+	DayID uint `pg:"day_id"`
 
-	ID uint `pg:",pk"`
+	ID uint `pg:"id,pk"`
 
-	Title  string
-	TypeID uint
-	Type   *SpendType `pg:"fk:type_id"`
-	Notes  string
-	Cost   money.Money
+	Title  string      `pg:"title"`
+	TypeID uint        `pg:"type_id"`
+	Type   *SpendType  `pg:"fk:type_id"`
+	Notes  string      `pg:"notes"`
+	Cost   money.Money `pg:"cost"`
 }
 
 // Check checks whether Spend is valid (not empty title, positive cost and etc.)
@@ -252,8 +262,10 @@ func (s *Spend) ToCommon(year int, month time.Month, day int) *db_common.Spend {
 
 // SpendType represents spend type entity in PostgreSQL db
 type SpendType struct {
-	ID   uint `pg:",pk"`
-	Name string
+	tableName struct{} `pg:"spend_types"` // nolint:structcheck,unused
+
+	ID   uint   `pg:"id,pk"`
+	Name string `pg:"name"`
 }
 
 // Check checks whether Spend Type is valid (not empty name)

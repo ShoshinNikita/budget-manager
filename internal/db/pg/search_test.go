@@ -17,8 +17,8 @@ import (
 func TestSearchSpends(t *testing.T) {
 	globalRequire := require.New(t)
 
-	db := initDB(globalRequire)
-	defer cleanUp(globalRequire, db)
+	db := initDB(t)
+	defer cleanUp(t, db)
 
 	// We have to drop and create tables for Months and Days because we manually prepare months for tests
 	err := dropTables(db.db, &Month{}, nil, &Day{}, nil)
