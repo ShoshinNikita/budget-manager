@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/gorilla/mux"
 )
@@ -46,4 +47,12 @@ func (s Server) addRoutes(router *mux.Router) {
 	for _, r := range routes {
 		router.Methods(r.methods).Path(r.path).HandlerFunc(r.handler)
 	}
+}
+
+func (Server) addPprofRoutes(router *mux.Router) {
+	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	router.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	router.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index)
 }

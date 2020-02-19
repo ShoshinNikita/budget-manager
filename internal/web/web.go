@@ -144,6 +144,10 @@ func (s *Server) Prepare() {
 	// Add API routes
 	s.log.Debug("add routes")
 	s.addRoutes(router)
+	if s.config.Debug {
+		// Enable pprof handlers
+		s.addPprofRoutes(router)
+	}
 
 	// Add File Handler
 	fileHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
