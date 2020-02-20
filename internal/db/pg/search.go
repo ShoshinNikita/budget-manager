@@ -83,7 +83,7 @@ type searchSpendsModel struct {
 	}
 }
 
-// buildSearchSpendsQuery builds query to search spends
+// buildSearchSpendsQuery builds a query to search for spends
 //
 // Full query looks like:
 //
