@@ -103,6 +103,10 @@ func TestSearchSpends(t *testing.T) {
 			Spend: db_common.Spend{Title: "first spending", Notes: "2020-02-14", Cost: FromInt(555)},
 			dayID: 76,
 		},
+		{
+			Spend: db_common.Spend{Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
+			dayID: 77,
+		},
 	}
 	for _, s := range spends {
 		args := db_common.AddSpendArgs{DayID: s.dayID, Title: s.Title, Notes: s.Notes, Cost: s.Cost}
@@ -136,6 +140,7 @@ func TestSearchSpends(t *testing.T) {
 				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
 				{ID: 10, Year: 2020, Month: time.February, Day: 13, Title: "qwerty", Notes: "2020-02-13", Cost: FromInt(7821)},
 				{ID: 11, Year: 2020, Month: time.February, Day: 14, Title: "first spending", Notes: "2020-02-14", Cost: FromInt(555)},
+				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
 			},
 		},
 		{
@@ -238,6 +243,38 @@ func TestSearchSpends(t *testing.T) {
 				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},
 				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
 			},
+		},
+		{
+			desc: "search uppercase title with lowerace",
+			args: db_common.SearchSpendsArgs{
+				Title: "title",
+			},
+			want: []*db_common.Spend{
+				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
+			},
+		},
+		{
+			desc: "search uppercase title with uppercase (no rows)",
+			args: db_common.SearchSpendsArgs{
+				Title: "TITLE",
+			},
+			want: []*db_common.Spend{},
+		},
+		{
+			desc: "search uppercase notes with lowerace",
+			args: db_common.SearchSpendsArgs{
+				Notes: "notes",
+			},
+			want: []*db_common.Spend{
+				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
+			},
+		},
+		{
+			desc: "search uppercase notes with uppercase (no rows)",
+			args: db_common.SearchSpendsArgs{
+				Notes: "NOTES",
+			},
+			want: []*db_common.Spend{},
 		},
 		{
 			desc: "sql injection",
