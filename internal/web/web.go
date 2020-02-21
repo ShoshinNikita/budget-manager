@@ -110,6 +110,9 @@ type Database interface {
 	AddSpendType(ctx context.Context, name string) (id uint, err error)
 	EditSpendType(ctx context.Context, id uint, newName string) error
 	RemoveSpendType(ctx context.Context, id uint) error
+
+	// Other
+	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]*db.Spend, error)
 }
 
 type TemplateStore interface {

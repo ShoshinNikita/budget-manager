@@ -228,3 +228,10 @@ Requests and responses can be found in [internal/web/models](internal/web/models
 
   **Request:** `models.RemoveSpendTypeReq`  
   **Response:** `models.Response`
+
+#### Other
+
+- `GET /api/search/spends` - search for Spends
+
+  **Request:** `models.SearchSpendsReq`  
+  **Response:** `models.SearchSpendsResp`

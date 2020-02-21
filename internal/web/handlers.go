@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
@@ -718,14 +719,63 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 // Other
 // -------------------------------------------------
 
-//nolint:unused,deadcode,errcheck
-func notImplementedYet(w http.ResponseWriter, _ *http.Request) {
-	w.Write([]byte("not implemented yet"))
+// GET /api/search/spends
+//
+// Request: models.SearchSpendsReq
+// Response: models.SearchSpendsResp
+//
+func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	// Decode
+	req := &models.SearchSpendsReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(r.Context(), w, errDecodeRequest, http.StatusBadRequest, err)
+		return
+	}
+
+	// Process
+	args := db.SearchSpendsArgs{
+		Title:        strings.ToLower(req.Title),
+		Notes:        strings.ToLower(req.Notes),
+		TitleExactly: req.TitleExactly,
+		NotesExactly: req.NotesExactly,
+		After:        req.After,
+		Before:       req.Before,
+		MinCost:      money.FromFloat(req.MinCost),
+		MaxCost:      money.FromFloat(req.MaxCost),
+		TypeIDs:      req.TypeIDs,
+	}
+	spends, err := s.db.SearchSpends(r.Context(), args)
+	if err != nil {
+		msg, code, err := s.parseDBError(err)
+		s.processError(r.Context(), w, msg, code, err)
+		return
+	}
+
+	resp := models.SearchSpendsResp{
+		Response: models.Response{
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
+		},
+		Spends: spends,
+	}
+
+	// Encode
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(r.Context(), w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
 // -------------------------------------------------
 // Helpers
 // -------------------------------------------------
+
+//nolint:unused,deadcode,errcheck
+func notImplementedYet(w http.ResponseWriter, _ *http.Request) {
+	w.Write([]byte("not implemented yet"))
+}
 
 // jsonNewDecoder is a wrapper for json.NewDecoder function.
 // It creates a new json.Decoder and calls json.Decoder.DisallowUnknownFields method

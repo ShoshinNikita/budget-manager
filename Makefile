@@ -93,3 +93,8 @@ check: lint test
 
 bench:
 	./tools/bench.sh
+
+generate-mocks:
+	# Mockery is required - https://github.com/vektra/mockery
+	#
+	mockery -testonly -name=Database -dir=internal/web -inpkg -case=underscore
