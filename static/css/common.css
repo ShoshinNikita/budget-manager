@@ -60,6 +60,13 @@ div.feather-icon:hover > svg {
 
 /* | Inputs */
 
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+	outline: none;
+}
+
 input {
 	background-color: white;
 	font-size: 15px;
