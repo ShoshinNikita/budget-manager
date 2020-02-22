@@ -67,6 +67,7 @@
 
 		.search__options__separator::before {
 			content: "–";
+			color: #4d4d4d;
 		}
 
 		#search__options__buttons {
@@ -122,24 +123,24 @@
 
 					<!-- Title -->
 					<div id="search__options__title" class="search__option">
-						<input type="text" name="title" placeholder="Title">
+						<input type="text" name="title" placeholder="Title" title="Title">
 					</div>
 
 					<!-- Notes -->
 					<div id="search__options__notes" class="search__option">
-						<input type="text" name="notes" placeholder="Notes">
+						<input type="text" name="notes" placeholder="Notes" title="Notes">
 					</div>
 
 					<!-- Cost -->
 					<div id="search__options__cost" class="search__option">
 						<div id="search__options__cost__min">
-							<input type="text" name="min_cost" placeholder="Min Cost">
+							<input type="text" name="min_cost" placeholder="Min Cost" title="Minimal Cost">
 						</div>
 
 						<div class="search__options__separator"></div>
 
 						<div id="search__options__cost__max">
-							<input type="text" name="max_cost" placeholder="Max Cost">
+							<input type="text" name="max_cost" placeholder="Max Cost" title="Maximal Cost">
 						</div>
 					</div>
 
@@ -180,6 +181,64 @@
 			<div id="search__results"> </div>
 		</div>
 	</div>
+
+	<script>
+		// Update Search Options with query params
+		window.addEventListener("load", () => {
+			const query = new URLSearchParams(location.search);
+
+			// Title
+			const title = query.get("title");
+			setOptionValue("search__options__title", title);
+
+			// Notes
+			const notes = query.get("notes");
+			setOptionValue("search__options__notes", notes);
+
+			// Min Cost
+			const minCost = query.get("min_cost");
+			setOptionValue("search__options__cost__min", minCost);
+
+			// Max cost
+			const maxCost = query.get("max_cost");
+			setOptionValue("search__options__cost__max", maxCost);
+
+			// After
+			const after = query.get("after");
+			setOptionValue("search__options__time__after", after);
+
+			// Before
+			const before = query.get("before");
+			setOptionValue("search__options__time__before", before);
+		})
+
+		/**
+		* @param {string} parentID - id of an input parent
+		* @param {string} value - new value
+		*/
+		function setOptionValue(parentID, value) {
+			if (value === "") {
+				return;
+			}
+
+			const parent = document.getElementById(parentID);
+			if (parent === undefined) {
+				console.error(`element '${parentID}' doesn't exist`);
+				return;
+			}
+			if (parent.childElementCount < 1) {
+				console.error(`element '${parentID}' doesn't have any children`);
+				return;
+			}
+			if (parent.children[0].tagName !== "INPUT") {
+				console.error(`the first child of element '${parentID}' must be <input>`);
+				return;
+			}
+
+			const elem = parent.children[0];
+			elem.value = value;
+		}
+	</script>
 </body>
 
 </html>
