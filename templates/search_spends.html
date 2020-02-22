@@ -80,6 +80,8 @@
 		.search__options__button {
 			background-color: white;
 			border: none;
+			margin: 0px;
+			padding: 0px;
 		}
 
 		.search__options__button>.feather-icon>svg {
@@ -91,6 +93,7 @@
 
 		#search__results {
 			height: 100%;
+			overflow-y: auto;
 		}
 
 		/* | Layouts */
@@ -178,7 +181,12 @@
 			</div>
 
 			<!-- Search Results -->
-			<div id="search__results"> </div>
+			<div id="search__results">
+				{{range .Spends}}
+				{{.}}
+				<br>
+				{{end}}
+			</div>
 		</div>
 	</div>
 
