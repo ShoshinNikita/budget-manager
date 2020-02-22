@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Search | Budget Manager</title>
+
+	<link rel="stylesheet" href="/static/css/common.css">
+
+	<style>
+		/* | Global */
+
+		body {
+			min-width: 800px;
+		}
+
+		#app {
+			height: 100%;
+		}
+
+		input[type=date] {
+			border: none;
+			border-bottom: 1px solid var(--border-accent-color);
+			width: 100%;
+		}
+
+		/* | Search */
+
+		#search {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: 1fr 4fr;
+			height: 100%;
+		}
+
+		#search__header {
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 18px;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		/* || Search Options */
+
+		#search__options {
+			border: 1px solid var(--border-color);
+			border-radius: 3px;
+			height: 100%;
+			padding: 10px;
+		}
+
+		.search__option {
+			margin-bottom: 15px;
+		}
+
+		.search__option:last-child {
+			margin-bottom: 0;
+		}
+
+		#search__options__cost,
+		#search__options__time {
+			column-gap: 5px;
+			display: grid;
+			grid-template-columns: 1fr auto 1fr;
+		}
+
+		.search__options__separator::before {
+			content: "–";
+		}
+
+		#search__options__buttons {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: repeat(2, min-content);
+			justify-content: center;
+		}
+
+		.search__options__button {
+			background-color: white;
+			border: none;
+		}
+
+		.search__options__button>.feather-icon>svg {
+			height: 25px;
+			width: 25px;
+		}
+
+		/* || Search Results */
+
+		#search__results {
+			height: 100%;
+		}
+
+		/* | Layouts */
+
+		/* For medium screens (<= 1300px) */
+		@media (max-width: 1300px) {
+
+			#search__options__cost,
+			#search__options__time {
+				grid-template-columns: 1fr;
+				grid-template-rows: 1fr 1fr;
+				row-gap: 10px;
+			}
+
+			.search__options__separator {
+				display: none;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<div id="search">
+			<!-- Search Options -->
+			<div id="search__options">
+				<div id="search__header" class="noselect">Spend Search</div>
+
+				<form action="/search/spends">
+
+					<!-- Title -->
+					<div id="search__options__title" class="search__option">
+						<input type="text" name="title" placeholder="Title">
+					</div>
+
+					<!-- Notes -->
+					<div id="search__options__notes" class="search__option">
+						<input type="text" name="notes" placeholder="Notes">
+					</div>
+
+					<!-- Cost -->
+					<div id="search__options__cost" class="search__option">
+						<div id="search__options__cost__min">
+							<input type="text" name="min_cost" placeholder="Min Cost">
+						</div>
+
+						<div class="search__options__separator"></div>
+
+						<div id="search__options__cost__max">
+							<input type="text" name="max_cost" placeholder="Max Cost">
+						</div>
+					</div>
+
+					<!-- Time -->
+					<div id="search__options__time" class="search__option">
+						<div id="search__options__time__after">
+							<input type="date" name="after" title="After">
+						</div>
+
+						<div class="search__options__separator"></div>
+
+						<div id="search__options__time__before">
+							<input type="date" name="before" title="Before">
+						</div>
+					</div>
+
+					<!-- Buttons -->
+					<div id="search__options__buttons">
+						<button type="reset" class="search__options__button" title="Reset">
+							<div class="feather-icon">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" /> </svg>
+							</div>
+						</button>
+
+						<button type="submit" class="search__options__button" title="Search">
+							<div class="feather-icon">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#search" /> </svg>
+							</div>
+						</button>
+					</div>
+
+				</form>
+			</div>
+
+			<!-- Search Results -->
+			<div id="search__results"> </div>
+		</div>
+	</div>
+</body>
+
+</html>

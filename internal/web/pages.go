@@ -12,9 +12,12 @@ import (
 )
 
 const (
-	overviewTemplatePath  = "./templates/overview.html"
-	yearTemplatePath      = "./templates/year.html"
-	monthTemplatePath     = "./templates/month.html"
+	overviewTemplatePath = "./templates/overview.html"
+	yearTemplatePath     = "./templates/year.html"
+	monthTemplatePath    = "./templates/month.html"
+	//
+	searchSpendsTemplatePath = "./templates/search_spends.html"
+	//
 	errorPageTemplatePath = "./templates/error_page.html"
 )
 
@@ -159,6 +162,18 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET /search/spends
+//
+func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
+	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, nil); err != nil {
+		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
+	}
+}
+
+// -------------------------------------------------
+// Helpers
+// -------------------------------------------------
+
 func toShortMonth(m time.Month) string {
 	month := m.String()
 	// Don't trim June and July
@@ -175,10 +190,6 @@ func sumSpendCosts(spends []*db.Spend) money.Money {
 	}
 	return m
 }
-
-// -------------------------------------------------
-// Helpers
-// -------------------------------------------------
 
 const yearKey = "year"
 
