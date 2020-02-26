@@ -70,6 +70,26 @@
 			color: #4d4d4d;
 		}
 
+		#search__options__types {
+			margin-left: auto;
+			margin-right: auto;
+			min-width: 60%;
+			width: min-content;
+		}
+
+		#search__options__types__header {
+			border-bottom: 1px solid var(--border-color);
+			margin: 0 auto 7px;
+			padding: 0 10px;
+			text-align: center;
+			width: min-content;
+			white-space: nowrap;
+		}
+
+		.search__options__types__type {
+			white-space: nowrap;
+		}
+
 		#search__options__buttons {
 			column-gap: 20px;
 			display: grid;
@@ -209,6 +229,17 @@
 						</div>
 					</div>
 
+					<!-- Spend Types -->
+					<div id="search__options__types" class="search__option">
+						<div id="search__options__types__header" class="noselect">Spend Types</div>
+						{{ range .SpendTypes }}
+						<div class="search__options__types__type">
+							<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}">
+							<label for="search__options__types__type-{{ .ID }}">{{ .Name }}</label>
+						</div>
+						{{ end }}
+					</div>
+
 					<!-- Buttons -->
 					<div id="search__options__buttons">
 						<button type="reset" class="search__options__button" title="Reset">
@@ -301,6 +332,18 @@
 			// Before
 			const before = query.get("before");
 			setOptionValue("search__options__time__before", before);
+
+			// Spend Types
+			const typeIDs = query.getAll("type_id");
+			for (let i = 0; i < typeIDs.length; i++) {
+				const elemID = "search__options__types__type-" + typeIDs[i];
+				const checkbox = document.getElementById(elemID);
+				if (!checkbox) {
+					console.error(`element '${elemID}' doesn't exist`);
+					continue;
+				}
+				checkbox.checked = true;
+			}
 		})
 
 		/**

@@ -173,6 +173,7 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 //   - max_cost - maximal cost
 //   - after - date in format 'yyyy-mm-dd'
 //   - before - date in format 'yyyy-mm-dd'
+//   - type_id - Spend Type id to search (can be passed multiple times: ?type_id=56&type_id=58)
 //
 // nolint:funlen
 func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
@@ -245,6 +246,22 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return t
 	}()
 
+	// Parse Spend Type ids
+	typeIDs := func() []uint {
+		ids := r.Form["type_id"]
+		typeIDs := make([]uint, 0, len(ids))
+		for i := range ids {
+			id, err := strconv.ParseUint(ids[i], 10, 0)
+			if err != nil {
+				// Just log the error
+				log.WithError(err).WithField("type_id", ids[i]).Warn("couldn't convert Spend Type id")
+				continue
+			}
+			typeIDs = append(typeIDs, uint(id))
+		}
+		return typeIDs
+	}()
+
 	// Process
 	args := db.SearchSpendsArgs{
 		Title:   strings.ToLower(title),
@@ -253,10 +270,10 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		Before:  before,
 		MinCost: minCost,
 		MaxCost: maxCost,
+		TypeIDs: typeIDs,
 		// TODO
 		TitleExactly: false,
 		NotesExactly: false,
-		TypeIDs:      []uint{},
 	}
 	spends, err := s.db.SearchSpends(r.Context(), args)
 	if err != nil {
@@ -265,11 +282,20 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	spendTypes, err := s.db.GetSpendTypes(r.Context())
+	if err != nil {
+		msg, code, err := s.parseDBError(err)
+		s.processErrorWithPage(r.Context(), w, msg, code, err)
+		return
+	}
+
 	// Execute the template
 	resp := struct {
-		Spends []*db.Spend
+		Spends     []*db.Spend
+		SpendTypes []*db.SpendType
 	}{
-		Spends: spends,
+		Spends:     spends,
+		SpendTypes: spendTypes,
 	}
 	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
