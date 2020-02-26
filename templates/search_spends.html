@@ -96,6 +96,55 @@
 			overflow-y: auto;
 		}
 
+		#search__results__table {
+			/*
+				We have to overwrite property 'border-collapse' because it doesn't work properly with 'position: sticky':
+				https://stackoverflow.com/a/53559396/7752659
+			*/
+			border-collapse: separate;
+			border-spacing: 0;
+		}
+
+		#search__results__table th {
+			background-color: white;
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 18px;
+			position: sticky;
+			top: 0;
+		}
+
+		#search__results__table th,
+		#search__results__table td {
+			padding-right: 10px;
+			padding-left: 10px;
+		}
+
+		#search__results__table th:first-child,
+		#search__results__table td:first-child {
+			padding-left: 5px;
+		}
+
+		#search__results__table th:last-child,
+		#search__results__table td:last-child {
+			padding-right: 5px;
+		}
+
+		.search__results__table__date,
+		.search__results__table__type,
+		.search__results__table__cost,
+		.search__results__table__link {
+			white-space: nowrap;
+		}
+
+		.search__results__table__link {
+			z-index: 1;
+		}
+
+		.search__results__table__link div.feather-icon>svg {
+			height: 20px;
+			width: 20px;
+		}
+
 		/* | Layouts */
 
 		/* For medium screens (<= 1300px) */
@@ -182,10 +231,44 @@
 
 			<!-- Search Results -->
 			<div id="search__results">
-				{{range .Spends}}
-				{{.}}
-				<br>
-				{{end}}
+				<table id="search__results__table">
+					<thead>
+						<tr>
+							<th class="search__results__table__date noselect">Date</th>
+							<th class="search__results__table__title noselect">Title</th>
+							<th class="search__results__table__notes noselect">Notes</th>
+							<th class="search__results__table__type noselect">Type</th>
+							<th class="search__results__table__cost noselect">Cost</th>
+							<th class="search__results__table__link noselect">Link</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{ range .Spends }}
+						<tr>
+							<td class="search__results__table__date">{{ printf "%02d" .Month }} / {{ printf "%02d" .Day }} / {{ .Year }}</td>
+							<td class="search__results__table__title">{{ .Title }}</td>
+							<td class="search__results__table__notes">{{ .Notes }}</td>
+							<td class="search__results__table__type">
+								{{ if .Type }}
+								<span>{{ .Type.Name }}</span>
+								{{ else }}
+								<span>-</span>
+								{{ end }}
+							</td>
+							<td class="search__results__table__cost">{{ .Cost }}</td>
+							<td class="search__results__table__link">
+								<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
+									<div class="feather-icon" title="View Day">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#external-link" />
+										</svg>
+									</div>
+								</a>
+							</td>
+						</tr>
+						{{ end }}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
