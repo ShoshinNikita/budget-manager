@@ -329,6 +329,25 @@
 			const elem = parent.children[0];
 			elem.value = value;
 		}
+
+		// Set date titles
+		window.addEventListener("load", () => {
+			let cache = {};
+
+			const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+			const dates = document.querySelectorAll("td.search__results__table__date");
+			for (let i = 0; i < dates.length; i++) {
+				const originalDate = dates[i].textContent;
+				let date = cache[originalDate];
+				if (!date) {
+					// Remove thin spaces and format like 'Friday, November 1, 2019'
+					date = new Date(originalDate.replace(/ /g, "", -1)).toLocaleDateString("en-US", dateFormatOptions);
+					cache[originalDate] = date;
+				}
+
+				dates[i].title = date;
+			}
+		})
 	</script>
 </body>
 
