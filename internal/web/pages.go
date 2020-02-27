@@ -293,9 +293,11 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	resp := struct {
 		Spends     []*db.Spend
 		SpendTypes []*db.SpendType
+		TotalCost  money.Money
 	}{
 		Spends:     spends,
 		SpendTypes: spendTypes,
+		TotalCost:  sumSpendCosts(spends),
 	}
 	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)

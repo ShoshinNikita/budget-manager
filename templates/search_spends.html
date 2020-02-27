@@ -156,6 +156,10 @@
 			white-space: nowrap;
 		}
 
+		.search__results__table__cost {
+			text-align: right;
+		}
+
 		.search__results__table__link {
 			z-index: 1;
 		}
@@ -163,6 +167,13 @@
 		.search__results__table__link div.feather-icon>svg {
 			height: 20px;
 			width: 20px;
+		}
+
+		#search__results__table__result-row .money--lose::after,
+		#search__results__table__result-row .money--gain::after {
+			/* Hide coin icon */
+			content: "";
+			margin-left: 0;
 		}
 
 		/* | Layouts */
@@ -269,7 +280,7 @@
 							<th class="search__results__table__title noselect">Title</th>
 							<th class="search__results__table__notes noselect">Notes</th>
 							<th class="search__results__table__type noselect">Type</th>
-							<th class="search__results__table__cost noselect">Cost</th>
+							<th class="search__results__table__cost noselect money">Cost,</th>
 							<th class="search__results__table__link noselect">Link</th>
 						</tr>
 					</thead>
@@ -298,6 +309,18 @@
 							</td>
 						</tr>
 						{{ end }}
+						<tr id="search__results__table__result-row">
+							<td colspan="4"></td>
+							<td class="search__results__table__cost" title="Total Cost">
+								<!-- Total Cost must be always <= 0 -->
+								{{ if eq .TotalCost 0 }}
+								<span class="money--gain">{{ .TotalCost }}</span>
+								{{ else }}
+								<span class="money--lose">{{ .TotalCost }}</span>
+								{{ end }}
+							</td>
+							<td></td>
+						</tr>
 					</tbody>
 				</table>
 			</div>
