@@ -132,15 +132,15 @@
 			overflow-x: auto;
 		}
 
-		.detailed-info__block__table__header-title {
+		.detailed-info__block__table__title {
 			width: 120px;
 		}
 
-		.detailed-info__block__table__header-cost {
+		.detailed-info__block__table__money {
 			width: 100px;
 		}
 
-		.detailed-info__block__table__header-actions {
+		.detailed-info__block__table__actions {
 			/* Set width to minimum */
 			width: 1px;
 		}
@@ -488,18 +488,18 @@
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th class="detailed-info__block__table__header-title noselect">Title</th>
-							<th class="noselect">Notes</th>
-							<th class="detailed-info__block__table__header-cost money noselect" style="width: 90px;">Income,</th>
-							<th class="detailed-info__block__table__header-actions"></th>
+							<th class="detailed-info__block__table__title noselect">Title</th>
+							<th class="detailed-info__block__table__notes noselect">Notes</th>
+							<th class="detailed-info__block__table__money money noselect" style="width: 90px;">Income,</th>
+							<th class="detailed-info__block__table__actions"></th>
 						</tr>
 
 						{{ range .Incomes }}
 						<tr>
-							<td>{{ .Title }}</td>
-							<td>{{ .Notes }}</td>
-							<td>{{ .Income }}</td>
-							<td>
+							<td class="detailed-info__block__table__title">{{ .Title }}</td>
+							<td class="detailed-info__block__table__notes">{{ .Notes }}</td>
+							<td class="detailed-info__block__table__money">{{ .Income }}</td>
+							<td class="detailed-info__block__table__actions">
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Edit"
 										onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
@@ -519,17 +519,17 @@
 
 						<!-- Inputs for new Income -->
 						<tr>
-							<td>
+							<td class="detailed-info__block__table__title">
 								<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
 							</td>
-							<td>
+							<td class="detailed-info__block__table__notes">
 								<input
 									type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
 							</td>
-							<td>
+							<td class="detailed-info__block__table__money">
 								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
 							</td>
-							<td>
+							<td class="detailed-info__block__table__actions">
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Add" onclick="addIncome()">
 										<svg class="svg-icon-plus">
@@ -550,27 +550,26 @@
 				<div class="detailed-info__block__table">
 					<table>
 						<tr>
-							<th class="detailed-info__block__table__header-title noselect">Title</th>
-							<th class="noselect">Notes</th>
-							<th class="noselect">Type</th>
-							<th class="detailed-info__block__table__header-cost money noselect"
-								style="width: 90px">Cost,</th>
-							<th class="detailed-info__block__table__header-actions"></th>
+							<th class="detailed-info__block__table__title noselect">Title</th>
+							<th class="detailed-info__block__table__notes noselect">Notes</th>
+							<th class="detailed-info__block__table__type noselect">Type</th>
+							<th class="detailed-info__block__table__money money noselect">Cost,</th>
+							<th class="detailed-info__block__table__actions"></th>
 						</tr>
 
 						{{ range .MonthlyPayments }}
 						<tr>
-							<td>{{ .Title }}</td>
-							<td>{{ .Notes }}</td>
-							<td>
+							<td class="detailed-info__block__table__title">{{ .Title }}</td>
+							<td class="detailed-info__block__table__notes">{{ .Notes }}</td>
+							<td class="detailed-info__block__table__type">
 								{{ if .Type }}
 								{{ .Type.Name }}
 								{{ else }}
 								-
 								{{ end }}
 							</td>
-							<td>{{ .Cost }}</td>
-							<td>
+							<td class="detailed-info__block__table__money">{{ .Cost }}</td>
+							<td class="detailed-info__block__table__actions">
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Edit"
 										onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
@@ -591,15 +590,15 @@
 
 						<!-- Inputs for new Monthly Payment -->
 						<tr>
-							<td>
+							<td class="detailed-info__block__table__title">
 								<input type="text" id="new-monthly-payment-title" placeholder="Title"
 									autocomplete="off">
 							</td>
-							<td>
+							<td class="detailed-info__block__table__notes">
 								<input
 									type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off">
 							</td>
-							<td>
+							<td class="detailed-info__block__table__type">
 								<select id="new-monthly-payment-type" autocomplete="off">
 									<option value="0">-</option>
 									{{ range $.SpendTypes }}
@@ -607,10 +606,10 @@
 									{{ end }}
 								</select>
 							</td>
-							<td>
+							<td class="detailed-info__block__table__money">
 								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
 							</td>
-							<td>
+							<td class="detailed-info__block__table__actions">
 								<div class="actions-horizontal-list">
 									<div class="feather-icon" title="Add" onclick="addMonthlyPayment()">
 										<svg class="svg-icon-plus">
@@ -659,26 +658,26 @@
 					<div class="detailed-info__days__day__spends">
 						<table>
 							<tr>
-								<th class="noselect">Title</th>
-								<th class="noselect">Notes</th>
-								<th class="noselect">Type</th>
-								<th class="money noselect" style="width: 100px;">Cost,</th>
-								<th class="detailed-info__block__table__header-actions"></th>
+								<th class="detailed-info__block__table__title noselect">Title</th>
+								<th class="detailed-info__block__table__notes noselect">Notes</th>
+								<th class="detailed-info__block__table__type noselect">Type</th>
+								<th class="detailed-info__block__table__money money noselect" style="width: 100px;">Cost,</th>
+								<th class="detailed-info__block__table__actions"></th>
 							</tr>
 
 							{{ range .Spends }}
 							<tr>
-								<td>{{ .Title }}</td>
-								<td>{{ .Notes }}</td>
-								<td>
+								<td class="detailed-info__block__table__title">{{ .Title }}</td>
+								<td class="detailed-info__block__table__notes">{{ .Notes }}</td>
+								<td class="detailed-info__block__table__type">
 									{{ if .Type }}
 									{{ .Type.Name }}
 									{{ else }}
 									-
 									{{ end }}
 								</td>
-								<td>{{ .Cost }}</td>
-								<td>
+								<td class="detailed-info__block__table__money">{{ .Cost }}</td>
+								<td class="detailed-info__block__table__actions">
 									<div class="actions-horizontal-list">
 										<div class="feather-icon" title="Edit"
 											onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
@@ -705,14 +704,14 @@
 								day number because we pass into 'addSpend' function day id.
 							-->
 							<tr>
-								<td>
+								<td class="detailed-info__block__table__title">
 									<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off">
 								</td>
-								<td>
+								<td class="detailed-info__block__table__notes">
 									<input
 										type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes" autocomplete="off">
 								</td>
-								<td>
+								<td class="detailed-info__block__table__type">
 									<select id="new-spend-type-{{ .ID }}" autocomplete="off">
 										<option value="0">-</option>
 										{{ range $.SpendTypes }}
@@ -720,10 +719,10 @@
 										{{ end }}
 									</select>
 								</td>
-								<td>
+								<td class="detailed-info__block__table__money">
 									<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost" autocomplete="off">
 								</td>
-								<td>
+								<td class="detailed-info__block__table__actions">
 									<div class="actions-horizontal-list">
 										<div class="feather-icon" title="Add" onclick="addSpend(Number('{{ .ID }}'))">
 											<svg class="svg-icon-plus">
