@@ -134,6 +134,7 @@
 
 		.detailed-info__block__table__type,
 		.detailed-info__block__table__money,
+		.detailed-info__block__table__money--input,
 		.detailed-info__block__table__actions {
 			/* Set width to minimum */
 			width: 1px;
@@ -142,6 +143,11 @@
 
 		.detailed-info__block__table__money {
 			min-width: 80px;
+			text-align: right;
+		}
+
+		td.detailed-info__block__table__money {
+			padding-right: 10px;
 		}
 
 		/* || Income */
@@ -520,7 +526,7 @@
 								<input
 									type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
 							</td>
-							<td class="detailed-info__block__table__money">
+							<td class="detailed-info__block__table__money--input">
 								<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
 							</td>
 							<td class="detailed-info__block__table__actions">
@@ -600,7 +606,7 @@
 									{{ end }}
 								</select>
 							</td>
-							<td class="detailed-info__block__table__money">
+							<td class="detailed-info__block__table__money--input">
 								<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
 							</td>
 							<td class="detailed-info__block__table__actions">
@@ -713,7 +719,7 @@
 										{{ end }}
 									</select>
 								</td>
-								<td class="detailed-info__block__table__money">
+								<td class="detailed-info__block__table__money--input">
 									<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost" autocomplete="off">
 								</td>
 								<td class="detailed-info__block__table__actions">
