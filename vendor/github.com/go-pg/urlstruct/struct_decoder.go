@@ -1,6 +1,7 @@
 package urlstruct
 
 import (
+	"context"
 	"net/url"
 	"reflect"
 	"strings"
@@ -19,7 +20,7 @@ func newStructDecoder(v reflect.Value) *structDecoder {
 	}
 }
 
-func (d *structDecoder) Decode(values url.Values) error {
+func (d *structDecoder) Decode(ctx context.Context, values url.Values) error {
 	var maps map[string][]string
 	for name, values := range values {
 		name = strings.TrimPrefix(name, ":")
@@ -60,13 +61,13 @@ func (d *structDecoder) Decode(values url.Values) error {
 		}
 
 		u := fv.Interface().(Unmarshaler)
-		if err := u.UnmarshalValues(values); err != nil {
+		if err := u.UnmarshalValues(ctx, values); err != nil {
 			return err
 		}
 	}
 
 	if d.sinfo.isUnmarshaler {
-		return d.v.Addr().Interface().(Unmarshaler).UnmarshalValues(values)
+		return d.v.Addr().Interface().(Unmarshaler).UnmarshalValues(ctx, values)
 	}
 
 	return nil

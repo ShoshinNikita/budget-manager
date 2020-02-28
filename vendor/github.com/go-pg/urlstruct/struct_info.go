@@ -1,6 +1,7 @@
 package urlstruct
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -10,7 +11,7 @@ import (
 )
 
 type Unmarshaler interface {
-	UnmarshalValues(url.Values) error
+	UnmarshalValues(context.Context, url.Values) error
 }
 
 //------------------------------------------------------------------------------
@@ -147,6 +148,7 @@ func joinIndex(base, idx []int) []int {
 //------------------------------------------------------------------------------
 
 var (
+	contextType   = reflect.TypeOf((*context.Context)(nil)).Elem()
 	urlValuesType = reflect.TypeOf((*url.Values)(nil)).Elem()
 	errorType     = reflect.TypeOf((*error)(nil)).Elem()
 )
@@ -155,9 +157,10 @@ func isUnmarshaler(typ reflect.Type) bool {
 	for i := 0; i < typ.NumMethod(); i++ {
 		meth := typ.Method(i)
 		if meth.Name == "UnmarshalValues" &&
-			meth.Type.NumIn() == 2 &&
+			meth.Type.NumIn() == 3 &&
 			meth.Type.NumOut() == 1 &&
-			meth.Type.In(1) == urlValuesType &&
+			meth.Type.In(1) == contextType &&
+			meth.Type.In(2) == urlValuesType &&
 			meth.Type.Out(0) == errorType {
 			return true
 		}
