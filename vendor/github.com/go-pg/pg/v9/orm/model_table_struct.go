@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/go-pg/pg/v9/types"
 )
@@ -360,18 +359,8 @@ func (m *structTableModel) join(
 }
 
 func (m *structTableModel) setSoftDeleteField() {
-	field := m.table.SoftDeleteField
-	value := field.Value(m.strct)
-
-	now := time.Now()
-	switch {
-	case value.Kind() == reflect.Ptr:
-		value.Set(reflect.ValueOf(&now))
-	case field.Type == timeType:
-		value.Set(reflect.ValueOf(now))
-	default:
-		value.Set(reflect.ValueOf(types.NullTime{Time: now}))
-	}
+	fv := m.table.SoftDeleteField.Value(m.strct)
+	m.table.SetSoftDeleteField(fv)
 }
 
 func splitColumn(s string) (string, string) {

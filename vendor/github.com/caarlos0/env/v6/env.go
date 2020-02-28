@@ -4,6 +4,7 @@ import (
 	"encoding"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"reflect"
@@ -77,14 +78,14 @@ var (
 		reflect.TypeOf(url.URL{}): func(v string) (interface{}, error) {
 			u, err := url.Parse(v)
 			if err != nil {
-				return nil, fmt.Errorf("unable parse URL: %v", err)
+				return nil, fmt.Errorf("unable to parse URL: %v", err)
 			}
 			return *u, nil
 		},
 		reflect.TypeOf(time.Nanosecond): func(v string) (interface{}, error) {
 			s, err := time.ParseDuration(v)
 			if err != nil {
-				return nil, fmt.Errorf("unable to parser duration: %v", err)
+				return nil, fmt.Errorf("unable to parse duration: %v", err)
 			}
 			return s, err
 		},
@@ -135,7 +136,7 @@ func doParse(ref reflect.Value, funcMap map[reflect.Type]ParserFunc) error {
 		}
 		if reflect.Struct == refField.Kind() && refField.CanAddr() && refField.Type().Name() == "" {
 			err := Parse(refField.Addr().Interface())
-			if nil != err {
+			if err != nil {
 				return err
 			}
 			continue
@@ -160,33 +161,43 @@ func doParse(ref reflect.Value, funcMap map[reflect.Type]ParserFunc) error {
 	return nil
 }
 
-func get(field reflect.StructField) (string, error) {
-	var (
-		val string
-		err error
-	)
+func get(field reflect.StructField) (val string, err error) {
+	var required bool
+	var exists bool
+	var loadFile bool
+	var expand = strings.EqualFold(field.Tag.Get("envExpand"), "true")
 
 	key, opts := parseKeyForOption(field.Tag.Get("env"))
 
-	defaultValue := field.Tag.Get("envDefault")
-	val = getOr(key, defaultValue)
+	for _, opt := range opts {
+		switch opt {
+		case "":
+			break
+		case "file":
+			loadFile = true
+		case "required":
+			required = true
+		default:
+			return "", fmt.Errorf("env: tag option %q not supported", opt)
+		}
+	}
 
-	expandVar := field.Tag.Get("envExpand")
-	if strings.ToLower(expandVar) == "true" {
+	defaultValue := field.Tag.Get("envDefault")
+	val, exists = getOr(key, defaultValue)
+
+	if expand {
 		val = os.ExpandEnv(val)
 	}
 
-	if len(opts) > 0 {
-		for _, opt := range opts {
-			// The only option supported is "required".
-			switch opt {
-			case "":
-				break
-			case "required":
-				val, err = getRequired(key)
-			default:
-				err = fmt.Errorf("env: tag option %q not supported", opt)
-			}
+	if required && !exists {
+		return "", fmt.Errorf(`env: required environment variable %q is not set`, key)
+	}
+
+	if loadFile && val != "" {
+		filename := val
+		val, err = getFromFile(filename)
+		if err != nil {
+			return "", fmt.Errorf(`env: could not load content of file "%s" from variable %s: %v`, filename, key, err)
 		}
 	}
 
@@ -199,19 +210,17 @@ func parseKeyForOption(key string) (string, []string) {
 	return opts[0], opts[1:]
 }
 
-func getRequired(key string) (string, error) {
-	if value, ok := os.LookupEnv(key); ok {
-		return value, nil
-	}
-	return "", fmt.Errorf(`env: required environment variable %q is not set`, key)
+func getFromFile(filename string) (value string, err error) {
+	b, err := ioutil.ReadFile(filename)
+	return string(b), err
 }
 
-func getOr(key, defaultValue string) string {
-	value, ok := os.LookupEnv(key)
-	if ok {
-		return value
+func getOr(key, defaultValue string) (value string, exists bool) {
+	value, exists = os.LookupEnv(key)
+	if !exists {
+		value = defaultValue
 	}
-	return defaultValue
+	return value, exists
 }
 
 func set(field reflect.Value, sf reflect.StructField, value string, funcMap map[reflect.Type]ParserFunc) error {
