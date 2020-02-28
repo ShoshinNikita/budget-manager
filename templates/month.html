@@ -132,22 +132,16 @@
 			overflow-x: auto;
 		}
 
-		.detailed-info__block__table__title {
-			width: 120px;
-		}
-
-		.detailed-info__block__table__money {
-			width: 100px;
-		}
-
+		.detailed-info__block__table__type,
+		.detailed-info__block__table__money,
 		.detailed-info__block__table__actions {
 			/* Set width to minimum */
 			width: 1px;
+			white-space: nowrap;
 		}
 
-		.detailed-info__block__table__add-buttons {
-			margin: 10px 0;
-			text-align: center;
+		.detailed-info__block__table__money {
+			min-width: 80px;
 		}
 
 		/* || Income */
@@ -490,7 +484,7 @@
 						<tr>
 							<th class="detailed-info__block__table__title noselect">Title</th>
 							<th class="detailed-info__block__table__notes noselect">Notes</th>
-							<th class="detailed-info__block__table__money money noselect" style="width: 90px;">Income,</th>
+							<th class="detailed-info__block__table__money money noselect">Income,</th>
 							<th class="detailed-info__block__table__actions"></th>
 						</tr>
 
@@ -661,7 +655,7 @@
 								<th class="detailed-info__block__table__title noselect">Title</th>
 								<th class="detailed-info__block__table__notes noselect">Notes</th>
 								<th class="detailed-info__block__table__type noselect">Type</th>
-								<th class="detailed-info__block__table__money money noselect" style="width: 100px;">Cost,</th>
+								<th class="detailed-info__block__table__money money noselect">Cost,</th>
 								<th class="detailed-info__block__table__actions"></th>
 							</tr>
 
