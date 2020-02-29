@@ -73,14 +73,17 @@
 			white-space: nowrap;
 		}
 
-		#header__type-manager {
+		#header__buttons {
+			column-gap: 5px;
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
 			height: 100%;
 			position: absolute;
 			right: 0px;
 			top: 0px;
 		}
 
-		#header__type-manager>svg {
+		#header__buttons svg {
 			height: 30px;
 			width: 30px;
 		}
@@ -355,8 +358,8 @@
 			}
 		}
 
-		/* For small screens (<= 900px) */
-		@media (max-width: 900px) {
+		/* For small screens (<= 950px) */
+		@media (max-width: 950px) {
 			#app {
 				height: auto;
 			}
@@ -458,10 +461,24 @@
 				</div>
 			</div>
 
-			<div id="header__type-manager" class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
-				<svg>
-					<use xlink:href="/static/feather/feather-sprite.svg#tag" />
-				</svg>
+			<div id="header__buttons">
+				<!-- Search for Spends -->
+				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
+				{{ $before := printf `%d-%02d-%d` .Year .Month.Month (len .Month.Days) }}
+				<a href="/search/spends?after={{ $after }}&before={{ $before }}">
+					<div class="feather-icon" title="Search for Spends">
+						<svg>
+							<use xlink:href="/static/feather/feather-sprite.svg#search" />
+						</svg>
+					</div>
+				</a>
+
+				<!-- Manage Spend Types -->
+				<div class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
+					<svg>
+						<use xlink:href="/static/feather/feather-sprite.svg#tag" />
+					</svg>
+				</div>
 			</div>
 		</div>
 
