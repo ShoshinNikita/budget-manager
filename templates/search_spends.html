@@ -197,6 +197,12 @@
 			margin-left: 0;
 		}
 
+		#search__results__no-spends {
+			font-size: 20px;
+			margin-top: 25px;
+			text-align: center;
+		}
+
 		/* | Layouts */
 
 		/* For medium screens (<= 1300px) */
@@ -302,6 +308,7 @@
 
 			<!-- Search Results -->
 			<div id="search__results">
+				{{ if .Spends }}
 				<table id="search__results__table">
 					<thead>
 						<tr>
@@ -352,6 +359,11 @@
 						</tr>
 					</tbody>
 				</table>
+				{{ else }}
+				<div id="search__results__no-spends" class="noselect">
+					<span>No Spends found!</span>
+				</div>
+				{{ end }}
 			</div>
 		</div>
 	</div>
