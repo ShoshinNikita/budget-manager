@@ -218,6 +218,11 @@
 			.search__options__separator {
 				display: none;
 			}
+
+			/* Hide notes */
+			.search__results__table__notes {
+				display: none;
+			}
 		}
 	</style>
 </head>
@@ -346,7 +351,12 @@
 						</tr>
 						{{ end }}
 						<tr id="search__results__table__result-row">
-							<td colspan="4"></td>
+							<!--
+								We can't use colspan="4" because we hide notes with 'display: none' for small and
+								medium screens. With colspan="4" there will be some bugs
+							 -->
+							<td colspan="3"></td>
+							<td class="search__results__table__notes"></td>
 							<td class="search__results__table__cost" title="Total Cost">
 								<!-- Total Cost must be always <= 0 -->
 								{{ if eq .TotalCost 0 }}
