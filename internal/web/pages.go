@@ -3,18 +3,23 @@ package web
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 const (
-	overviewTemplatePath  = "./templates/overview.html"
-	yearTemplatePath      = "./templates/year.html"
-	monthTemplatePath     = "./templates/month.html"
+	overviewTemplatePath = "./templates/overview.html"
+	yearTemplatePath     = "./templates/year.html"
+	monthTemplatePath    = "./templates/month.html"
+	//
+	searchSpendsTemplatePath = "./templates/search_spends.html"
+	//
 	errorPageTemplatePath = "./templates/error_page.html"
 )
 
@@ -159,6 +164,150 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GET /search/spends
+//
+// Query Params:
+//   - title - spend title
+//   - notes - spend notes
+//   - min_cost - minimal const
+//   - max_cost - maximal cost
+//   - after - date in format 'yyyy-mm-dd'
+//   - before - date in format 'yyyy-mm-dd'
+//   - type_id - Spend Type id to search (can be passed multiple times: ?type_id=56&type_id=58)
+//
+// nolint:funlen
+func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
+	log := request_id.FromContextToLogger(r.Context(), s.log)
+
+	// Parse the query
+
+	// Parse Title and Notes
+	title := r.FormValue("title")
+	notes := r.FormValue("notes")
+
+	// Parse Min and Max Costs
+	minCost := func() money.Money {
+		minCostParam := r.FormValue("min_cost")
+		if minCostParam == "" {
+			return 0
+		}
+
+		minCost, err := strconv.ParseFloat(minCostParam, 64)
+		if err != nil {
+			// Just log this error
+			log.WithError(err).WithField("min_cost", minCostParam).Warn("couldn't parse 'min_cost' param")
+			return 0
+		}
+		return money.FromFloat(minCost)
+	}()
+	maxCost := func() money.Money {
+		maxCostParam := r.FormValue("max_cost")
+		if maxCostParam == "" {
+			return 0
+		}
+
+		maxCost, err := strconv.ParseFloat(maxCostParam, 64)
+		if err != nil {
+			// Just log this error
+			log.WithError(err).WithField("max_cost", maxCostParam).Warn("couldn't parse 'max_cost' param")
+			return 0
+		}
+		return money.FromFloat(maxCost)
+	}()
+
+	// Parse After and Before
+	const timeLayout = "2006-01-02"
+	after := func() time.Time {
+		after := r.FormValue("after")
+		if after == "" {
+			return time.Time{}
+		}
+
+		t, err := time.Parse(timeLayout, after)
+		if err != nil {
+			// Just log this error
+			log.WithError(err).WithField("after", after).Warn("couldn't parse 'after' param")
+			t = time.Time{}
+		}
+		return t
+	}()
+	before := func() time.Time {
+		before := r.FormValue("before")
+		if before == "" {
+			return time.Time{}
+		}
+
+		t, err := time.Parse(timeLayout, before)
+		if err != nil {
+			// Just log this error
+			log.WithError(err).WithField("before", before).Warn("couldn't parse 'before' param")
+			t = time.Time{}
+		}
+		return t
+	}()
+
+	// Parse Spend Type ids
+	typeIDs := func() []uint {
+		ids := r.Form["type_id"]
+		typeIDs := make([]uint, 0, len(ids))
+		for i := range ids {
+			id, err := strconv.ParseUint(ids[i], 10, 0)
+			if err != nil {
+				// Just log the error
+				log.WithError(err).WithField("type_id", ids[i]).Warn("couldn't convert Spend Type id")
+				continue
+			}
+			typeIDs = append(typeIDs, uint(id))
+		}
+		return typeIDs
+	}()
+
+	// Process
+	args := db.SearchSpendsArgs{
+		Title:   strings.ToLower(title),
+		Notes:   strings.ToLower(notes),
+		After:   after,
+		Before:  before,
+		MinCost: minCost,
+		MaxCost: maxCost,
+		TypeIDs: typeIDs,
+		// TODO
+		TitleExactly: false,
+		NotesExactly: false,
+	}
+	spends, err := s.db.SearchSpends(r.Context(), args)
+	if err != nil {
+		msg, code, err := s.parseDBError(err)
+		s.processErrorWithPage(r.Context(), w, msg, code, err)
+		return
+	}
+
+	spendTypes, err := s.db.GetSpendTypes(r.Context())
+	if err != nil {
+		msg, code, err := s.parseDBError(err)
+		s.processErrorWithPage(r.Context(), w, msg, code, err)
+		return
+	}
+
+	// Execute the template
+	resp := struct {
+		Spends     []*db.Spend
+		SpendTypes []*db.SpendType
+		TotalCost  money.Money
+	}{
+		Spends:     spends,
+		SpendTypes: spendTypes,
+		TotalCost:  sumSpendCosts(spends),
+	}
+	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, resp); err != nil {
+		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
+	}
+}
+
+// -------------------------------------------------
+// Helpers
+// -------------------------------------------------
+
 func toShortMonth(m time.Month) string {
 	month := m.String()
 	// Don't trim June and July
@@ -175,10 +324,6 @@ func sumSpendCosts(spends []*db.Spend) money.Money {
 	}
 	return m
 }
-
-// -------------------------------------------------
-// Helpers
-// -------------------------------------------------
 
 const yearKey = "year"
 

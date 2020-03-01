@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Search | Budget Manager</title>
+
+	<link rel="stylesheet" href="/static/css/common.css">
+
+	<style>
+		/* | Global */
+
+		body {
+			min-width: 800px;
+		}
+
+		#app {
+			height: 100%;
+		}
+
+		input[type=date] {
+			border: none;
+			border-bottom: 1px solid var(--border-accent-color);
+			width: 100%;
+		}
+
+		/* | Search */
+
+		#search {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: 1fr 4fr;
+			height: 100%;
+		}
+
+
+		/* || Search Options */
+
+		#search__options {
+			border: 1px solid var(--border-color);
+			border-radius: 3px;
+			height: 100%;
+			padding: 10px;
+			position: relative;
+		}
+
+		#search__options__header {
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 18px;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		.search__option {
+			margin-bottom: 15px;
+		}
+
+		.search__option:last-child {
+			margin-bottom: 0;
+		}
+
+		#search__options__cost,
+		#search__options__time {
+			column-gap: 5px;
+			display: grid;
+			grid-template-columns: 1fr auto 1fr;
+		}
+
+		.search__options__separator::before {
+			content: "–";
+			color: #4d4d4d;
+		}
+
+		#search__options__types {
+			margin-left: auto;
+			margin-right: auto;
+			min-width: 60%;
+			width: min-content;
+		}
+
+		#search__options__types__header {
+			border-bottom: 1px solid var(--border-color);
+			margin: 0 auto 7px;
+			padding: 0 10px;
+			text-align: center;
+			width: min-content;
+			white-space: nowrap;
+		}
+
+		.search__options__types__type {
+			white-space: nowrap;
+		}
+
+		#search__options__buttons {
+			column-gap: 20px;
+			display: grid;
+			grid-template-columns: repeat(2, min-content);
+			justify-content: center;
+		}
+
+		.search__options__button {
+			background-color: white;
+			border: none;
+			margin: 0px;
+			padding: 0px;
+		}
+
+		.search__options__button>.feather-icon>svg {
+			height: 25px;
+			width: 25px;
+		}
+
+		#search__options__home-page-link {
+			bottom: 5px;
+			left: 50%;
+			position: absolute;
+			transform: translateX(-50%);
+		}
+
+		#search__options__home-page-link svg {
+			height: 25px;
+			width: 25px;
+		}
+
+
+		/* || Search Results */
+
+		#search__results {
+			height: 100%;
+			overflow-y: auto;
+		}
+
+		#search__results__table {
+			/*
+				We have to overwrite property 'border-collapse' because it doesn't work properly with 'position: sticky':
+				https://stackoverflow.com/a/53559396/7752659
+			*/
+			border-collapse: separate;
+			border-spacing: 0;
+		}
+
+		#search__results__table th {
+			background-color: white;
+			border-bottom: 1px solid var(--border-accent-color);
+			font-size: 18px;
+			position: sticky;
+			top: 0;
+		}
+
+		#search__results__table th,
+		#search__results__table td {
+			padding-right: 15px;
+			padding-left: 15px;
+		}
+
+		#search__results__table th:first-child,
+		#search__results__table td:first-child {
+			padding-left: 5px;
+		}
+
+		#search__results__table th:last-child,
+		#search__results__table td:last-child {
+			padding-right: 5px;
+		}
+
+		.search__results__table__date,
+		.search__results__table__type,
+		.search__results__table__cost,
+		.search__results__table__link {
+			width: 1px;
+			white-space: nowrap;
+		}
+
+		#search__results__table td.search__results__table__cost {
+			padding-right: 20px;
+		}
+
+		.search__results__table__cost {
+			text-align: right;
+		}
+
+		.search__results__table__link {
+			text-align: center;
+			z-index: 1;
+		}
+
+		.search__results__table__link div.feather-icon>svg {
+			height: 20px;
+			width: 20px;
+		}
+
+		#search__results__table__result-row .money--lose::after,
+		#search__results__table__result-row .money--gain::after {
+			/* Hide coin icon */
+			content: "";
+			margin-left: 0;
+		}
+
+		#search__results__no-spends {
+			font-size: 20px;
+			margin-top: 25px;
+			text-align: center;
+		}
+
+		/* | Layouts */
+
+		/* For medium screens (<= 1300px) */
+		@media (max-width: 1300px) {
+
+			#search__options__cost,
+			#search__options__time {
+				grid-template-columns: 1fr;
+				grid-template-rows: 1fr 1fr;
+				row-gap: 10px;
+			}
+
+			.search__options__separator {
+				display: none;
+			}
+
+			/* Hide notes */
+			.search__results__table__notes {
+				display: none;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<div id="search">
+			<!-- Search Options -->
+			<div id="search__options">
+				<div id="search__options__header" class="noselect">Spend Search</div>
+
+				<form action="/search/spends">
+					<!-- Title -->
+					<div id="search__options__title" class="search__option">
+						<input type="text" name="title" placeholder="Title" title="Title">
+					</div>
+
+					<!-- Notes -->
+					<div id="search__options__notes" class="search__option">
+						<input type="text" name="notes" placeholder="Notes" title="Notes">
+					</div>
+
+					<!-- Cost -->
+					<div id="search__options__cost" class="search__option">
+						<div id="search__options__cost__min">
+							<input type="text" name="min_cost" placeholder="Min Cost" title="Minimal Cost">
+						</div>
+
+						<div class="search__options__separator"></div>
+
+						<div id="search__options__cost__max">
+							<input type="text" name="max_cost" placeholder="Max Cost" title="Maximal Cost">
+						</div>
+					</div>
+
+					<!-- Time -->
+					<div id="search__options__time" class="search__option">
+						<div id="search__options__time__after">
+							<input type="date" name="after" title="After">
+						</div>
+
+						<div class="search__options__separator"></div>
+
+						<div id="search__options__time__before">
+							<input type="date" name="before" title="Before">
+						</div>
+					</div>
+
+					<!-- Spend Types -->
+					<div id="search__options__types" class="search__option">
+						<div id="search__options__types__header" class="noselect">Spend Types</div>
+						{{ range .SpendTypes }}
+						<div class="search__options__types__type">
+							<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}">
+							<label for="search__options__types__type-{{ .ID }}">{{ .Name }}</label>
+						</div>
+						{{ end }}
+					</div>
+
+					<!-- Buttons -->
+					<div id="search__options__buttons">
+						<button type="reset" class="search__options__button" title="Reset">
+							<div class="feather-icon">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" /> </svg>
+							</div>
+						</button>
+
+						<button type="submit" class="search__options__button" title="Search">
+							<div class="feather-icon">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#search" /> </svg>
+							</div>
+						</button>
+					</div>
+				</form>
+
+				<div id="search__options__home-page-link">
+					<a href="/">
+						<div class="feather-icon" title="Home">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#home" />
+							</svg>
+						</div>
+					</a>
+				</div>
+			</div>
+
+			<!-- Search Results -->
+			<div id="search__results">
+				{{ if .Spends }}
+				<table id="search__results__table">
+					<thead>
+						<tr>
+							<th class="search__results__table__date noselect">Date</th>
+							<th class="search__results__table__title noselect">Title</th>
+							<th class="search__results__table__notes noselect">Notes</th>
+							<th class="search__results__table__type noselect">Type</th>
+							<th class="search__results__table__cost noselect money">Cost,</th>
+							<th class="search__results__table__link noselect">Link</th>
+						</tr>
+					</thead>
+					<tbody>
+						{{ range .Spends }}
+						<tr>
+							<td class="search__results__table__date">{{ printf "%02d" .Month }} / {{ printf "%02d" .Day }} / {{ .Year }}</td>
+							<td class="search__results__table__title">{{ .Title }}</td>
+							<td class="search__results__table__notes">{{ .Notes }}</td>
+							<td class="search__results__table__type">
+								{{ if .Type }}
+								<span>{{ .Type.Name }}</span>
+								{{ else }}
+								<span>-</span>
+								{{ end }}
+							</td>
+							<td class="search__results__table__cost">{{ .Cost }}</td>
+							<td class="search__results__table__link">
+								<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
+									<div class="feather-icon" title="View Day">
+										<svg>
+											<use xlink:href="/static/feather/feather-sprite.svg#external-link" />
+										</svg>
+									</div>
+								</a>
+							</td>
+						</tr>
+						{{ end }}
+						<tr id="search__results__table__result-row">
+							<!--
+								We can't use colspan="4" because we hide notes with 'display: none' for small and
+								medium screens. With colspan="4" there will be some bugs
+							 -->
+							<td colspan="3"></td>
+							<td class="search__results__table__notes"></td>
+							<td class="search__results__table__cost" title="Total Cost">
+								<!-- Total Cost must be always <= 0 -->
+								{{ if eq .TotalCost 0 }}
+								<span class="money--gain">{{ .TotalCost }}</span>
+								{{ else }}
+								<span class="money--lose">{{ .TotalCost }}</span>
+								{{ end }}
+							</td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+				{{ else }}
+				<div id="search__results__no-spends" class="noselect">
+					<span>No Spends found!</span>
+				</div>
+				{{ end }}
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Update Search Options with query params
+		window.addEventListener("load", () => {
+			const query = new URLSearchParams(location.search);
+
+			// Title
+			const title = query.get("title");
+			setOptionValue("search__options__title", title);
+
+			// Notes
+			const notes = query.get("notes");
+			setOptionValue("search__options__notes", notes);
+
+			// Min Cost
+			const minCost = query.get("min_cost");
+			setOptionValue("search__options__cost__min", minCost);
+
+			// Max cost
+			const maxCost = query.get("max_cost");
+			setOptionValue("search__options__cost__max", maxCost);
+
+			// After
+			const after = query.get("after");
+			setOptionValue("search__options__time__after", after);
+
+			// Before
+			const before = query.get("before");
+			setOptionValue("search__options__time__before", before);
+
+			// Spend Types
+			const typeIDs = query.getAll("type_id");
+			for (let i = 0; i < typeIDs.length; i++) {
+				const elemID = "search__options__types__type-" + typeIDs[i];
+				const checkbox = document.getElementById(elemID);
+				if (!checkbox) {
+					console.error(`element '${elemID}' doesn't exist`);
+					continue;
+				}
+				checkbox.checked = true;
+			}
+		})
+
+		/**
+		* @param {string} parentID - id of an input parent
+		* @param {string} value - new value
+		*/
+		function setOptionValue(parentID, value) {
+			if (value === "") {
+				return;
+			}
+
+			const parent = document.getElementById(parentID);
+			if (parent === undefined) {
+				console.error(`element '${parentID}' doesn't exist`);
+				return;
+			}
+			if (parent.childElementCount < 1) {
+				console.error(`element '${parentID}' doesn't have any children`);
+				return;
+			}
+			if (parent.children[0].tagName !== "INPUT") {
+				console.error(`the first child of element '${parentID}' must be <input>`);
+				return;
+			}
+
+			const elem = parent.children[0];
+			elem.value = value;
+		}
+
+		// Set date titles
+		window.addEventListener("load", () => {
+			let cache = {};
+
+			const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+			const dates = document.querySelectorAll("td.search__results__table__date");
+			for (let i = 0; i < dates.length; i++) {
+				const originalDate = dates[i].textContent;
+				let date = cache[originalDate];
+				if (!date) {
+					// Remove thin spaces and format like 'Friday, November 1, 2019'
+					date = new Date(originalDate.replace(/ /g, "", -1)).toLocaleDateString("en-US", dateFormatOptions);
+					cache[originalDate] = date;
+				}
+
+				dates[i].title = date;
+			}
+		})
+	</script>
+</body>
+
+</html>

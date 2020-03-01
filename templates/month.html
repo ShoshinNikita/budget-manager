@@ -11,13 +11,6 @@
 	<style>
 		/* | Global */
 
-		body {
-			height: 100vh;
-			margin: 0;
-			padding: 30px;
-			padding-bottom: 40px;
-		}
-
 		table th,
 		td {
 			word-break: keep-all;
@@ -47,15 +40,7 @@
 		/* | App */
 
 		#app {
-			border: 1px solid var(--border-color);
-			border-radius: 3px;
-			display: flex;
-			flex-direction: column;
 			height: 100%;
-			margin: 0 auto 30px;
-			max-width: 1800px;
-			padding: 10px;
-			width: 100%;
 		}
 
 		/* | Header */
@@ -88,14 +73,17 @@
 			white-space: nowrap;
 		}
 
-		#header__type-manager {
+		#header__buttons {
+			column-gap: 5px;
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
 			height: 100%;
 			position: absolute;
 			right: 0px;
 			top: 0px;
 		}
 
-		#header__type-manager>svg {
+		#header__buttons svg {
 			height: 30px;
 			width: 30px;
 		}
@@ -370,8 +358,8 @@
 			}
 		}
 
-		/* For small screens (<= 900px) */
-		@media (max-width: 900px) {
+		/* For small screens (<= 950px) */
+		@media (max-width: 950px) {
 			#app {
 				height: auto;
 			}
@@ -473,10 +461,24 @@
 				</div>
 			</div>
 
-			<div id="header__type-manager" class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
-				<svg>
-					<use xlink:href="/static/feather/feather-sprite.svg#tag" />
-				</svg>
+			<div id="header__buttons">
+				<!-- Search for Spends -->
+				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
+				{{ $before := printf `%d-%02d-%d` .Year .Month.Month (len .Month.Days) }}
+				<a href="/search/spends?after={{ $after }}&before={{ $before }}">
+					<div class="feather-icon" title="Search for Spends">
+						<svg>
+							<use xlink:href="/static/feather/feather-sprite.svg#search" />
+						</svg>
+					</div>
+				</a>
+
+				<!-- Manage Spend Types -->
+				<div class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
+					<svg>
+						<use xlink:href="/static/feather/feather-sprite.svg#tag" />
+					</svg>
+				</div>
 			</div>
 		</div>
 
