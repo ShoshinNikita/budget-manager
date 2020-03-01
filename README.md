@@ -137,6 +137,7 @@ You can find screenshots of pages [here](./docs/images/README.md)
 - `/overview` - Overview Page (it is not ready yet)
 - `/overview/{year}` - Year Page
 - `/overview/{year}/{month_number}` - Month Page
+- `/search/spends` - Search for Spends
 
 ### API
 
