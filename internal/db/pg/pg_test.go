@@ -12,9 +12,25 @@ import (
 )
 
 func TestCreatedTables(t *testing.T) {
-	db := initDB(t)
-	defer cleanUp(t, db)
+	t.Run("run migrations against the empty db", func(t *testing.T) {
+		db := initDB(t)
+		checkTables(t, db)
+		cleanUp(t, db)
+	})
 
+	t.Run("run migrations against the up-to-date db", func(t *testing.T) {
+		db := initDB(t)
+		checkTables(t, db)
+		require.Nil(t, db.Shutdown())
+
+		db = initDB(t)
+		checkTables(t, db)
+		cleanUp(t, db)
+	})
+}
+
+// nolint:funlen
+func checkTables(t *testing.T, db *DB) {
 	// Check table number at first
 	ok := t.Run("check table number", func(t *testing.T) {
 		const tableNumber = 7
