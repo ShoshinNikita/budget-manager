@@ -31,8 +31,10 @@ func TestCreatedTables(t *testing.T) {
 	}
 
 	type column struct {
-		Name     string `pg:"column_name"`
-		DataType string `pg:"data_type"`
+		Name    string `pg:"column_name"`
+		Type    string `pg:"data_type"`
+		IsNull  bool   `pg:"is_nullable"`
+		Default string `pg:"column_default"`
 	}
 	tables := []struct {
 		name        string
@@ -42,61 +44,61 @@ func TestCreatedTables(t *testing.T) {
 		{
 			name: "months",
 			description: []column{
-				{"daily_budget", "bigint"},
-				{"id", "bigint"},
-				{"month", "bigint"},
-				{"result", "bigint"},
-				{"total_income", "bigint"},
-				{"total_spend", "bigint"},
-				{"year", "bigint"},
+				{Name: "daily_budget", Type: "bigint", IsNull: true},
+				{Name: "id", Type: "bigint", Default: "nextval('months_id_seq'::regclass)"},
+				{Name: "month", Type: "bigint", IsNull: true},
+				{Name: "result", Type: "bigint", IsNull: true},
+				{Name: "total_income", Type: "bigint", IsNull: true},
+				{Name: "total_spend", Type: "bigint", IsNull: true},
+				{Name: "year", Type: "bigint", IsNull: true},
 			},
 		},
 		{
 			name: "days",
 			description: []column{
-				{"day", "bigint"},
-				{"id", "bigint"},
-				{"month_id", "bigint"},
-				{"saldo", "bigint"},
+				{Name: "day", Type: "bigint", IsNull: true},
+				{Name: "id", Type: "bigint", Default: "nextval('days_id_seq'::regclass)"},
+				{Name: "month_id", Type: "bigint", IsNull: true},
+				{Name: "saldo", Type: "bigint", IsNull: true},
 			},
 		},
 		{
 			name: "incomes",
 			description: []column{
-				{"id", "bigint"},
-				{"income", "bigint"},
-				{"month_id", "bigint"},
-				{"notes", "text"},
-				{"title", "text"},
+				{Name: "id", Type: "bigint", Default: "nextval('incomes_id_seq'::regclass)"},
+				{Name: "income", Type: "bigint", IsNull: true},
+				{Name: "month_id", Type: "bigint", IsNull: true},
+				{Name: "notes", Type: "text", IsNull: true},
+				{Name: "title", Type: "text", IsNull: true},
 			},
 		},
 		{
 			name: "monthly_payments",
 			description: []column{
-				{"cost", "bigint"},
-				{"id", "bigint"},
-				{"month_id", "bigint"},
-				{"notes", "text"},
-				{"title", "text"},
-				{"type_id", "bigint"},
+				{Name: "cost", Type: "bigint", IsNull: true},
+				{Name: "id", Type: "bigint", Default: "nextval('monthly_payments_id_seq'::regclass)"},
+				{Name: "month_id", Type: "bigint", IsNull: true},
+				{Name: "notes", Type: "text", IsNull: true},
+				{Name: "title", Type: "text", IsNull: true},
+				{Name: "type_id", Type: "bigint", IsNull: true},
 			},
 		},
 		{
 			name: "spends",
 			description: []column{
-				{"cost", "bigint"},
-				{"day_id", "bigint"},
-				{"id", "bigint"},
-				{"notes", "text"},
-				{"title", "text"},
-				{"type_id", "bigint"},
+				{Name: "cost", Type: "bigint", IsNull: true},
+				{Name: "day_id", Type: "bigint", IsNull: true},
+				{Name: "id", Type: "bigint", Default: "nextval('spends_id_seq'::regclass)"},
+				{Name: "notes", Type: "text", IsNull: true},
+				{Name: "title", Type: "text", IsNull: true},
+				{Name: "type_id", Type: "bigint", IsNull: true},
 			},
 		},
 		{
 			name: "spend_types",
 			description: []column{
-				{"id", "bigint"},
-				{"name", "text"},
+				{Name: "id", Type: "bigint", Default: "nextval('spend_types_id_seq'::regclass)"},
+				{Name: "name", Type: "text", IsNull: true},
 			},
 		},
 	}
@@ -105,7 +107,7 @@ func TestCreatedTables(t *testing.T) {
 		t.Run(table.name, func(t *testing.T) {
 			var desc []column
 			_, err := db.db.Query(&desc,
-				`SELECT column_name, data_type
+				`SELECT column_name, data_type, is_nullable::bool , column_default
 				   FROM INFORMATION_SCHEMA.COLUMNS
 				  WHERE table_name = ?
 				  ORDER BY column_name`, table.name,
