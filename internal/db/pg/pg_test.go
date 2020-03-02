@@ -17,7 +17,7 @@ func TestCreatedTables(t *testing.T) {
 
 	// Check table number at first
 	ok := t.Run("check table number", func(t *testing.T) {
-		const tableNumber = 6
+		const tableNumber = 7
 
 		var n int
 		_, err := db.db.Query(pg.Scan(&n),
@@ -99,6 +99,14 @@ func TestCreatedTables(t *testing.T) {
 			description: []column{
 				{Name: "id", Type: "bigint", Default: "nextval('spend_types_id_seq'::regclass)"},
 				{Name: "name", Type: "text", IsNull: true},
+			},
+		},
+		{
+			name: "migrations",
+			description: []column{
+				{Name: "created_at", Type: "timestamp with time zone", IsNull: true},
+				{Name: "id", Type: "integer", Default: "nextval('migrations_id_seq'::regclass)"},
+				{Name: "version", Type: "bigint", IsNull: true},
 			},
 		},
 	}

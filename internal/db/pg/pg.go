@@ -5,11 +5,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
+
+	pg_migrations "github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 )
 
 const (
@@ -68,36 +70,52 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 	return db, nil
 }
 
+const migrationTable = "migrations"
+
 // Prepare prepares the database:
 //   - create tables
 //   - init tables (add days for current month if needed)
 //   - run some subproccess
 //
 func (db *DB) Prepare() error {
-	db.log.Debug("create tables")
+	// Create a new migrator
+	migrator := migrations.NewCollection().SetTableName(migrationTable).DisableSQLAutodiscover(true)
 
-	// Create tables If Not Exists
-	err := createTables(
-		db.db,
-
-		&Month{}, &orm.CreateTableOptions{IfNotExists: true},
-		&Income{}, &orm.CreateTableOptions{IfNotExists: true},
-		&MonthlyPayment{}, &orm.CreateTableOptions{IfNotExists: true},
-
-		&Day{}, &orm.CreateTableOptions{IfNotExists: true},
-		&Spend{}, &orm.CreateTableOptions{IfNotExists: true},
-		&SpendType{}, &orm.CreateTableOptions{IfNotExists: true},
-	)
-
-	err = errors.Wrap(err, "couldn't create tables")
-	if err != nil {
-		db.log.WithError(err).Error("couldn't create tables")
-		return err
+	// Register migrations
+	pg_migrations.RegisterMigrations(migrator)
+	if len(migrator.Migrations()) != pg_migrations.MigrationNumber {
+		const msg = "invalid number of registered migrations"
+		db.log.WithFields(logrus.Fields{
+			"got": len(migrator.Migrations()), "want": pg_migrations.MigrationNumber,
+		}).Error(msg)
+		return errors.New(msg)
 	}
+
+	// Init migration table
+	if _, _, err := migrator.Run(db.db, "init"); err != nil {
+		const msg = "couldn't init migration table"
+		db.log.WithError(err).Error(err)
+		return errors.Wrap(err, msg)
+	}
+
+	// Run migrations
+	db.log.Debug("run migrations")
+	oldVersion, newVersion, err := migrator.Run(db.db, "up")
+	if err != nil {
+		const msg = "couldn't run migrations"
+		db.log.WithError(err).Error(err)
+		return errors.Wrap(err, msg)
+	}
+
+	db.log.WithFields(logrus.Fields{
+		"old_version": oldVersion, "new_version": newVersion,
+	}).Info("migration process is finished")
 
 	// Init tables if needed
 	if err = db.initCurrentMonth(); err != nil {
-		return err
+		const msg = "couldn't init the current month"
+		db.log.WithError(err).Error(msg)
+		return errors.Wrap(err, msg)
 	}
 
 	// Init a new month monthly at 00:00
@@ -121,15 +139,13 @@ func (db *DB) Prepare() error {
 
 // DropDB drops all tables and relations. USE ONLY IN TESTS!
 func (db *DB) DropDB() error {
-	return dropTables(db.db,
-		&Month{}, &orm.DropTableOptions{IfExists: true},
-		&Income{}, &orm.DropTableOptions{IfExists: true},
-		&MonthlyPayment{}, &orm.DropTableOptions{IfExists: true},
-
-		&Day{}, &orm.DropTableOptions{IfExists: true},
-		&Spend{}, &orm.DropTableOptions{IfExists: true},
-		&SpendType{}, &orm.DropTableOptions{IfExists: true},
-	)
+	_, err := db.db.Exec(`
+		DROP SCHEMA public CASCADE;
+		CREATE SCHEMA public;
+		GRANT ALL ON SCHEMA public TO postgres;
+		GRANT ALL ON SCHEMA public TO public;
+	`)
+	return err
 }
 
 func (db *DB) initCurrentMonth() error {
