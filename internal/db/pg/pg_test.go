@@ -155,8 +155,6 @@ func initDB(t *testing.T) *DB {
 	}
 	db, err := NewDB(config, log)
 	require.Nil(t, err)
-	err = db.DropDB()
-	require.Nil(t, err)
 	err = db.Prepare()
 	require.Nil(t, err)
 
