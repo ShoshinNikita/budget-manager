@@ -32,18 +32,22 @@ const (
 // GET /overview
 //
 func (s Server) overviewPage(w http.ResponseWriter, r *http.Request) {
+	log := request_id.FromContextToLogger(r.Context(), s.log)
+
 	if err := s.tplStore.Execute(r.Context(), overviewTemplatePath, w, nil); err != nil {
-		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
+		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
 // GET /overview/{year:[0-9]+}
 //
 func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
+	log := request_id.FromContextToLogger(r.Context(), s.log)
+
 	year, ok := getYear(r)
 	if !ok {
 		s.processErrorWithPage(
-			r.Context(), w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
+			r.Context(), log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
 		)
 		return
 	}
@@ -52,7 +56,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	// Render the page even theare no months for passed year
 	if err != nil && err != db.ErrYearNotExist {
 		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), w, dbErrorMessagePrefix+msg, code, err)
+		s.processErrorWithPage(r.Context(), log, w, dbErrorMessagePrefix+msg, code, err)
 		return
 	}
 
@@ -104,30 +108,32 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		Result:       result,
 	}
 	if err := s.tplStore.Execute(r.Context(), yearTemplatePath, w, resp); err != nil {
-		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
+		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
 // GET /overview/{year:[0-9]+}/{month:[0-9]+}
 //
 func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
+	log := request_id.FromContextToLogger(r.Context(), s.log)
+
 	year, ok := getYear(r)
 	if !ok {
 		s.processErrorWithPage(
-			r.Context(), w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
+			r.Context(), log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
 		)
 		return
 	}
 	monthNumber, ok := getMonth(r)
 	if !ok {
-		s.processErrorWithPage(r.Context(), w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest, nil)
+		s.processErrorWithPage(r.Context(), log, w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest, nil)
 		return
 	}
 
 	monthID, err := s.db.GetMonthID(r.Context(), year, int(monthNumber))
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), w, dbErrorMessagePrefix+msg, code, err)
+		s.processErrorWithPage(r.Context(), log, w, dbErrorMessagePrefix+msg, code, err)
 		return
 	}
 
@@ -135,14 +141,14 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 	month, err := s.db.GetMonth(r.Context(), monthID)
 	if err != nil {
 		s.processErrorWithPage(
-			r.Context(), w, dbErrorMessagePrefix+"couldn't get Month info", http.StatusInternalServerError, err,
+			r.Context(), log, w, dbErrorMessagePrefix+"couldn't get Month info", http.StatusInternalServerError, err,
 		)
 		return
 	}
 
 	spendTypes, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
-		s.processErrorWithPage(r.Context(), w, dbErrorMessagePrefix+"couldn't get list of Spend Types",
+		s.processErrorWithPage(r.Context(), log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types",
 			http.StatusInternalServerError, err)
 		return
 	}
@@ -160,7 +166,7 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 		SumSpendCosts: sumSpendCosts,
 	}
 	if err := s.tplStore.Execute(r.Context(), monthTemplatePath, w, resp); err != nil {
-		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
+		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
@@ -278,14 +284,14 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	spends, err := s.db.SearchSpends(r.Context(), args)
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), w, msg, code, err)
+		s.processErrorWithPage(r.Context(), log, w, msg, code, err)
 		return
 	}
 
 	spendTypes, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
 		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), w, msg, code, err)
+		s.processErrorWithPage(r.Context(), log, w, msg, code, err)
 		return
 	}
 
@@ -300,7 +306,7 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		TotalCost:  sumSpendCosts(spends),
 	}
 	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, resp); err != nil {
-		s.processErrorWithPage(r.Context(), w, executeErrorMessage, http.StatusInternalServerError, err)
+		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
