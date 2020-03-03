@@ -243,6 +243,12 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 		"month_id": req.MonthID, "title": req.Title, "notes": req.Notes, "income": req.Income,
 	})
 
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+
 	// Process
 	log.Debug("add Income")
 	args := db.AddIncomeArgs{
@@ -294,6 +300,12 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	log = log.WithFields(logrus.Fields{
 		"id": req.ID, "title": req.Title, "notes": req.Notes, "income": req.Income,
 	})
+
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
 
 	// Process
 	log.Debug("edit Income")
@@ -391,6 +403,12 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 		"notes": req.Notes, "cost": req.Cost,
 	})
 
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+
 	// Process
 	log.Debug("add Monthly Payment")
 	args := db.AddMonthlyPaymentArgs{
@@ -443,6 +461,12 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log = log.WithFields(logrus.Fields{
 		"id": req.ID, "title": req.Title, "notes": req.Notes, "type_id": req.TypeID, "cost": req.Cost,
 	})
+
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
 
 	// Process
 	log.Debug("edit Monthly Payment")
@@ -541,6 +565,12 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 		"notes": req.Notes, "cost": req.Cost,
 	})
 
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+
 	// Process
 	log.Debug("add Spend")
 	args := db.AddSpendArgs{
@@ -593,6 +623,12 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	log = log.WithFields(logrus.Fields{
 		"id": req.ID, "title": req.Title, "notes": req.Notes, "type_id": req.TypeID,
 	})
+
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
 
 	// Process
 	log.Debug("edit Spend")
@@ -720,6 +756,12 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	}
 	log = log.WithField("name", req.Name)
 
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
+
 	// Process
 	log.Debug("add Spend Type")
 	id, err := s.db.AddSpendType(r.Context(), req.Name)
@@ -763,6 +805,12 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log = log.WithFields(logrus.Fields{"id": req.ID, "name": req.Name})
+
+	// Check request
+	if err := req.Check(); err != nil {
+		s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, nil)
+		return
+	}
 
 	// Process
 	log.Debug("edit Spend Type")
