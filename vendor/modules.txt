@@ -9,6 +9,8 @@ github.com/codemodus/kace/ktrie
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.9.0
 github.com/fatih/color
+# github.com/go-pg/migrations/v7 v7.1.9
+github.com/go-pg/migrations/v7
 # github.com/go-pg/pg/v9 v9.1.3
 github.com/go-pg/pg/v9
 github.com/go-pg/pg/v9/internal

@@ -5,11 +5,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
+
+	pg_migrations "github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 )
 
 const (
@@ -68,36 +70,57 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 	return db, nil
 }
 
+const migrationTable = "migrations"
+
 // Prepare prepares the database:
 //   - create tables
 //   - init tables (add days for current month if needed)
 //   - run some subproccess
 //
 func (db *DB) Prepare() error {
-	db.log.Debug("create tables")
+	// Create a new migrator
+	migrator := migrations.NewCollection().SetTableName(migrationTable).DisableSQLAutodiscover(true)
 
-	// Create tables If Not Exists
-	err := createTables(
-		db.db,
+	// Register migrations
+	pg_migrations.RegisterMigrations(migrator)
+	if len(migrator.Migrations()) != pg_migrations.MigrationNumber {
+		const msg = "invalid number of registered migrations"
+		db.log.WithFields(logrus.Fields{
+			"got": len(migrator.Migrations()), "want": pg_migrations.MigrationNumber,
+		}).Error(msg)
+		return errors.New(msg)
+	}
 
-		&Month{}, &orm.CreateTableOptions{IfNotExists: true},
-		&Income{}, &orm.CreateTableOptions{IfNotExists: true},
-		&MonthlyPayment{}, &orm.CreateTableOptions{IfNotExists: true},
+	// Init migration table
+	if _, _, err := migrator.Run(db.db, "init"); err != nil {
+		const msg = "couldn't init migration table"
+		db.log.WithError(err).Error(err)
+		return errors.Wrap(err, msg)
+	}
 
-		&Day{}, &orm.CreateTableOptions{IfNotExists: true},
-		&Spend{}, &orm.CreateTableOptions{IfNotExists: true},
-		&SpendType{}, &orm.CreateTableOptions{IfNotExists: true},
-	)
-
-	err = errors.Wrap(err, "couldn't create tables")
+	// Run migrations
+	db.log.Debug("run migrations")
+	oldVersion, newVersion, err := migrator.Run(db.db, "up")
 	if err != nil {
-		db.log.WithError(err).Error("couldn't create tables")
-		return err
+		const msg = "couldn't run migrations"
+		db.log.WithError(err).Error(err)
+		return errors.Wrap(err, msg)
+	}
+
+	db.log.WithFields(logrus.Fields{
+		"old_version": oldVersion, "new_version": newVersion,
+	}).Info("migration process is finished")
+
+	// Check the tables
+	if err := db.checkCreatedTables(); err != nil {
+		return errors.Wrap(err, "database schema is invalid")
 	}
 
 	// Init tables if needed
 	if err = db.initCurrentMonth(); err != nil {
-		return err
+		const msg = "couldn't init the current month"
+		db.log.WithError(err).Error(msg)
+		return errors.Wrap(err, msg)
 	}
 
 	// Init a new month monthly at 00:00
@@ -119,17 +142,136 @@ func (db *DB) Prepare() error {
 	return nil
 }
 
+// checkCreatedTables checks tables and their descriptions
+//
+// nolint:funlen
+func (db *DB) checkCreatedTables() error {
+	const tableNumber = 7
+	var n int
+	_, err := db.db.Query(pg.Scan(&n),
+		`SELECT COUNT(DISTINCT table_name) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'public'`,
+	)
+	if err != nil {
+		return errors.Wrap(err, "couldn't get number of tables")
+	}
+	if n != tableNumber {
+		return errors.Errorf("invalid number of tables: '%d', expected: '%d'", n, tableNumber)
+	}
+
+	type column struct {
+		Name    string `pg:"column_name"`
+		Type    string `pg:"data_type"`
+		IsNull  bool   `pg:"is_nullable"`
+		Default string `pg:"column_default"`
+	}
+	tables := []struct {
+		name    string
+		columns []column
+	}{
+		// Columns must be sorted by name
+		{
+			name: "months",
+			columns: []column{
+				{Name: "daily_budget", Type: "bigint", Default: "0"},
+				{Name: "id", Type: "bigint", Default: "nextval('months_id_seq'::regclass)"},
+				{Name: "month", Type: "bigint"},
+				{Name: "result", Type: "bigint", Default: "0"},
+				{Name: "total_income", Type: "bigint", Default: "0"},
+				{Name: "total_spend", Type: "bigint", Default: "0"},
+				{Name: "year", Type: "bigint"},
+			},
+		},
+		{
+			name: "days",
+			columns: []column{
+				{Name: "day", Type: "bigint"},
+				{Name: "id", Type: "bigint", Default: "nextval('days_id_seq'::regclass)"},
+				{Name: "month_id", Type: "bigint"},
+				{Name: "saldo", Type: "bigint", Default: "0"},
+			},
+		},
+		{
+			name: "incomes",
+			columns: []column{
+				{Name: "id", Type: "bigint", Default: "nextval('incomes_id_seq'::regclass)"},
+				{Name: "income", Type: "bigint"},
+				{Name: "month_id", Type: "bigint"},
+				{Name: "notes", Type: "text", IsNull: true},
+				{Name: "title", Type: "text"},
+			},
+		},
+		{
+			name: "monthly_payments",
+			columns: []column{
+				{Name: "cost", Type: "bigint"},
+				{Name: "id", Type: "bigint", Default: "nextval('monthly_payments_id_seq'::regclass)"},
+				{Name: "month_id", Type: "bigint"},
+				{Name: "notes", Type: "text", IsNull: true},
+				{Name: "title", Type: "text"},
+				{Name: "type_id", Type: "bigint", IsNull: true},
+			},
+		},
+		{
+			name: "spends",
+			columns: []column{
+				{Name: "cost", Type: "bigint"},
+				{Name: "day_id", Type: "bigint"},
+				{Name: "id", Type: "bigint", Default: "nextval('spends_id_seq'::regclass)"},
+				{Name: "notes", Type: "text", IsNull: true},
+				{Name: "title", Type: "text"},
+				{Name: "type_id", Type: "bigint", IsNull: true},
+			},
+		},
+		{
+			name: "spend_types",
+			columns: []column{
+				{Name: "id", Type: "bigint", Default: "nextval('spend_types_id_seq'::regclass)"},
+				{Name: "name", Type: "text"},
+			},
+		},
+		{
+			name: "migrations",
+			columns: []column{
+				{Name: "created_at", Type: "timestamp with time zone", IsNull: true},
+				{Name: "id", Type: "integer", Default: "nextval('migrations_id_seq'::regclass)"},
+				{Name: "version", Type: "bigint", IsNull: true},
+			},
+		},
+	}
+	var columnsInDB []column
+	for _, table := range tables {
+		_, err := db.db.Query(&columnsInDB,
+			`SELECT column_name, data_type, is_nullable::bool , column_default
+			   FROM INFORMATION_SCHEMA.COLUMNS
+			  WHERE table_name = ?
+			  ORDER BY column_name`, table.name,
+		)
+		if err != nil {
+			return errors.Wrapf(err, "couldn't get description of table '%s'", table.name)
+		}
+
+		err = errors.Wrapf(err, "table has wrong columns: '%+v', expected: '%+v'", columnsInDB, table.columns)
+		if len(table.columns) != len(columnsInDB) {
+			return err
+		}
+		for i := range table.columns {
+			if table.columns[i] != columnsInDB[i] {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // DropDB drops all tables and relations. USE ONLY IN TESTS!
 func (db *DB) DropDB() error {
-	return dropTables(db.db,
-		&Month{}, &orm.DropTableOptions{IfExists: true},
-		&Income{}, &orm.DropTableOptions{IfExists: true},
-		&MonthlyPayment{}, &orm.DropTableOptions{IfExists: true},
-
-		&Day{}, &orm.DropTableOptions{IfExists: true},
-		&Spend{}, &orm.DropTableOptions{IfExists: true},
-		&SpendType{}, &orm.DropTableOptions{IfExists: true},
-	)
+	_, err := db.db.Exec(`
+		DROP SCHEMA public CASCADE;
+		CREATE SCHEMA public;
+		GRANT ALL ON SCHEMA public TO postgres;
+		GRANT ALL ON SCHEMA public TO public;
+	`)
+	return err
 }
 
 func (db *DB) initCurrentMonth() error {

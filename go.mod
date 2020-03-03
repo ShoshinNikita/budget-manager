@@ -6,6 +6,7 @@ require (
 	github.com/abbot/go-http-auth v0.4.0
 	github.com/caarlos0/env/v6 v6.2.1
 	github.com/fatih/color v1.9.0
+	github.com/go-pg/migrations/v7 v7.1.9
 	github.com/go-pg/pg/v9 v9.1.3
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/gorilla/mux v1.7.4

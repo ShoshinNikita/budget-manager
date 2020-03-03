@@ -22,14 +22,14 @@ type Month struct {
 	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
 
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
-	DailyBudget money.Money `pg:"daily_budget"`
+	DailyBudget money.Money `pg:"daily_budget,use_zero"`
 	Days        []*Day      `pg:"fk:month_id"`
 
-	TotalIncome money.Money `pg:"total_income"`
+	TotalIncome money.Money `pg:"total_income,use_zero"`
 	// TotalSpend is a cost of all Monthly Payments and Spends
-	TotalSpend money.Money `pg:"total_spend"`
+	TotalSpend money.Money `pg:"total_spend,use_zero"`
 	// Result is TotalIncome - TotalSpend
-	Result money.Money `pg:"result"`
+	Result money.Money `pg:"result,use_zero"`
 }
 
 // ToCommon converts Month to common Month structure from
@@ -82,7 +82,7 @@ type Day struct {
 
 	Day int `pg:"day"`
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
-	Saldo  money.Money `pg:"saldo"`
+	Saldo  money.Money `pg:"saldo,use_zero"`
 	Spends []*Spend    `pg:"fk:day_id"`
 }
 
