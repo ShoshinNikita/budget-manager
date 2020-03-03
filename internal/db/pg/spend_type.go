@@ -20,9 +20,7 @@ func (db DB) GetSpendType(ctx context.Context, id uint) (*db_common.SpendType, e
 	err := db.db.Select(spendType)
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err = errors.Wrap(err,
-				errors.WithMsg("Spend Type with passed id doesn't exist"),
-				errors.WithType(errors.UserError))
+			err = db_common.ErrSpendTypeNotExist
 		} else {
 			err = errors.Wrap(err,
 				errors.WithMsg("couldn't select Spend Type"),
