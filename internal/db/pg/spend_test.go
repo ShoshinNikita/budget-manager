@@ -19,36 +19,10 @@ func TestAddSpend(t *testing.T) {
 	db := initDB(t)
 	defer cleanUp(t, db)
 
-	spends := []struct {
-		Spend
-		isError bool
-	}{
-		{
-			Spend: Spend{ID: 1, DayID: 1, Title: "first spend", Notes: "123", Cost: money.FromInt(5000)},
-		},
-		{
-			Spend: Spend{ID: 2, DayID: 15, Title: "another spend", Cost: money.FromInt(15)},
-		},
-		{
-			Spend: Spend{ID: 3, DayID: 22, Title: "ывоаыоварод", Cost: money.FromInt(1)},
-		},
-		// With errors
-		{
-			Spend:   Spend{ID: 4, DayID: 22, Title: "", Cost: money.FromInt(1)},
-			isError: true,
-		},
-		{
-			Spend:   Spend{ID: 5, DayID: 22, Title: "123", Cost: money.FromInt(0)},
-			isError: true,
-		},
-		{
-			Spend:   Spend{ID: 6, DayID: 22, Title: "456", Cost: money.FromInt(-50)},
-			isError: true,
-		},
-		{
-			Spend:   Spend{ID: 7, DayID: 4000, Title: "first spend", Notes: "123", Cost: money.FromInt(5000)},
-			isError: true,
-		},
+	spends := []Spend{
+		{ID: 1, DayID: 1, Title: "first spend", Notes: "123", Cost: money.FromInt(5000)},
+		{ID: 2, DayID: 15, Title: "another spend", Cost: money.FromInt(15)},
+		{ID: 3, DayID: 22, Title: "ывоаыоварод", Cost: money.FromInt(1)},
 	}
 
 	// Add Spends
@@ -61,10 +35,6 @@ func TestAddSpend(t *testing.T) {
 			Cost:   sp.Cost,
 		}
 		id, err := db.AddSpend(context.Background(), args)
-		if sp.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 		require.Equal(uint(i+1), id)
 	}
@@ -73,21 +43,14 @@ func TestAddSpend(t *testing.T) {
 	for _, sp := range spends {
 		spend := &Spend{ID: sp.ID}
 		err := db.db.Select(spend)
-		if sp.isError {
-			require.Equal(pg.ErrNoRows, err)
-			continue
-		}
 		require.Nil(err)
-		require.Equal(sp.Spend, *spend)
+		require.Equal(sp, *spend)
 	}
 
 	// Check Total Spend
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			if sp.isError {
-				continue
-			}
 			totalSpend -= sp.Cost.ToInt()
 		}
 		return totalSpend
@@ -101,9 +64,8 @@ func TestEditSpend(t *testing.T) {
 	defer cleanUp(t, db)
 
 	spends := []struct {
-		origin  Spend
-		edited  *Spend
-		isError bool
+		origin Spend
+		edited *Spend
 	}{
 		{
 			origin: Spend{
@@ -128,40 +90,6 @@ func TestEditSpend(t *testing.T) {
 			edited: &Spend{
 				ID: 3, DayID: 1, Title: "123", TypeID: 0, Notes: "", Cost: money.FromInt(150),
 			},
-		},
-		// With errors
-		{
-			origin: Spend{
-				ID: 4, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
-			},
-			edited: &Spend{
-				ID: 4, DayID: 10, Title: "", TypeID: 12, Notes: "test notes", Cost: money.FromInt(15500),
-			},
-			isError: true,
-		},
-		{
-			origin: Spend{
-				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000)},
-			edited: &Spend{
-				ID: 5, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(0),
-			},
-			isError: true,
-		},
-		{
-			origin: Spend{
-				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000)},
-			edited: &Spend{
-				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(-50),
-			},
-			isError: true,
-		},
-		{
-			origin: Spend{
-				ID: 6, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000)},
-			edited: &Spend{
-				ID: 200, DayID: 10, Title: "456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
-			},
-			isError: true,
 		},
 	}
 
@@ -203,10 +131,6 @@ func TestEditSpend(t *testing.T) {
 			Cost:   &sp.edited.Cost,
 		}
 		err := db.EditSpend(context.Background(), args)
-		if sp.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 	}
 
@@ -216,7 +140,7 @@ func TestEditSpend(t *testing.T) {
 		err := db.db.Select(spend)
 		require.Nil(err)
 
-		if sp.edited == nil || sp.isError {
+		if sp.edited == nil {
 			require.Equal(sp.origin, *spend)
 			continue
 		}
@@ -228,7 +152,7 @@ func TestEditSpend(t *testing.T) {
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			if sp.edited == nil || sp.isError {
+			if sp.edited == nil {
 				totalSpend -= sp.origin.Cost.ToInt()
 				continue
 			}

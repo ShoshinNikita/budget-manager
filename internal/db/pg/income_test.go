@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -21,44 +20,10 @@ func TestAddIncome(t *testing.T) {
 	db := initDB(t)
 	defer cleanUp(t, db)
 
-	incomes := []struct {
-		Income
-		isError bool
-	}{
-		{
-			Income: Income{
-				ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not big :(", Income: money.FromInt(30000),
-			},
-		},
-		{
-			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Gifts", Notes: "From parents", Income: money.FromInt(5000),
-			},
-		},
-		{
-			Income: Income{
-				ID: 3, MonthID: monthID, Title: "Another birthdate gifts", Income: money.FromInt(3000),
-			},
-		},
-		// With errors
-		{
-			Income: Income{
-				ID: 0, MonthID: monthID, Title: "", Notes: "From friends", Income: money.FromInt(3000),
-			},
-			isError: true,
-		},
-		{
-			Income: Income{
-				ID: 0, MonthID: monthID, Title: "Birthdate gifts", Income: money.FromInt(0),
-			},
-			isError: true,
-		},
-		{
-			Income: Income{
-				ID: 0, MonthID: monthID, Title: "Gifts 2", Notes: "From friends", Income: money.FromInt(-500),
-			},
-			isError: true,
-		},
+	incomes := []Income{
+		{ID: 1, MonthID: monthID, Title: "Salary", Notes: "Not big :(", Income: money.FromInt(30000)},
+		{ID: 2, MonthID: monthID, Title: "Gifts", Notes: "From parents", Income: money.FromInt(5000)},
+		{ID: 3, MonthID: monthID, Title: "Another birthdate gifts", Income: money.FromInt(3000)},
 	}
 
 	// Add Incomes
@@ -67,13 +32,9 @@ func TestAddIncome(t *testing.T) {
 			MonthID: in.MonthID,
 			Title:   in.Title,
 			Notes:   in.Notes,
-			Income:  in.Income.Income,
+			Income:  in.Income,
 		}
 		id, err := db.AddIncome(context.Background(), args)
-		if in.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 		require.Equal(uint(i+1), id)
 	}
@@ -82,22 +43,15 @@ func TestAddIncome(t *testing.T) {
 	for _, in := range incomes {
 		income := &Income{ID: in.ID}
 		err := db.db.Select(income)
-		if in.isError {
-			require.Equal(pg.ErrNoRows, err)
-			continue
-		}
 		require.Nil(err)
-		require.Equal(in.Income, *income)
+		require.Equal(in, *income)
 	}
 
 	// Check daily budget
 	dailyBudget := func() int64 {
 		var b int64
 		for _, in := range incomes {
-			if in.isError {
-				continue
-			}
-			b += in.Income.Income.ToInt()
+			b += in.Income.ToInt()
 		}
 		now := time.Now()
 		return b / int64(daysInMonth(now.Year(), now.Month()))
@@ -120,45 +74,9 @@ func TestEditIncome(t *testing.T) {
 		{ID: 2, MonthID: monthID, Title: "Birthdate gifts", Notes: "From parents", Income: money.FromInt(5000)},
 	}
 
-	editedIncomes := []struct {
-		Income
-		isError bool
-	}{
-		{
-			Income: Income{
-				ID: 1, MonthID: monthID, Title: "Salary++", Income: money.FromInt(20000),
-			},
-		},
-		{
-			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(5000),
-			},
-		},
-		// With errors
-		{
-			Income: Income{
-				ID: 100, MonthID: monthID, Title: "Valid title", Income: money.FromInt(5000),
-			},
-			isError: true,
-		},
-		{
-			Income: Income{
-				ID: 1, MonthID: monthID, Title: "", Income: money.FromInt(5000),
-			},
-			isError: true,
-		},
-		{
-			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(0),
-			},
-			isError: true,
-		},
-		{
-			Income: Income{
-				ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(-100),
-			},
-			isError: true,
-		},
+	editedIncomes := []Income{
+		{ID: 1, MonthID: monthID, Title: "Salary++", Income: money.FromInt(20000)},
+		{ID: 2, MonthID: monthID, Title: "Birthdate gifts from parents", Income: money.FromInt(5000)},
 	}
 
 	// Add Incomes
@@ -176,36 +94,25 @@ func TestEditIncome(t *testing.T) {
 			ID:     in.ID,
 			Title:  &in.Title,
 			Notes:  &in.Notes,
-			Income: &in.Income.Income,
+			Income: &in.Income,
 		}
 		err := db.EditIncome(context.Background(), args)
-		if in.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 	}
 
 	// Check Incomes
 	for _, in := range editedIncomes {
-		if in.isError {
-			continue
-		}
-
 		income := &Income{ID: in.ID}
 		err := db.db.Select(income)
 		require.Nil(err)
-		require.Equal(in.Income, *income)
+		require.Equal(in, *income)
 	}
 
 	// Check daily budget
 	dailyBudget := func() int64 {
 		var b int64
 		for _, in := range editedIncomes {
-			if in.isError {
-				continue
-			}
-			b += in.Income.Income.ToInt()
+			b += in.Income.ToInt()
 		}
 		now := time.Now()
 		return b / int64(daysInMonth(now.Year(), now.Month()))
