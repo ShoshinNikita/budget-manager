@@ -67,11 +67,7 @@ func (DB) addSpend(tx *pg.Tx, args db_common.AddSpendArgs) (uint, error) {
 		Cost:   args.Cost,
 	}
 
-	if err := checkModel(spend); err != nil {
-		return 0, err
-	}
-	err := tx.Insert(spend)
-	if err != nil {
+	if err := tx.Insert(spend); err != nil {
 		return 0, err
 	}
 
@@ -147,9 +143,6 @@ func (DB) editSpend(tx *pg.Tx, spend *Spend, args db_common.EditSpendArgs) error
 		spend.Cost = *args.Cost
 	}
 
-	if err := checkModel(spend); err != nil {
-		return err
-	}
 	return tx.Update(spend)
 }
 

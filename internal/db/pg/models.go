@@ -1,8 +1,6 @@
 package pg
 
 import (
-	"errors"
-	"fmt"
 	"time"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -122,23 +120,6 @@ type Income struct {
 	Income money.Money `pg:"income"`
 }
 
-// Check checks whether Income is valid (not empty title, positive income and etc.)
-func (in Income) Check() error {
-	// Check Title
-	if in.Title == "" {
-		return errors.New("title can't be empty")
-	}
-
-	// Skip Notes
-
-	// Check Income
-	if in.Income <= 0 {
-		return fmt.Errorf("invalid income: '%d'", in.Income)
-	}
-
-	return nil
-}
-
 // ToCommon converts Income to common Income structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
 func (in *Income) ToCommon(year int, month time.Month) *db_common.Income {
@@ -169,25 +150,6 @@ type MonthlyPayment struct {
 	Type   *SpendType  `pg:"fk:type_id"`
 	Notes  string      `pg:"notes"`
 	Cost   money.Money `pg:"cost"`
-}
-
-// Check checks whether Monthly Payment is valid (not empty title, positive cost and etc.)
-func (mp MonthlyPayment) Check() error {
-	// Check Title
-	if mp.Title == "" {
-		return errors.New("title can't be empty")
-	}
-
-	// Skip Type
-
-	// Skip Notes
-
-	// Check Cost
-	if mp.Cost <= 0 {
-		return fmt.Errorf("invalid cost: '%d'", mp.Cost)
-	}
-
-	return nil
 }
 
 // ToCommon converts MonthlyPayment to common MonthlyPayment structure from
@@ -223,25 +185,6 @@ type Spend struct {
 	Cost   money.Money `pg:"cost"`
 }
 
-// Check checks whether Spend is valid (not empty title, positive cost and etc.)
-func (s Spend) Check() error {
-	// Check Title
-	if s.Title == "" {
-		return errors.New("title can't be empty")
-	}
-
-	// Skip Type
-
-	// Skip Notes
-
-	// Check Cost
-	if s.Cost <= 0 {
-		return fmt.Errorf("invalid cost: '%d'", s.Cost)
-	}
-
-	return nil
-}
-
 // ToCommon converts Spend to common Spend structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
 func (s *Spend) ToCommon(year int, month time.Month, day int) *db_common.Spend {
@@ -266,16 +209,6 @@ type SpendType struct {
 
 	ID   uint   `pg:"id,pk"`
 	Name string `pg:"name"`
-}
-
-// Check checks whether Spend Type is valid (not empty name)
-func (s SpendType) Check() error {
-	// Check Name
-	if s.Name == "" {
-		return fmt.Errorf("name can't be empty")
-	}
-
-	return nil
 }
 
 // ToCommon converts SpendType to common SpendType structure from

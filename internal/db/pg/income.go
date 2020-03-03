@@ -59,9 +59,6 @@ func (DB) addIncome(tx *pg.Tx, args db_common.AddIncomeArgs) (incomeID uint, err
 		Income: args.Income,
 	}
 
-	if err := checkModel(in); err != nil {
-		return 0, err
-	}
 	err = tx.Insert(in)
 	if err != nil {
 		return 0, err
@@ -133,9 +130,6 @@ func (DB) editIncome(tx *pg.Tx, in *Income, args db_common.EditIncomeArgs) error
 		in.Income = *args.Income
 	}
 
-	if err := checkModel(in); err != nil {
-		return err
-	}
 	err := tx.Update(in)
 	if err != nil {
 		return err

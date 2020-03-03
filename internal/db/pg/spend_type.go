@@ -66,18 +66,12 @@ func (db DB) AddSpendType(ctx context.Context, name string) (typeID uint, err er
 	log = log.WithField("name", name)
 
 	spendType := &SpendType{Name: name}
-	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		if err := checkModel(spendType); err != nil {
-			return errors.Wrap(err, errors.WithMsg("couldn't add a new Spend Type"))
-		}
-
-		err = tx.Insert(spendType)
-		if err != nil {
+	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
+		if err := tx.Insert(spendType); err != nil {
 			return errors.Wrap(err,
 				errors.WithMsg("couldn't add a new Spend Type"),
 				errors.WithType(errors.AppError))
 		}
-
 		return nil
 	})
 	if err != nil {
@@ -101,18 +95,12 @@ func (db DB) EditSpendType(ctx context.Context, id uint, newName string) error {
 	}
 
 	spendType := &SpendType{ID: id, Name: newName}
-	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		if err := checkModel(spendType); err != nil {
-			return errors.Wrap(err, errors.WithMsg("couldn't edit the Spend Type"))
-		}
-
-		err = tx.Update(spendType)
-		if err != nil {
+	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
+		if err := tx.Update(spendType); err != nil {
 			return errors.Wrap(err,
 				errors.WithMsg("couldn't edit the Spend Type"),
 				errors.WithType(errors.AppError))
 		}
-
 		return nil
 	})
 	if err != nil {

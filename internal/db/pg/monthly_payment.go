@@ -59,11 +59,7 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args db_common.AddMonthlyPaymentArgs) (id
 		Cost:    args.Cost,
 	}
 
-	if err := checkModel(mp); err != nil {
-		return 0, err
-	}
-	err = tx.Insert(mp)
-	if err != nil {
+	if err := tx.Insert(mp); err != nil {
 		return 0, err
 	}
 
@@ -131,10 +127,6 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args db_common.EditM
 	}
 	if args.Cost != nil {
 		mp.Cost = *args.Cost
-	}
-
-	if err := checkModel(mp); err != nil {
-		return err
 	}
 
 	return tx.Update(mp)
