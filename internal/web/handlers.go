@@ -58,8 +58,13 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	log.Debug("get month from the database")
 	month, err := s.db.GetMonth(r.Context(), monthID)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrMonthNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, nil)
+		default:
+			msg := "couldn't get Month with passed id"
+			s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -119,8 +124,13 @@ func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok 
 	log.Debug("try to get month id")
 	id, err = s.db.GetMonthID(r.Context(), year, month)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrMonthNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, nil)
+		default:
+			msg := "couldn't get month with passed year and month"
+			s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		}
 		return 0, false
 	}
 
@@ -149,8 +159,13 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	log.Debug("get day from the database")
 	day, err := s.db.GetDay(r.Context(), dayID)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrDayNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, nil)
+		default:
+			msg := "couldn't get Day with passed id"
+			s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -211,8 +226,13 @@ func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bo
 	log.Debug("try to get day id")
 	id, err = s.db.GetDayIDByDate(r.Context(), year, month, day)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrDayNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, nil)
+		default:
+			msg := "couldn't get such Day"
+			s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		}
 		return 0, false
 	}
 
@@ -259,8 +279,12 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddIncome(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrMonthNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't add Income", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log = log.WithField("id", id)
@@ -320,8 +344,12 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditIncome(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrIncomeNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't edit Income", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Income was successfully edited")
@@ -360,8 +388,12 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("remove Income")
 	err := s.db.RemoveIncome(r.Context(), req.ID)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrIncomeNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't remove Income", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Income was successfully removed")
@@ -420,8 +452,12 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddMonthlyPayment(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrMonthNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't add Monthly Payment", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log = log.WithField("id", id)
@@ -482,8 +518,12 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditMonthlyPayment(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrMonthlyPaymentNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't edit Monthly Payment", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Monthly Payment was successfully edited")
@@ -522,8 +562,12 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log.Debug("remove Monthly Payment")
 	err := s.db.RemoveMonthlyPayment(r.Context(), req.ID)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrMonthlyPaymentNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't remove Monthly Payment", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Monthly Payment was successfully removed")
@@ -582,8 +626,12 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := s.db.AddSpend(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrDayNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't add Spend", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log = log.WithField("id", id)
@@ -644,8 +692,12 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	err := s.db.EditSpend(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrSpendNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't edit Spend", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Spend was successfully edited")
@@ -684,8 +736,12 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("remove Spend")
 	err := s.db.RemoveSpend(r.Context(), req.ID)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrSpendNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't remove Spend", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Spend was successfully removed")
@@ -718,8 +774,7 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	log.Debug("return all Spend Types")
 	types, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		s.processError(r.Context(), log, w, "couldn't get Spend Types", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -766,8 +821,7 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	log.Debug("add Spend Type")
 	id, err := s.db.AddSpendType(r.Context(), req.Name)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		s.processError(r.Context(), log, w, "couldn't add Spend Type", http.StatusInternalServerError, err)
 		return
 	}
 	log = log.WithField("id", id)
@@ -816,8 +870,12 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	log.Debug("edit Spend Type")
 	err := s.db.EditSpendType(r.Context(), req.ID, req.Name)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrSpendTypeNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't edit Spend Type", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Spend Type was successfully edited")
@@ -856,8 +914,12 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	log.Debug("remove Spend Type")
 	err := s.db.RemoveSpendType(r.Context(), req.ID)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		switch err {
+		case db.ErrSpendTypeNotExist:
+			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+		default:
+			s.processError(r.Context(), log, w, "couldn't remove Spend Type", http.StatusInternalServerError, err)
+		}
 		return
 	}
 	log.Info("Spend Type was successfully removed")
@@ -916,8 +978,7 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	}
 	spends, err := s.db.SearchSpends(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processError(r.Context(), log, w, msg, code, err)
+		s.processError(r.Context(), log, w, "couldn't search for Spends", http.StatusInternalServerError, err)
 		return
 	}
 	log.WithField("spend_number", len(spends)).Debug("finish Spend search")

@@ -92,7 +92,7 @@ func TestSearchSpends(t *testing.T) {
 			//
 			statusCode: 500,
 			resp: models.SearchSpendsResp{
-				Response: models.Response{RequestID: "request-id", Success: false, Error: "db error"},
+				Response: models.Response{RequestID: "request-id", Success: false, Error: "couldn't search for Spends"},
 			},
 		},
 	}

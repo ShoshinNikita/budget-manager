@@ -55,8 +55,8 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 	months, err := s.db.GetMonths(r.Context(), year)
 	// Render the page even theare no months for passed year
 	if err != nil && err != db.ErrYearNotExist {
-		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), log, w, dbErrorMessagePrefix+msg, code, err)
+		msg := dbErrorMessagePrefix + "couldn't get months"
+		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -132,17 +132,22 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 
 	monthID, err := s.db.GetMonthID(r.Context(), year, int(monthNumber))
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), log, w, dbErrorMessagePrefix+msg, code, err)
+		switch err {
+		case db.ErrMonthNotExist:
+			s.processErrorWithPage(r.Context(), log, w, err.Error(), http.StatusNotFound, nil)
+		default:
+			msg := dbErrorMessagePrefix + "couldn't get month"
+			s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		}
 		return
 	}
 
 	// Process
 	month, err := s.db.GetMonth(r.Context(), monthID)
 	if err != nil {
-		s.processErrorWithPage(
-			r.Context(), log, w, dbErrorMessagePrefix+"couldn't get Month info", http.StatusInternalServerError, err,
-		)
+		// Month must exist
+		msg := dbErrorMessagePrefix + "couldn't get Month info"
+		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -283,15 +288,15 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	}
 	spends, err := s.db.SearchSpends(r.Context(), args)
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), log, w, msg, code, err)
+		msg := dbErrorMessagePrefix + "couldn't complete Spend search"
+		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
 	spendTypes, err := s.db.GetSpendTypes(r.Context())
 	if err != nil {
-		msg, code, err := s.parseDBError(err)
-		s.processErrorWithPage(r.Context(), log, w, msg, code, err)
+		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
+		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 

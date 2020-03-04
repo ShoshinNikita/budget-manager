@@ -135,7 +135,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Month with passed id doesn't exist",
+				Error:     "such Month doesn't exist",
 				Success:   false,
 			},
 		},
@@ -231,7 +231,7 @@ func testHandlers_Income_EditIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Income with passed id doesn't exist",
+				Error:     "such Income doesn't exist",
 				Success:   false,
 			},
 		},
@@ -319,7 +319,7 @@ func testHandlers_Income_RemoveIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Income with passed id doesn't exist",
+				Error:     "such Income doesn't exist",
 				Success:   false,
 			},
 		},
@@ -459,7 +459,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Month with passed id doesn't exist",
+				Error:     "such Month doesn't exist",
 				Success:   false,
 			},
 		},
@@ -557,7 +557,7 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Monthly Payment with passed id doesn't exist",
+				Error:     "such Monthly Payment doesn't exist",
 				Success:   false,
 			},
 		},
@@ -645,7 +645,7 @@ func testHandlers_MonthlyPayment_RemoveMonthlyPayment(t *testing.T, server *Serv
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Monthly Payment with passed id doesn't exist",
+				Error:     "such Monthly Payment doesn't exist",
 				Success:   false,
 			},
 		},
@@ -764,7 +764,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Day with passed id doesn't exist",
+				Error:     "such Day doesn't exist",
 				Success:   false,
 			},
 		},
@@ -877,7 +877,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Spend with passed id doesn't exist",
+				Error:     "such Spend doesn't exist",
 				Success:   false,
 			},
 		},
@@ -965,7 +965,7 @@ func testHandlers_Spend_RemoveSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Spend with passed id doesn't exist",
+				Error:     "such Spend doesn't exist",
 				Success:   false,
 			},
 		},
@@ -1272,7 +1272,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
-					Error:     "Spend Type with passed id doesn't exist",
+					Error:     "such Spend Type doesn't exist",
 					Success:   false,
 				},
 			},

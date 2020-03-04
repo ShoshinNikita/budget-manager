@@ -7,32 +7,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
-
-// parseDBError parses DB error and returns vars for passing into 'Server.processError' method
-func (s Server) parseDBError(err error) (msg string, code int, originalErr error) {
-	msg = err.Error()
-	code = http.StatusInternalServerError
-	originalErr = errors.GetOriginalError(err)
-
-	errType, ok := errors.GetErrorType(err)
-	if !ok {
-		errType = errors.UndefinedError
-		msg = errors.DefaultErrorMessage
-	}
-
-	if errType == errors.UserError {
-		code = http.StatusBadRequest
-		// 'originalErr' and 'msg' contain the same message. So, we can set 'originalErr' to nil
-		// to skip logging in 'processError' method
-		originalErr = nil
-	}
-
-	return msg, code, originalErr
-}
 
 // processError logs error and writes models.Response. If internalErr is nil,
 // it just writes models.Response
