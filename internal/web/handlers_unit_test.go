@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/web/models"
 )
@@ -85,8 +85,7 @@ func TestSearchSpends(t *testing.T) {
 			//
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{}
-				err := errors.New("internal db error",
-					errors.WithMsg("db error"), errors.WithType(errors.AppError))
+				err := errors.New("internal db error")
 				m.On("SearchSpends", mock.Anything, args).Return(nil, err)
 			},
 			//
