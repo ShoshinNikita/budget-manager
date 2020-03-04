@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
@@ -32,14 +32,14 @@ func (db DB) GetMonth(ctx context.Context, id uint) (month *db_common.Month, err
 	})
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := db_common.ErrMonthNotExist
+			err = db_common.ErrMonthNotExist
 			log.Error(err)
 			return nil, err
 		}
 
 		const msg = "couldn't select month with passed id"
 		log.WithError(err).Error(msg)
-		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
+		return nil, errors.Wrap(err, msg)
 	}
 
 	log.Debug("return the Month")
@@ -61,7 +61,7 @@ func (db DB) GetMonthID(ctx context.Context, year, month int) (uint, error) {
 
 		const msg = "couldn't select Month with passed year and month"
 		log.WithError(err).Error(msg)
-		return 0, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
+		return 0, errors.Wrap(err, msg)
 	}
 
 	log = log.WithField("id", m.ID)
@@ -77,9 +77,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 			return 0, db_common.ErrDayNotExist
 		}
 
-		return 0, errors.Wrap(err,
-			errors.WithMsg("couldn't select day with passed id"),
-			errors.WithType(errors.AppError))
+		return 0, errors.Wrap(err, "couldn't select day with passed id")
 	}
 
 	return day.MonthID, nil
@@ -97,24 +95,18 @@ func (db DB) GetMonths(ctx context.Context, year int) ([]*db_common.Month, error
 		Order("month ASC").
 		Select()
 	if err != nil {
-		if err == pg.ErrNoRows {
-			err := db_common.ErrYearNotExist
-			log.Error(err)
-			return nil, err
-		}
-
 		const msg = "couldn't select months with passed year"
 		log.WithError(err).Error(msg)
-		return nil, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
+		return nil, errors.Wrap(err, msg)
 	}
 	if len(pgMonths) == 0 {
 		err := db_common.ErrYearNotExist
 		log.Error(err)
 		return nil, err
 	}
+	log = log.WithField("month_number", len(pgMonths))
 
 	log.Debug("return all Months")
-
 	months := make([]*db_common.Month, 0, len(pgMonths))
 	for i := range pgMonths {
 		months = append(months, pgMonths[i].ToCommon())
@@ -145,9 +137,7 @@ func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
 			if err == pg.ErrNoRows {
 				return db_common.ErrDayNotExist
 			}
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't select day with passed id"),
-				errors.WithType(errors.AppError))
+			return err
 		}
 
 		// Get year and month
@@ -156,15 +146,13 @@ func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
 			Where("id = ?", day.MonthID).
 			Select(&year, &month)
 		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't get year and month of Month which contains passed Day"),
-				errors.WithType(errors.AppError))
+			return errors.Wrap(err, "couldn't get year and month of Month which contains passed Day")
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("couldn't get Day with passed id")
+		log.WithError(err).Error("couldn't get Day with passed id")
 		return nil, err
 	}
 
@@ -179,16 +167,15 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
 		if err == db_common.ErrMonthNotExist {
-			err := db_common.ErrMonthNotExist
+			err = db_common.ErrMonthNotExist
 			log.Error(err)
 			return 0, err
 		}
 
 		const msg = "couldn't define month id with passed year and month"
 		log.WithError(err).Error(msg)
-		return 0, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
+		return 0, errors.Wrap(err, msg)
 	}
-
 	log = log.WithField("month_id", monthID)
 
 	d := &Day{}
@@ -198,14 +185,15 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		Select()
 	if err != nil {
 		if err == pg.ErrNoRows {
-			err := db_common.ErrDayNotExist
+			err = db_common.ErrDayNotExist
 			log.Error(err)
 			return 0, err
 		}
 		const msg = "couldn't select day with passed id"
 		log.WithError(err).Error(msg)
-		return 0, errors.Wrap(err, errors.WithMsg(msg), errors.WithType(errors.AppError))
+		return 0, errors.Wrap(err, msg)
 	}
+	log = log.WithField("day_id", d.ID)
 
 	log.Debug("return Day id")
 	return d.ID, nil
@@ -219,9 +207,7 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
-		return errors.Wrap(err,
-			errors.WithMsg("couldn't select month"),
-			errors.WithType(errors.AppError))
+		return errors.Wrap(err, "couldn't select month")
 	}
 
 	// Update Total Income
@@ -284,17 +270,13 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	// Update Month
 	err = tx.Update(m)
 	if err != nil {
-		return errors.Wrap(err,
-			errors.WithMsg("couldn't the update month"),
-			errors.WithType(errors.AppError))
+		return errors.Wrap(err, "couldn't update month")
 	}
 
 	// Update Days
 	_, err = tx.Model(&m.Days).Update()
 	if err != nil {
-		return errors.Wrap(err,
-			errors.WithMsg("couldn't the update days"),
-			errors.WithType(errors.AppError))
+		return errors.Wrap(err, "couldn't update days")
 	}
 
 	return nil
@@ -312,8 +294,10 @@ func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
 		Relation("Days.Spends", orderByID).
 		Relation("Days.Spends.Type").
 		WherePK().Select()
-
-	return m, err
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func orderByID(q *orm.Query) (*orm.Query, error) {
@@ -370,7 +354,5 @@ func (db DB) checkModel(model interface{}) (ok bool) {
 // Other
 
 func errRecomputeBudget(err error) error {
-	return errors.Wrap(err,
-		errors.WithMsg("couldn't recompute the month budget"),
-		errors.WithType(errors.AppError))
+	return errors.Wrap(err, "couldn't recompute the month budget")
 }

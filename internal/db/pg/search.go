@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
@@ -26,13 +25,10 @@ func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) 
 	startTime := time.Now()
 	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
 		query := db.buildSearchSpendsQuery(tx, args)
-		if err := query.Select(&pgSpends); err != nil {
-			return errors.Wrap(err, errors.WithMsg("couldn't select Spends"), errors.WithType(errors.AppError))
-		}
-		return nil
+		return query.Select(&pgSpends)
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("couldn't select Spends")
+		log.WithError(err).Error("couldn't select Spends")
 		return nil, err
 	}
 
