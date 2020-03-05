@@ -43,7 +43,7 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args db_common.AddMonthlyPay
 		return 0, err
 	}
 
-	log.WithField("monthly_payment_id", id).Info("a new Monthly Payment was successfully created")
+	log.WithField("monthly_payment_id", id).Debug("a new Monthly Payment was successfully created")
 	return id, nil
 }
 
@@ -100,7 +100,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args db_common.EditMonthlyP
 		return err
 	}
 
-	log.Info("the Monthly Payment was successfully edited")
+	log.Debug("the Monthly Payment was successfully edited")
 	return nil
 }
 
@@ -156,6 +156,6 @@ func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
 		return err
 	}
 
-	log.Info("the Monthly Payment was successfully removed")
+	log.Debug("the Monthly Payment was successfully removed")
 	return nil
 }

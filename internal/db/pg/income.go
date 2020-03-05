@@ -43,7 +43,7 @@ func (db DB) AddIncome(ctx context.Context, args db_common.AddIncomeArgs) (incom
 		return 0, err
 	}
 
-	log.WithField("id", incomeID).Info("a new Income was successfully created")
+	log.WithField("id", incomeID).Debug("a new Income was successfully created")
 	return incomeID, nil
 }
 
@@ -104,7 +104,7 @@ func (db DB) EditIncome(ctx context.Context, args db_common.EditIncomeArgs) erro
 		return err
 	}
 
-	log.Info("the Income was successfully edited")
+	log.Debug("the Income was successfully edited")
 	return nil
 }
 
@@ -167,7 +167,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 		return err
 	}
 
-	log.Info("the Income was successfully removed")
+	log.Debug("the Income was successfully removed")
 	return nil
 }
 

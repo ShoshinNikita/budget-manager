@@ -49,7 +49,7 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 		return 0, err
 	}
 
-	log.WithField("id", id).Info("a new Spend was successfully created")
+	log.WithField("id", id).Debug("a new Spend was successfully created")
 	return id, nil
 }
 
@@ -109,7 +109,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 		return err
 	}
 
-	log.Info("the Spend was successfully edited")
+	log.Debug("the Spend was successfully edited")
 	return nil
 }
 
@@ -172,6 +172,6 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		return err
 	}
 
-	log.Info("the Spend was successfully removed")
+	log.Debug("the Spend was successfully removed")
 	return nil
 }

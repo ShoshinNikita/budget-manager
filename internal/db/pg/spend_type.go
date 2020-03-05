@@ -63,7 +63,7 @@ func (db DB) AddSpendType(ctx context.Context, name string) (typeID uint, err er
 		return 0, err
 	}
 
-	log.WithField("id", typeID).Info("a new Spend Type was successfully created")
+	log.WithField("id", typeID).Debug("a new Spend Type was successfully created")
 	return spendType.ID, nil
 }
 
@@ -87,7 +87,7 @@ func (db DB) EditSpendType(ctx context.Context, id uint, newName string) error {
 		return err
 	}
 
-	log.Info("the Spend Type was successfully edited")
+	log.Debug("the Spend Type was successfully edited")
 	return nil
 }
 
@@ -133,6 +133,6 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 		return err
 	}
 
-	log.Info("the Spend Type was successfully removed")
+	log.Debug("the Spend Type was successfully removed")
 	return nil
 }
