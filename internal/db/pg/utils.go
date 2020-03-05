@@ -10,8 +10,6 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	pkgErrors "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 // --------------------------------------------------
@@ -159,18 +157,4 @@ func buildStringFromKeysAndValues(keysAndValues ...interface{}) string {
 	}
 
 	return b.String()
-}
-
-// --------------------------------------------------
-// Checker
-// --------------------------------------------------
-
-// checkModel calls 'Check' method of passed model. If error is not nil,// it wraps error
-// with 'errors.WithOriginalError()' and 'errors.WithType(errors.UserError)' options
-func checkModel(model interface{ Check() error }) error {
-	err := model.Check()
-	if err != nil {
-		return errors.Wrap(err, errors.WithOriginalError(), errors.WithType(errors.UserError))
-	}
-	return nil
 }

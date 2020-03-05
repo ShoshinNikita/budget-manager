@@ -26,54 +26,12 @@ func TestAddMonthlyPayment(t *testing.T) {
 	)
 	require.Nil(err)
 
-	payments := []struct {
-		MonthlyPayment
-		isError bool
-	}{
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 1, MonthID: monthID, Title: "Rent", Cost: money.FromInt(20000), Notes: "some notes",
-			},
-		},
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 2, MonthID: monthID, Title: "Loans", Cost: money.FromInt(1000), TypeID: 5,
-			},
-		},
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 3, MonthID: monthID, Title: "Music", Cost: money.FromInt(300),
-			},
-		},
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 4, MonthID: monthID, Title: "Netflix", Cost: money.FromInt(600),
-			},
-		},
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 5, MonthID: monthID, Title: "Patreon", Cost: money.FromInt(1000),
-			},
-		},
-		// With errors
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 0, MonthID: monthID, Title: "", Cost: money.FromInt(1000),
-			},
-			isError: true,
-		},
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 0, MonthID: monthID, Title: "Some name", Cost: money.FromInt(0),
-			},
-			isError: true,
-		},
-		{
-			MonthlyPayment: MonthlyPayment{
-				ID: 0, MonthID: monthID, Title: "Another name", Cost: money.FromInt(-1000),
-			},
-			isError: true,
-		},
+	payments := []MonthlyPayment{
+		{ID: 1, MonthID: monthID, Title: "Rent", Cost: money.FromInt(20000), Notes: "some notes"},
+		{ID: 2, MonthID: monthID, Title: "Loans", Cost: money.FromInt(1000), TypeID: 5},
+		{ID: 3, MonthID: monthID, Title: "Music", Cost: money.FromInt(300)},
+		{ID: 4, MonthID: monthID, Title: "Netflix", Cost: money.FromInt(600)},
+		{ID: 5, MonthID: monthID, Title: "Patreon", Cost: money.FromInt(1000)},
 	}
 
 	// Add Monthly Payments
@@ -86,24 +44,16 @@ func TestAddMonthlyPayment(t *testing.T) {
 			Cost:    p.Cost,
 		}
 		id, err := db.AddMonthlyPayment(context.Background(), args)
-		if p.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 		require.Equal(p.ID, id)
 	}
 
 	// Check Monthly Payments
 	for _, p := range payments {
-		if p.isError {
-			continue
-		}
-
 		mp := &MonthlyPayment{ID: p.ID}
 		err := db.db.Select(mp)
 		require.Nil(err)
-		require.Equal(p.MonthlyPayment, *mp)
+		require.Equal(p, *mp)
 	}
 
 	// Check daily budget
@@ -135,9 +85,8 @@ func TestEditMonthlyPayment(t *testing.T) {
 	require.Nil(err)
 
 	payments := []struct {
-		origin  MonthlyPayment
-		edited  *MonthlyPayment
-		isError bool
+		origin MonthlyPayment
+		edited *MonthlyPayment
 	}{
 		{
 			origin: MonthlyPayment{
@@ -159,34 +108,6 @@ func TestEditMonthlyPayment(t *testing.T) {
 			origin: MonthlyPayment{
 				ID: 3, MonthID: monthID, Title: "test", Notes: "123", Cost: money.FromInt(15000),
 			},
-		},
-		// With error
-		{
-			origin: MonthlyPayment{
-				ID: 4, MonthID: monthID, Title: "test", Notes: "123", Cost: money.FromInt(15000),
-			},
-			edited: &MonthlyPayment{
-				ID: 4, MonthID: monthID, Title: "", Cost: money.FromInt(100),
-			},
-			isError: true,
-		},
-		{
-			origin: MonthlyPayment{
-				ID: 5, MonthID: monthID, Title: "test", Notes: "123", Cost: money.FromInt(15000),
-			},
-			edited: &MonthlyPayment{
-				ID: 5, MonthID: monthID, Title: "132", Cost: money.FromInt(0),
-			},
-			isError: true,
-		},
-		{
-			origin: MonthlyPayment{
-				ID: 6, MonthID: monthID, Title: "test", Notes: "123", Cost: money.FromInt(15000),
-			},
-			edited: &MonthlyPayment{
-				ID: 6, MonthID: monthID, Title: "Test", Cost: money.FromInt(-50),
-			},
-			isError: true,
 		},
 	}
 
@@ -218,10 +139,6 @@ func TestEditMonthlyPayment(t *testing.T) {
 			Cost:   &p.edited.Cost,
 		}
 		err := db.EditMonthlyPayment(context.Background(), args)
-		if p.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 	}
 
@@ -230,7 +147,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 		mp := &MonthlyPayment{ID: p.origin.ID}
 		err = db.db.Select(mp)
 		require.Nil(err)
-		if p.edited == nil || p.isError {
+		if p.edited == nil {
 			require.Equal(p.origin, *mp)
 			continue
 		}
@@ -241,7 +158,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 	dailyBudget := func() int64 {
 		var b int64 = income.ToInt()
 		for _, p := range payments {
-			if p.edited == nil || p.isError {
+			if p.edited == nil {
 				b -= p.origin.Cost.ToInt()
 			} else {
 				b -= p.edited.Cost.ToInt()

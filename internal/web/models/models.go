@@ -4,6 +4,8 @@ package models
 import (
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
@@ -79,6 +81,18 @@ type AddIncomeReq struct {
 	Notes   string  `json:"notes,omitempty"` // optional
 	Income  float64 `json:"income"`
 }
+
+func (req AddIncomeReq) Check() error {
+	if req.Title == "" {
+		return errors.New("title can't be empty")
+	}
+	// Skip Notes
+	if req.Income <= 0 {
+		return errors.Errorf("invalid income: '%.2f'", req.Income)
+	}
+	return nil
+}
+
 type AddIncomeResp struct {
 	Response
 
@@ -92,6 +106,17 @@ type EditIncomeReq struct {
 	Title  *string  `json:"title,omitempty"`  // optional
 	Notes  *string  `json:"notes,omitempty"`  // optional
 	Income *float64 `json:"income,omitempty"` // optional
+}
+
+func (req EditIncomeReq) Check() error {
+	if req.Title != nil && *req.Title == "" {
+		return errors.New("title can't be empty")
+	}
+	// Skip Notes
+	if req.Income != nil && *req.Income <= 0 {
+		return errors.Errorf("invalid income: '%.2f'", *req.Income)
+	}
+	return nil
 }
 
 type RemoveIncomeReq struct {
@@ -114,6 +139,19 @@ type AddMonthlyPaymentReq struct {
 	Notes  string  `json:"notes,omitempty"`   // optional
 	Cost   float64 `json:"cost"`
 }
+
+func (req AddMonthlyPaymentReq) Check() error {
+	if req.Title == "" {
+		return errors.New("title can't be empty")
+	}
+	// Skip Type
+	// Skip Notes
+	if req.Cost <= 0 {
+		return errors.Errorf("invalid cost: '%.2f'", req.Cost)
+	}
+	return nil
+}
+
 type AddMonthlyPaymentResp struct {
 	Response
 
@@ -128,6 +166,18 @@ type EditMonthlyPaymentReq struct {
 	TypeID *uint    `json:"type_id,omitempty"` // optional
 	Notes  *string  `json:"notes,omitempty"`   // optional
 	Cost   *float64 `json:"cost,omitempty"`    // optional
+}
+
+func (req EditMonthlyPaymentReq) Check() error {
+	if req.Title != nil && *req.Title == "" {
+		return errors.New("title can't be empty")
+	}
+	// Skip Type
+	// Skip Notes
+	if req.Cost != nil && *req.Cost <= 0 {
+		return errors.Errorf("invalid cost: '%.2f'", *req.Cost)
+	}
+	return nil
 }
 
 type RemoveMonthlyPaymentReq struct {
@@ -150,6 +200,19 @@ type AddSpendReq struct {
 	Notes  string  `json:"notes,omitempty"`   // optional
 	Cost   float64 `json:"cost"`
 }
+
+func (req AddSpendReq) Check() error {
+	if req.Title == "" {
+		return errors.New("title can't be empty")
+	}
+	// Skip Type
+	// Skip Notes
+	if req.Cost <= 0 {
+		return errors.Errorf("invalid cost: '%.2f'", req.Cost)
+	}
+	return nil
+}
+
 type AddSpendResp struct {
 	Response
 
@@ -164,6 +227,18 @@ type EditSpendReq struct {
 	TypeID *uint    `json:"type_id,omitempty"` // optional
 	Notes  *string  `json:"notes,omitempty"`   // optional
 	Cost   *float64 `json:"cost,omitempty"`    // optional
+}
+
+func (req EditSpendReq) Check() error {
+	if req.Title != nil && *req.Title == "" {
+		return errors.New("title can't be empty")
+	}
+	// Skip Type
+	// Skip Notes
+	if req.Cost != nil && *req.Cost <= 0 {
+		return errors.Errorf("invalid cost: '%.2f'", *req.Cost)
+	}
+	return nil
 }
 
 type RemoveSpendReq struct {
@@ -187,6 +262,14 @@ type AddSpendTypeReq struct {
 
 	Name string `json:"name"`
 }
+
+func (req AddSpendTypeReq) Check() error {
+	if req.Name == "" {
+		return errors.New("name can't be empty")
+	}
+	return nil
+}
+
 type AddSpendTypeResp struct {
 	Response
 
@@ -198,6 +281,13 @@ type EditSpendTypeReq struct {
 
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
+}
+
+func (req EditSpendTypeReq) Check() error {
+	if req.Name == "" {
+		return errors.New("name can't be empty")
+	}
+	return nil
 }
 
 type RemoveSpendTypeReq struct {

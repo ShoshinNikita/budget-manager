@@ -105,7 +105,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't add a new Income: title can't be empty",
+				Error:     "title can't be empty",
 				Success:   false,
 			},
 		},
@@ -120,7 +120,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't add a new Income: invalid income: '0'",
+				Error:     "invalid income: '0.00'",
 				Success:   false,
 			},
 		},
@@ -135,7 +135,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Month with passed id doesn't exist",
+				Error:     "such Month doesn't exist",
 				Success:   false,
 			},
 		},
@@ -226,12 +226,12 @@ func testHandlers_Income_EditIncome(t *testing.T, server *Server) {
 				ID:     5,
 				Title:  newTitle("edited title"),
 				Notes:  newNotes("updated notes"),
-				Income: newIncome(0),
+				Income: newIncome(1),
 			},
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Income with passed id doesn't exist",
+				Error:     "such Income doesn't exist",
 				Success:   false,
 			},
 		},
@@ -246,7 +246,7 @@ func testHandlers_Income_EditIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't edit the Income: invalid income: '0'",
+				Error:     "invalid income: '0.00'",
 				Success:   false,
 			},
 		},
@@ -319,7 +319,7 @@ func testHandlers_Income_RemoveIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Income with passed id doesn't exist",
+				Error:     "such Income doesn't exist",
 				Success:   false,
 			},
 		},
@@ -429,7 +429,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't add a new Monthly Payment: title can't be empty",
+				Error:     "title can't be empty",
 				Success:   false,
 			},
 		},
@@ -444,7 +444,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't add a new Monthly Payment: invalid cost: '0'",
+				Error:     "invalid cost: '0.00'",
 				Success:   false,
 			},
 		},
@@ -459,7 +459,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Month with passed id doesn't exist",
+				Error:     "such Month doesn't exist",
 				Success:   false,
 			},
 		},
@@ -557,7 +557,7 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Monthly Payment with passed id doesn't exist",
+				Error:     "such Monthly Payment doesn't exist",
 				Success:   false,
 			},
 		},
@@ -572,7 +572,7 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't edit the Monthly Payment: invalid cost: '0'",
+				Error:     "invalid cost: '0.00'",
 				Success:   false,
 			},
 		},
@@ -645,7 +645,7 @@ func testHandlers_MonthlyPayment_RemoveMonthlyPayment(t *testing.T, server *Serv
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Monthly Payment with passed id doesn't exist",
+				Error:     "such Monthly Payment doesn't exist",
 				Success:   false,
 			},
 		},
@@ -740,7 +740,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't add a new Spend: title can't be empty",
+				Error:     "title can't be empty",
 				Success:   false,
 			},
 		},
@@ -752,7 +752,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't add a new Spend: invalid cost: '0'",
+				Error:     "invalid cost: '0.00'",
 				Success:   false,
 			},
 		},
@@ -764,7 +764,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Day with passed id doesn't exist",
+				Error:     "such Day doesn't exist",
 				Success:   false,
 			},
 		},
@@ -862,7 +862,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't edit the Spend: title can't be empty",
+				Error:     "title can't be empty",
 				Success:   false,
 			},
 		},
@@ -877,7 +877,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Spend with passed id doesn't exist",
+				Error:     "such Spend doesn't exist",
 				Success:   false,
 			},
 		},
@@ -892,7 +892,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "couldn't edit the Spend: invalid cost: '0'",
+				Error:     "invalid cost: '0.00'",
 				Success:   false,
 			},
 		},
@@ -965,7 +965,7 @@ func testHandlers_Spend_RemoveSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "Spend with passed id doesn't exist",
+				Error:     "such Spend doesn't exist",
 				Success:   false,
 			},
 		},
@@ -1053,7 +1053,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
-					Error:     "couldn't add a new Spend Type: name can't be empty",
+					Error:     "name can't be empty",
 					Success:   false,
 				},
 			},
@@ -1164,7 +1164,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
-					Error:     "couldn't edit the Spend Type: name can't be empty",
+					Error:     "name can't be empty",
 					Success:   false,
 				},
 			},
@@ -1272,7 +1272,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
-					Error:     "Spend Type with passed id doesn't exist",
+					Error:     "such Spend Type doesn't exist",
 					Success:   false,
 				},
 			},

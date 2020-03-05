@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
@@ -28,33 +28,28 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 		// Add Spend
 		id, err = db.addSpend(tx, args)
 		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't add a new Spend"),
-				errors.WithTypeIfNotSet(errors.AppError))
+			return err
 		}
 
 		// Recompute Month budget
 
 		monthID, err := db.getMonthIDByDayID(ctx, tx, args.DayID)
 		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't get Month which contains Day with passed dayID"),
-				errors.WithType(errors.AppError))
+			return errors.Wrap(err, "couldn't get Month which contains Day with passed dayID")
 		}
 
-		err = db.recomputeMonth(tx, monthID)
-		if err != nil {
+		if err = db.recomputeMonth(tx, monthID); err != nil {
 			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("couldn't create a new Spend")
+		log.WithError(err).Error("couldn't create a new Spend")
 		return 0, err
 	}
 
-	log.WithField("id", id).Info("a new Spend was successfully created")
+	log.WithField("id", id).Debug("a new Spend was successfully created")
 	return id, nil
 }
 
@@ -66,15 +61,9 @@ func (DB) addSpend(tx *pg.Tx, args db_common.AddSpendArgs) (uint, error) {
 		Notes:  args.Notes,
 		Cost:   args.Cost,
 	}
-
-	if err := checkModel(spend); err != nil {
+	if err := tx.Insert(spend); err != nil {
 		return 0, err
 	}
-	err := tx.Insert(spend)
-	if err != nil {
-		return 0, err
-	}
-
 	return spend.ID, nil
 }
 
@@ -93,43 +82,34 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 
 	spend := &Spend{ID: args.ID}
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		err = tx.Select(spend)
-		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't select Spend with passed id"),
-				errors.WithType(errors.AppError))
+		if err = tx.Select(spend); err != nil {
+			return errors.Wrap(err, "couldn't select Spend with passed id")
 		}
 
 		// Edit Spend
-		err = db.editSpend(tx, spend, args)
-		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't edit the Spend"),
-				errors.WithTypeIfNotSet(errors.AppError))
+		if err = db.editSpend(tx, spend, args); err != nil {
+			return err
 		}
 
 		// Recompute Month budget
 
 		monthID, err := db.getMonthIDByDayID(ctx, tx, spend.DayID)
 		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't get Month which contains Day with passed dayID"),
-				errors.WithType(errors.AppError))
+			return errors.Wrap(err, "couldn't get Month which contains Day with passed dayID")
 		}
 
-		err = db.recomputeMonth(tx, monthID)
-		if err != nil {
+		if err = db.recomputeMonth(tx, monthID); err != nil {
 			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("coudldn't edit the Spend")
+		log.WithError(err).Error("couldn't edit the Spend")
 		return err
 	}
 
-	log.Info("the Spend was successfully edited")
+	log.Debug("the Spend was successfully edited")
 	return nil
 }
 
@@ -145,10 +125,6 @@ func (DB) editSpend(tx *pg.Tx, spend *Spend, args db_common.EditSpendArgs) error
 	}
 	if args.Cost != nil {
 		spend.Cost = *args.Cost
-	}
-
-	if err := checkModel(spend); err != nil {
-		return err
 	}
 	return tx.Update(spend)
 }
@@ -169,26 +145,19 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		// Select day id
 		err = tx.Model(spend).Column("day_id").WherePK().Select()
 		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't select Spend with passed id"),
-				errors.WithType(errors.AppError))
+			return errors.Wrap(err, "couldn't select Spend with passed id")
 		}
 
 		// Remove Spend
-		err = tx.Delete(spend)
-		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't delete Spend with passed id"),
-				errors.WithType(errors.AppError))
+		if err = tx.Delete(spend); err != nil {
+			return err
 		}
 
 		// Recompute Month budget
 
 		monthID, err := db.getMonthIDByDayID(ctx, tx, spend.DayID)
 		if err != nil {
-			return errors.Wrap(err,
-				errors.WithMsg("couldn't get Month which contains Day with passed dayID"),
-				errors.WithType(errors.AppError))
+			return errors.Wrap(err, "couldn't get Month which contains Day with passed dayID")
 		}
 
 		err = db.recomputeMonth(tx, monthID)
@@ -199,10 +168,10 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		return nil
 	})
 	if err != nil {
-		log.WithError(errors.GetOriginalError(err)).Error("couldn't remove the Spend")
+		log.WithError(err).Error("couldn't remove the Spend")
 		return err
 	}
 
-	log.Info("the Spend was successfully removed")
+	log.Debug("the Spend was successfully removed")
 	return nil
 }
