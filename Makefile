@@ -83,7 +83,7 @@ lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
 	#
 	# golangci-lint can be installed with:
-	#   curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.20.0
+	#   curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.23.8
 	#
 	# More installation options: https://github.com/golangci/golangci-lint#binary-release
 	#
