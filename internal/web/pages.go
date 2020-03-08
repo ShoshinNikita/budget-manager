@@ -184,6 +184,7 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 //   - max_cost - maximal cost
 //   - after - date in format 'yyyy-mm-dd'
 //   - before - date in format 'yyyy-mm-dd'
+//   - without_type - option to search for Spends without Spend Type (all passed type ids will be ignored)
 //   - type_id - Spend Type id to search (can be passed multiple times: ?type_id=56&type_id=58)
 //
 // nolint:funlen
@@ -257,10 +258,12 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return t
 	}()
 
-	// Parse Spend Type ids
-	typeIDs := func() []uint {
+	withoutType := r.FormValue("without_type") == "true"
+
+	// Parse Spend Type ids if needed
+	var typeIDs []uint
+	if !withoutType {
 		ids := r.Form["type_id"]
-		typeIDs := make([]uint, 0, len(ids))
 		for i := range ids {
 			id, err := strconv.ParseUint(ids[i], 10, 0)
 			if err != nil {
@@ -270,18 +273,18 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 			}
 			typeIDs = append(typeIDs, uint(id))
 		}
-		return typeIDs
-	}()
+	}
 
 	// Process
 	args := db.SearchSpendsArgs{
-		Title:   strings.ToLower(title),
-		Notes:   strings.ToLower(notes),
-		After:   after,
-		Before:  before,
-		MinCost: minCost,
-		MaxCost: maxCost,
-		TypeIDs: typeIDs,
+		Title:       strings.ToLower(title),
+		Notes:       strings.ToLower(notes),
+		After:       after,
+		Before:      before,
+		MinCost:     minCost,
+		MaxCost:     maxCost,
+		WithoutType: withoutType,
+		TypeIDs:     typeIDs,
 		// TODO
 		TitleExactly: false,
 		NotesExactly: false,

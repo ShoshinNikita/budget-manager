@@ -81,6 +81,26 @@ func TestSearchSpends(t *testing.T) {
 			},
 		},
 		{
+			desc: "pass without type",
+			//
+			req: models.SearchSpendsReq{
+				WithoutType: true,
+				TypeIDs:     []uint{1, 2, 3},
+			},
+			expect: func(m *MockDatabase) {
+				args := db.SearchSpendsArgs{
+					WithoutType: true,
+				}
+				m.On("SearchSpends", mock.Anything, args).Return([]*db.Spend{}, nil)
+			},
+			//
+			statusCode: 200,
+			resp: models.SearchSpendsResp{
+				Response: models.Response{RequestID: "request-id", Success: true},
+				Spends:   []*db.Spend{},
+			},
+		},
+		{
 			desc: "db error",
 			//
 			expect: func(m *MockDatabase) {

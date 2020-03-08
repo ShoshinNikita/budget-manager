@@ -301,6 +301,8 @@ type RemoveSpendTypeReq struct {
 // -------------------------------------------------
 
 // SearchSpendsReq is used to search for spends, all fields are optional
+//
+// nolint:maligned
 type SearchSpendsReq struct {
 	Request
 
@@ -322,6 +324,8 @@ type SearchSpendsReq struct {
 	MinCost float64 `json:"min_cost,omitempty"`
 	MaxCost float64 `json:"max_cost,omitempty"`
 
+	// WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
+	WithoutType bool `json:"without_type,omitempty"`
 	// TypeIDs is a list of Spend Type ids to search for
 	TypeIDs []uint `json:"type_ids,omitempty"`
 }

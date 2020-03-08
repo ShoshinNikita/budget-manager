@@ -964,7 +964,7 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// Process
-	log.Debug("search Spends")
+	log.Debug("search for Spends")
 	args := db.SearchSpendsArgs{
 		Title:        strings.ToLower(req.Title),
 		Notes:        strings.ToLower(req.Notes),
@@ -974,7 +974,10 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 		Before:       req.Before,
 		MinCost:      money.FromFloat(req.MinCost),
 		MaxCost:      money.FromFloat(req.MaxCost),
-		TypeIDs:      req.TypeIDs,
+		WithoutType:  req.WithoutType,
+	}
+	if !args.WithoutType {
+		args.TypeIDs = req.TypeIDs
 	}
 	spends, err := s.db.SearchSpends(r.Context(), args)
 	if err != nil {
