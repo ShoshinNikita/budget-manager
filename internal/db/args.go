@@ -70,6 +70,8 @@ type EditSpendArgs struct {
 // ----------------------------------------------------
 
 // SearchSpendsArgs is used to search for spends. All fields are optional
+//
+// nolint:maligned
 type SearchSpendsArgs struct {
 	Title string // Must be in lovercase
 	Notes string // Must be in lovercase

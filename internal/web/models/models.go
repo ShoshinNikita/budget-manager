@@ -301,6 +301,8 @@ type RemoveSpendTypeReq struct {
 // -------------------------------------------------
 
 // SearchSpendsReq is used to search for spends, all fields are optional
+//
+// nolint:maligned
 type SearchSpendsReq struct {
 	Request
 
