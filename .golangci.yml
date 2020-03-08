@@ -2,6 +2,7 @@ run:
   concurrency: 4
   build-tags:
     - integration
+  modules-download-mode: vendor
 
 linters:
   enable-all: true
