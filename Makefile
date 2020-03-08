@@ -1,5 +1,4 @@
 MODULE_PATH=github.com/ShoshinNikita/budget-manager
-DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 
 run: run-local
 
@@ -10,7 +9,7 @@ build: export-ldflags
 
 build-docker: TAG?=budget-manager:latest
 build-docker: export-ldflags
-	@ docker build -f scripts/docker/Dockerfile -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
+	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # Run
 
@@ -21,7 +20,7 @@ run-local: stop export-ldflags
 	./scripts/local/run.sh
 
 run-docker: stop export-ldflags
-	docker-compose -f ${DOCKER_COMPOSE} up \
+	docker-compose up \
 		--build \
 		--force-recreate \
 		--renew-anon-volumes \
@@ -36,7 +35,7 @@ stop-local:
 
 stop-docker:
 	# Stop and remove containers and volumes
-	docker-compose -f ${DOCKER_COMPOSE} down -v || true
+	docker-compose down -v || true
 
 # Tests
 
