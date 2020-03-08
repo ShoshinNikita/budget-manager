@@ -284,6 +284,43 @@ func TestSearchSpends(t *testing.T) {
 			},
 			want: []*db_common.Spend{},
 		},
+		{
+			desc: "search for spends without type",
+			args: db_common.SearchSpendsArgs{
+				WithoutType: true,
+			},
+			want: []*db_common.Spend{
+				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
+				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
+				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
+				{ID: 6, Year: 2020, Month: time.January, Day: 1, Title: "second spend", Notes: "2020-01-01", Cost: FromInt(7821)},
+				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},
+				{ID: 8, Year: 2020, Month: time.January, Day: 30, Title: "second spend", Notes: "2020-01-30", Cost: FromInt(15)},
+				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
+				{ID: 10, Year: 2020, Month: time.February, Day: 13, Title: "qwerty", Notes: "2020-02-13", Cost: FromInt(7821)},
+				{ID: 11, Year: 2020, Month: time.February, Day: 14, Title: "first spending", Notes: "2020-02-14", Cost: FromInt(555)},
+				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
+			},
+		},
+		{
+			desc: "search for spends without type (pass type ids)",
+			args: db_common.SearchSpendsArgs{
+				WithoutType: true,
+				TypeIDs:     []uint{1, 2, 3},
+			},
+			want: []*db_common.Spend{
+				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
+				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
+				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
+				{ID: 6, Year: 2020, Month: time.January, Day: 1, Title: "second spend", Notes: "2020-01-01", Cost: FromInt(7821)},
+				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},
+				{ID: 8, Year: 2020, Month: time.January, Day: 30, Title: "second spend", Notes: "2020-01-30", Cost: FromInt(15)},
+				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
+				{ID: 10, Year: 2020, Month: time.February, Day: 13, Title: "qwerty", Notes: "2020-02-13", Cost: FromInt(7821)},
+				{ID: 11, Year: 2020, Month: time.February, Day: 14, Title: "first spending", Notes: "2020-02-14", Cost: FromInt(555)},
+				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

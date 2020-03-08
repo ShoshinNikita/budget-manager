@@ -153,6 +153,21 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 			},
 		},
 		{
+			desc:     "without type",
+			reqQuery: buildWhereQuery(`WHERE (spend.type_id IS NULL)`),
+			args: db_common.SearchSpendsArgs{
+				WithoutType: true,
+			},
+		},
+		{
+			desc:     "without type (pass type ids)",
+			reqQuery: buildWhereQuery(`WHERE (spend.type_id IS NULL)`),
+			args: db_common.SearchSpendsArgs{
+				WithoutType: true,
+				TypeIDs:     []uint{1, 2, 5, 25, 3},
+			},
+		},
+		{
 			desc: "all args",
 			reqQuery: buildWhereQuery(`
 				WHERE (LOWER(spend.title) LIKE '%123%')

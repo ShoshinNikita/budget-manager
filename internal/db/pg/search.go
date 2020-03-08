@@ -158,7 +158,10 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 		query = query.Where("spend.cost <= ?", args.MaxCost)
 	}
 
-	if len(args.TypeIDs) != 0 {
+	switch {
+	case args.WithoutType:
+		query = query.Where("spend.type_id IS NULL")
+	case len(args.TypeIDs) != 0:
 		query = query.WhereIn("spend.type_id IN (?)", args.TypeIDs)
 	}
 

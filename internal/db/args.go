@@ -85,5 +85,7 @@ type SearchSpendsArgs struct {
 	MinCost money.Money
 	MaxCost money.Money
 
-	TypeIDs []uint
+	// WithoutType is used to search for Spends without Spend Type. TypeIDs must be ignored when it is true
+	WithoutType bool
+	TypeIDs     []uint
 }
