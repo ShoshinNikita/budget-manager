@@ -15,9 +15,9 @@ build-docker: export-ldflags
 
 run-local: stop export-ldflags
 	# Run Postgres
-	./scripts/local/postgres.sh
+	./scripts/postgres.sh
 	# Run Budget Manager
-	./scripts/local/run.sh
+	./scripts/run.sh
 
 run-docker: stop export-ldflags
 	docker-compose up \
@@ -46,7 +46,7 @@ test-unit:
 
 test-integ: stop
 	# Run Postgres
-	./scripts/local/postgres.sh test
+	./scripts/postgres.sh test
 
 	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
 	go test -mod=vendor -count=1 -p=1 --tags=integration -v \
