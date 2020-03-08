@@ -6,18 +6,16 @@ ARG WORKDIR=/go/src/github.com/ShoshinNikita/budget-manager
 # Build a binary file
 #
 
-FROM golang:1.13.5-alpine3.10 as backend-builder
+FROM golang:1.14-alpine3.11 as backend-builder
 ARG WORKDIR
 
-ENV GO111MODULE=on
 ENV CGO_ENABLED=0
 
 WORKDIR ${WORKDIR}
 
 # Copy dependencies (for better caching)
+COPY go.mod go.sum ./
 COPY vendor ./vendor
-COPY go.mod .
-COPY go.sum .
 
 # Copy code
 COPY cmd ./cmd
@@ -53,7 +51,7 @@ RUN minify --html-keep-default-attrvals -o templates/ templates && \
 # Build the final image
 #
 
-FROM alpine:3.9
+FROM alpine:3.11
 ARG WORKDIR
 
 WORKDIR /srv
