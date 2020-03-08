@@ -11,6 +11,7 @@ linters:
     - godox
     - whitespace
     - wsl
+    - gomnd
 
 linters-settings:
   funlen:
