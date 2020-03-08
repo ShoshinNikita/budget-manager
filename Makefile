@@ -1,5 +1,4 @@
 MODULE_PATH=github.com/ShoshinNikita/budget-manager
-DOCKER_COMPOSE=./scripts/docker/docker-compose.yml
 
 run: run-local
 
@@ -10,18 +9,18 @@ build: export-ldflags
 
 build-docker: TAG?=budget-manager:latest
 build-docker: export-ldflags
-	@ docker build -f scripts/docker/Dockerfile -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
+	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # Run
 
 run-local: stop export-ldflags
 	# Run Postgres
-	./scripts/local/postgres.sh
+	./scripts/postgres.sh
 	# Run Budget Manager
-	./scripts/local/run.sh
+	./scripts/run.sh
 
 run-docker: stop export-ldflags
-	docker-compose -f ${DOCKER_COMPOSE} up \
+	docker-compose up \
 		--build \
 		--force-recreate \
 		--renew-anon-volumes \
@@ -36,7 +35,7 @@ stop-local:
 
 stop-docker:
 	# Stop and remove containers and volumes
-	docker-compose -f ${DOCKER_COMPOSE} down -v || true
+	docker-compose down -v || true
 
 # Tests
 
@@ -47,7 +46,7 @@ test-unit:
 
 test-integ: stop
 	# Run Postgres
-	./scripts/local/postgres.sh test
+	./scripts/postgres.sh test
 
 	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
 	go test -mod=vendor -count=1 -p=1 --tags=integration -v \

@@ -1,5 +1,13 @@
-scripts/
-var/
+# Ignore all
+*
 
-Makefile
-README.md
+# Except dirs
+!/cmd/*
+!/internal/*
+!/static/*
+!/templates/*
+!/vendor/*
+
+# Except files
+!go.mod
+!go.sum
