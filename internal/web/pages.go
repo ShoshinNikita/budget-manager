@@ -194,8 +194,8 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	// Parse the query
 
 	// Parse Title and Notes
-	title := r.FormValue("title")
-	notes := r.FormValue("notes")
+	title := strings.TrimSpace(r.FormValue("title"))
+	notes := strings.TrimSpace(r.FormValue("notes"))
 
 	// Parse Min and Max Costs
 	minCost := func() money.Money {
