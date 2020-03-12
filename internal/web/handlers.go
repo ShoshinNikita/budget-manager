@@ -273,8 +273,8 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("add Income")
 	args := db.AddIncomeArgs{
 		MonthID: req.MonthID,
-		Title:   req.Title,
-		Notes:   req.Notes,
+		Title:   strings.TrimSpace(req.Title),
+		Notes:   strings.TrimSpace(req.Notes),
 		Income:  money.FromFloat(req.Income),
 	}
 	id, err := s.db.AddIncome(r.Context(), args)
@@ -335,8 +335,8 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("edit Income")
 	args := db.EditIncomeArgs{
 		ID:    req.ID,
-		Title: req.Title,
-		Notes: req.Notes,
+		Title: trimSpacePointer(req.Title),
+		Notes: trimSpacePointer(req.Notes),
 	}
 	if req.Income != nil {
 		income := money.FromFloat(*req.Income)
@@ -445,9 +445,9 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log.Debug("add Monthly Payment")
 	args := db.AddMonthlyPaymentArgs{
 		MonthID: req.MonthID,
-		Title:   req.Title,
+		Title:   strings.TrimSpace(req.Title),
 		TypeID:  req.TypeID,
-		Notes:   req.Notes,
+		Notes:   strings.TrimSpace(req.Notes),
 		Cost:    money.FromFloat(req.Cost),
 	}
 	id, err := s.db.AddMonthlyPayment(r.Context(), args)
@@ -508,8 +508,8 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log.Debug("edit Monthly Payment")
 	args := db.EditMonthlyPaymentArgs{
 		ID:     req.ID,
-		Title:  req.Title,
-		Notes:  req.Notes,
+		Title:  trimSpacePointer(req.Title),
+		Notes:  trimSpacePointer(req.Notes),
 		TypeID: req.TypeID,
 	}
 	if req.Cost != nil {
@@ -619,9 +619,9 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("add Spend")
 	args := db.AddSpendArgs{
 		DayID:  req.DayID,
-		Title:  req.Title,
+		Title:  strings.TrimSpace(req.Title),
 		TypeID: req.TypeID,
-		Notes:  req.Notes,
+		Notes:  strings.TrimSpace(req.Notes),
 		Cost:   money.FromFloat(req.Cost),
 	}
 	id, err := s.db.AddSpend(r.Context(), args)
@@ -682,8 +682,8 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("edit Spend")
 	args := db.EditSpendArgs{
 		ID:     req.ID,
-		Title:  req.Title,
-		Notes:  req.Notes,
+		Title:  trimSpacePointer(req.Title),
+		Notes:  trimSpacePointer(req.Notes),
 		TypeID: req.TypeID,
 	}
 	if req.Cost != nil {
@@ -819,7 +819,7 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 
 	// Process
 	log.Debug("add Spend Type")
-	id, err := s.db.AddSpendType(r.Context(), req.Name)
+	id, err := s.db.AddSpendType(r.Context(), strings.TrimSpace(req.Name))
 	if err != nil {
 		s.processError(r.Context(), log, w, "couldn't add Spend Type", http.StatusInternalServerError, err)
 		return
@@ -868,7 +868,7 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 
 	// Process
 	log.Debug("edit Spend Type")
-	err := s.db.EditSpendType(r.Context(), req.ID, req.Name)
+	err := s.db.EditSpendType(r.Context(), req.ID, strings.TrimSpace(req.Name))
 	if err != nil {
 		switch err {
 		case db.ErrSpendTypeNotExist:
@@ -966,8 +966,8 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	// Process
 	log.Debug("search for Spends")
 	args := db.SearchSpendsArgs{
-		Title:        strings.ToLower(req.Title),
-		Notes:        strings.ToLower(req.Notes),
+		Title:        strings.ToLower(strings.TrimSpace(req.Title)),
+		Notes:        strings.ToLower(strings.TrimSpace(req.Notes)),
 		TitleExactly: req.TitleExactly,
 		NotesExactly: req.NotesExactly,
 		After:        req.After,
@@ -1008,6 +1008,15 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 //nolint:unused,deadcode,errcheck
 func notImplementedYet(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("not implemented yet"))
+}
+
+// trimSpacePointer is like 'strings.TrimPointer' but for pointers
+func trimSpacePointer(s *string) *string {
+	if s == nil {
+		return nil
+	}
+	trimmed := strings.TrimSpace(*s)
+	return &trimmed
 }
 
 // jsonNewDecoder is a wrapper for json.NewDecoder function.
