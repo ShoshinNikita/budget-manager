@@ -66,8 +66,16 @@ type EditSpendArgs struct {
 }
 
 // ----------------------------------------------------
-// Other
+// Search
 // ----------------------------------------------------
+
+// SearchOrder is used to specify order of search results. 'Asc' by default
+type SearchOrder int
+
+const (
+	OrderByAsc SearchOrder = iota
+	OrderByDesc
+)
 
 // SearchSpendsArgs is used to search for spends. All fields are optional
 //
@@ -90,4 +98,16 @@ type SearchSpendsArgs struct {
 	// WithoutType is used to search for Spends without Spend Type. TypeIDs must be ignored when it is true
 	WithoutType bool
 	TypeIDs     []uint
+
+	Sort  SearchSpendsColumn
+	Order SearchOrder
 }
+
+// SearchSpendsColumn is used to specify column to sort by. 'Date' by default
+type SearchSpendsColumn int
+
+const (
+	SortByDate SearchSpendsColumn = iota
+	SortByTitle
+	SortByCost
+)
