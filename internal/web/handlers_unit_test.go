@@ -109,7 +109,7 @@ func TestSearchSpends(t *testing.T) {
 			},
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{
-					Sort:  db.SortByTitle,
+					Sort:  db.SortSpendsByTitle,
 					Order: db.OrderByDesc,
 				}
 				m.On("SearchSpends", mock.Anything, args).Return([]*db.Spend{}, nil)
@@ -130,7 +130,7 @@ func TestSearchSpends(t *testing.T) {
 			},
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{
-					Sort: db.SortByCost,
+					Sort: db.SortSpendsByCost,
 				}
 				m.On("SearchSpends", mock.Anything, args).Return([]*db.Spend{}, nil)
 			},

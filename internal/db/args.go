@@ -107,7 +107,7 @@ type SearchSpendsArgs struct {
 type SearchSpendsColumn int
 
 const (
-	SortByDate SearchSpendsColumn = iota
-	SortByTitle
-	SortByCost
+	SortSpendsByDate SearchSpendsColumn = iota
+	SortSpendsByTitle
+	SortSpendsByCost
 )

@@ -209,14 +209,14 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 			desc:     "sort by title",
 			reqQuery: buildWhereQuery("", `ORDER BY "spend"."title", "spend"."id"`),
 			args: db_common.SearchSpendsArgs{
-				Sort: db_common.SortByTitle,
+				Sort: db_common.SortSpendsByTitle,
 			},
 		},
 		{
 			desc:     "sort by title (desc)",
 			reqQuery: buildWhereQuery("", `ORDER BY "spend"."title" DESC, "spend"."id"`),
 			args: db_common.SearchSpendsArgs{
-				Sort:  db_common.SortByTitle,
+				Sort:  db_common.SortSpendsByTitle,
 				Order: db_common.OrderByDesc,
 			},
 		},
@@ -224,7 +224,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 			desc:     "sort by cost",
 			reqQuery: buildWhereQuery("", `ORDER BY "spend"."cost", "spend"."id"`),
 			args: db_common.SearchSpendsArgs{
-				Sort: db_common.SortByCost,
+				Sort: db_common.SortSpendsByCost,
 			},
 		},
 		{

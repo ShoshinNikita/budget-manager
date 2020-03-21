@@ -166,11 +166,11 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 
 	var orders []string
 	switch args.Sort {
-	case db_common.SortByDate:
+	case db_common.SortSpendsByDate:
 		orders = []string{"month.year", "month.month", "day.day"}
-	case db_common.SortByTitle:
+	case db_common.SortSpendsByTitle:
 		orders = []string{"spend.title"}
-	case db_common.SortByCost:
+	case db_common.SortSpendsByCost:
 		orders = []string{"spend.cost"}
 	}
 	if args.Order == db_common.OrderByDesc {

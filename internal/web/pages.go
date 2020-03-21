@@ -281,11 +281,11 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	sort := func() db.SearchSpendsColumn {
 		switch r.FormValue("sort") {
 		case "title":
-			return db.SortByTitle
+			return db.SortSpendsByTitle
 		case "cost":
-			return db.SortByCost
+			return db.SortSpendsByCost
 		default:
-			return db.SortByDate
+			return db.SortSpendsByDate
 		}
 	}()
 	order := func() db.SearchOrder {

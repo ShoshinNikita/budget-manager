@@ -982,9 +982,9 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	}
 	switch req.Sort {
 	case "title":
-		args.Sort = db.SortByTitle
+		args.Sort = db.SortSpendsByTitle
 	case "cost":
-		args.Sort = db.SortByCost
+		args.Sort = db.SortSpendsByCost
 	}
 	if req.Order == "desc" {
 		args.Order = db.OrderByDesc

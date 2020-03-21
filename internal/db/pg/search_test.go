@@ -324,7 +324,7 @@ func TestSearchSpends(t *testing.T) {
 		{
 			desc: "sort by cost, desc",
 			args: db_common.SearchSpendsArgs{
-				Sort:  db_common.SortByCost,
+				Sort:  db_common.SortSpendsByCost,
 				Order: db_common.OrderByDesc,
 			},
 			want: []*db_common.Spend{
