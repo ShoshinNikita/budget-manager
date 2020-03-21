@@ -985,9 +985,14 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 		args.Sort = db.SortSpendsByTitle
 	case "cost":
 		args.Sort = db.SortSpendsByCost
+	default:
+		args.Sort = db.SortSpendsByDate
 	}
-	if req.Order == "desc" {
+	switch req.Order {
+	case "desc":
 		args.Order = db.OrderByDesc
+	default:
+		args.Order = db.OrderByAsc
 	}
 
 	spends, err := s.db.SearchSpends(r.Context(), args)
