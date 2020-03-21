@@ -186,6 +186,8 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 //   - before - date in format 'yyyy-mm-dd'
 //   - without_type - option to search for Spends without Spend Type (all passed type ids will be ignored)
 //   - type_id - Spend Type id to search (can be passed multiple times: ?type_id=56&type_id=58)
+//   - sort - sort type: 'title', 'date' or 'cost'
+//   - order - sort order: 'asc' or 'desc'
 //
 // nolint:funlen
 func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
@@ -275,6 +277,26 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Sort
+	sort := func() db.SearchSpendsColumn {
+		switch r.FormValue("sort") {
+		case "title":
+			return db.SortByTitle
+		case "cost":
+			return db.SortByCost
+		default:
+			return db.SortByDate
+		}
+	}()
+	order := func() db.SearchOrder {
+		switch r.FormValue("order") {
+		case "desc":
+			return db.OrderByDesc
+		default:
+			return db.OrderByAsc
+		}
+	}()
+
 	// Process
 	args := db.SearchSpendsArgs{
 		Title:       strings.ToLower(title),
@@ -285,6 +307,8 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		MaxCost:     maxCost,
 		WithoutType: withoutType,
 		TypeIDs:     typeIDs,
+		Sort:        sort,
+		Order:       order,
 		// TODO
 		TitleExactly: false,
 		NotesExactly: false,

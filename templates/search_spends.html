@@ -172,7 +172,7 @@
 			white-space: nowrap;
 		}
 
-		#search__results__table td.search__results__table__cost {
+		#search__results__table .search__results__table__cost {
 			padding-right: 20px;
 		}
 
@@ -188,6 +188,28 @@
 		.search__results__table__link div.feather-icon>svg {
 			height: 20px;
 			width: 20px;
+		}
+
+		.search__results__table__sort-icon__wrapper {
+			display: inline-grid;
+			grid-template-rows: 1fr 1fr;
+			vertical-align: middle;
+		}
+
+		.search__results__table__sort-icon__wrapper svg.search__results__table__sort-icon,
+		.search__results__table__sort-icon__wrapper svg.search__results__table__sort-icon--asc,
+		.search__results__table__sort-icon__wrapper svg.search__results__table__sort-icon--desc {
+			height: 12px;
+			stroke-width: 4;
+			width: 12px;
+		}
+
+		.search__results__table__sort-icon__wrapper:hover svg.search__results__table__sort-icon,
+		.search__results__table__sort-icon__wrapper:hover svg.search__results__table__sort-icon--asc,
+		.search__results__table__sort-icon__wrapper:hover svg.search__results__table__sort-icon--desc {
+			/* Reset to default */
+			opacity: 0.64;
+			stroke: #888888;
 		}
 
 		#search__results__table__result-row .money--lose::after,
@@ -287,6 +309,12 @@
 						{{ end }}
 					</div>
 
+					<!-- Hidden fields -->
+					<div style="display: none;">
+						<input id="search__options__types__hidden__sort" type="text" name="sort" value="">
+						<input id="search__options__types__hidden__order" type="text" name="order" value="">
+					</div>
+
 					<!-- Buttons -->
 					<div id="search__options__buttons">
 						<button type="reset" class="search__options__button" title="Reset">
@@ -322,11 +350,41 @@
 				<table id="search__results__table">
 					<thead>
 						<tr>
-							<th class="search__results__table__date noselect">Date</th>
-							<th class="search__results__table__title noselect">Title</th>
+							<th class="search__results__table__date noselect" onclick="alert">
+								<span>Date</span>
+								<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
+									<svg class="feather-icon search__results__table__sort-icon--asc">
+										<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+									</svg>
+									<svg class="feather-icon search__results__table__sort-icon--desc">
+										<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+									</svg>
+								</div>
+							</th>
+							<th class="search__results__table__title noselect">
+								<span>Title</span>
+								<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
+									<svg class="feather-icon search__results__table__sort-icon--asc">
+										<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+									</svg>
+									<svg class="feather-icon search__results__table__sort-icon--desc">
+										<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+									</svg>
+								</div>
+							</th>
 							<th class="search__results__table__notes noselect">Notes</th>
 							<th class="search__results__table__type noselect">Type</th>
-							<th class="search__results__table__cost noselect money">Cost,</th>
+							<th class="search__results__table__cost noselect">
+								<span>Cost</span>
+								<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
+									<svg class="feather-icon search__results__table__sort-icon--asc">
+										<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+									</svg>
+									<svg class="feather-icon search__results__table__sort-icon--desc">
+										<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+									</svg>
+								</div>
+							</th>
 							<th class="search__results__table__link noselect">Link</th>
 						</tr>
 					</thead>
@@ -384,6 +442,9 @@
 	</div>
 
 	<script>
+		let CurrentSort = "";
+		let CurrentOrder = "";
+
 		// Update Search Options with query params
 		window.addEventListener("load", () => {
 			const query = new URLSearchParams(location.search);
@@ -411,6 +472,38 @@
 			// Before
 			const before = query.get("before");
 			setOptionValue("search__options__time__before", before);
+
+			// Sort and Order
+
+			CurrentSort = query.get("sort");
+			let sortSelector = ""
+			if (CurrentSort === "title") {
+				sortSelector = ".search__results__table__title"
+			} else if (CurrentSort === "cost") {
+				sortSelector = ".search__results__table__cost"
+			} else {
+				// Default sort is by date
+				CurrentSort = "date";
+				sortSelector = ".search__results__table__date"
+			}
+
+			CurrentOrder = query.get("order");
+			let orderSelector = "";
+			if (CurrentOrder === "desc") {
+				orderSelector = ".search__results__table__sort-icon--desc";
+			} else {
+				// Default order is asc
+				CurrentOrder = "asc";
+				orderSelector = ".search__results__table__sort-icon--asc";
+			}
+
+			const selector = sortSelector + " " + orderSelector;
+			const icon = document.querySelector(selector);
+			if (icon !== null) {
+				icon.style["stroke"] = "black";
+			}
+
+			// Don't set sort and order in form. It allows to 'reset' sort/order by clicking 'Search' button
 
 			// Without Type
 			const withoutType = query.get("without_type");
@@ -505,6 +598,45 @@
 				return;
 			}
 			input.checked = false;
+		}
+
+		/**
+		 * Change Sort and Order and submit form
+		 */
+		function searchWithSort(newSort) {
+			let sortValue = "";
+			let orderValue = "";
+
+			if (CurrentSort !== newSort) {
+				// Change sort type and set order to 'asc'
+				sortValue = newSort;
+				orderValue = "asc";
+			} else {
+				// Change sort order
+				if (CurrentOrder === "asc") {
+					orderValue = "desc";
+				} else if (CurrentOrder === "desc") {
+					orderValue = "asc";
+				} else {
+					console.error(`invalid current order value: '${CurrentOrder}'`);
+					orderValue = "asc";
+				}
+
+				sortValue = CurrentSort;
+			}
+
+			const sortInput = document.getElementById("search__options__types__hidden__sort");
+			sortInput.value = sortValue;
+			const orderInput = document.getElementById("search__options__types__hidden__order");
+			orderInput.value = orderValue;
+
+			// Submit form
+			const form = document.querySelector("#search__options form");
+			if (form === null) {
+				console.error("couldn't get form")
+				return;
+			}
+			form.submit();
 		}
 	</script>
 </body>
