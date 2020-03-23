@@ -961,6 +961,7 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 		"notes": req.Notes, "notes_exactly": req.NotesExactly,
 		"after": req.After, "before": req.Before, "type_ids": req.TypeIDs,
 		"min_cost": req.MinCost, "max_cost": req.MaxCost,
+		"sort": req.Sort, "order": req.Order,
 	})
 
 	// Process
@@ -979,6 +980,21 @@ func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	if !args.WithoutType {
 		args.TypeIDs = req.TypeIDs
 	}
+	switch req.Sort {
+	case "title":
+		args.Sort = db.SortSpendsByTitle
+	case "cost":
+		args.Sort = db.SortSpendsByCost
+	default:
+		args.Sort = db.SortSpendsByDate
+	}
+	switch req.Order {
+	case "desc":
+		args.Order = db.OrderByDesc
+	default:
+		args.Order = db.OrderByAsc
+	}
+
 	spends, err := s.db.SearchSpends(r.Context(), args)
 	if err != nil {
 		s.processError(r.Context(), log, w, "couldn't search for Spends", http.StatusInternalServerError, err)

@@ -101,6 +101,47 @@ func TestSearchSpends(t *testing.T) {
 			},
 		},
 		{
+			desc: "sort by title, desc",
+			//
+			req: models.SearchSpendsReq{
+				Sort:  "title",
+				Order: "desc",
+			},
+			expect: func(m *MockDatabase) {
+				args := db.SearchSpendsArgs{
+					Sort:  db.SortSpendsByTitle,
+					Order: db.OrderByDesc,
+				}
+				m.On("SearchSpends", mock.Anything, args).Return([]*db.Spend{}, nil)
+			},
+			//
+			statusCode: 200,
+			resp: models.SearchSpendsResp{
+				Response: models.Response{RequestID: "request-id", Success: true},
+				Spends:   []*db.Spend{},
+			},
+		},
+		{
+			desc: "sort by cost",
+			//
+			req: models.SearchSpendsReq{
+				Sort:  "cost",
+				Order: "abcde",
+			},
+			expect: func(m *MockDatabase) {
+				args := db.SearchSpendsArgs{
+					Sort: db.SortSpendsByCost,
+				}
+				m.On("SearchSpends", mock.Anything, args).Return([]*db.Spend{}, nil)
+			},
+			//
+			statusCode: 200,
+			resp: models.SearchSpendsResp{
+				Response: models.Response{RequestID: "request-id", Success: true},
+				Spends:   []*db.Spend{},
+			},
+		},
+		{
 			desc: "db error",
 			//
 			expect: func(m *MockDatabase) {

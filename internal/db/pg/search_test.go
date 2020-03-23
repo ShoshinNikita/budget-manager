@@ -321,6 +321,27 @@ func TestSearchSpends(t *testing.T) {
 				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
 			},
 		},
+		{
+			desc: "sort by cost, desc",
+			args: db_common.SearchSpendsArgs{
+				Sort:  db_common.SortSpendsByCost,
+				Order: db_common.OrderByDesc,
+			},
+			want: []*db_common.Spend{
+				{ID: 6, Year: 2020, Month: time.January, Day: 1, Title: "second spend", Notes: "2020-01-01", Cost: FromInt(7821)},
+				{ID: 10, Year: 2020, Month: time.February, Day: 13, Title: "qwerty", Notes: "2020-02-13", Cost: FromInt(7821)},
+				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},
+				{ID: 11, Year: 2020, Month: time.February, Day: 14, Title: "first spending", Notes: "2020-02-14", Cost: FromInt(555)},
+				{ID: 5, Year: 2020, Month: time.January, Day: 1, Title: "first spend", Notes: "2020-01-01", Cost: FromInt(189), Type: secondSpendType},
+				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
+				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
+				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
+				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
+				{ID: 8, Year: 2020, Month: time.January, Day: 30, Title: "second spend", Notes: "2020-01-30", Cost: FromInt(15)},
+				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
+				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
+			},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt

@@ -105,6 +105,7 @@ type searchSpendsModel struct {
 //
 //   ORDER BY month.year, month.month, day.day, spend.id;
 //
+// nolint:funlen
 func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *orm.Query {
 	query := tx.Model((*Spend)(nil)).
 		ColumnExpr("spend.id AS id").
@@ -119,9 +120,7 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 		//
 		Join("INNER JOIN days AS day ON day.id = spend.day_id").
 		Join("INNER JOIN months AS month ON month.id = day.month_id").
-		Join("LEFT JOIN spend_types AS spend_type ON spend_type.id = spend.type_id").
-		//
-		Order("month.year").Order("month.month").Order("day.day").Order("spend.id")
+		Join("LEFT JOIN spend_types AS spend_type ON spend_type.id = spend.type_id")
 
 	if args.Title != "" {
 		title := "%" + args.Title + "%"
@@ -164,6 +163,23 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 	case len(args.TypeIDs) != 0:
 		query = query.WhereIn("spend.type_id IN (?)", args.TypeIDs)
 	}
+
+	var orders []string
+	switch args.Sort {
+	case db_common.SortSpendsByDate:
+		orders = []string{"month.year", "month.month", "day.day"}
+	case db_common.SortSpendsByTitle:
+		orders = []string{"spend.title"}
+	case db_common.SortSpendsByCost:
+		orders = []string{"spend.cost"}
+	}
+	if args.Order == db_common.OrderByDesc {
+		for i := range orders {
+			orders[i] += " DESC"
+		}
+	}
+	orders = append(orders, "spend.id")
+	query = query.Order(orders...)
 
 	return query
 }

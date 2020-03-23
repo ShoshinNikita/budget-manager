@@ -328,6 +328,11 @@ type SearchSpendsReq struct {
 	WithoutType bool `json:"without_type,omitempty"`
 	// TypeIDs is a list of Spend Type ids to search for
 	TypeIDs []uint `json:"type_ids,omitempty"`
+
+	// Sort specify field to sort by. Available options: title, cost, date (default)
+	Sort string `json:"sort,omitempty"`
+	// Order specify sort order. Available options: asc (default), desc
+	Order string `json:"order,omitempty"`
 }
 
 type SearchSpendsResp struct {
