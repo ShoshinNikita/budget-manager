@@ -10,6 +10,14 @@ import (
 	"github.com/vmihailenco/msgpack/v4/codes"
 )
 
+const (
+	sortMapKeysFlag uint32 = 1 << iota
+	structAsArrayFlag
+	encodeUsingJSONFlag
+	useCompactIntsFlag
+	useCompactFloatsFlag
+)
+
 type writer interface {
 	io.Writer
 	WriteByte(byte) error
@@ -66,23 +74,19 @@ func Marshal(v interface{}) ([]byte, error) {
 type Encoder struct {
 	w writer
 
-	buf       []byte
-	timeBuf   []byte
-	bootstrap [9 + 12]byte
+	buf     []byte
+	timeBuf []byte
 
 	intern map[string]int
 
-	sortMapKeys   bool
-	structAsArray bool
-	useJSONTag    bool
-	useCompact    bool
+	flags uint32
 }
 
 // NewEncoder returns a new encoder that writes to w.
 func NewEncoder(w io.Writer) *Encoder {
-	e := new(Encoder)
-	e.buf = e.bootstrap[:9]
-	e.timeBuf = e.bootstrap[9 : 9+12]
+	e := &Encoder{
+		buf: make([]byte, 9),
+	}
 	e.Reset(w)
 	return e
 }
@@ -99,35 +103,67 @@ func (e *Encoder) Reset(w io.Writer) {
 	for k := range e.intern {
 		delete(e.intern, k)
 	}
+
+	//TODO:
+	//e.sortMapKeys = false
+	//e.structAsArray = false
+	//e.useJSONTag = false
+	//e.useCompact = false
 }
 
 // SortMapKeys causes the Encoder to encode map keys in increasing order.
 // Supported map types are:
 //   - map[string]string
 //   - map[string]interface{}
-func (e *Encoder) SortMapKeys(flag bool) *Encoder {
-	e.sortMapKeys = flag
+func (e *Encoder) SortMapKeys(on bool) *Encoder {
+	if on {
+		e.flags |= sortMapKeysFlag
+	} else {
+		e.flags &= ^sortMapKeysFlag
+	}
 	return e
 }
 
 // StructAsArray causes the Encoder to encode Go structs as msgpack arrays.
-func (e *Encoder) StructAsArray(flag bool) *Encoder {
-	e.structAsArray = flag
+func (e *Encoder) StructAsArray(on bool) *Encoder {
+	if on {
+		e.flags |= structAsArrayFlag
+	} else {
+		e.flags &= ^structAsArrayFlag
+	}
 	return e
 }
 
 // UseJSONTag causes the Encoder to use json struct tag as fallback option
 // if there is no msgpack tag.
-func (e *Encoder) UseJSONTag(flag bool) *Encoder {
-	e.useJSONTag = flag
+func (e *Encoder) UseJSONTag(on bool) *Encoder {
+	if on {
+		e.flags |= encodeUsingJSONFlag
+	} else {
+		e.flags &= ^encodeUsingJSONFlag
+	}
 	return e
 }
 
 // UseCompactEncoding causes the Encoder to chose the most compact encoding.
 // For example, it allows to encode small Go int64 as msgpack int8 saving 7 bytes.
-func (e *Encoder) UseCompactEncoding(flag bool) *Encoder {
-	e.useCompact = flag
+func (e *Encoder) UseCompactEncoding(on bool) *Encoder {
+	if on {
+		e.flags |= useCompactIntsFlag
+	} else {
+		e.flags &= ^useCompactIntsFlag
+	}
 	return e
+}
+
+// UseCompactFloats causes the Encoder to chose a compact integer encoding
+// for floats that can be represented as integers.
+func (e *Encoder) UseCompactFloats(on bool) {
+	if on {
+		e.flags |= useCompactFloatsFlag
+	} else {
+		e.flags &= ^useCompactFloatsFlag
+	}
 }
 
 func (e *Encoder) Encode(v interface{}) error {
@@ -183,6 +219,10 @@ func (e *Encoder) EncodeBool(value bool) error {
 		return e.writeCode(codes.True)
 	}
 	return e.writeCode(codes.False)
+}
+
+func (e *Encoder) EncodeDuration(d time.Duration) error {
+	return e.EncodeInt(int64(d))
 }
 
 func (e *Encoder) writeCode(c codes.Code) error {
