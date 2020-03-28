@@ -5,7 +5,10 @@ import (
 	"strings"
 )
 
-const prefixToTrim = "github.com/ShoshinNikita/budget-manager/"
+const (
+	packageNameToTrim  = "github.com/ShoshinNikita/budget-manager/"
+	internalPathToTrim = "internal/"
+)
 
 // GetFormattedCaller returns formatted caller.
 // It uses 'FormatCaller' function to format '*runtime.Func'
@@ -29,5 +32,9 @@ func FormatCaller(details *runtime.Func) string {
 	funcName := details.Name()
 
 	// Trim "github.com/username/project/"
-	return strings.TrimPrefix(funcName, prefixToTrim)
+	funcName = strings.TrimPrefix(funcName, packageNameToTrim)
+	// Trim "internal/"
+	funcName = strings.TrimPrefix(funcName, internalPathToTrim)
+
+	return funcName
 }
