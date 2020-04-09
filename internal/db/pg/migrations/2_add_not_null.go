@@ -4,7 +4,7 @@ import (
 	"github.com/go-pg/migrations/v7"
 )
 
-func addNotNullRegister(migrator *migrations.Collection) {
+func registerAddNotNull(migrator *migrations.Collection) {
 	migrator.MustRegisterTx(addNotNullUp, addNotNullDown)
 }
 
