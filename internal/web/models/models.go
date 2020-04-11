@@ -49,18 +49,18 @@ type GetMonthResp struct {
 // Day
 // -------------------------------------------------
 
-type GetDayReq struct {
+type GetDayByIDReq struct {
 	Request
 
-	ID *uint `json:"id"`
+	ID uint `json:"id"`
 }
 
 type GetDayByDateReq struct {
 	Request
 
-	Year  *int        `json:"year"`
-	Month *time.Month `json:"month"`
-	Day   *int        `json:"day"`
+	Year  int `json:"year"`
+	Month int `json:"month"`
+	Day   int `json:"day"`
 }
 
 type GetDayResp struct {
