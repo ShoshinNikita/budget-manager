@@ -90,7 +90,7 @@ Content-Type: application/json
 
 ### Get Month by Id
 
-GET {{baseUrl}}/api/months
+GET {{baseUrl}}/api/months/id
 Content-Type: application/json
 
 {
@@ -99,7 +99,7 @@ Content-Type: application/json
 
 ### Get Month by year and month
 
-GET {{baseUrl}}/api/months
+GET {{baseUrl}}/api/months/date
 Content-Type: application/json
 
 {
@@ -113,7 +113,7 @@ Content-Type: application/json
 
 ### Get Day by ID
 
-GET {{baseUrl}}/api/days
+GET {{baseUrl}}/api/days/id
 Content-Type: application/json
 
 {
@@ -122,7 +122,7 @@ Content-Type: application/json
 
 ### Get Day by date
 
-GET {{baseUrl}}/api/days
+GET {{baseUrl}}/api/days/date
 Content-Type: application/json
 
 {
