@@ -16,6 +16,22 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
+// Swagger General Info
+//
+// nolint:lll
+//
+// @title Budget Manager API
+// @version v0.2
+// @description Easy-to-use, lightweight and self-hosted solution to track your finances - [GitHub](https://github.com/ShoshinNikita/budget-manager)
+//
+// @BasePath /api
+//
+// @securityDefinitions.basic BasicAuth
+//
+// @license.name MIT
+// @license.url https://github.com/ShoshinNikita/budget-manager/blob/master/LICENSE
+//
+
 func main() {
 	// Create a new application
 	app := NewApp()
