@@ -147,14 +147,24 @@ Requests and responses can be found in [internal/web/models](internal/web/models
 
 #### General
 
-- `GET /api/months` - get month
+- `GET /api/months/id` - get month by id
 
-  **Request:** `models.GetMonthReq` or `models.GetMonthByYearAndMonthReq`  
+  **Request:** `models.GetMonthByIDReq`  
   **Response:** `models.GetMonthResp` or `models.Response`
 
-- `GET /api/days` - get day
+- `GET /api/months/date` - get month by date
 
-  **Request:** `models.GetDayReq` or `models.GetDayByDate`  
+  **Request:** `models.GetMonthByDateReq`  
+  **Response:** `models.GetMonthResp` or `models.Response`
+
+- `GET /api/days/id` - get day by id
+
+  **Request:** `models.GetDayByIDReq`  
+  **Response:** `models.GetDayResp` or `models.Response`
+
+- `GET /api/days/date` - get day by date
+
+  **Request:** `models.GetDayByDate`  
   **Response:** `models.GetDayResp` or `models.Response`
 
 #### Income
