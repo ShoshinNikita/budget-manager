@@ -26,17 +26,17 @@ type Response struct {
 // Month
 // -------------------------------------------------
 
-type GetMonthReq struct {
+type GetMonthByIDReq struct {
 	Request
 
-	ID *uint `json:"id"`
+	ID uint `json:"id"`
 }
 
-type GetMonthByYearAndMonthReq struct {
+type GetMonthByDateReq struct {
 	Request
 
-	Year  *int        `json:"year"`
-	Month *time.Month `json:"month"`
+	Year  int `json:"year"`
+	Month int `json:"month"`
 }
 
 type GetMonthResp struct {
