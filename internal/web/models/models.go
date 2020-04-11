@@ -19,7 +19,8 @@ type Request struct {
 type Response struct {
 	RequestID string `json:"request_id"`
 	Success   bool   `json:"success"`
-	Error     string `json:"error,omitempty"` // optional
+	// Error is specified only when success if false
+	Error string `json:"error,omitempty"`
 }
 
 // -------------------------------------------------
@@ -29,14 +30,14 @@ type Response struct {
 type GetMonthByIDReq struct {
 	Request
 
-	ID uint `json:"id"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 type GetMonthByDateReq struct {
 	Request
 
-	Year  int `json:"year"`
-	Month int `json:"month"`
+	Year  int `json:"year" validate:"required" example:"2020"`
+	Month int `json:"month" validate:"required" example:"4"`
 }
 
 type GetMonthResp struct {
@@ -52,15 +53,15 @@ type GetMonthResp struct {
 type GetDayByIDReq struct {
 	Request
 
-	ID uint `json:"id"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 type GetDayByDateReq struct {
 	Request
 
-	Year  int `json:"year"`
-	Month int `json:"month"`
-	Day   int `json:"day"`
+	Year  int `json:"year" validate:"required" example:"2020"`
+	Month int `json:"month" validate:"required" example:"4"`
+	Day   int `json:"day" validate:"required" example:"12"`
 }
 
 type GetDayResp struct {
@@ -76,10 +77,10 @@ type GetDayResp struct {
 type AddIncomeReq struct {
 	Request
 
-	MonthID uint    `json:"month_id"`
-	Title   string  `json:"title"`
+	MonthID uint    `json:"month_id" validate:"required" example:"1"`
+	Title   string  `json:"title" validate:"required" example:"Salary"`
 	Notes   string  `json:"notes,omitempty"` // optional
-	Income  float64 `json:"income"`
+	Income  float64 `json:"income" validate:"required" example:"10000"`
 }
 
 func (req AddIncomeReq) Check() error {
@@ -102,10 +103,10 @@ type AddIncomeResp struct {
 type EditIncomeReq struct {
 	Request
 
-	ID     uint     `json:"id"`
-	Title  *string  `json:"title,omitempty"`  // optional
-	Notes  *string  `json:"notes,omitempty"`  // optional
-	Income *float64 `json:"income,omitempty"` // optional
+	ID     uint     `json:"id" validate:"required" example:"1"`
+	Title  *string  `json:"title,omitempty"`                     // optional
+	Notes  *string  `json:"notes,omitempty" example:"New notes"` // optional
+	Income *float64 `json:"income,omitempty" example:"15000"`    // optional
 }
 
 func (req EditIncomeReq) Check() error {
@@ -122,7 +123,7 @@ func (req EditIncomeReq) Check() error {
 type RemoveIncomeReq struct {
 	Request
 
-	ID uint `json:"id"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 // -------------------------------------------------
@@ -132,12 +133,12 @@ type RemoveIncomeReq struct {
 type AddMonthlyPaymentReq struct {
 	Request
 
-	MonthID uint `json:"month_id"`
+	MonthID uint `json:"month_id" validate:"required" example:"1"`
 
-	Title  string  `json:"title"`
+	Title  string  `json:"title" validate:"required" example:"Rent"`
 	TypeID uint    `json:"type_id,omitempty"` // optional
 	Notes  string  `json:"notes,omitempty"`   // optional
-	Cost   float64 `json:"cost"`
+	Cost   float64 `json:"cost" validate:"required" example:"1500"`
 }
 
 func (req AddMonthlyPaymentReq) Check() error {
@@ -161,11 +162,11 @@ type AddMonthlyPaymentResp struct {
 type EditMonthlyPaymentReq struct {
 	Request
 
-	ID     uint     `json:"id"`
-	Title  *string  `json:"title,omitempty"`   // optional
-	TypeID *uint    `json:"type_id,omitempty"` // optional
-	Notes  *string  `json:"notes,omitempty"`   // optional
-	Cost   *float64 `json:"cost,omitempty"`    // optional
+	ID     uint     `json:"id" validate:"required" example:"1"`
+	Title  *string  `json:"title,omitempty"`                     // optional
+	TypeID *uint    `json:"type_id,omitempty" example:"1"`       // optional
+	Notes  *string  `json:"notes,omitempty" example:"New notes"` // optional
+	Cost   *float64 `json:"cost,omitempty" example:"1550"`       // optional
 }
 
 func (req EditMonthlyPaymentReq) Check() error {
@@ -183,7 +184,7 @@ func (req EditMonthlyPaymentReq) Check() error {
 type RemoveMonthlyPaymentReq struct {
 	Request
 
-	ID uint `json:"id"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 // -------------------------------------------------
@@ -193,12 +194,12 @@ type RemoveMonthlyPaymentReq struct {
 type AddSpendReq struct {
 	Request
 
-	DayID uint `json:"day_id"`
+	DayID uint `json:"day_id" validate:"required"`
 
-	Title  string  `json:"title"`
+	Title  string  `json:"title" validate:"required" example:"Food"`
 	TypeID uint    `json:"type_id,omitempty"` // optional
 	Notes  string  `json:"notes,omitempty"`   // optional
-	Cost   float64 `json:"cost"`
+	Cost   float64 `json:"cost" validate:"required" example:"30"`
 }
 
 func (req AddSpendReq) Check() error {
@@ -222,11 +223,11 @@ type AddSpendResp struct {
 type EditSpendReq struct {
 	Request
 
-	ID     uint     `json:"id"`
-	Title  *string  `json:"title,omitempty"`   // optional
-	TypeID *uint    `json:"type_id,omitempty"` // optional
-	Notes  *string  `json:"notes,omitempty"`   // optional
-	Cost   *float64 `json:"cost,omitempty"`    // optional
+	ID     uint     `json:"id" validate:"required" example:"1"`
+	Title  *string  `json:"title,omitempty"`                      // optional
+	TypeID *uint    `json:"type_id,omitempty"`                    // optional
+	Notes  *string  `json:"notes,omitempty" example:"Vegetables"` // optional
+	Cost   *float64 `json:"cost,omitempty" example:"30.15"`       // optional
 }
 
 func (req EditSpendReq) Check() error {
@@ -244,7 +245,7 @@ func (req EditSpendReq) Check() error {
 type RemoveSpendReq struct {
 	Request
 
-	ID uint `json:"id"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 // -------------------------------------------------
@@ -260,7 +261,7 @@ type GetSpendTypesResp struct {
 type AddSpendTypeReq struct {
 	Request
 
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required" example:"Food"`
 }
 
 func (req AddSpendTypeReq) Check() error {
@@ -279,8 +280,8 @@ type AddSpendTypeResp struct {
 type EditSpendTypeReq struct {
 	Request
 
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID   uint   `json:"id" validate:"required" example:"1"`
+	Name string `json:"name" example:"Vegetables"`
 }
 
 func (req EditSpendTypeReq) Check() error {
@@ -293,7 +294,7 @@ func (req EditSpendTypeReq) Check() error {
 type RemoveSpendTypeReq struct {
 	Request
 
-	ID uint `json:"id"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 // -------------------------------------------------
@@ -317,9 +318,9 @@ type SearchSpendsReq struct {
 	NotesExactly bool `json:"notes_exactly,omitempty"`
 
 	// After must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
-	After time.Time `json:"after,omitempty"`
+	After time.Time `json:"after,omitempty" format:"date"`
 	// Before must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
-	Before time.Time `json:"before,omitempty"`
+	Before time.Time `json:"before,omitempty" format:"date"`
 
 	MinCost float64 `json:"min_cost,omitempty"`
 	MaxCost float64 `json:"max_cost,omitempty"`
