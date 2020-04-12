@@ -2,87 +2,16 @@ package pg
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
-	pkgErrors "github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 // --------------------------------------------------
 // DB
 // --------------------------------------------------
-
-// createTables create table according to passed models and options. It returns the first encountered error
-//
-// Example:
-//   createTables(
-//     db,
-//     &firstModel{}, &orm.CreateTableOptions{...},
-//     &secondModel{}, nil,
-//   )
-//
-func createTables(db *pg.DB, modelsAndOpts ...interface{}) error {
-	if len(modelsAndOpts)%2 != 0 {
-		return pkgErrors.New("invalid numbers of arguments")
-	}
-
-	for i := 0; i < len(modelsAndOpts); i += 2 {
-		model := modelsAndOpts[i]
-		opts, ok := modelsAndOpts[i+1].(*orm.CreateTableOptions)
-		if !ok {
-			if modelsAndOpts[i+1] != nil {
-				return pkgErrors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
-			}
-
-			opts = nil
-		}
-
-		err := db.CreateTable(model, opts)
-		if err != nil {
-			return pkgErrors.Wrap(err, "couldn't create a table")
-		}
-	}
-
-	return nil
-}
-
-// dropTables drops table according to passed models and options. It returns the first encountered error
-//
-// Example:
-//   dropTable(
-//     db,
-//     &firstModel{}, &orm.DropTableOptions{...},
-//     &secondModel{}, nil,
-//   )
-//
-func dropTables(db *pg.DB, modelsAndOpts ...interface{}) error {
-	if len(modelsAndOpts)%2 != 0 {
-		return pkgErrors.New("invalid numbers of arguments")
-	}
-
-	for i := 0; i < len(modelsAndOpts); i += 2 {
-		model := modelsAndOpts[i]
-		opts, ok := modelsAndOpts[i+1].(*orm.DropTableOptions)
-		if !ok {
-			if modelsAndOpts[i+1] != nil {
-				return pkgErrors.Errorf("invalid opts type: '%s'", reflect.TypeOf(modelsAndOpts[i+1]))
-			}
-
-			opts = nil
-		}
-
-		err := db.DropTable(model, opts)
-		if err != nil {
-			return pkgErrors.Wrap(err, "couldn't drop a table")
-		}
-	}
-
-	return nil
-}
 
 // ping checks the connection to the database
 func ping(db *pg.DB) (ok bool) {

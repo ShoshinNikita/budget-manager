@@ -4,6 +4,7 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"io"
@@ -363,6 +364,12 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 	server := initServer(requireGlobal)
 	defer cleanUp(requireGlobal, server)
 
+	// Add Spend Types for testing
+	for _, name := range []string{"first", "second"} {
+		_, err := server.db.AddSpendType(context.Background(), name)
+		requireGlobal.Nil(err)
+	}
+
 	t.Run("AddMonthlyPayment", func(t *testing.T) {
 		testHandlers_MonthlyPayment_AddMonthlyPayment(t, server)
 	})
@@ -536,7 +543,7 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 				ID:     2,
 				Title:  newTitle("edited title"),
 				Notes:  newNotes("updated notes"),
-				TypeID: newTypeID(1),
+				TypeID: newTypeID(2),
 				Cost:   newCost(123456.50),
 			},
 			statusCode: http.StatusOK,
@@ -688,6 +695,12 @@ func TestHandlers_Spend(t *testing.T) {
 	requireGlobal := require.New(t)
 	server := initServer(requireGlobal)
 	defer cleanUp(requireGlobal, server)
+
+	// Add Spend Types for testing
+	for _, name := range []string{"first", "second"} {
+		_, err := server.db.AddSpendType(context.Background(), name)
+		requireGlobal.Nil(err)
+	}
 
 	t.Run("AddSpend", func(t *testing.T) {
 		testHandlers_Spend_AddSpend(t, server)

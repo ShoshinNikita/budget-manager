@@ -4,7 +4,7 @@ import (
 	"github.com/go-pg/migrations/v7"
 )
 
-func initRegister(migrator *migrations.Collection) {
+func registerInit(migrator *migrations.Collection) {
 	migrator.MustRegisterTx(initUp, initDown)
 }
 
