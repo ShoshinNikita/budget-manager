@@ -34,10 +34,16 @@ func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
-// GET /api/months/id
-//
-// Request: models.GetMonthByIDReq
-// Response: models.GetMonthResp or models.Response
+// @Summary Get Month by id
+// @Tags Months
+// @Router /api/months/id [get]
+// @Accept json
+// @Param body body models.GetMonthByIDReq true "Month ID"
+// @Produce json
+// @Success 200 {object} models.GetMonthResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Month doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -81,10 +87,16 @@ func (s Server) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /api/months/date
-//
-// Request: models.GetMonthByDateReq
-// Response: models.GetMonthResp or models.Response
+// @Summary Get Month by date
+// @Tags Months
+// @Router /api/months/date [get]
+// @Accept json
+// @Param body body models.GetMonthByDateReq true "Date"
+// @Produce json
+// @Success 200 {object} models.GetMonthResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Month doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -136,10 +148,16 @@ func (s Server) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /api/days/id
-//
-// Request: models.GetDayByIDReq
-// Response: models.GetDayResp or models.Response
+// @Summary Get Day by id
+// @Tags Days
+// @Router /api/days/id [get]
+// @Accept json
+// @Param body body models.GetDayByIDReq true "Day id"
+// @Produce json
+// @Success 200 {object} models.GetDayResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Day doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) GetDayByID(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -183,10 +201,16 @@ func (s Server) GetDayByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GET /api/days/id
-//
-// Request: models.GetDayByIDReq
-// Response: models.GetDayResp or models.Response
+// @Summary Get Day by date
+// @Tags Days
+// @Router /api/days/date [get]
+// @Accept json
+// @Param body body models.GetDayByDateReq true "Date"
+// @Produce json
+// @Success 200 {object} models.GetDayResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Day doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -243,10 +267,16 @@ func (s Server) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 // Income
 // -------------------------------------------------
 
-// POST /api/incomes - add a new income
-//
-// Request: models.AddIncomeReq
-// Response: models.AddIncomeResp or models.Response
+// @Summary Create Income
+// @Tags Incomes
+// @Router /api/incomes [post]
+// @Accept json
+// @Param body body models.AddIncomeReq true "New Income"
+// @Produce json
+// @Success 200 {object} models.AddIncomeResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Month doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -305,10 +335,16 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PUT /api/incomes - edit existing income
-//
-// Request: models.EditIncomeReq
-// Response: models.Response
+// @Summary Edit Income
+// @Tags Incomes
+// @Router /api/incomes [put]
+// @Accept json
+// @Param body body models.EditIncomeReq true "Updated Income"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Income doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -366,10 +402,16 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DELETE /api/incomes - remove income
-//
-// Request: models.RemoveIncomeReq
-// Response: models.Response
+// @Summary Remove Income
+// @Tags Incomes
+// @Router /api/incomes [delete]
+// @Accept json
+// @Param body body models.RemoveIncomeReq true "Income id"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Income doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -414,10 +456,16 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 // Monthly Payment
 // -------------------------------------------------
 
-// POST /api/monthly-payments
-//
-// Request: models.AddMonthlyPaymentReq
-// Response: models.AddMonthlyPaymentResp or models.Response
+// @Summary Create Monthly Payment
+// @Tags Monthly Payments
+// @Router /api/monthly-payments [post]
+// @Accept json
+// @Param body body models.AddMonthlyPaymentReq true "New Monthly Payment"
+// @Produce json
+// @Success 200 {object} models.AddMonthlyPaymentResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Month doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -478,10 +526,16 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PUT /api/monthly-payments
-//
-// Request: models.EditMonthlyPaymentReq
-// Response: models.Response
+// @Summary Edit Monthly Payment
+// @Tags Monthly Payments
+// @Router /api/monthly-payments [put]
+// @Accept json
+// @Param body body models.EditMonthlyPaymentReq true "Updated Monthly Payment"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Monthly Payment doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -540,10 +594,16 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DELETE /api/monthly-payments
-//
-// Request: models.DeleteMonthlyPaymentReq
-// Response: models.Response
+// @Summary Remove Monthly Payment
+// @Tags Monthly Payments
+// @Router /api/monthly-payments [delete]
+// @Accept json
+// @Param body body models.RemoveMonthlyPaymentReq true "Monthly Payment id"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Monthly Payment doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -588,10 +648,16 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 // Spend
 // -------------------------------------------------
 
-// POST /api/spends
-//
-// Request: models.AddSpendReq
-// Response: models.AddSpendResp or models.Response
+// @Summary Create Spend
+// @Tags Spends
+// @Router /api/spends [post]
+// @Accept json
+// @Param body body models.AddSpendReq true "New Spend"
+// @Produce json
+// @Success 200 {object} models.AddSpendResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Day doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -652,10 +718,16 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PUT /api/spends
-//
-// Request: models.EditSpendReq
-// Response: models.Response
+// @Summary Edit Spend
+// @Tags Spends
+// @Router /api/spends [put]
+// @Accept json
+// @Param body body models.EditSpendReq true "Updated Spend"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Spend doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -714,10 +786,16 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DELETE /api/spends
-//
-// Request: models.RemoveSpendReq
-// Response: models.Response
+// @Summary Remove Spend
+// @Tags Spends
+// @Router /api/spends [delete]
+// @Accept json
+// @Param body body models.RemoveSpendReq true "Updated Spend"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Spend doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -762,10 +840,12 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 // Spend Types
 // -------------------------------------------------
 
-// GET /api/spend-types
-//
-// Request: -
-// Response: models.GetSpendTypesResp or models.Response
+// @Summary Get All Spend Types
+// @Tags Spend Types
+// @Router /api/spend-types [get]
+// @Produce json
+// @Success 200 {object} models.GetSpendTypesResp
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -793,10 +873,15 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// POST /api/spend-types
-//
-// Request: models.AddSpendTypeReq
-// Response: models.AddSpendTypeResp or models.Response
+// @Summary Create Spend Type
+// @Tags Spend Types
+// @Router /api/spend-types [post]
+// @Accept json
+// @Param body body models.AddSpendTypeReq true "New Spend Type"
+// @Produce json
+// @Success 200 {object} models.AddSpendTypeResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -842,10 +927,16 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PUT /api/spend-types
-//
-// Request: models.EditSpendTypeReq
-// Response: models.Response
+// @Summary Edit Spend Type
+// @Tags Spend Types
+// @Router /api/spend-types [put]
+// @Accept json
+// @Param body body models.EditSpendTypeReq true "Updated Spend Type"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Spend Type doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -892,10 +983,16 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DELETE /api/spend-types
-//
-// Request: models.RemoveSpendTypeReq
-// Response: models.Response
+// @Summary Remove Spend Type
+// @Tags Spend Types
+// @Router /api/spend-types [delete]
+// @Accept json
+// @Param body body models.RemoveSpendTypeReq true "Spend Type id"
+// @Produce json
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 404 {object} models.Response "Spend Type doesn't exist"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
@@ -940,10 +1037,15 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 // Other
 // -------------------------------------------------
 
-// GET /api/search/spends
-//
-// Request: models.SearchSpendsReq
-// Response: models.SearchSpendsResp
+// @Summary Search Spends
+// @Tags Search
+// @Router /api/search/spends [get]
+// @Accept json
+// @Param body body models.SearchSpendsReq true "Search args"
+// @Produce json
+// @Success 200 {object} models.SearchSpendsResp
+// @Failure 400 {object} models.Response "Invalid request"
+// @Failure 500 {object} models.Response "Internal error"
 //
 func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
