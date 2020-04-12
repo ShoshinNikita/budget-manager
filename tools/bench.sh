@@ -5,7 +5,7 @@
 YEAR=$(date +"%Y")
 MONTH=$(date +"%-m")
 BODY='{"year": '${YEAR}', "month": '${MONTH}'}'
-URL="http://localhost:8080/api/months"
+URL="http://localhost:8080/api/months/date"
 DURATION="5s"
 #
 REQ_BODY_FILE="bench_body"

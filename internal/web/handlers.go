@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -35,28 +34,27 @@ func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
-// GET /api/months
+// GET /api/months/id
 //
-// Request: models.GetMonthReq or models.GetMonthByYearAndMonthReq
+// Request: models.GetMonthByIDReq
 // Response: models.GetMonthResp or models.Response
 //
-func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
+func (s Server) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
 	defer r.Body.Close()
 
-	// Prepare
-	var monthID uint
-	monthID, ok := s.getMonthID(w, r)
-	if !ok {
-		// 'Server.getMonthID' has already called 'Server.processError'
+	// Decode
+	req := &models.GetMonthByIDReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(r.Context(), log, w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
-	log = log.WithField("month_id", monthID)
+	log = log.WithField("month_id", req.ID)
 
 	// Process
 	log.Debug("get month from the database")
-	month, err := s.db.GetMonth(r.Context(), monthID)
+	month, err := s.db.GetMonth(r.Context(), req.ID)
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
@@ -83,46 +81,26 @@ func (s Server) GetMonth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok bool) {
+// GET /api/months/date
+//
+// Request: models.GetMonthByDateReq
+// Response: models.GetMonthResp or models.Response
+//
+func (s Server) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		s.processError(r.Context(), log, w, "couldn't read body", http.StatusBadRequest, err)
-		return 0, false
-	}
+	defer r.Body.Close()
 
-	// Try to decode models.GetMonthReq
-	idReq := &models.GetMonthReq{}
-	// We have to use json.NewDecoder because there are several types of request
-	if err := json.Unmarshal(body, idReq); err != nil {
+	// Decode
+	req := &models.GetMonthByDateReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(r.Context(), log, w, errDecodeRequest, http.StatusBadRequest, err)
-		return 0, false
+		return
 	}
-	if idReq.ID != nil {
-		log.WithField("id", *idReq.ID).Debug("month id is passed")
-		return *idReq.ID, true
-	}
-
-	log.Debug("try to parse year and month")
-
-	// Try to use models.GetMonthByYearAndMonthReq
-	yearAndMonthReq := &models.GetMonthByYearAndMonthReq{}
-	if err := json.Unmarshal(body, yearAndMonthReq); err != nil {
-		s.processError(r.Context(), log, w, errDecodeRequest, http.StatusBadRequest, err)
-		return 0, false
-	}
-	if yearAndMonthReq.Year == nil || yearAndMonthReq.Month == nil {
-		msg := "invalid request: no id or year and month were passed"
-		s.processError(r.Context(), log, w, msg, http.StatusBadRequest, nil)
-		return 0, false
-	}
-	year := *yearAndMonthReq.Year
-	month := int(*yearAndMonthReq.Month)
-	log = log.WithFields(logrus.Fields{"year": year, "month": month})
+	log = log.WithFields(logrus.Fields{"year": req.Year, "month": req.Month})
 
 	log.Debug("try to get month id")
-	id, err = s.db.GetMonthID(r.Context(), year, month)
+	monthID, err := s.db.GetMonthID(r.Context(), req.Year, req.Month)
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
@@ -131,33 +109,54 @@ func (s Server) getMonthID(w http.ResponseWriter, r *http.Request) (id uint, ok 
 			msg := "couldn't get month with passed year and month"
 			s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		}
-		return 0, false
+		return
 	}
 
-	return id, true
+	// Process
+	log.Debug("get month from the database")
+	month, err := s.db.GetMonth(r.Context(), monthID)
+	if err != nil {
+		msg := "couldn't get Month with passed id"
+		s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		return
+	}
+
+	resp := models.GetMonthResp{
+		Response: models.Response{
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
+		},
+		Month: *month,
+	}
+
+	// Encode
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(r.Context(), log, w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
-// GET /api/days
+// GET /api/days/id
 //
-// Request: models.GetDayReq or models.GetDayByDate
+// Request: models.GetDayByIDReq
 // Response: models.GetDayResp or models.Response
 //
-func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
+func (s Server) GetDayByID(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
 	defer r.Body.Close()
 
-	// Prepare
-	dayID, ok := s.getDayID(w, r)
-	if !ok {
-		// 'Server.getDayID' has already called 'Server.processError'
+	// Decode
+	req := &models.GetDayByIDReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
+		s.processError(r.Context(), log, w, errDecodeRequest, http.StatusBadRequest, err)
 		return
 	}
-	log = log.WithField("day_id", dayID)
+	log = log.WithField("day_id", req.ID)
 
 	// Process
 	log.Debug("get day from the database")
-	day, err := s.db.GetDay(r.Context(), dayID)
+	day, err := s.db.GetDay(r.Context(), req.ID)
 	if err != nil {
 		switch err {
 		case db.ErrDayNotExist:
@@ -184,47 +183,27 @@ func (s Server) GetDay(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bool) {
+// GET /api/days/id
+//
+// Request: models.GetDayByIDReq
+// Response: models.GetDayResp or models.Response
+//
+func (s Server) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		s.processError(r.Context(), log, w, "couldn't read body", http.StatusBadRequest, err)
-		return 0, false
-	}
+	defer r.Body.Close()
 
-	// Try to decode models.GetDayReq
-	idReq := &models.GetDayReq{}
-	// We have to use json.NewDecoder because there are several types of request
-	if err := json.Unmarshal(body, idReq); err != nil {
+	// Decode
+	req := &models.GetDayByDateReq{}
+	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
 		s.processError(r.Context(), log, w, errDecodeRequest, http.StatusBadRequest, err)
-		return 0, false
+		return
 	}
-	if idReq.ID != nil {
-		log.WithField("id", idReq.ID).Debug("day id is passed")
-		return *idReq.ID, true
-	}
+	log = log.WithFields(logrus.Fields{"year": req.Year, "month": req.Month, "day": req.Day})
 
-	log.Debug("try to parse year, month and day")
-
-	// Try to use models.GetDayByDateReq
-	dateReq := &models.GetDayByDateReq{}
-	if err := json.Unmarshal(body, dateReq); err != nil {
-		s.processError(r.Context(), log, w, errDecodeRequest, http.StatusBadRequest, err)
-		return 0, false
-	}
-	if dateReq.Year == nil || dateReq.Month == nil || dateReq.Day == nil {
-		s.processError(r.Context(), log, w, "invalid request: no id or year, month and day were passed",
-			http.StatusBadRequest, nil)
-		return 0, false
-	}
-	year := *dateReq.Year
-	month := int(*dateReq.Month)
-	day := *dateReq.Day
-	log = log.WithFields(logrus.Fields{"year": year, "month": month, "day": day})
-
+	// Prepare
 	log.Debug("try to get day id")
-	id, err = s.db.GetDayIDByDate(r.Context(), year, month, day)
+	dayID, err := s.db.GetDayIDByDate(r.Context(), req.Year, req.Month, req.Day)
 	if err != nil {
 		switch err {
 		case db.ErrDayNotExist:
@@ -233,10 +212,31 @@ func (s Server) getDayID(w http.ResponseWriter, r *http.Request) (id uint, ok bo
 			msg := "couldn't get such Day"
 			s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		}
-		return 0, false
+		return
 	}
 
-	return id, true
+	// Process
+	log.Debug("get day from the database")
+	day, err := s.db.GetDay(r.Context(), dayID)
+	if err != nil {
+		msg := "couldn't get Day with passed id"
+		s.processError(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		return
+	}
+
+	resp := models.GetDayResp{
+		Response: models.Response{
+			RequestID: request_id.FromContext(r.Context()).ToString(),
+			Success:   true,
+		},
+		Day: *day,
+	}
+
+	// Encode
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		s.processError(r.Context(), log, w, errEncodeResponse, http.StatusInternalServerError, err)
+	}
 }
 
 // -------------------------------------------------
