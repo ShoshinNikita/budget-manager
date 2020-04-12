@@ -93,6 +93,12 @@ check: lint test
 bench:
 	./tools/bench.sh
 
+generate-docs:
+	# Swag - https://github.com/swaggo/swag
+	#
+	swag init --generalInfo cmd/budget-manager/main.go --output docs
+	rm ./docs/swagger.json ./docs/docs.go
+
 generate-mocks:
 	# Mockery is required - https://github.com/vektra/mockery
 	#
