@@ -26,9 +26,12 @@ func TestAddMonthlyPayment(t *testing.T) {
 	)
 	require.Nil(err)
 
+	_, err = db.AddSpendType(context.Background(), "spend type")
+	require.Nil(err)
+
 	payments := []MonthlyPayment{
 		{ID: 1, MonthID: monthID, Title: "Rent", Cost: money.FromInt(20000), Notes: "some notes"},
-		{ID: 2, MonthID: monthID, Title: "Loans", Cost: money.FromInt(1000), TypeID: 5},
+		{ID: 2, MonthID: monthID, Title: "Loans", Cost: money.FromInt(1000), TypeID: 1},
 		{ID: 3, MonthID: monthID, Title: "Music", Cost: money.FromInt(300)},
 		{ID: 4, MonthID: monthID, Title: "Netflix", Cost: money.FromInt(600)},
 		{ID: 5, MonthID: monthID, Title: "Patreon", Cost: money.FromInt(1000)},

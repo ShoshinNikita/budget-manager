@@ -20,10 +20,11 @@ func TestSearchSpends(t *testing.T) {
 	db := initDB(t)
 	defer cleanUp(t, db)
 
-	// We have to drop and create tables for Months and Days because we manually prepare months for tests
-	err := dropTables(db.db, &Month{}, nil, &Day{}, nil)
+	// Reset tables 'months' and 'days' because we manually prepare months for tests
+	_, err := db.db.Exec(`DELETE FROM days; DELETE FROM months;`)
 	globalRequire.Nil(err)
-	err = createTables(db.db, &Month{}, nil, &Day{}, nil)
+	// Reset sequences
+	_, err = db.db.Exec(`ALTER SEQUENCE days_id_seq RESTART; ALTER SEQUENCE months_id_seq RESTART;`)
 	globalRequire.Nil(err)
 
 	// Preparations

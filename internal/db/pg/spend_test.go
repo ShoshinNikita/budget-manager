@@ -69,15 +69,15 @@ func TestEditSpend(t *testing.T) {
 	}{
 		{
 			origin: Spend{
-				ID: 1, DayID: 10, Title: "123", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
+				ID: 1, DayID: 10, Title: "123", TypeID: 2, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
-				ID: 1, DayID: 10, Title: "123456", TypeID: 12, Notes: "test notes", Cost: money.FromInt(15500),
+				ID: 1, DayID: 10, Title: "123456", TypeID: 2, Notes: "test notes", Cost: money.FromInt(15500),
 			},
 		},
 		{
 			origin: Spend{
-				ID: 2, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
+				ID: 2, DayID: 1, Title: "123", TypeID: 2, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
 				ID: 2, DayID: 1, Title: "123", TypeID: 1, Notes: "", Cost: money.FromInt(150),
@@ -85,12 +85,18 @@ func TestEditSpend(t *testing.T) {
 		},
 		{
 			origin: Spend{
-				ID: 3, DayID: 1, Title: "123", TypeID: 12, Notes: "test notes", Cost: money.FromInt(155000),
+				ID: 3, DayID: 1, Title: "123", TypeID: 2, Notes: "test notes", Cost: money.FromInt(155000),
 			},
 			edited: &Spend{
 				ID: 3, DayID: 1, Title: "123", TypeID: 0, Notes: "", Cost: money.FromInt(150),
 			},
 		},
+	}
+
+	// Add Spend Types
+	for _, name := range []string{"first", "second"} {
+		_, err := db.AddSpendType(context.Background(), name)
+		require.Nil(err)
 	}
 
 	// Add spends
