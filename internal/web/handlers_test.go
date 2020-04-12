@@ -126,14 +126,14 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			},
 		},
 		{
-			desc: "invalid request (invalid month)",
+			desc: "invalid request (non-existing Month)",
 			req: models.AddIncomeReq{
 				MonthID: 10,
 				Title:   "title",
 				Notes:   "some notes",
 				Income:  15000,
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Month doesn't exist",
@@ -222,14 +222,14 @@ func testHandlers_Income_EditIncome(t *testing.T, server *Server) {
 		},
 		// Invalid requests
 		{
-			desc: "invalid request (invalid id)",
+			desc: "invalid request (non-existing Income)",
 			req: models.EditIncomeReq{
 				ID:     5,
 				Title:  newTitle("edited title"),
 				Notes:  newNotes("updated notes"),
 				Income: newIncome(1),
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Income doesn't exist",
@@ -313,11 +313,11 @@ func testHandlers_Income_RemoveIncome(t *testing.T, server *Server) {
 		},
 		// Invalid requests
 		{
-			desc: "invalid request (remove non-existing Income)",
+			desc: "invalid request (non-existing Income)",
 			req: models.RemoveIncomeReq{
 				ID: 3,
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Income doesn't exist",
@@ -456,14 +456,14 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			},
 		},
 		{
-			desc: "invalid request (invalid month)",
+			desc: "invalid request (non-existing Month)",
 			req: models.AddMonthlyPaymentReq{
 				MonthID: 10,
 				Title:   "title",
 				Notes:   "some notes",
 				Cost:    15000,
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Month doesn't exist",
@@ -554,14 +554,14 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 		},
 		// Invalid requests
 		{
-			desc: "invalid request (invalid id)",
+			desc: "invalid request (non-existing Monthly Payment)",
 			req: models.EditMonthlyPaymentReq{
 				ID:    5,
 				Title: newTitle("edited title"),
 				Notes: newNotes("updated notes"),
 				Cost:  newCost(10.05),
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Monthly Payment doesn't exist",
@@ -645,11 +645,11 @@ func testHandlers_MonthlyPayment_RemoveMonthlyPayment(t *testing.T, server *Serv
 		},
 		// Invalid requests
 		{
-			desc: "invalid request (remove non-existing Monthly Payment)",
+			desc: "invalid request (non-existing Monthly Payment)",
 			req: models.RemoveMonthlyPaymentReq{
 				ID: 3,
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Monthly Payment doesn't exist",
@@ -770,11 +770,11 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			},
 		},
 		{
-			desc: "invalid request (invalid day)",
+			desc: "invalid request (non-existing Day)",
 			req: models.AddSpendReq{
 				DayID: 36000, Title: "title", Notes: "some notes", Cost: 15000,
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Day doesn't exist",
@@ -880,14 +880,14 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			},
 		},
 		{
-			desc: "invalid request (invalid id)",
+			desc: "invalid request (non-existing Spend)",
 			req: models.EditSpendReq{
 				ID:    5,
 				Title: newTitle("edited title"),
 				Notes: newNotes("updated notes"),
 				Cost:  newCost(10),
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Spend doesn't exist",
@@ -971,11 +971,11 @@ func testHandlers_Spend_RemoveSpend(t *testing.T, server *Server) {
 		},
 		// Invalid requests
 		{
-			desc: "invalid request (remove non-existing Spend)",
+			desc: "invalid request (non-existing Spend)",
 			req: models.RemoveSpendReq{
 				ID: 3,
 			},
-			statusCode: http.StatusBadRequest,
+			statusCode: http.StatusNotFound,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Spend doesn't exist",
@@ -1278,11 +1278,11 @@ func TestHandlers_SpendType(t *testing.T) {
 			},
 			// Invalid requests
 			{
-				desc: "invalid request (remove non-existing Spend Type)",
+				desc: "invalid request (non-existing Spend Type)",
 				req: models.RemoveSpendTypeReq{
 					ID: 3,
 				},
-				statusCode: http.StatusBadRequest,
+				statusCode: http.StatusNotFound,
 				resp: models.Response{
 					RequestID: requestID.ToString(),
 					Error:     "such Spend Type doesn't exist",

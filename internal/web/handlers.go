@@ -281,7 +281,7 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't add Income", http.StatusInternalServerError, err)
 		}
@@ -346,7 +346,7 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrIncomeNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't edit Income", http.StatusInternalServerError, err)
 		}
@@ -390,7 +390,7 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrIncomeNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't remove Income", http.StatusInternalServerError, err)
 		}
@@ -454,7 +454,7 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't add Monthly Payment", http.StatusInternalServerError, err)
 		}
@@ -520,7 +520,7 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthlyPaymentNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't edit Monthly Payment", http.StatusInternalServerError, err)
 		}
@@ -564,7 +564,7 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthlyPaymentNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't remove Monthly Payment", http.StatusInternalServerError, err)
 		}
@@ -628,7 +628,7 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrDayNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't add Spend", http.StatusInternalServerError, err)
 		}
@@ -694,7 +694,7 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrSpendNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't edit Spend", http.StatusInternalServerError, err)
 		}
@@ -738,7 +738,7 @@ func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrSpendNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't remove Spend", http.StatusInternalServerError, err)
 		}
@@ -872,7 +872,7 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrSpendTypeNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't edit Spend Type", http.StatusInternalServerError, err)
 		}
@@ -916,7 +916,7 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrSpendTypeNotExist:
-			s.processError(r.Context(), log, w, err.Error(), http.StatusBadRequest, err)
+			s.processError(r.Context(), log, w, err.Error(), http.StatusNotFound, err)
 		default:
 			s.processError(r.Context(), log, w, "couldn't remove Spend Type", http.StatusInternalServerError, err)
 		}
