@@ -7,10 +7,10 @@ definitions:
       id:
         type: integer
       month:
-        type: string
+        type: integer
       saldo:
         description: Saldo is DailyBudget - Cost of all Spends. It can be negative
-        type: integer
+        type: number
       spends:
         items:
           $ref: '#/definitions/db.Spend'
@@ -23,9 +23,9 @@ definitions:
       id:
         type: integer
       income:
-        type: integer
+        type: number
       month:
-        type: string
+        type: integer
       notes:
         type: string
       title:
@@ -38,7 +38,7 @@ definitions:
       daily_budget:
         description: DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number
           of Days
-        type: integer
+        type: number
       days:
         items:
           $ref: '#/definitions/db.Day'
@@ -50,30 +50,30 @@ definitions:
           $ref: '#/definitions/db.Income'
         type: array
       month:
-        type: string
+        type: integer
       monthly_payments:
         items:
           $ref: '#/definitions/db.MonthlyPayment'
         type: array
       result:
         description: Result is TotalIncome - TotalSpend
-        type: integer
+        type: number
       total_income:
-        type: integer
+        type: number
       total_spend:
         description: TotalSpend is a cost of all Monthly Payments and Spends
-        type: integer
+        type: number
       year:
         type: integer
     type: object
   db.MonthlyPayment:
     properties:
       cost:
-        type: integer
+        type: number
       id:
         type: integer
       month:
-        type: string
+        type: integer
       notes:
         type: string
       title:
@@ -87,13 +87,13 @@ definitions:
   db.Spend:
     properties:
       cost:
-        type: integer
+        type: number
       day:
         type: integer
       id:
         type: integer
       month:
-        type: string
+        type: integer
       notes:
         type: string
       title:
