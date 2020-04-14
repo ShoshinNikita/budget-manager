@@ -1,0 +1,1066 @@
+basePath: /api
+definitions:
+  db.Day:
+    properties:
+      day:
+        type: integer
+      id:
+        type: integer
+      month:
+        type: integer
+      saldo:
+        description: Saldo is DailyBudget - Cost of all Spends. It can be negative
+        type: number
+      spends:
+        items:
+          $ref: '#/definitions/db.Spend'
+        type: array
+      year:
+        type: integer
+    type: object
+  db.Income:
+    properties:
+      id:
+        type: integer
+      income:
+        type: number
+      month:
+        type: integer
+      notes:
+        type: string
+      title:
+        type: string
+      year:
+        type: integer
+    type: object
+  db.Month:
+    properties:
+      daily_budget:
+        description: DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number
+          of Days
+        type: number
+      days:
+        items:
+          $ref: '#/definitions/db.Day'
+        type: array
+      id:
+        type: integer
+      incomes:
+        items:
+          $ref: '#/definitions/db.Income'
+        type: array
+      month:
+        type: integer
+      monthly_payments:
+        items:
+          $ref: '#/definitions/db.MonthlyPayment'
+        type: array
+      result:
+        description: Result is TotalIncome - TotalSpend
+        type: number
+      total_income:
+        type: number
+      total_spend:
+        description: TotalSpend is a cost of all Monthly Payments and Spends
+        type: number
+      year:
+        type: integer
+    type: object
+  db.MonthlyPayment:
+    properties:
+      cost:
+        type: number
+      id:
+        type: integer
+      month:
+        type: integer
+      notes:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/db.SpendType'
+        type: object
+      year:
+        type: integer
+    type: object
+  db.Spend:
+    properties:
+      cost:
+        type: number
+      day:
+        type: integer
+      id:
+        type: integer
+      month:
+        type: integer
+      notes:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/db.SpendType'
+        type: object
+      year:
+        type: integer
+    type: object
+  db.SpendType:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.AddIncomeReq:
+    properties:
+      income:
+        example: 10000
+        type: number
+      month_id:
+        example: 1
+        type: integer
+      notes:
+        description: optional
+        type: string
+      title:
+        example: Salary
+        type: string
+    required:
+    - income
+    - month_id
+    - title
+    type: object
+  models.AddIncomeResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      id:
+        type: integer
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.AddMonthlyPaymentReq:
+    properties:
+      cost:
+        example: 1500
+        type: number
+      month_id:
+        example: 1
+        type: integer
+      notes:
+        description: optional
+        type: string
+      title:
+        example: Rent
+        type: string
+      type_id:
+        description: optional
+        type: integer
+    required:
+    - cost
+    - month_id
+    - title
+    type: object
+  models.AddMonthlyPaymentResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      id:
+        type: integer
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.AddSpendReq:
+    properties:
+      cost:
+        example: 30
+        type: number
+      day_id:
+        type: integer
+      notes:
+        description: optional
+        type: string
+      title:
+        example: Food
+        type: string
+      type_id:
+        description: optional
+        type: integer
+    required:
+    - cost
+    - day_id
+    - title
+    type: object
+  models.AddSpendResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      id:
+        type: integer
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.AddSpendTypeReq:
+    properties:
+      name:
+        example: Food
+        type: string
+    required:
+    - name
+    type: object
+  models.AddSpendTypeResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      id:
+        type: integer
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.EditIncomeReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+      income:
+        description: optional
+        example: 15000
+        type: number
+      notes:
+        description: optional
+        example: New notes
+        type: string
+      title:
+        description: optional
+        type: string
+    required:
+    - id
+    type: object
+  models.EditMonthlyPaymentReq:
+    properties:
+      cost:
+        description: optional
+        example: 1550
+        type: number
+      id:
+        example: 1
+        type: integer
+      notes:
+        description: optional
+        example: New notes
+        type: string
+      title:
+        description: optional
+        type: string
+      type_id:
+        description: optional
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.EditSpendReq:
+    properties:
+      cost:
+        description: optional
+        example: 30.15
+        type: number
+      id:
+        example: 1
+        type: integer
+      notes:
+        description: optional
+        example: Vegetables
+        type: string
+      title:
+        description: optional
+        type: string
+      type_id:
+        description: optional
+        type: integer
+    required:
+    - id
+    type: object
+  models.EditSpendTypeReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Vegetables
+        type: string
+    required:
+    - id
+    type: object
+  models.GetDayByDateReq:
+    properties:
+      day:
+        example: 12
+        type: integer
+      month:
+        example: 4
+        type: integer
+      year:
+        example: 2020
+        type: integer
+    required:
+    - day
+    - month
+    - year
+    type: object
+  models.GetDayByIDReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.GetDayResp:
+    properties:
+      day:
+        $ref: '#/definitions/db.Day'
+        type: object
+      error:
+        description: Error is specified only when success if false
+        type: string
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.GetMonthByDateReq:
+    properties:
+      month:
+        example: 4
+        type: integer
+      year:
+        example: 2020
+        type: integer
+    required:
+    - month
+    - year
+    type: object
+  models.GetMonthByIDReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.GetMonthResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      month:
+        $ref: '#/definitions/db.Month'
+        type: object
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.GetSpendTypesResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      request_id:
+        type: string
+      spend_types:
+        items:
+          $ref: '#/definitions/db.SpendType'
+        type: array
+      success:
+        type: boolean
+    type: object
+  models.RemoveIncomeReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.RemoveMonthlyPaymentReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.RemoveSpendReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.RemoveSpendTypeReq:
+    properties:
+      id:
+        example: 1
+        type: integer
+    required:
+    - id
+    type: object
+  models.Response:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
+  models.SearchSpendsReq:
+    properties:
+      after:
+        description: After must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
+        format: date
+        type: string
+      before:
+        description: Before must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
+        format: date
+        type: string
+      max_cost:
+        type: number
+      min_cost:
+        type: number
+      notes:
+        description: Notes can be in any case. Search will be performed by lowercased
+          value
+        type: string
+      notes_exactly:
+        description: NotesExactly defines should we search exactly for the given notes
+        type: boolean
+      order:
+        description: 'Order specify sort order. Available options: asc (default),
+          desc'
+        type: string
+      sort:
+        description: 'Sort specify field to sort by. Available options: title, cost,
+          date (default)'
+        type: string
+      title:
+        description: Title can be in any case. Search will be performed by lowercased
+          value
+        type: string
+      title_exactly:
+        description: TitleExactly defines should we search exactly for the given title
+        type: boolean
+      type_ids:
+        description: TypeIDs is a list of Spend Type ids to search for
+        items:
+          type: integer
+        type: array
+      without_type:
+        description: WithoutType is used to search for Spends without Spend Type.
+          TypeIDs are ignored when it is true
+        type: boolean
+    type: object
+  models.SearchSpendsResp:
+    properties:
+      error:
+        description: Error is specified only when success if false
+        type: string
+      request_id:
+        type: string
+      spends:
+        items:
+          $ref: '#/definitions/db.Spend'
+        type: array
+      success:
+        type: boolean
+    type: object
+info:
+  contact: {}
+  description: Easy-to-use, lightweight and self-hosted solution to track your finances
+    - [GitHub](https://github.com/ShoshinNikita/budget-manager)
+  license:
+    name: MIT
+    url: https://github.com/ShoshinNikita/budget-manager/blob/master/LICENSE
+  title: Budget Manager API
+  version: v0.2
+paths:
+  /api/days/date:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Date
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetDayByDateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetDayResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Day doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get Day by date
+      tags:
+      - Days
+  /api/days/id:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Day id
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetDayByIDReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetDayResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Day doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get Day by id
+      tags:
+      - Days
+  /api/incomes:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Income id
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RemoveIncomeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Income doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Remove Income
+      tags:
+      - Incomes
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New Income
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddIncomeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AddIncomeResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Month doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create Income
+      tags:
+      - Incomes
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Updated Income
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EditIncomeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Income doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Edit Income
+      tags:
+      - Incomes
+  /api/monthly-payments:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Monthly Payment id
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RemoveMonthlyPaymentReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Monthly Payment doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Remove Monthly Payment
+      tags:
+      - Monthly Payments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New Monthly Payment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddMonthlyPaymentReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AddMonthlyPaymentResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Month doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create Monthly Payment
+      tags:
+      - Monthly Payments
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Updated Monthly Payment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EditMonthlyPaymentReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Monthly Payment doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Edit Monthly Payment
+      tags:
+      - Monthly Payments
+  /api/months/date:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Date
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetMonthByDateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetMonthResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Month doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get Month by date
+      tags:
+      - Months
+  /api/months/id:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Month ID
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetMonthByIDReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetMonthResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Month doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get Month by id
+      tags:
+      - Months
+  /api/search/spends:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Search args
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.SearchSpendsReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SearchSpendsResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Search Spends
+      tags:
+      - Search
+  /api/spend-types:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Spend Type id
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RemoveSpendTypeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Spend Type doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Remove Spend Type
+      tags:
+      - Spend Types
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GetSpendTypesResp'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get All Spend Types
+      tags:
+      - Spend Types
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New Spend Type
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddSpendTypeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AddSpendTypeResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create Spend Type
+      tags:
+      - Spend Types
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Updated Spend Type
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EditSpendTypeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Spend Type doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Edit Spend Type
+      tags:
+      - Spend Types
+  /api/spends:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Updated Spend
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.RemoveSpendReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Spend doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Remove Spend
+      tags:
+      - Spends
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New Spend
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddSpendReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AddSpendResp'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Day doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create Spend
+      tags:
+      - Spends
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Updated Spend
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/models.EditSpendReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Spend doesn't exist
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Edit Spend
+      tags:
+      - Spends
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
