@@ -13,9 +13,16 @@ import (
 // Common
 // -------------------------------------------------
 
+// Request is a base request model that must be nested into all requests
 type Request struct {
 }
 
+// Check is a default method to implement 'web.RequestChecker' interface
+func (Request) Check() error {
+	return nil
+}
+
+// Response is a base response model that must be nested into all responses
 type Response struct {
 	RequestID string `json:"request_id"`
 	Success   bool   `json:"success"`
