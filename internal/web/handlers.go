@@ -48,8 +48,6 @@ func (s Server) indexHandler(w http.ResponseWriter, r *http.Request) {
 func (s Server) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.GetMonthByIDReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -100,8 +98,6 @@ func (s Server) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.GetMonthByDateReq{}
@@ -162,8 +158,6 @@ func (s Server) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 func (s Server) GetDayByID(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.GetDayByIDReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -214,8 +208,6 @@ func (s Server) GetDayByID(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.GetDayByDateReq{}
@@ -280,8 +272,6 @@ func (s Server) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.AddIncomeReq{}
@@ -349,8 +339,6 @@ func (s Server) AddIncome(w http.ResponseWriter, r *http.Request) {
 func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.EditIncomeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -416,8 +404,6 @@ func (s Server) EditIncome(w http.ResponseWriter, r *http.Request) {
 func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.RemoveIncomeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -469,8 +455,6 @@ func (s Server) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.AddMonthlyPaymentReq{}
@@ -540,8 +524,6 @@ func (s Server) AddMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.EditMonthlyPaymentReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -608,8 +590,6 @@ func (s Server) EditMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.RemoveMonthlyPaymentReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -661,8 +641,6 @@ func (s Server) RemoveMonthlyPayment(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.AddSpendReq{}
@@ -732,8 +710,6 @@ func (s Server) AddSpend(w http.ResponseWriter, r *http.Request) {
 func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.EditSpendReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -799,8 +775,6 @@ func (s Server) EditSpend(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.RemoveSpendReq{}
@@ -886,8 +860,6 @@ func (s Server) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.AddSpendTypeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -940,8 +912,6 @@ func (s Server) AddSpendType(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.EditSpendTypeReq{}
@@ -997,8 +967,6 @@ func (s Server) EditSpendType(w http.ResponseWriter, r *http.Request) {
 func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
 
-	defer r.Body.Close()
-
 	// Decode
 	req := &models.RemoveSpendTypeReq{}
 	if err := jsonNewDecoder(r.Body).Decode(req); err != nil {
@@ -1049,8 +1017,6 @@ func (s Server) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 //
 func (s Server) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(r.Context(), s.log)
-
-	defer r.Body.Close()
 
 	// Decode
 	req := &models.SearchSpendsReq{}
