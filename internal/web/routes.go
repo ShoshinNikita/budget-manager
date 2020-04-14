@@ -48,7 +48,6 @@ func (s Server) addRoutes(router *mux.Router) {
 		// Other
 		{methods: "GET", path: "/api/search/spends", handler: s.SearchSpends},
 	}
-
 	for _, r := range routes {
 		router.Methods(r.methods).Path(r.path).HandlerFunc(r.handler)
 	}
