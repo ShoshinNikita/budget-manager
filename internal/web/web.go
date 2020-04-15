@@ -38,9 +38,9 @@ type Config struct { // nolint:maligned
 	Credentials Credentials `env:"SERVER_CREDENTIALS"`
 }
 
-var _ encoding.TextUnmarshaler = &Credentials{}
-
 type Credentials map[string]string
+
+var _ encoding.TextUnmarshaler = &Credentials{}
 
 func (c *Credentials) UnmarshalText(text []byte) error {
 	m := make(Credentials)
