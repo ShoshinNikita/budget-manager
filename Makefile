@@ -1,49 +1,54 @@
 MODULE_PATH=github.com/ShoshinNikita/budget-manager
 
-run: run-local
+default: run
 
 # Build
 
+# build builds a binary file
 build: export-ldflags
 	go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
-build-docker: TAG?=budget-manager:latest
-build-docker: export-ldflags
-	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
+# docker-build builds a Docker image
+docker-build: TAG?=budget-manager:latest
+docker-build: export-ldflags
+	docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # Run
 
-run-local: stop export-ldflags
+# run runs Budget Manager with 'go run' command and PostgreSQL in container
+run: stop export-ldflags
 	# Run Postgres
 	./scripts/postgres.sh
 	# Run Budget Manager
 	./scripts/run.sh
 
-run-docker: stop export-ldflags
+# docker-run runs both Budget Manager and PostgreSQL in containers
+docker-run: stop export-ldflags
 	docker-compose up \
 		--build \
-		--force-recreate \
-		--renew-anon-volumes \
 		--exit-code-from budget-manager
 
 # Clear
 
-stop: stop-local stop-docker
+stop: docker-stop
 
-stop-local:
-	docker stop budget-manager_postgres || true
+# docker-stop stops containers
+docker-stop:
+	docker-compose stop || true
 
-stop-docker:
-	# Stop and remove containers and volumes
+# docker-stop-force stops containers and removes volumes
+docker-stop-force:
 	docker-compose down -v || true
 
 # Tests
 
 test: test-integ
 
+# test-unit runs only unit tests
 test-unit:
 	go test -mod vendor -count 1 -v ./...
 
+# test-integ runs PostgreSQL in test mode and runs all tests
 test-integ: stop
 	# Run Postgres
 	./scripts/postgres.sh test
@@ -88,10 +93,7 @@ lint:
 	#
 	golangci-lint run --config .golangci.yml
 
-check: lint test
-
-bench:
-	./tools/bench.sh
+check: build lint test
 
 generate-docs:
 	# Swag - https://github.com/swaggo/swag
