@@ -1,5 +1,8 @@
 MODULE_PATH=github.com/ShoshinNikita/budget-manager
 
+# Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
+.PHONY: build check default docker-build docker-run docker-stop docker-stop-force export-ldflags generate-docs generate-mocks lint run stop test test-integ test-unit
+
 default: run
 
 # Build
