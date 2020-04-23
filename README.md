@@ -22,6 +22,7 @@ You can find more screenshots [here](./docs/images/README.md)
 - [Configuration](#configuration)
 - [Development](#development)
   - [Commands](#commands)
+  - [Tools](#tools)
   - [Endpoints](#endpoints)
 
 ## Install
@@ -116,6 +117,22 @@ make test
 #### More
 
 You can find more commands in [Makefile](./Makefile)
+
+### Tools
+
+#### Linter
+
+[golangci-lint](https://github.com/golangci/golangci-lint) can be used to lint the code. Just run `make lint`. Config can be found [here](./.golangci.yml)
+
+The recommended version of `golangci-lint` is [v1.23.8](https://github.com/golangci/golangci-lint/releases/tag/v1.23.8)
+
+#### API documentation
+
+[swag](https://github.com/swaggo/swag) is used to generate API documentation. You can find more information about API endpoints in section [API](#api)
+
+#### Mocks
+
+Mocks are weakly used in tests. [mockery](https://github.com/vektra/mockery) was used to generate them. But it must be replaced with [gomock](https://github.com/golang/mock) due to the poor maintenance
 
 ### Endpoints
 

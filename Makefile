@@ -89,22 +89,17 @@ export-ldflags:
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
 	#
-	# golangci-lint can be installed with:
-	#   curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.23.8
-	#
-	# More installation options: https://github.com/golangci/golangci-lint#binary-release
-	#
 	golangci-lint run --config .golangci.yml
 
 check: build lint test
 
 generate-docs:
-	# Swag - https://github.com/swaggo/swag
+	# swag - https://github.com/swaggo/swag
 	#
 	swag init --generalInfo cmd/budget-manager/main.go --output docs
 	rm ./docs/swagger.json ./docs/docs.go
 
 generate-mocks:
-	# Mockery is required - https://github.com/vektra/mockery
+	# mockery - https://github.com/vektra/mockery
 	#
 	mockery -testonly -name=Database -dir=internal/web -inpkg -case=underscore
