@@ -21,11 +21,9 @@ You can find more screenshots [here](./docs/images/README.md)
 - [Install](#install)
 - [Configuration](#configuration)
 - [Development](#development)
-  - [Run](#run)
-  - [Test](#test)
-- [Endpoints](#endpoints)
-  - [Pages](#pages)
-  - [API](#api)
+  - [Commands](#commands)
+  - [Tools](#tools)
+  - [Endpoints](#endpoints)
 
 ## Install
 
@@ -91,9 +89,17 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 
 ## Development
 
-### Run
+### Commands
 
-You can run a local version with `make run-docker` with Docker. If you don't want to use Docker, you can build and run **Budget Manager** with `make` (or `make run-local`)
+#### Run
+
+```bash
+# Run the app with 'go run' command and PostgreSQL in Docker container
+make
+
+# Or run both the app and PostgreSQL in Docker containers
+make docker-run
+```
 
 After the launch you can use [`tools/api.rest`](tools/api.rest) file to make basic API requests. More info about the `.rest` and `.http` files:
 
@@ -102,35 +108,35 @@ After the launch you can use [`tools/api.rest`](tools/api.rest) file to make bas
 
 Also you can use [`tools/fill_db.go`](tools/fill_db.go) script to fill the DB. This script makes `POST` requests to create Incomes, Monthly Payments, Spends and Spend Types.
 
-```bash
-# Run Budget Manager
-make
-# Or
-make run-docker
-
-# Add test data
-go run tools/fill_db.go
-```
-
-### Test
-
-#### Unit tests
-
-```bash
-make test-unit
-```
-
-#### Integration tests
+#### Test
 
 ```bash
 make test
-# Or
-make test-integ
 ```
 
-## Endpoints
+#### More
 
-### Pages
+You can find more commands in [Makefile](./Makefile)
+
+### Tools
+
+#### Linter
+
+[golangci-lint](https://github.com/golangci/golangci-lint) can be used to lint the code. Just run `make lint`. Config can be found [here](./.golangci.yml)
+
+The recommended version of `golangci-lint` is [v1.23.8](https://github.com/golangci/golangci-lint/releases/tag/v1.23.8)
+
+#### API documentation
+
+[swag](https://github.com/swaggo/swag) is used to generate API documentation. You can find more information about API endpoints in section [API](#api)
+
+#### Mocks
+
+Mocks are weakly used in tests. [mockery](https://github.com/vektra/mockery) was used to generate them. But it must be replaced with [gomock](https://github.com/golang/mock) due to the poor maintenance
+
+### Endpoints
+
+#### Pages
 
 You can find screenshots of pages [here](./docs/images/README.md)
 
@@ -139,6 +145,6 @@ You can find screenshots of pages [here](./docs/images/README.md)
 - `/overview/{year}/{month_number}` - Month Page
 - `/search/spends` - Search for Spends
 
-### API
+#### API
 
 You can find Swagger 2.0 Documentation [here](docs/swagger.yaml). Use [Swagger Editor](https://editor.swagger.io/) to view it
