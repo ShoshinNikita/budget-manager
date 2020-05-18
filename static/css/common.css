@@ -22,19 +22,38 @@
 body {
 	height: 100vh;
 	margin: 0;
-	padding: 30px;
-	padding-bottom: 40px;
+	padding: 0px;
+	width: 100vw;
 }
 
 #app {
-	border: 1px solid var(--border-color);
-	border-radius: 3px;
 	display: flex;
 	flex-direction: column;
-	margin: 0 auto 30px;
-	max-width: 1800px;
-	padding: 10px;
+	height: 100%;
+	max-width: 2000px;
+	padding: 10px 20px 20px;
 	width: 100%;
+}
+
+#header {
+	border-bottom: 1px solid var(--border-accent-color);
+	box-sizing: content-box;
+	font-size: 20px;
+	height: 35px;
+	line-height: 35px;
+	margin-bottom: 10px;
+	padding-bottom: 5px;
+	width: 100%;
+}
+
+@media (max-width: 1350px) {
+	#app {
+		padding: 5px 10px 10px;
+	}
+
+	#header {
+		font-size: 18px;
+	}
 }
 
 /* | Icons */

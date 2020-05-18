@@ -40,24 +40,16 @@
 		/* | App */
 
 		#app {
-			height: 100%;
+			min-width: 900px;
 		}
 
 		/* | Header */
 
 		#header {
-			border-bottom: 1px solid var(--border-accent-color);
-			box-sizing: content-box;
 			display: grid;
 			column-gap: 20px;
-			font-size: 20px;
-			height: 35px;
-			line-height: 35px;
-			margin-bottom: 10px;
-			padding-bottom: 5px;
 			position: relative;
 			row-gap: 5px;
-			width: 100%;
 		}
 
 		#header__stats {
@@ -317,8 +309,8 @@
 
 		/* | Layouts */
 
-		/* For large screens (>= 1350px) */
-		@media (min-width: 1350px) {
+		/* For large screens (> 1350px) */
+		@media (min-width: 1351px) {
 			#header {
 				grid-template-columns: 325px auto;
 			}
@@ -334,20 +326,8 @@
 
 		/* For medium screens (<= 1350px) */
 		@media (max-width: 1350px) {
-			#app {
-				border: none;
-				margin: 0;
-				min-width: 900px;
-			}
-
-			body {
-				padding: 5px;
-			}
-
 			#header {
-				grid-template-columns: 250px auto;
-				font-size: 18px;
-				height: auto;
+				grid-template-columns: max-content auto;
 			}
 
 			#detailed-info {
@@ -356,6 +336,11 @@
 				grid-template-areas:
 					"incomes monthly-payments"
 					"days days";
+			}
+
+			.detailed-info__block__header,
+			.detailed-info__days__day__date {
+				font-size: 18px;
 			}
 		}
 	</style>
