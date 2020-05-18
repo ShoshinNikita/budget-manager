@@ -16,8 +16,8 @@ import (
 
 const (
 	overviewTemplatePath = "./templates/overview.html"
-	yearTemplatePath     = "./templates/year.html"
-	monthTemplatePath    = "./templates/month.html"
+	yearTemplatePath     = "./templates/overview_year.html"
+	monthTemplatePath    = "./templates/overview_year_month.html"
 	//
 	searchSpendsTemplatePath = "./templates/search_spends.html"
 	//
