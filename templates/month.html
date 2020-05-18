@@ -337,6 +337,7 @@
 			#app {
 				border: none;
 				margin: 0;
+				min-width: 900px;
 			}
 
 			body {
@@ -355,72 +356,6 @@
 				grid-template-areas:
 					"incomes monthly-payments"
 					"days days";
-			}
-		}
-
-		/* For small screens (<= 950px) */
-		@media (max-width: 950px) {
-			#app {
-				height: auto;
-			}
-
-			#header {
-				grid-template-columns: 100%;
-				grid-template-rows: repeat(2, minmax(min-content, max-content));
-				font-size: 16px;
-				height: auto;
-				line-height: 18px;
-			}
-
-			#header__stats {
-				grid-template-columns: min-content;
-				grid-template-rows: repeat(3, min-content);
-			}
-
-			.header__stats__stat {
-				grid-template-columns: min-content auto;
-				text-align: right;
-			}
-
-			#detailed-info {
-				grid-template-columns: 100%;
-				grid-template-rows: repeat(2, minmax(auto, 250px)) auto;
-				grid-template-areas:
-					"incomes"
-					"monthly-payments"
-					"days";
-			}
-
-			.detailed-info__block__header {
-				font-size: 18px;
-				padding: 0;
-			}
-
-			.detailed-info__days__calendar__week-day-name {
-				display: none;
-			}
-
-			.detailed-info__days__calendar__week-day-name--short {
-				display: block;
-			}
-
-			.detailed-info__days__calendar__day,
-			.detailed-info__days__calendar__day--disabled {
-				height: auto;
-			}
-
-			.detailed-info__days__calendar__day__info__number {
-				margin: auto;
-			}
-
-			.detailed-info__days__calendar__day__info__month-name,
-			.detailed-info__days__calendar__day__info__spend-number,
-			.detailed-info__days__calendar__day__saldo {
-				display: none;
-			}
-
-			.detailed-info__days__day__date {
-				font-size: 18px;
 			}
 		}
 	</style>
