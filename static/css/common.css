@@ -17,7 +17,16 @@
 	font-weight: normal;
 }
 
-/* | Layout */
+/* | Layout
+
+All pages should stick to this layout:
+
+  body
+    #app
+      #header
+      #content
+
+*/
 
 body {
 	height: 100vh;
@@ -27,11 +36,12 @@ body {
 }
 
 #app {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-template-rows: calc(35px + 5px + 1px) calc(100% - (35px + 5px + 1px));
 	height: 100%;
 	max-width: 2000px;
 	padding: 10px 20px 20px;
+	row-gap: 10px;
 	width: 100%;
 }
 
@@ -41,7 +51,6 @@ body {
 	font-size: 20px;
 	height: 35px;
 	line-height: 35px;
-	margin-bottom: 10px;
 	padding-bottom: 5px;
 	width: 100%;
 }

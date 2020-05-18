@@ -131,23 +131,55 @@
 			</div>
 		</div>
 
-		<div id="months-list">
-			{{range .Months}}
+		<div id="content">
+			<div id="months-list">
+				{{range .Months}}
 
-			{{if ne .ID 0}}
-			<!-- Show month overview -->
+				{{if ne .ID 0}}
+				<!-- Show month overview -->
 
-			<!-- Use the number of a month instead of the name -->
-			<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
-				<div class="month" title="Go to the month">
+				<!-- Use the number of a month instead of the name -->
+				<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
+					<div class="month" title="Go to the month">
+						<div class="month__header">{{.Month}} {{.Year}}</div>
+						<div class="month__results">
+							<div>Income:</div>
+							<div class="month__results__value money--gain">{{.TotalIncome}}</div>
+							<div>Spend:</div>
+							<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+							<div>Result:</div>
+							<div class="month__results__value">
+								{{if ge .Result 0}}
+								<span class="money--gain">{{.Result}}</span>
+								{{else}}
+								<span class="money--lose">{{.Result}}</span>
+								{{end}}
+							</div>
+						</div>
+					</div>
+				</a>
+				{{else}}
+				<!-- Just show a stub -->
+				<div class="month--not-exist" title="No data for the month">
 					<div class="month__header">{{.Month}} {{.Year}}</div>
-					<div class="month__results">
-						<div>Income:</div>
-						<div class="month__results__value money--gain">{{.TotalIncome}}</div>
-						<div>Spend:</div>
-						<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+				</div>
+				{{end}}
+				{{end}}
+			</div>
+
+			<div id="year-overview">
+				<div id="year-overview__results">
+					<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
+
+					<div class="year-overview__results__result">
+						<div>Annual Income:</div>
+						<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
+
+						<div>Annual Spend:</div>
+						<div class="year-overview__results__result__value money--lose">{{.AnnualSpend}}</div>
+
 						<div>Result:</div>
-						<div class="month__results__value">
+						<div class="year-overview__results__result__value">
 							{{if ge .Result 0}}
 							<span class="money--gain">{{.Result}}</span>
 							{{else}}
@@ -156,44 +188,14 @@
 						</div>
 					</div>
 				</div>
-			</a>
-			{{else}}
-			<!-- Just show a stub -->
-			<div class="month--not-exist" title="No data for the month">
-				<div class="month__header">{{.Month}} {{.Year}}</div>
-			</div>
-			{{end}}
-			{{end}}
-		</div>
 
-		<div id="year-overview">
-			<div id="year-overview__results">
-				<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
-
-				<div class="year-overview__results__result">
-					<div>Annual Income:</div>
-					<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
-
-					<div>Annual Spend:</div>
-					<div class="year-overview__results__result__value money--lose">{{.AnnualSpend}}</div>
-
-					<div>Result:</div>
-					<div class="year-overview__results__result__value">
-						{{if ge .Result 0}}
-						<span class="money--gain">{{.Result}}</span>
-						{{else}}
-						<span class="money--lose">{{.Result}}</span>
-						{{end}}
-					</div>
+				<!--
+					There's a bug when width is 100%. Div isn't decreasing width if we resize screen.
+					So, use 99% for width.
+				-->
+				<div style="position: relative; width: 99%;">
+					<canvas id="year-overview__chart"></canvas>
 				</div>
-			</div>
-
-			<!--
-				There's a bug when width is 100%. Div isn't decreasing width if we resize screen.
-				So, use 99% for width.
-			-->
-			<div style="position: relative; width: 99%;">
-				<canvas id="year-overview__chart"></canvas>
 			</div>
 		</div>
 	</div>
