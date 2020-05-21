@@ -25,6 +25,7 @@ All pages should stick to this layout:
     #app
       #header
       #content
+      #footer
 
 */
 
@@ -37,10 +38,10 @@ body {
 
 #app {
 	display: grid;
-	grid-template-rows: calc(35px + 5px + 1px) calc(100% - (35px + 5px + 1px));
+	grid-template-rows: 40px calc(100% - 70px - 20px) 30px;
 	height: 100%;
 	max-width: 2000px;
-	padding: 10px 20px 20px;
+	padding: 10px 20px;
 	row-gap: 10px;
 	width: 100%;
 }
@@ -57,11 +58,16 @@ body {
 
 @media (max-width: 1350px) {
 	#app {
+		grid-template-rows: 40px calc(100% - 40px - 10px);
 		padding: 5px 10px 10px;
 	}
 
 	#header {
 		font-size: 18px;
+	}
+
+	#footer {
+		display: none;
 	}
 }
 

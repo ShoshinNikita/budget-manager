@@ -24,7 +24,7 @@
 		/* | Layout */
 
 		#app {
-			grid-template-rows: 100%;
+			grid-template-rows: calc(100% - 30px - 10px) 30px;
 		}
 
 		#header {
@@ -233,8 +233,11 @@
 
 		/* | Layouts */
 
-		/* For medium screens (<= 1300px) */
-		@media (max-width: 1300px) {
+		/* For medium screens (<= 1350px) */
+		@media (max-width: 1350px) {
+			#app {
+				grid-template-rows: 100%;
+			}
 
 			#search__options__cost,
 			#search__options__time {
@@ -448,6 +451,8 @@
 				</div>
 			</div>
 		</div>
+
+		{{template "templates/footer.html" .Footer}}
 	</div>
 
 	<script>
