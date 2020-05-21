@@ -2,7 +2,6 @@ package urlstruct
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"reflect"
 
@@ -11,7 +10,11 @@ import (
 )
 
 type Unmarshaler interface {
-	UnmarshalValues(context.Context, url.Values) error
+	UnmarshalValues(ctx context.Context, values url.Values) error
+}
+
+type ParamUnmarshaler interface {
+	UnmarshalParam(ctx context.Context, name string, values []string) error
 }
 
 //------------------------------------------------------------------------------
@@ -22,14 +25,15 @@ type StructInfo struct {
 	structs   map[string][]int
 
 	isUnmarshaler      bool
-	unknownFieldsIndex []int
+	isParamUnmarshaler bool
 	unmarshalerIndexes [][]int
 }
 
 func newStructInfo(typ reflect.Type) *StructInfo {
 	sinfo := &StructInfo{
-		Fields:        make([]*Field, 0, typ.NumField()),
-		isUnmarshaler: isUnmarshaler(reflect.PtrTo(typ)),
+		Fields:             make([]*Field, 0, typ.NumField()),
+		isUnmarshaler:      isUnmarshaler(reflect.PtrTo(typ)),
+		isParamUnmarshaler: isParamUnmarshaler(reflect.PtrTo(typ)),
 	}
 	addFields(sinfo, typ, nil)
 	return sinfo
@@ -96,16 +100,6 @@ func addField(sinfo *StructInfo, sf reflect.StructField, baseIndex []int) {
 		return
 	}
 
-	if _, ok := tag.Options["unknown"]; ok {
-		if sf.Type != mapType {
-			err := fmt.Errorf("urlstruct: got %s for unknown fields, wanted %s",
-				sf.Type, mapType)
-			panic(err)
-		}
-		sinfo.unknownFieldsIndex = joinIndex(baseIndex, sf.Index)
-		return
-	}
-
 	name := tag.Name
 	if name == "" {
 		name = sf.Name
@@ -168,24 +162,23 @@ func isUnmarshaler(typ reflect.Type) bool {
 	return false
 }
 
-//------------------------------------------------------------------------------
+var (
+	stringType      = reflect.TypeOf("")
+	stringSliceType = reflect.TypeOf((*[]string)(nil)).Elem()
+)
 
-var mapType = reflect.TypeOf((*map[string][]string)(nil)).Elem()
-
-type fieldMap struct {
-	m map[string][]string
-}
-
-func newFieldMap(v reflect.Value) *fieldMap {
-	if v.IsNil() {
-		v.Set(reflect.MakeMap(mapType))
+func isParamUnmarshaler(typ reflect.Type) bool {
+	for i := 0; i < typ.NumMethod(); i++ {
+		meth := typ.Method(i)
+		if meth.Name == "UnmarshalParam" &&
+			meth.Type.NumIn() == 4 &&
+			meth.Type.NumOut() == 1 &&
+			meth.Type.In(1) == contextType &&
+			meth.Type.In(2) == stringType &&
+			meth.Type.In(3) == stringSliceType &&
+			meth.Type.Out(0) == errorType {
+			return true
+		}
 	}
-	return &fieldMap{
-		m: v.Interface().(map[string][]string),
-	}
-}
-
-func (fm fieldMap) Decode(name string, values []string) error {
-	fm.m[name] = values
-	return nil
+	return false
 }

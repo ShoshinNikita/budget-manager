@@ -59,6 +59,12 @@ func (p *Pool) Get() *Buffer {
 	return buf
 }
 
+// New returns an empty buffer bypassing the pool. Returned buffer capacity
+// is determined by accumulated usage stats and changes over time.
+func (p *Pool) New() *Buffer {
+	return NewBuffer(make([]byte, 0, p.getServeSize()))
+}
+
 // Put returns buffer to the pool.
 func (p *Pool) Put(buf *Buffer) {
 	length := buf.Len()

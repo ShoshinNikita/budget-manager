@@ -79,6 +79,10 @@ func (db *baseDB) getConn(c context.Context) (*pool.Conn, error) {
 	err = db.initConn(c, cn)
 	if err != nil {
 		db.pool.Remove(cn, err)
+		// It is safe to reset SingleConnPool if conn can't be initialized.
+		if p, ok := db.pool.(*pool.SingleConnPool); ok {
+			_ = p.Reset()
+		}
 		if err := internal.Unwrap(err); err != nil {
 			return nil, err
 		}
@@ -193,7 +197,7 @@ func (db *baseDB) Close() error {
 // Exec executes a query ignoring returned rows. The params are for any
 // placeholders in the query.
 func (db *baseDB) Exec(query interface{}, params ...interface{}) (res Result, err error) {
-	return db.exec(context.Background(), query, params...)
+	return db.exec(db.db.Context(), query, params...)
 }
 
 func (db *baseDB) ExecContext(c context.Context, query interface{}, params ...interface{}) (Result, error) {
@@ -235,7 +239,7 @@ func (db *baseDB) exec(c context.Context, query interface{}, params ...interface
 // returns ErrNoRows error when query returns zero rows or
 // ErrMultiRows when query returns multiple rows.
 func (db *baseDB) ExecOne(query interface{}, params ...interface{}) (Result, error) {
-	return db.execOne(context.Background(), query, params...)
+	return db.execOne(db.db.Context(), query, params...)
 }
 
 func (db *baseDB) ExecOneContext(c context.Context, query interface{}, params ...interface{}) (Result, error) {
@@ -257,7 +261,7 @@ func (db *baseDB) execOne(c context.Context, query interface{}, params ...interf
 // Query executes a query that returns rows, typically a SELECT.
 // The params are for any placeholders in the query.
 func (db *baseDB) Query(model, query interface{}, params ...interface{}) (res Result, err error) {
-	return db.query(context.Background(), model, query, params...)
+	return db.query(db.db.Context(), model, query, params...)
 }
 
 func (db *baseDB) QueryContext(c context.Context, model, query interface{}, params ...interface{}) (Result, error) {
@@ -299,7 +303,7 @@ func (db *baseDB) query(c context.Context, model, query interface{}, params ...i
 // returns ErrNoRows error when query returns zero rows or
 // ErrMultiRows when query returns multiple rows.
 func (db *baseDB) QueryOne(model, query interface{}, params ...interface{}) (Result, error) {
-	return db.queryOne(context.Background(), model, query, params...)
+	return db.queryOne(db.db.Context(), model, query, params...)
 }
 
 func (db *baseDB) QueryOneContext(c context.Context, model, query interface{}, params ...interface{}) (Result, error) {
@@ -320,7 +324,7 @@ func (db *baseDB) queryOne(c context.Context, model, query interface{}, params .
 
 // CopyFrom copies data from reader to a table.
 func (db *baseDB) CopyFrom(r io.Reader, query interface{}, params ...interface{}) (res Result, err error) {
-	c := context.TODO()
+	c := db.db.Context()
 	err = db.withConn(c, func(c context.Context, cn *pool.Conn) error {
 		res, err = db.copyFrom(c, cn, r, query, params...)
 		return err
@@ -378,7 +382,7 @@ func (db *baseDB) copyFrom(
 
 // CopyTo copies data from a table to writer.
 func (db *baseDB) CopyTo(w io.Writer, query interface{}, params ...interface{}) (res Result, err error) {
-	c := context.TODO()
+	c := db.db.Context()
 	err = db.withConn(c, func(c context.Context, cn *pool.Conn) error {
 		res, err = db.copyTo(c, cn, w, query, params...)
 		return err

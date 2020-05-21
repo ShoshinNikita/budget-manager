@@ -16,8 +16,7 @@ func DescribeStruct(typ reflect.Type) *StructInfo {
 
 // Unmarshal unmarshals url values into the struct.
 func Unmarshal(ctx context.Context, values url.Values, strct interface{}) error {
-	v := reflect.Indirect(reflect.ValueOf(strct))
-	d := newStructDecoder(v)
+	d := newStructDecoder(reflect.ValueOf(strct))
 	return d.Decode(ctx, values)
 }
 

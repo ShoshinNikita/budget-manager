@@ -1,6 +1,7 @@
 package bufpool
 
 import (
+	"log"
 	"sync"
 )
 
@@ -26,9 +27,6 @@ type bufPool struct {
 }
 
 func (p *bufPool) Get(length int) *Buffer {
-	if length == 0 {
-		return nil
-	}
 	if length > maxPoolSize {
 		return NewBuffer(make([]byte, length))
 	}
@@ -36,7 +34,11 @@ func (p *bufPool) Get(length int) *Buffer {
 	idx := index(length)
 	if bufIface := p.pools[idx].Get(); bufIface != nil {
 		buf := bufIface.(*Buffer)
-		buf.reset(length)
+		unlock(buf)
+		if length > buf.Cap() {
+			log.Println(idx, buf.Len(), buf.Cap(), buf.String())
+		}
+		buf.buf = buf.buf[:length]
 		return buf
 	}
 
@@ -51,5 +53,15 @@ func (p *bufPool) Put(buf *Buffer) {
 	}
 
 	idx := prevIndex(length)
+	lock(buf)
 	p.pools[idx].Put(buf)
+}
+
+func lock(buf *Buffer) {
+	buf.buf = buf.buf[:cap(buf.buf)]
+	buf.off = cap(buf.buf) + 1
+}
+
+func unlock(buf *Buffer) {
+	buf.off = 0
 }

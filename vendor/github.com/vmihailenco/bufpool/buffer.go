@@ -87,15 +87,6 @@ func (b *Buffer) Truncate(n int) {
 	b.buf = b.buf[:b.off+n]
 }
 
-// Reset resets the buffer to be empty,
-// but it retains the underlying storage for use by future writes.
-// Reset is the same as Truncate(0).
-func (b *Buffer) Reset() {
-	b.buf = b.buf[:0]
-	b.off = 0
-	b.lastRead = opInvalid
-}
-
 // tryGrowByReslice is a inlineable version of grow for the fast-case where the
 // internal buffer only needs to be resliced.
 // It returns the index where bytes should be written and whether it succeeded.
@@ -105,44 +96,6 @@ func (b *Buffer) tryGrowByReslice(n int) (int, bool) {
 		return l, true
 	}
 	return 0, false
-}
-
-// grow grows the buffer to guarantee space for n more bytes.
-// It returns the index where bytes should be written.
-// If the buffer can't grow it will panic with ErrTooLarge.
-func (b *Buffer) grow(n int) int {
-	m := b.Len()
-	// If buffer is empty, reset to recover space.
-	if m == 0 && b.off != 0 {
-		b.Reset()
-	}
-	// Try to grow by means of a reslice.
-	if i, ok := b.tryGrowByReslice(n); ok {
-		return i
-	}
-	if b.buf == nil && n <= smallBufferSize {
-		b.buf = make([]byte, n, smallBufferSize)
-		return 0
-	}
-	c := cap(b.buf)
-	if n <= c/2-m {
-		// We can slide things down instead of allocating a new
-		// slice. We only need m+n <= c to slide, but
-		// we instead let capacity get twice as large so we
-		// don't spend all our time copying.
-		copy(b.buf, b.buf[b.off:])
-	} else if c > maxInt-c-n {
-		panic(bytes.ErrTooLarge)
-	} else {
-		// Not enough space anywhere, we need to allocate.
-		buf := makeSlice(2*c + n)
-		copy(buf, b.buf[b.off:])
-		b.buf = buf
-	}
-	// Restore b.off and len(b.buf).
-	b.off = 0
-	b.buf = b.buf[:m+n]
-	return m
 }
 
 // Grow grows the buffer's capacity, if necessary, to guarantee space for
@@ -211,18 +164,6 @@ func (b *Buffer) ReadFrom(r io.Reader) (n int64, err error) {
 			return n, e
 		}
 	}
-}
-
-// makeSlice allocates a slice of size n. If the allocation fails, it panics
-// with ErrTooLarge.
-func makeSlice(n int) []byte {
-	// If the make fails, give a known error.
-	defer func() {
-		if recover() != nil {
-			panic(bytes.ErrTooLarge)
-		}
-	}()
-	return make([]byte, n)
 }
 
 // WriteTo writes data to w until the buffer is drained or an error occurs.
