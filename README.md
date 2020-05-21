@@ -1,4 +1,4 @@
-# Budget Manager
+# Budget Manager [![Last version](https://img.shields.io/github/v/tag/ShoshinNikita/budget-manager?label=version&style=flat-square)](https://github.com/ShoshinNikita/budget-manager/releases/latest) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ShoshinNikita/budget-manager/Check%20code?style=flat-square&logo=github)](https://github.com/ShoshinNikita/budget-manager/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/ShoshinNikita/budget-manager?style=flat-square)](https://goreportcard.com/report/github.com/ShoshinNikita/budget-manager)
 
 **Budger Manager** is an easy-to-use, lightweight and self-hosted solution to track your finances
 
