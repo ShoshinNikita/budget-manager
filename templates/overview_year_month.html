@@ -156,19 +156,13 @@
 			margin-bottom: 30px;
 		}
 
-		.detailed-info__days__calendar__week-day-name,
-		.detailed-info__days__calendar__week-day-name--short {
+		.detailed-info__days__calendar__week-day-name {
 			border-bottom: 1px solid var(--border-color);
 			font-size: 14px;
 			margin: auto;
 			padding: 0 10px;
 			text-align: center;
 			width: min-content;
-		}
-
-		.detailed-info__days__calendar__week-day-name--short {
-			display: none;
-			padding: 0 5px;
 		}
 
 		.detailed-info__days__calendar__day,
@@ -189,15 +183,6 @@
 
 		.detailed-info__days__calendar__day__info {
 			display: flex;
-		}
-
-		.detailed-info__days__calendar__day__info__number::after {
-			content: " ";
-			display: inline;
-			/*
-				Without 'white-space: pre' the space isn't displayed: https://stackoverflow.com/a/40963855
-			*/
-			white-space: pre;
 		}
 
 		.detailed-info__days__calendar__day__info__spend-number {
@@ -338,7 +323,7 @@
 
 			#detailed-info {
 				grid-template-columns: 1fr 1fr;
-				grid-template-rows: 1fr 2fr;
+				grid-template-rows: 2fr 5fr;
 				grid-template-areas:
 					"incomes monthly-payments"
 					"days days";
@@ -347,6 +332,14 @@
 			.detailed-info__block__header,
 			.detailed-info__days__day__date {
 				font-size: 18px;
+			}
+
+			.detailed-info__days__calendar__day__info {
+				justify-content: center;
+			}
+
+			.detailed-info__days__calendar__day__saldo {
+				display: none;
 			}
 		}
 	</style>
@@ -560,8 +553,9 @@
 							onclick="selectDay('{{ .Day }}');">
 
 							<div class="detailed-info__days__calendar__day__info">
-								<div class="detailed-info__days__calendar__day__info__number">{{ .Day }}</div>
-								<div class="detailed-info__days__calendar__day__info__month-name">{{ call $.ToShortMonth $.Month.Month }}</div>
+								<div class="detailed-info__days__calendar__day__info__date">
+									<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
+								</div>
 								<div class="detailed-info__days__calendar__day__info__spend-number" title="Spends">
 									{{ len .Spends }}
 								</div>
@@ -854,18 +848,14 @@
 				const info = document.createElement("div");
 				info.classList.add("detailed-info__days__calendar__day__info");
 
-				const numberElem = document.createElement("div");
-				numberElem.classList.add("detailed-info__days__calendar__day__info__number");
-				numberElem.textContent = dayNumber;
-				info.append(numberElem);
-
-				const monthNameElem = document.createElement("div");
-				monthNameElem.classList.add("detailed-info__days__calendar__day__info__month-name");
 				if (monthName.length > 4) {
 					monthName = monthName.slice(0, 3);
 				}
-				monthNameElem.textContent = monthName;
-				info.append(monthNameElem);
+				const date = `${dayNumber} ${monthName}`;
+				const dateElem = document.createElement("div");
+				dateElem.classList.add("detailed-info__days__calendar__day__info__date");
+				dateElem.textContent = date;
+				info.append(dateElem);
 
 				div.append(info);
 
@@ -907,11 +897,6 @@
 				let div = document.createElement("div");
 				div.classList.add("detailed-info__days__calendar__week-day-name", "noselect")
 				div.textContent = weekDayNames[i];
-				calendar.prepend(div);
-
-				div = document.createElement("div");
-				div.classList.add("detailed-info__days__calendar__week-day-name--short", "noselect")
-				div.textContent = weekDayNamesShort[i];
 				calendar.prepend(div);
 			}
 		})
