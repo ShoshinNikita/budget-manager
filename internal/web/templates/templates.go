@@ -4,127 +4,79 @@ package templates
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	htmlTemplate "html/template"
 	"io"
 	"io/ioutil"
-	"sync"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
-// TemplateStore is used for serving *template.Template. It provides in-memory template caching
-type TemplateStore struct {
-	log logrus.FieldLogger
-
-	templates map[string]*template
-	mux       *sync.Mutex
-
-	getFunc func(path string, log logrus.FieldLogger) *template
+type TemplateExecutor interface {
+	// Get returns template with passed path. It should panic if template doesn't exist
+	Get(ctx context.Context, t Template) *htmlTemplate.Template
+	// Execute executes template. It should panic if template doesn't exist
+	Execute(ctx context.Context, t Template, w io.Writer, data interface{}) error
 }
 
-// template is an internal wrapper for *template.Template
-type template struct {
-	Name string
-	tpl  *htmlTemplate.Template
+type Template struct {
+	Path string
+	Deps []string
 }
 
-// NewTemplateStore inits new Template Store
-func NewTemplateStore(log logrus.FieldLogger, cacheTemplates bool) *TemplateStore {
-	store := &TemplateStore{
-		templates: make(map[string]*template),
-		mux:       new(sync.Mutex),
-		log:       log,
+// ----------------------------------------------------
+// Helpers
+// ----------------------------------------------------
+
+// loadTemplateWithDeps load base template and associates all deps with it
+func loadTemplateWithDeps(template Template) (*htmlTemplate.Template, error) {
+	// Read base template
+	baseTpl, err := loadTemplateFromDisk(template.Path)
+	if err != nil {
+		return nil, err
 	}
 
-	store.getFunc = store.getFromCache
-	if !cacheTemplates {
-		store.getFunc = store.getFromDisk
+	// Load deps
+	for _, dep := range template.Deps {
+		depTpl, err := loadTemplateFromDisk(dep)
+		if err != nil {
+			return nil, err
+		}
+		if _, err = baseTpl.AddParseTree(dep, depTpl.Tree.Copy()); err != nil {
+			return nil, errors.Wrap(err, "couldn't add parsed tree")
+		}
 	}
 
-	return store
+	return baseTpl, nil
 }
 
-// Get returns template with passed path. It panics, if template doesn't exist
-func (t *TemplateStore) Get(ctx context.Context, path string) *htmlTemplate.Template {
-	log := request_id.FromContextToLogger(ctx, t.log)
-	log = log.WithField("path", path)
+// loadTemplateFromDisk reads file and parses template
+func loadTemplateFromDisk(path string) (*htmlTemplate.Template, error) {
+	tpl := htmlTemplate.New(path)
 
-	return t.getFunc(path, log).tpl
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "couldn't read file")
+	}
+	if _, err := tpl.Parse(string(data)); err != nil {
+		return nil, errors.Wrap(err, "couldn't parse template")
+	}
+
+	return tpl, nil
 }
 
-// Execute executes template with passed path. It panics, if template doesn't exist
-// Execute checks for errors before writing into w: it executes template into
-// temporary buffer and copies data if everything is fine
-func (t *TemplateStore) Execute(ctx context.Context, path string,
-	w io.Writer, data interface{}) error {
-
-	log := request_id.FromContextToLogger(ctx, t.log)
-	log = log.WithField("path", path)
-
-	tpl := t.getFunc(path, log)
+// executeTemplate executes passed template. It checks for errors before writing into w: it executes
+// template into temporary buffer and copies data if everything is fine
+func executeTemplate(log logrus.FieldLogger, tpl *htmlTemplate.Template, w io.Writer, data interface{}) error {
 	buff := bytes.NewBuffer(nil)
 
 	now := time.Now()
-	err := tpl.tpl.ExecuteTemplate(buff, tpl.Name, data)
-	log = log.WithField("time", time.Since(now))
-	if err != nil {
-		log.WithError(err).Error("couldn't execute template")
+	if err := tpl.Execute(buff, data); err != nil {
 		return err
 	}
+	log.WithField("time", time.Since(now)).Debug("template was successfully executed")
 
-	log.Debug("execute template successfully")
-	_, err = io.Copy(w, buff)
+	_, err := io.Copy(w, buff)
 	return err
-}
-
-// -------------------------------------------------
-// Internal methods
-// -------------------------------------------------
-
-// getFromCache tries to use cache for template. If template wasn't loaded, it calls 'getFromDisk' method
-func (t *TemplateStore) getFromCache(path string, log logrus.FieldLogger) *template {
-	t.mux.Lock()
-	defer t.mux.Unlock()
-
-	if tpl, ok := t.templates[path]; ok {
-		// Can use cache
-		log.Debug("get template from cache")
-		return tpl
-	}
-
-	// Have to load from disk
-	tpl := t.getFromDisk(path, log)
-	t.templates[path] = tpl
-	return tpl
-}
-
-// getFromDisk loads template from disk
-func (t *TemplateStore) getFromDisk(path string, log logrus.FieldLogger) *template {
-	log.Debug("load template from disk")
-
-	// Don't use 'template.ParseFiles' method to support files with the same name
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.WithError(err).Panic("couldn't read file")
-	}
-
-	name := generateTemplateName()
-	// Load from disk
-	return &template{
-		Name: name,
-		tpl:  htmlTemplate.Must(htmlTemplate.New(name).Parse(string(data))),
-	}
-}
-
-const nameLength = 8
-
-func generateTemplateName() string {
-	b := make([]byte, nameLength/2)
-	rand.Read(b) //nolint:errcheck
-	return hex.EncodeToString(b)
 }

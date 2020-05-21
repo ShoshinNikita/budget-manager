@@ -12,22 +12,24 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
-)
-
-const (
-	overviewTemplatePath = "./templates/overview.html"
-	yearTemplatePath     = "./templates/overview_year.html"
-	monthTemplatePath    = "./templates/overview_year_month.html"
-	//
-	searchSpendsTemplatePath = "./templates/search_spends.html"
-	//
-	errorPageTemplatePath = "./templates/error_page.html"
+	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
 const (
 	executeErrorMessage     = "Can't execute template"
 	invalidURLMessagePrefix = "Invalid URL: "
 	dbErrorMessagePrefix    = "DB error: "
+)
+
+// nolint:gochecknoglobals
+var (
+	overviewTemplatePath = templates.Template{Path: "./templates/overview.html"}
+	yearTemplatePath     = templates.Template{Path: "./templates/overview_year.html"}
+	monthTemplatePath    = templates.Template{Path: "./templates/overview_year_month.html"}
+	//
+	searchSpendsTemplatePath = templates.Template{Path: "./templates/search_spends.html"}
+	//
+	errorPageTemplatePath = templates.Template{Path: "./templates/error_page.html"}
 )
 
 // GET /overview
