@@ -1,0 +1,16 @@
+name: prune artifacts
+
+on:
+  schedule:
+    # Run every day at 00:00
+    - cron: "0 0 * * *"
+
+jobs:
+  prune_artifacts:
+    name: Prune artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - uses: c-hive/gha-remove-artifacts@v1.2.0
+      with:
+        age: 1 day
