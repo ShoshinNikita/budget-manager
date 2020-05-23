@@ -288,7 +288,7 @@ func (db *DB) addMonth(year int, month time.Month) error {
 		// The month is already created
 		return nil
 	}
-	if err != pg.ErrNoRows {
+	if !errors.Is(err, pg.ErrNoRows) {
 		// Unexpected error
 		db.log.WithError(err).Error("unexpected error: couldn't select the current month")
 		return err

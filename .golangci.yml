@@ -8,10 +8,12 @@ linters:
   enable-all: true
   disable:
     - dupl
+    - godot
     - godox
+    - gomnd
+    - testpackage
     - whitespace
     - wsl
-    - gomnd
 
 linters-settings:
   funlen:
@@ -25,6 +27,11 @@ issues:
     - "use underscores in Go names; (?:func|type) (?:T|t)est"
     # Ignore long functions in tests
     - "Function '(?:T|t)est.*' is too long"
+
+  exclude-rules:
+    - linters:
+        - goerr113
+      text: "do not define dynamic errors"
 
   # Display all issues
   max-issues-per-linter: 0
