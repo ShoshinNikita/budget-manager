@@ -92,7 +92,7 @@ lint:
 	docker run --rm -it --network=none \
 		-v $(shell pwd):/app \
 		-w /app \
-		golangci/golangci-lint:v1.23.8-alpine golangci-lint run --config .golangci.yml
+		golangci/golangci-lint:v1.27.0-alpine golangci-lint run --config .golangci.yml
 
 check: build lint test
 
