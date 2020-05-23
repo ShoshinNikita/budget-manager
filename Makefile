@@ -89,7 +89,10 @@ export-ldflags:
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
 	#
-	golangci-lint run --config .golangci.yml
+	docker run --rm -it --network=none \
+		-v $(shell pwd):/app \
+		-w /app \
+		golangci/golangci-lint:v1.23.8-alpine golangci-lint run --config .golangci.yml
 
 check: build lint test
 
