@@ -1,4 +1,4 @@
-# Budget Manager [![Last version](https://img.shields.io/github/v/tag/ShoshinNikita/budget-manager?label=version&style=flat-square)](https://github.com/ShoshinNikita/budget-manager/releases/latest) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ShoshinNikita/budget-manager/Check%20code?style=flat-square&logo=github)](https://github.com/ShoshinNikita/budget-manager/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/ShoshinNikita/budget-manager?style=flat-square)](https://goreportcard.com/report/github.com/ShoshinNikita/budget-manager)
+# Budget Manager [![Last version](https://img.shields.io/github/v/tag/ShoshinNikita/budget-manager?label=version&style=flat-square)](https://github.com/ShoshinNikita/budget-manager/releases/latest) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ShoshinNikita/budget-manager/check%20code?label=check%20code&logo=github&style=flat-square)](https://github.com/ShoshinNikita/budget-manager/actions) [![Go Report Card](https://goreportcard.com/badge/github.com/ShoshinNikita/budget-manager?style=flat-square)](https://goreportcard.com/report/github.com/ShoshinNikita/budget-manager)
 
 **Budger Manager** is an easy-to-use, lightweight and self-hosted solution to track your finances
 
@@ -124,7 +124,7 @@ You can find more commands in [Makefile](./Makefile)
 
 [golangci-lint](https://github.com/golangci/golangci-lint) can be used to lint the code. Just run `make lint`. Config can be found [here](./.golangci.yml)
 
-The recommended version of `golangci-lint` is [v1.23.8](https://github.com/golangci/golangci-lint/releases/tag/v1.23.8)
+The recommended version of `golangci-lint` is [v1.27.0](https://github.com/golangci/golangci-lint/releases/tag/v1.27.0)
 
 #### API documentation
 
