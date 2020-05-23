@@ -15,7 +15,7 @@ import (
 // {year}/{month}/{day} {hour}:{minute}:{second}
 const timeLayout = "2006/01/02 15:04:05"
 
-type Config struct { // nolint:maligned
+type Config struct {
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
 	// Mode is a mode of Logger. Valid options: prod, production, dev, develop.

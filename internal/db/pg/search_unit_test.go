@@ -15,7 +15,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-// nolint:lll
 func TestBuildSearchSpendsQuery(t *testing.T) {
 	t.Parallel()
 

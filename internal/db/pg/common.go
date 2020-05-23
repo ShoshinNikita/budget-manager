@@ -203,7 +203,6 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 // Internal methods
 // -----------------------------------------------------------------------------
 
-// nolint:funlen
 func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
