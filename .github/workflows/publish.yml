@@ -32,10 +32,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     env:
-      TAG: docker.pkg.github.com/shoshinnikita/budget-manager/budget-manager:master
+      TAG: docker.pkg.github.com/${{ github.repository }}/budget-manager:master
     steps:
+      - name: Convert tag to lower case
+        run: echo "::set-env name=TAG::${TAG,,}"
+
       - name: Login to Package Registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u shoshinnikita --password-stdin docker.pkg.github.com
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.repository_owner }} --password-stdin docker.pkg.github.com
 
       - name: Download docker image as an artifact
         uses: actions/download-artifact@v2
