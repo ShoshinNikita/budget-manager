@@ -14,6 +14,12 @@
 
 		/* | App */
 
+		#content {
+			display: grid;
+			grid-template-rows: min-content auto;
+			row-gap: 50px;
+		}
+
 		/* || Months */
 
 		#months-list {
@@ -68,8 +74,8 @@
 			column-gap: 20px;
 			display: grid;
 			grid-template-columns: 3fr 7fr;
-			height: 400px;
-			margin-top: 50px;
+			height: 100%;
+			max-height: 400px;
 		}
 
 		#year-overview__results__header {
@@ -91,30 +97,39 @@
 			text-align: right;
 		}
 
+		#year-overview__chart__wrapper {
+			position: relative;
+			/*
+				There's a bug when width and height are 100%. Div isn't decreasing width and height if we resize screen.
+				So, use 99% instead.
+			*/
+			height: 99%;
+			width: 99%;
+		}
+
 		/* | Layouts */
 
-		/* For medium screens (1000px <= width < 1400px) */
-		@media (max-width: 1399px) {
+		@media (max-width: 1350px) {
+			#months-list {
+				grid-template-columns: repeat(4, 1fr);
+			}
+
+			#year-overview__results__header {
+				font-size: 18px;
+			}
+
+			.year-overview__results__result {
+				font-size: 16px;
+			}
+		}
+
+		@media (max-width: 1100px) {
+			#content {
+				row-gap: 30px;
+			}
+
 			#months-list {
 				grid-template-columns: repeat(3, 1fr);
-			}
-		}
-
-		/* For small screens (450px <= width < 1000px) */
-		@media (max-width: 999px) {
-			#months-list {
-				grid-template-columns: repeat(2, 1fr);
-			}
-
-			#year-overview {
-				display: none;
-			}
-		}
-
-		/* For smartphones (< 450px) */
-		@media (max-width: 449px) {
-			#months-list {
-				grid-template-columns: repeat(1, 1fr);
 			}
 		}
 	</style>
@@ -189,11 +204,7 @@
 					</div>
 				</div>
 
-				<!--
-					There's a bug when width is 100%. Div isn't decreasing width if we resize screen.
-					So, use 99% for width.
-				-->
-				<div style="position: relative; width: 99%;">
+				<div id="year-overview__chart__wrapper">
 					<canvas id="year-overview__chart"></canvas>
 				</div>
 			</div>
