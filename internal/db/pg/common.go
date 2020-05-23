@@ -31,7 +31,7 @@ func (db DB) GetMonth(ctx context.Context, id uint) (month *db_common.Month, err
 		return nil
 	})
 	if err != nil {
-		if err == pg.ErrNoRows {
+		if errors.Is(err, pg.ErrNoRows) {
 			err = db_common.ErrMonthNotExist
 			log.Error(err)
 			return nil, err
@@ -53,7 +53,7 @@ func (db DB) GetMonthID(ctx context.Context, year, month int) (uint, error) {
 	m := &Month{}
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
-		if err == pg.ErrNoRows {
+		if errors.Is(err, pg.ErrNoRows) {
 			err = db_common.ErrMonthNotExist
 			log.Error(err)
 			return 0, err
@@ -73,7 +73,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 	day := &Day{ID: dayID}
 	err := tx.Model(day).Column("month_id").WherePK().Select()
 	if err != nil {
-		if err == pg.ErrNoRows {
+		if errors.Is(err, pg.ErrNoRows) {
 			return 0, db_common.ErrDayNotExist
 		}
 
@@ -134,7 +134,7 @@ func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
 			Relation("Spends.Type").
 			WherePK().Select()
 		if err != nil {
-			if err == pg.ErrNoRows {
+			if errors.Is(err, pg.ErrNoRows) {
 				return db_common.ErrDayNotExist
 			}
 			return err
@@ -166,7 +166,7 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
-		if err == db_common.ErrMonthNotExist {
+		if errors.Is(err, db_common.ErrMonthNotExist) {
 			err = db_common.ErrMonthNotExist
 			log.Error(err)
 			return 0, err
@@ -184,7 +184,7 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		Where("month_id = ? AND day = ?", monthID, day).
 		Select()
 	if err != nil {
-		if err == pg.ErrNoRows {
+		if errors.Is(err, pg.ErrNoRows) {
 			err = db_common.ErrDayNotExist
 			log.Error(err)
 			return 0, err

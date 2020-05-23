@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -54,7 +55,7 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 
 	months, err := s.db.GetMonths(r.Context(), year)
 	// Render the page even theare no months for passed year
-	if err != nil && err != db.ErrYearNotExist {
+	if err != nil && !errors.Is(err, db.ErrYearNotExist) {
 		msg := dbErrorMessagePrefix + "couldn't get months"
 		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
 		return

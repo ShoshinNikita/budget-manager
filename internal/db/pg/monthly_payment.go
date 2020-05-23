@@ -78,7 +78,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args db_common.EditMonthlyP
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		err = tx.Select(mp)
 		if err != nil {
-			if err == pg.ErrNoRows {
+			if errors.Is(err, pg.ErrNoRows) {
 				return db_common.ErrMonthlyPaymentNotExist
 			}
 			return errors.Wrap(err, "couldn't get Monthly Payment with passed id")

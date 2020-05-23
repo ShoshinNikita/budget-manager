@@ -18,7 +18,7 @@ func (db DB) GetSpendType(ctx context.Context, id uint) (*db_common.SpendType, e
 
 	spendType := &SpendType{ID: id}
 	if err := db.db.Select(spendType); err != nil {
-		if err == pg.ErrNoRows {
+		if errors.Is(err, pg.ErrNoRows) {
 			err = db_common.ErrSpendTypeNotExist
 		}
 

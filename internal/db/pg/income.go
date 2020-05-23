@@ -81,7 +81,7 @@ func (db DB) EditIncome(ctx context.Context, args db_common.EditIncomeArgs) erro
 		// Select Income
 		err = tx.Select(in)
 		if err != nil {
-			if err == pg.ErrNoRows {
+			if errors.Is(err, pg.ErrNoRows) {
 				return db_common.ErrIncomeNotExist
 			}
 			return errors.Wrap(err, "couldn't select Income")
