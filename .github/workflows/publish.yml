@@ -1,0 +1,55 @@
+name: publish
+on:
+  push:
+    branches:
+      - master
+
+env:
+  BASE_TAG: budget-manager:master
+  IMAGE_ARCHIVE: budget-manager.tar
+
+jobs:
+  build:
+    name: build image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build docker image
+        run: make docker-build VERSION=master TAG=${BASE_TAG}
+
+      - name: Save docker image
+        run: docker save -o ${IMAGE_ARCHIVE} ${BASE_TAG}
+
+      - name: Upload docker image as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.IMAGE_ARCHIVE }}
+          path: ${{ github.workspace }}/${{ env.IMAGE_ARCHIVE }}
+
+  gpr:
+    name: push to GPR
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      TAG: docker.pkg.github.com/${{ github.repository }}/budget-manager:master
+    steps:
+      - name: Convert tag to lower case
+        run: echo "::set-env name=TAG::${TAG,,}"
+
+      - name: Login to Package Registry
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.repository_owner }} --password-stdin docker.pkg.github.com
+
+      - name: Download docker image as an artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.IMAGE_ARCHIVE }}
+
+      - name: Load docker image
+        run: docker load -i ${IMAGE_ARCHIVE}
+
+      - name: Tag image
+        run: docker tag ${BASE_TAG} ${TAG}
+
+      - name: Push to Package Registry
+        run: docker push ${TAG}
