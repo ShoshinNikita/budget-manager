@@ -12,22 +12,37 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
-)
-
-const (
-	overviewTemplatePath = "./templates/overview.html"
-	yearTemplatePath     = "./templates/year.html"
-	monthTemplatePath    = "./templates/month.html"
-	//
-	searchSpendsTemplatePath = "./templates/search_spends.html"
-	//
-	errorPageTemplatePath = "./templates/error_page.html"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
+	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
 const (
 	executeErrorMessage     = "Can't execute template"
 	invalidURLMessagePrefix = "Invalid URL: "
 	dbErrorMessagePrefix    = "DB error: "
+)
+
+// nolint:gochecknoglobals
+var (
+	overviewTemplatePath = templates.Template{
+		Path: "templates/overview.html",
+		Deps: []string{"templates/footer.html"},
+	}
+	yearTemplatePath = templates.Template{
+		Path: "templates/overview_year.html",
+		Deps: []string{"templates/footer.html"},
+	}
+	monthTemplatePath = templates.Template{
+		Path: "templates/overview_year_month.html",
+		Deps: []string{"templates/footer.html"},
+	}
+	//
+	searchSpendsTemplatePath = templates.Template{
+		Path: "templates/search_spends.html",
+		Deps: []string{"templates/footer.html"},
+	}
+	//
+	errorPageTemplatePath = templates.Template{Path: "./templates/error_page.html"}
 )
 
 // GET /overview
@@ -101,12 +116,19 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 		AnnualIncome money.Money
 		AnnualSpend  money.Money
 		Result       money.Money
+		//
+		Footer FooterTemplateData
 	}{
 		Year:         year,
 		Months:       allMonths,
 		AnnualIncome: annualIncome,
 		AnnualSpend:  annualSpend,
 		Result:       result,
+		//
+		Footer: FooterTemplateData{
+			Version: version.Version,
+			GitHash: version.GitHash,
+		},
 	}
 	if err := s.tplStore.Execute(r.Context(), yearTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
@@ -161,15 +183,21 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 
 	resp := struct {
 		*db.Month
-
 		SpendTypes    []*db.SpendType
 		ToShortMonth  func(time.Month) string
 		SumSpendCosts func([]*db.Spend) money.Money
+		//
+		Footer FooterTemplateData
 	}{
 		Month:         month,
 		SpendTypes:    spendTypes,
 		ToShortMonth:  toShortMonth,
 		SumSpendCosts: sumSpendCosts,
+		//
+		Footer: FooterTemplateData{
+			Version: version.Version,
+			GitHash: version.GitHash,
+		},
 	}
 	if err := s.tplStore.Execute(r.Context(), monthTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
@@ -333,14 +361,26 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		Spends     []*db.Spend
 		SpendTypes []*db.SpendType
 		TotalCost  money.Money
+		//
+		Footer FooterTemplateData
 	}{
 		Spends:     spends,
 		SpendTypes: spendTypes,
 		TotalCost:  sumSpendCosts(spends),
+		//
+		Footer: FooterTemplateData{
+			Version: version.Version,
+			GitHash: version.GitHash,
+		},
 	}
 	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, resp); err != nil {
 		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
+}
+
+type FooterTemplateData struct {
+	Version string
+	GitHash string
 }
 
 // -------------------------------------------------

@@ -14,20 +14,10 @@
 
 		/* | App */
 
-		#app {
-			min-height: 100%;
-		}
-
-		/* || Header */
-
-		#header {
-			border-bottom: 1px solid var(--border-accent-color);
-			box-sizing: content-box;
-			font-size: 20px;
-			height: 35px;
-			line-height: 35px;
-			margin-bottom: 10px;
-			padding-bottom: 5px;
+		#content {
+			display: grid;
+			grid-template-rows: min-content auto;
+			row-gap: 50px;
 		}
 
 		/* || Months */
@@ -42,7 +32,7 @@
 		.month,
 		.month--not-exist {
 			border: 1px solid var(--border-color);
-			border-radius: 3px;
+			border-radius: 2px;
 			cursor: pointer;
 			height: 120px;
 			padding: 7px;
@@ -84,8 +74,8 @@
 			column-gap: 20px;
 			display: grid;
 			grid-template-columns: 3fr 7fr;
-			height: 400px;
-			margin-top: 50px;
+			height: 100%;
+			max-height: 400px;
 		}
 
 		#year-overview__results__header {
@@ -107,34 +97,39 @@
 			text-align: right;
 		}
 
+		#year-overview__chart__wrapper {
+			position: relative;
+			/*
+				There's a bug when width and height are 100%. Div isn't decreasing width and height if we resize screen.
+				So, use 99% instead.
+			*/
+			height: 99%;
+			width: 99%;
+		}
+
 		/* | Layouts */
 
-		/* For medium screens (1000px <= width < 1400px) */
-		@media (max-width: 1399px) {
+		@media (max-width: 1350px) {
+			#months-list {
+				grid-template-columns: repeat(4, 1fr);
+			}
+
+			#year-overview__results__header {
+				font-size: 18px;
+			}
+
+			.year-overview__results__result {
+				font-size: 16px;
+			}
+		}
+
+		@media (max-width: 1100px) {
+			#content {
+				row-gap: 30px;
+			}
+
 			#months-list {
 				grid-template-columns: repeat(3, 1fr);
-			}
-		}
-
-		/* For small screens (450px <= width < 1000px) */
-		@media (max-width: 999px) {
-			body {
-				padding: 15px;
-			}
-
-			#months-list {
-				grid-template-columns: repeat(2, 1fr);
-			}
-
-			#year-overview {
-				display: none;
-			}
-		}
-
-		/* For smartphones (< 450px) */
-		@media (max-width: 449px) {
-			#months-list {
-				grid-template-columns: repeat(1, 1fr);
 			}
 		}
 	</style>
@@ -151,23 +146,55 @@
 			</div>
 		</div>
 
-		<div id="months-list">
-			{{range .Months}}
+		<div id="content">
+			<div id="months-list">
+				{{range .Months}}
 
-			{{if ne .ID 0}}
-			<!-- Show month overview -->
+				{{if ne .ID 0}}
+				<!-- Show month overview -->
 
-			<!-- Use the number of a month instead of the name -->
-			<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
-				<div class="month" title="Go to the month">
+				<!-- Use the number of a month instead of the name -->
+				<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
+					<div class="month" title="Go to the month">
+						<div class="month__header">{{.Month}} {{.Year}}</div>
+						<div class="month__results">
+							<div>Income:</div>
+							<div class="month__results__value money--gain">{{.TotalIncome}}</div>
+							<div>Spend:</div>
+							<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+							<div>Result:</div>
+							<div class="month__results__value">
+								{{if ge .Result 0}}
+								<span class="money--gain">{{.Result}}</span>
+								{{else}}
+								<span class="money--lose">{{.Result}}</span>
+								{{end}}
+							</div>
+						</div>
+					</div>
+				</a>
+				{{else}}
+				<!-- Just show a stub -->
+				<div class="month--not-exist" title="No data for the month">
 					<div class="month__header">{{.Month}} {{.Year}}</div>
-					<div class="month__results">
-						<div>Income:</div>
-						<div class="month__results__value money--gain">{{.TotalIncome}}</div>
-						<div>Spend:</div>
-						<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+				</div>
+				{{end}}
+				{{end}}
+			</div>
+
+			<div id="year-overview">
+				<div id="year-overview__results">
+					<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
+
+					<div class="year-overview__results__result">
+						<div>Annual Income:</div>
+						<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
+
+						<div>Annual Spend:</div>
+						<div class="year-overview__results__result__value money--lose">{{.AnnualSpend}}</div>
+
 						<div>Result:</div>
-						<div class="month__results__value">
+						<div class="year-overview__results__result__value">
 							{{if ge .Result 0}}
 							<span class="money--gain">{{.Result}}</span>
 							{{else}}
@@ -176,46 +203,14 @@
 						</div>
 					</div>
 				</div>
-			</a>
-			{{else}}
-			<!-- Just show a stub -->
-			<div class="month--not-exist" title="No data for the month">
-				<div class="month__header">{{.Month}} {{.Year}}</div>
-			</div>
-			{{end}}
-			{{end}}
-		</div>
 
-		<div id="year-overview">
-			<div id="year-overview__results">
-				<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
-
-				<div class="year-overview__results__result">
-					<div>Annual Income:</div>
-					<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
-
-					<div>Annual Spend:</div>
-					<div class="year-overview__results__result__value money--lose">{{.AnnualSpend}}</div>
-
-					<div>Result:</div>
-					<div class="year-overview__results__result__value">
-						{{if ge .Result 0}}
-						<span class="money--gain">{{.Result}}</span>
-						{{else}}
-						<span class="money--lose">{{.Result}}</span>
-						{{end}}
-					</div>
+				<div id="year-overview__chart__wrapper">
+					<canvas id="year-overview__chart"></canvas>
 				</div>
 			</div>
-
-			<!--
-				There's a bug when width is 100%. Div isn't decreasing width if we resize screen.
-				So, use 99% for width.
-			-->
-			<div style="position: relative; width: 99%;">
-				<canvas id="year-overview__chart"></canvas>
-			</div>
 		</div>
+
+		{{template "templates/footer.html" .Footer}}
 	</div>
 
 	<script src="/static/chart.js/chart.min.js"></script>

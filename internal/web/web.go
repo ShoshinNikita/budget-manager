@@ -3,8 +3,6 @@ package web
 import (
 	"context"
 	"encoding"
-	htmlTemplate "html/template"
-	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -73,7 +71,7 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 type Server struct {
 	log      logrus.FieldLogger
 	db       Database
-	tplStore TemplateStore
+	tplStore templates.TemplateExecutor
 
 	server *http.Server
 
@@ -115,19 +113,18 @@ type Database interface {
 	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]*db.Spend, error)
 }
 
-type TemplateStore interface {
-	Get(ctx context.Context, path string) *htmlTemplate.Template
-	Execute(ctx context.Context, path string, w io.Writer, data interface{}) error
-}
-
 func NewServer(cnf Config, db Database, log logrus.FieldLogger) *Server {
+	executorLog := log.WithField("component", "template_executor")
+	var executor templates.TemplateExecutor = templates.NewTemplateDiskExecutor(executorLog)
+	if cnf.CacheTemplates {
+		executor = templates.NewTemplateCacheExecutor(executorLog)
+	}
+
 	return &Server{
-		db:  db,
-		log: log,
-		tplStore: templates.NewTemplateStore(
-			log.WithField("component", "template store"), cnf.CacheTemplates,
-		),
-		config: cnf,
+		db:       db,
+		log:      log,
+		tplStore: executor,
+		config:   cnf,
 	}
 }
 

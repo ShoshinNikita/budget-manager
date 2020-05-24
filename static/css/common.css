@@ -2,9 +2,9 @@
 
 :root {
 	--font-color: #000000dd;
-	--border-color: #88888830;
+	--border-color: #88888818;
 	--border-accent-color: #88888860;
-	--hover-color: #e4e4e448;
+	--hover-color: #e4e4e438;
 }
 
 /* | Common */
@@ -17,24 +17,59 @@
 	font-weight: normal;
 }
 
-/* | Layout */
+/* | Layout
+
+All pages should stick to this layout:
+
+  body
+    #app
+      #header
+      #content
+      #footer
+
+*/
 
 body {
 	height: 100vh;
 	margin: 0;
-	padding: 30px;
-	padding-bottom: 40px;
+	padding: 0px;
+	width: 100vw;
 }
 
 #app {
-	border: 1px solid var(--border-color);
-	border-radius: 3px;
-	display: flex;
-	flex-direction: column;
-	margin: 0 auto 30px;
-	max-width: 1800px;
-	padding: 10px;
+	display: grid;
+	grid-template-rows: 40px calc(100% - 70px - 20px) 30px;
+	height: 100%;
+	max-width: 2000px;
+	min-width: 900px;
+	padding: 10px 20px;
+	row-gap: 10px;
 	width: 100%;
+}
+
+#header {
+	border-bottom: 1px solid var(--border-accent-color);
+	box-sizing: content-box;
+	font-size: 20px;
+	height: 35px;
+	line-height: 35px;
+	padding-bottom: 5px;
+	width: 100%;
+}
+
+@media (max-width: 1350px) {
+	#app {
+		grid-template-rows: 40px calc(100% - 40px - 10px);
+		padding: 5px 10px 10px;
+	}
+
+	#header {
+		font-size: 18px;
+	}
+
+	#footer {
+		display: none;
+	}
 }
 
 /* | Icons */
@@ -84,7 +119,7 @@ input[type="text"]:focus {
 
 input[type="button"] {
 	border: 1px solid var(--border-accent-color);
-	border-radius: 3px;
+	border-radius: 2px;
 	cursor: pointer;
 	height: 23px;
 	width: 80px;
@@ -175,7 +210,7 @@ a:link:hover {
 
 table {
 	border-collapse: collapse;
-	margin-bottom: 30px;
+	margin-bottom: 1em;
 	width: 100%;
 }
 

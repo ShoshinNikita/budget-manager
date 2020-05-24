@@ -11,18 +11,20 @@
 	<style>
 		/* | Global */
 
-		body {
-			min-width: 800px;
-		}
-
-		#app {
-			height: 100%;
-		}
-
 		input[type=date] {
 			border: none;
 			border-bottom: 1px solid var(--border-accent-color);
 			width: 100%;
+		}
+
+		/* | Layout */
+
+		#app {
+			grid-template-rows: calc(100% - 30px - 10px) 30px;
+		}
+
+		#header {
+			display: none;
 		}
 
 		/* | Search */
@@ -39,7 +41,7 @@
 
 		#search__options {
 			border: 1px solid var(--border-color);
-			border-radius: 3px;
+			border-radius: 2px;
 			height: 100%;
 			padding: 10px;
 			position: relative;
@@ -227,8 +229,11 @@
 
 		/* | Layouts */
 
-		/* For medium screens (<= 1300px) */
-		@media (max-width: 1300px) {
+		/* For medium screens (<= 1350px) */
+		@media (max-width: 1350px) {
+			#app {
+				grid-template-rows: 100%;
+			}
 
 			#search__options__cost,
 			#search__options__time {
@@ -251,194 +256,199 @@
 
 <body>
 	<div id="app">
-		<div id="search">
-			<!-- Search Options -->
-			<div id="search__options">
-				<div id="search__options__header" class="noselect">Spend Search</div>
+		<div id="header"></div>
+		<div id="content">
+			<div id="search">
+				<!-- Search Options -->
+				<div id="search__options">
+					<div id="search__options__header" class="noselect">Spend Search</div>
 
-				<form action="/search/spends">
-					<!-- Title -->
-					<div id="search__options__title" class="search__option">
-						<input type="text" name="title" placeholder="Title" title="Title">
-					</div>
-
-					<!-- Notes -->
-					<div id="search__options__notes" class="search__option">
-						<input type="text" name="notes" placeholder="Notes" title="Notes">
-					</div>
-
-					<!-- Cost -->
-					<div id="search__options__cost" class="search__option">
-						<div id="search__options__cost__min">
-							<input type="text" name="min_cost" placeholder="Min Cost" title="Minimal Cost">
+					<form action="/search/spends">
+						<!-- Title -->
+						<div id="search__options__title" class="search__option">
+							<input type="text" name="title" placeholder="Title" title="Title">
 						</div>
 
-						<div class="search__options__separator"></div>
-
-						<div id="search__options__cost__max">
-							<input type="text" name="max_cost" placeholder="Max Cost" title="Maximal Cost">
-						</div>
-					</div>
-
-					<!-- Time -->
-					<div id="search__options__time" class="search__option">
-						<div id="search__options__time__after">
-							<input type="date" name="after" title="After">
+						<!-- Notes -->
+						<div id="search__options__notes" class="search__option">
+							<input type="text" name="notes" placeholder="Notes" title="Notes">
 						</div>
 
-						<div class="search__options__separator"></div>
-
-						<div id="search__options__time__before">
-							<input type="date" name="before" title="Before">
-						</div>
-					</div>
-
-					<!-- Spend Types -->
-					<div id="search__options__types" class="search__option">
-						<div id="search__options__types__header" class="noselect">Spend Types</div>
-						<!-- Without Type option -->
-						<div class="search__options__types__type">
-							<input id="search__options__types__without-type" type="checkbox" name="without_type" value="true" onclick="resetChosenTypes()">
-							<label for="search__options__types__without-type" title="Use this option to search for Spends without type">Without Type</label>
-						</div>
-						{{ range .SpendTypes }}
-						<div class="search__options__types__type">
-							<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}" onclick="resetWithoutType()">
-							<label for="search__options__types__type-{{ .ID }}">{{ .Name }}</label>
-						</div>
-						{{ end }}
-					</div>
-
-					<!-- Hidden fields -->
-					<div style="display: none;">
-						<input id="search__options__types__hidden__sort" type="text" name="sort" value="">
-						<input id="search__options__types__hidden__order" type="text" name="order" value="">
-					</div>
-
-					<!-- Buttons -->
-					<div id="search__options__buttons">
-						<button type="reset" class="search__options__button" title="Reset">
-							<div class="feather-icon">
-								<svg>
-									<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" /> </svg>
+						<!-- Cost -->
+						<div id="search__options__cost" class="search__option">
+							<div id="search__options__cost__min">
+								<input type="text" name="min_cost" placeholder="Min Cost" title="Minimal Cost">
 							</div>
-						</button>
 
-						<button type="submit" class="search__options__button" title="Search">
-							<div class="feather-icon">
-								<svg>
-									<use xlink:href="/static/feather/feather-sprite.svg#search" /> </svg>
+							<div class="search__options__separator"></div>
+
+							<div id="search__options__cost__max">
+								<input type="text" name="max_cost" placeholder="Max Cost" title="Maximal Cost">
 							</div>
-						</button>
-					</div>
-				</form>
-
-				<div id="search__options__home-page-link">
-					<a href="/">
-						<div class="feather-icon" title="Home">
-							<svg>
-								<use xlink:href="/static/feather/feather-sprite.svg#home" />
-							</svg>
 						</div>
-					</a>
+
+						<!-- Time -->
+						<div id="search__options__time" class="search__option">
+							<div id="search__options__time__after">
+								<input type="date" name="after" title="After">
+							</div>
+
+							<div class="search__options__separator"></div>
+
+							<div id="search__options__time__before">
+								<input type="date" name="before" title="Before">
+							</div>
+						</div>
+
+						<!-- Spend Types -->
+						<div id="search__options__types" class="search__option">
+							<div id="search__options__types__header" class="noselect">Spend Types</div>
+							<!-- Without Type option -->
+							<div class="search__options__types__type">
+								<input id="search__options__types__without-type" type="checkbox" name="without_type" value="true" onclick="resetChosenTypes()">
+								<label for="search__options__types__without-type" title="Use this option to search for Spends without type">Without Type</label>
+							</div>
+							{{ range .SpendTypes }}
+							<div class="search__options__types__type">
+								<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}" onclick="resetWithoutType()">
+								<label for="search__options__types__type-{{ .ID }}">{{ .Name }}</label>
+							</div>
+							{{ end }}
+						</div>
+
+						<!-- Hidden fields -->
+						<div style="display: none;">
+							<input id="search__options__types__hidden__sort" type="text" name="sort" value="">
+							<input id="search__options__types__hidden__order" type="text" name="order" value="">
+						</div>
+
+						<!-- Buttons -->
+						<div id="search__options__buttons">
+							<button type="reset" class="search__options__button" title="Reset">
+								<div class="feather-icon">
+									<svg>
+										<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" /> </svg>
+								</div>
+							</button>
+
+							<button type="submit" class="search__options__button" title="Search">
+								<div class="feather-icon">
+									<svg>
+										<use xlink:href="/static/feather/feather-sprite.svg#search" /> </svg>
+								</div>
+							</button>
+						</div>
+					</form>
+
+					<div id="search__options__home-page-link">
+						<a href="/">
+							<div class="feather-icon" title="Home">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#home" />
+								</svg>
+							</div>
+						</a>
+					</div>
 				</div>
-			</div>
 
-			<!-- Search Results -->
-			<div id="search__results">
-				{{ if .Spends }}
-				<table id="search__results__table">
-					<thead>
-						<tr>
-							<th class="search__results__table__date noselect" onclick="alert">
-								<span>Date</span>
-								<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
-									<svg class="feather-icon search__results__table__sort-icon--asc">
-										<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
-									</svg>
-									<svg class="feather-icon search__results__table__sort-icon--desc">
-										<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
-									</svg>
-								</div>
-							</th>
-							<th class="search__results__table__title noselect">
-								<span>Title</span>
-								<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
-									<svg class="feather-icon search__results__table__sort-icon--asc">
-										<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
-									</svg>
-									<svg class="feather-icon search__results__table__sort-icon--desc">
-										<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
-									</svg>
-								</div>
-							</th>
-							<th class="search__results__table__notes noselect">Notes</th>
-							<th class="search__results__table__type noselect">Type</th>
-							<th class="search__results__table__cost noselect">
-								<span>Cost</span>
-								<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
-									<svg class="feather-icon search__results__table__sort-icon--asc">
-										<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
-									</svg>
-									<svg class="feather-icon search__results__table__sort-icon--desc">
-										<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
-									</svg>
-								</div>
-							</th>
-							<th class="search__results__table__link noselect">Link</th>
-						</tr>
-					</thead>
-					<tbody>
-						{{ range .Spends }}
-						<tr>
-							<td class="search__results__table__date">{{ printf "%02d" .Month }} / {{ printf "%02d" .Day }} / {{ .Year }}</td>
-							<td class="search__results__table__title">{{ .Title }}</td>
-							<td class="search__results__table__notes">{{ .Notes }}</td>
-							<td class="search__results__table__type">
-								{{ if .Type }}
-								<span>{{ .Type.Name }}</span>
-								{{ else }}
-								<span>-</span>
-								{{ end }}
-							</td>
-							<td class="search__results__table__cost">{{ .Cost }}</td>
-							<td class="search__results__table__link">
-								<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
-									<div class="feather-icon" title="View Day">
-										<svg>
-											<use xlink:href="/static/feather/feather-sprite.svg#external-link" />
+				<!-- Search Results -->
+				<div id="search__results">
+					{{ if .Spends }}
+					<table id="search__results__table">
+						<thead>
+							<tr>
+								<th class="search__results__table__date noselect" onclick="alert">
+									<span>Date</span>
+									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
+										<svg class="feather-icon search__results__table__sort-icon--asc">
+											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+										</svg>
+										<svg class="feather-icon search__results__table__sort-icon--desc">
+											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
 										</svg>
 									</div>
-								</a>
-							</td>
-						</tr>
-						{{ end }}
-						<tr id="search__results__table__result-row">
-							<!--
+								</th>
+								<th class="search__results__table__title noselect">
+									<span>Title</span>
+									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
+										<svg class="feather-icon search__results__table__sort-icon--asc">
+											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+										</svg>
+										<svg class="feather-icon search__results__table__sort-icon--desc">
+											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+										</svg>
+									</div>
+								</th>
+								<th class="search__results__table__notes noselect">Notes</th>
+								<th class="search__results__table__type noselect">Type</th>
+								<th class="search__results__table__cost noselect">
+									<span>Cost</span>
+									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
+										<svg class="feather-icon search__results__table__sort-icon--asc">
+											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+										</svg>
+										<svg class="feather-icon search__results__table__sort-icon--desc">
+											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+										</svg>
+									</div>
+								</th>
+								<th class="search__results__table__link noselect">Link</th>
+							</tr>
+						</thead>
+						<tbody>
+							{{ range .Spends }}
+							<tr>
+								<td class="search__results__table__date">{{ printf "%02d" .Month }} / {{ printf "%02d" .Day }} / {{ .Year }}</td>
+								<td class="search__results__table__title">{{ .Title }}</td>
+								<td class="search__results__table__notes">{{ .Notes }}</td>
+								<td class="search__results__table__type">
+									{{ if .Type }}
+									<span>{{ .Type.Name }}</span>
+									{{ else }}
+									<span>-</span>
+									{{ end }}
+								</td>
+								<td class="search__results__table__cost">{{ .Cost }}</td>
+								<td class="search__results__table__link">
+									<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
+										<div class="feather-icon" title="View Day">
+											<svg>
+												<use xlink:href="/static/feather/feather-sprite.svg#external-link" />
+											</svg>
+										</div>
+									</a>
+								</td>
+							</tr>
+							{{ end }}
+							<tr id="search__results__table__result-row">
+								<!--
 								We can't use colspan="4" because we hide notes with 'display: none' for small and
 								medium screens. With colspan="4" there will be some bugs
 							 -->
-							<td colspan="3"></td>
-							<td class="search__results__table__notes"></td>
-							<td class="search__results__table__cost" title="Total Cost">
-								<!-- Total Cost must be always <= 0 -->
-								{{ if eq .TotalCost 0 }}
-								<span class="money--gain">{{ .TotalCost }}</span>
-								{{ else }}
-								<span class="money--lose">{{ .TotalCost }}</span>
-								{{ end }}
-							</td>
-							<td></td>
-						</tr>
-					</tbody>
-				</table>
-				{{ else }}
-				<div id="search__results__no-spends" class="noselect">
-					<span>No Spends found!</span>
+								<td colspan="3"></td>
+								<td class="search__results__table__notes"></td>
+								<td class="search__results__table__cost" title="Total Cost">
+									<!-- Total Cost must be always <= 0 -->
+									{{ if eq .TotalCost 0 }}
+									<span class="money--gain">{{ .TotalCost }}</span>
+									{{ else }}
+									<span class="money--lose">{{ .TotalCost }}</span>
+									{{ end }}
+								</td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
+					{{ else }}
+					<div id="search__results__no-spends" class="noselect">
+						<span>No Spends found!</span>
+					</div>
+					{{ end }}
 				</div>
-				{{ end }}
 			</div>
 		</div>
+
+		{{template "templates/footer.html" .Footer}}
 	</div>
 
 	<script>
