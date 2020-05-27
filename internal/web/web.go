@@ -21,8 +21,6 @@ import (
 // -------------------------------------------------
 
 type Config struct { // nolint:maligned
-	Debug bool `env:"DEBUG" envDefault:"false"`
-
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
 
 	// CacheTemplates defines whether templates have to be loaded from disk every request.
@@ -34,6 +32,8 @@ type Config struct { // nolint:maligned
 	// Credentials is a list of pairs 'login:password' separated by comma.
 	// Example: "login:password,user:qwerty"
 	Credentials Credentials `env:"SERVER_CREDENTIALS"`
+
+	EnableProfiling bool `env:"SERVER_ENABLE_PROFILING" envDefault:"false"`
 }
 
 type Credentials map[string]string
@@ -144,8 +144,9 @@ func (s *Server) Prepare() {
 	// Add API routes
 	s.log.Debug("add routes")
 	s.addRoutes(router)
-	if s.config.Debug {
+	if s.config.EnableProfiling {
 		// Enable pprof handlers
+		s.log.Warn("pprof handlers are enabled")
 		s.addPprofRoutes(router)
 	}
 

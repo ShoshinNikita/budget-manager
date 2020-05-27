@@ -49,7 +49,6 @@ func TestConfig(t *testing.T) {
 			Database: "db",
 		},
 		Server: web.Config{
-			Debug:          true,
 			Port:           6666,
 			CacheTemplates: true,
 			Credentials: web.Credentials{
