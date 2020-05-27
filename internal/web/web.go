@@ -21,8 +21,6 @@ import (
 // -------------------------------------------------
 
 type Config struct { // nolint:maligned
-	Debug bool `env:"DEBUG" envDefault:"false"`
-
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
 
 	// CacheTemplates defines whether templates have to be loaded from disk every request.
