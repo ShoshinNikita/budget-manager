@@ -89,7 +89,13 @@ export-ldflags:
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
 	#
+	# Use go cache to speed up execution: https://github.com/golangci/golangci-lint/issues/1004
+	#
 	docker run --rm -it --network=none \
+		-v $(shell go env GOCACHE):/cache/go \
+		-e GOCACHE=/cache/go \
+		-e GOLANGCI_LINT_CACHE=/cache/go \
+		-v $(shell go env GOPATH)/pkg:/go/pkg \
 		-v $(shell pwd):/app \
 		-w /app \
 		golangci/golangci-lint:v1.27.0-alpine golangci-lint run --config .golangci.yml
