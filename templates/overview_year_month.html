@@ -22,11 +22,11 @@
 
 		/* || Actions */
 
-		div.actions-horizontal-list {
+		.actions-horizontal-list {
 			display: flex;
 		}
 
-		div.actions-horizontal-list>.feather-icon>svg {
+		.actions-horizontal-list>.feather-icon>svg {
 			width: 18px;
 			height: 18px;
 		}
@@ -435,25 +435,27 @@
 
 							<!-- Inputs for new Income -->
 							<tr>
-								<td class="detailed-info__block__table__title">
-									<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
-								</td>
-								<td class="detailed-info__block__table__notes">
-									<input
-										type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
-								</td>
-								<td class="detailed-info__block__table__money--input">
-									<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
-								</td>
-								<td class="detailed-info__block__table__actions">
-									<div class="actions-horizontal-list">
-										<div class="feather-icon" title="Add" onclick="addIncome()">
-											<svg class="svg-icon-plus">
-												<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-											</svg>
-										</div>
-									</div>
-								</td>
+								<form onsubmit="addIncome()">
+									<td class="detailed-info__block__table__title">
+										<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
+									</td>
+									<td class="detailed-info__block__table__notes">
+										<input
+											type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
+									</td>
+									<td class="detailed-info__block__table__money--input">
+										<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
+									</td>
+									<td class="detailed-info__block__table__actions">
+										<button type="submit" class="actions-horizontal-list">
+											<div class="feather-icon" title="Add">
+												<svg class="svg-icon-plus">
+													<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+												</svg>
+											</div>
+										</button>
+									</td>
+								</form>
 							</tr>
 						</table>
 					</div>
@@ -506,34 +508,36 @@
 
 							<!-- Inputs for new Monthly Payment -->
 							<tr>
-								<td class="detailed-info__block__table__title">
-									<input type="text" id="new-monthly-payment-title" placeholder="Title"
-										autocomplete="off">
-								</td>
-								<td class="detailed-info__block__table__notes">
-									<input
-										type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off">
-								</td>
-								<td class="detailed-info__block__table__type">
-									<select id="new-monthly-payment-type" autocomplete="off">
-										<option value="0">-</option>
-										{{ range $.SpendTypes }}
-										<option value="{{ .ID }}">{{ .Name }}</option>
-										{{ end }}
-									</select>
-								</td>
-								<td class="detailed-info__block__table__money--input">
-									<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
-								</td>
-								<td class="detailed-info__block__table__actions">
-									<div class="actions-horizontal-list">
-										<div class="feather-icon" title="Add" onclick="addMonthlyPayment()">
-											<svg class="svg-icon-plus">
-												<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-											</svg>
-										</div>
-									</div>
-								</td>
+								<form onsubmit="addMonthlyPayment()">
+									<td class="detailed-info__block__table__title">
+										<input type="text" id="new-monthly-payment-title" placeholder="Title"
+											autocomplete="off">
+									</td>
+									<td class="detailed-info__block__table__notes">
+										<input
+											type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off">
+									</td>
+									<td class="detailed-info__block__table__type">
+										<select id="new-monthly-payment-type" autocomplete="off">
+											<option value="0">-</option>
+											{{ range $.SpendTypes }}
+											<option value="{{ .ID }}">{{ .Name }}</option>
+											{{ end }}
+										</select>
+									</td>
+									<td class="detailed-info__block__table__money--input">
+										<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
+									</td>
+									<td class="detailed-info__block__table__actions">
+										<button type="submit" class="actions-horizontal-list">
+											<div class="feather-icon" title="Add">
+												<svg class="svg-icon-plus">
+													<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+												</svg>
+											</div>
+										</button>
+									</td>
+								</form>
 							</tr>
 						</table>
 					</div>
@@ -614,40 +618,42 @@
 								{{ end }}
 
 								<!--
-								Inputs for new Spend
+									Inputs for new Spend
 
-								We use '-{{ .ID }}' suffix because we render all days, just hide them.
-								So, ids without this suffix wouldn't be unique. We use day id instead of
-								day number because we pass into 'addSpend' function day id.
-							-->
+									We use '-{{ .ID }}' suffix because we render all days, just hide them.
+									So, ids without this suffix wouldn't be unique. We use day id instead of
+									day number because we pass into 'addSpend' function day id.
+								-->
 								<tr>
-									<td class="detailed-info__block__table__title">
-										<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off">
-									</td>
-									<td class="detailed-info__block__table__notes">
-										<input
-											type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes" autocomplete="off">
-									</td>
-									<td class="detailed-info__block__table__type">
-										<select id="new-spend-type-{{ .ID }}" autocomplete="off">
-											<option value="0">-</option>
-											{{ range $.SpendTypes }}
-											<option value="{{ .ID }}">{{ .Name }}</option>
-											{{ end }}
-										</select>
-									</td>
-									<td class="detailed-info__block__table__money--input">
-										<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost" autocomplete="off">
-									</td>
-									<td class="detailed-info__block__table__actions">
-										<div class="actions-horizontal-list">
-											<div class="feather-icon" title="Add" onclick="addSpend(Number('{{ .ID }}'))">
-												<svg class="svg-icon-plus">
-													<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-												</svg>
-											</div>
-										</div>
-									</td>
+									<form onsubmit="addSpend(Number('{{ .ID }}'))">
+										<td class="detailed-info__block__table__title">
+											<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off">
+										</td>
+										<td class="detailed-info__block__table__notes">
+											<input
+												type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes" autocomplete="off">
+										</td>
+										<td class="detailed-info__block__table__type">
+											<select id="new-spend-type-{{ .ID }}" autocomplete="off">
+												<option value="0">-</option>
+												{{ range $.SpendTypes }}
+												<option value="{{ .ID }}">{{ .Name }}</option>
+												{{ end }}
+											</select>
+										</td>
+										<td class="detailed-info__block__table__money--input">
+											<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost" autocomplete="off">
+										</td>
+										<td class="detailed-info__block__table__actions">
+											<button type="submit" class="actions-horizontal-list">
+												<div class="feather-icon" title="Add">
+													<svg class="svg-icon-plus">
+														<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+													</svg>
+												</div>
+											</button>
+										</td>
+									</form>
 								</tr>
 							</table>
 						</div>
@@ -800,15 +806,15 @@
 					{{ end }}
 
 					<!-- New Spend Type -->
-					<div class="modal-window__manage-types__spend-type">
+					<form class="modal-window__manage-types__spend-type" onsubmit="addSpendType()">
 						<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
 
-						<div class="feather-icon" title="Add" onclick="addSpendType()">
+						<button type="submit" class="feather-icon" title="Add">
 							<svg>
 								<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 							</svg>
-						</div>
-					</div>
+						</button>
+					</form>
 				</div>
 			</div>
 		</div>

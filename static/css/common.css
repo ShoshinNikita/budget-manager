@@ -74,12 +74,12 @@ body {
 
 /* | Icons */
 
-div.feather-icon {
+.feather-icon {
 	cursor: pointer;
 	padding: 3px;
 }
 
-div.feather-icon > svg {
+.feather-icon > svg {
 	fill: none;
 	opacity: 0.64;
 	stroke: #888888;
@@ -88,7 +88,7 @@ div.feather-icon > svg {
 	stroke-width: 2;
 }
 
-div.feather-icon:hover > svg {
+.feather-icon:hover > svg {
 	opacity: 1;
 	stroke: #666666;
 }
@@ -100,6 +100,12 @@ select:focus,
 textarea:focus,
 button:focus {
 	outline: none;
+}
+
+button {
+	background-color: white;
+	border: none;
+	padding: 0;
 }
 
 input {
