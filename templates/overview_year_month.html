@@ -687,7 +687,7 @@
 			<!-- Modal windows (hidden by default) -->
 			<div id="modal-window__background">
 				<!-- Edit Income -->
-				<div id="modal-window__edit-income" class="modal-window">
+				<form id="modal-window__edit-income" class="modal-window">
 					<div class="modal-window__header noselect">Edit Income</div>
 
 					<div class="modal-window__edit-field">
@@ -707,12 +707,12 @@
 
 					<div class="modal-window__save-button">
 						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-						<input type="button" id="modal-window__edit-income__save-button" value="Save">
+						<input type="submit" id="modal-window__edit-income__save-button" value="Save">
 					</div>
-				</div>
+				</form>
 
 				<!-- Edit Monthly Payment -->
-				<div id="modal-window__edit-monthly-payment" class="modal-window">
+				<form id="modal-window__edit-monthly-payment" class="modal-window">
 					<div class="modal-window__header noselect">Edit Monthly Payment</div>
 
 					<div class="modal-window__edit-field">
@@ -742,12 +742,12 @@
 
 					<div class="modal-window__save-button">
 						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-						<input type="button" id="modal-window__edit-monthly-payment__save-button" value="Save">
+						<input type="submit" id="modal-window__edit-monthly-payment__save-button" value="Save">
 					</div>
-				</div>
+				</form>
 
 				<!-- Edit Spend -->
-				<div id="modal-window__edit-spend" class="modal-window">
+				<form id="modal-window__edit-spend" class="modal-window">
 					<div class="modal-window__header noselect">Edit Spend</div>
 
 					<div class="modal-window__edit-field">
@@ -777,9 +777,9 @@
 
 					<div class="modal-window__save-button">
 						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-						<input type="button" id="modal-window__edit-spend__save-button" value="Save">
+						<input type="submit" id="modal-window__edit-spend__save-button" value="Save">
 					</div>
-				</div>
+				</form>
 
 				<!-- Manage types -->
 				<div id="modal-window__manage-types" class="modal-window">
@@ -1280,8 +1280,8 @@
 			setValue("modal-window__edit-income__income", income);
 
 			// Reset event listener
-			const saveButton = document.getElementById("modal-window__edit-income__save-button");
-			saveButton.onclick = () => { editIncome(id); }
+			const form = document.getElementById(editIncomeModalWindowID);
+			form.onsubmit = () => { editIncome(id); }
 
 			// Show Modal Window
 			showElement(editIncomeModalWindowID);
@@ -1305,8 +1305,8 @@
 			setValue("modal-window__edit-monthly-payment__cost", cost);
 
 			// Reset event listener
-			const saveButton = document.getElementById("modal-window__edit-monthly-payment__save-button");
-			saveButton.onclick = () => { editMonthlyPayment(id); }
+			const form = document.getElementById(editMonthlyPaymentModalWindowID);
+			form.onsubmit = () => { editMonthlyPayment(id); }
 
 			// Show Modal Window
 			showElement(editMonthlyPaymentModalWindowID);
@@ -1330,8 +1330,8 @@
 			setValue("modal-window__edit-spend__cost", cost);
 
 			// Reset event listener
-			const saveButton = document.getElementById("modal-window__edit-spend__save-button");
-			saveButton.onclick = () => { editSpend(id); }
+			const form = document.getElementById(editSpendModalWindowID);
+			form.onsubmit = () => { editSpend(id); }
 
 			// Show Modal Window
 			showElement(editSpendModalWindowID);

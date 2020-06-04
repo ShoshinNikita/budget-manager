@@ -123,7 +123,8 @@ input[type="text"]:focus {
 	border-bottom: 1px solid var(--border-accent-color);
 }
 
-input[type="button"] {
+input[type="button"],
+input[type="submit"] {
 	border: 1px solid var(--border-accent-color);
 	border-radius: 2px;
 	cursor: pointer;
@@ -131,11 +132,13 @@ input[type="button"] {
 	width: 80px;
 }
 
-input[type="button"]:hover {
+input[type="button"]:hover,
+input[type="submit"]:hover {
 	background-color: var(--hover-color);
 }
 
-input[type="button"]:active {
+input[type="button"]:active,
+input[type="submit"]:active {
 	color: var(--font-color);
 }
 
