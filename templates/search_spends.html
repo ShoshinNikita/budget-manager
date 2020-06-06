@@ -398,7 +398,7 @@
 						<tbody>
 							{{ range .Spends }}
 							<tr>
-								<td class="search__results__table__date">{{ printf "%02d" .Month }} / {{ printf "%02d" .Day }} / {{ .Year }}</td>
+								<td class="search__results__table__date">{{ .Year }}-{{ printf "%02d" .Month }}-{{ printf "%02d" .Day }}</td>
 								<td class="search__results__table__title">{{ .Title }}</td>
 								<td class="search__results__table__notes">{{ .Notes }}</td>
 								<td class="search__results__table__type">
@@ -576,8 +576,8 @@
 				const originalDate = dates[i].textContent;
 				let date = cache[originalDate];
 				if (!date) {
-					// Remove thin spaces and format like 'Friday, November 1, 2019'
-					date = new Date(originalDate.replace(/ /g, "", -1)).toLocaleDateString("en-US", dateFormatOptions);
+					// Format like 'Friday, November 1, 2019'
+					date = new Date(originalDate).toLocaleDateString("en-US", dateFormatOptions);
 					cache[originalDate] = date;
 				}
 
