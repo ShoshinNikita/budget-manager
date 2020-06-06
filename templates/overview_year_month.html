@@ -987,6 +987,8 @@
 		// Incomes
 
 		function addIncome() {
+			preventDefault(this);
+
 			const income = replaceCommas(getValue("new-income-income"));
 			if (isNaN(income)) {
 				processError("income must be a number");
@@ -1004,6 +1006,8 @@
 		}
 
 		function editIncome(id) {
+			preventDefault(this);
+
 			const income = replaceCommas(getValue("modal-window__edit-income__income"));
 			if (isNaN(income)) {
 				processError("income must be a number");
@@ -1021,6 +1025,8 @@
 		}
 
 		function removeIncome(id) {
+			preventDefault(this);
+
 			if (!confirm("Do you really want to delete the Income?")) {
 				return;
 			}
@@ -1032,6 +1038,8 @@
 		// Monthly Payments
 
 		function addMonthlyPayment() {
+			preventDefault(this);
+
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue("new-monthly-payment-type");
 
@@ -1053,6 +1061,8 @@
 		}
 
 		function editMonthlyPayment(id) {
+			preventDefault(this);
+
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue("modal-window__edit-monthly-payment__type");
 
@@ -1074,6 +1084,8 @@
 		}
 
 		function removeMonthlyPayment(id) {
+			preventDefault(this);
+
 			if (!confirm("Do you really want to delete the Monthly Payment?")) {
 				return;
 			}
@@ -1085,6 +1097,8 @@
 		// Spends
 
 		function addSpend(dayID) {
+			preventDefault(this);
+
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue(`new-spend-type-${dayID}`);
 
@@ -1106,6 +1120,8 @@
 		}
 
 		function editSpend(id) {
+			preventDefault(this);
+
 			// Skip check because user can't specify typeID as not a number
 			const typeID = getValue("modal-window__edit-spend__type");
 
@@ -1127,6 +1143,8 @@
 		}
 
 		function removeSpend(id) {
+			preventDefault(this);
+
 			if (!confirm("Do you really want to delete the Spend?")) {
 				return;
 			}
@@ -1141,6 +1159,8 @@
 		var spendTypeChanged = false;
 
 		function addSpendType() {
+			preventDefault(this);
+
 			const name = getValue("new-spend-type-name");
 			if (name === "") {
 				processError("Name of Spend Type can't be empty");
@@ -1156,6 +1176,8 @@
 		}
 
 		function editSpendType(id, oldName) {
+			preventDefault(this);
+
 			const newName = getValue(`edit-spend-type-name-${id}`);
 			if (newName === oldName) {
 				// Do nothing
@@ -1365,6 +1387,15 @@
 		// ----------------------------------------------------
 		// Helpers
 		// ----------------------------------------------------
+
+		/**
+		 * preventDefault prevent the default action if it is possible
+		 */
+		function preventDefault(that) {
+			if (that.event && that.event.preventDefault) {
+				that.event.preventDefault();
+			}
+		}
 
 		/**
 		 * @param {string} elemID - id of an element
