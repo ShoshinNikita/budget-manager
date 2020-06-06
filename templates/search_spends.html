@@ -360,10 +360,10 @@
 								<th class="search__results__table__date noselect" onclick="alert">
 									<span>Date</span>
 									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
-										<svg class="feather-icon search__results__table__sort-icon--asc">
+										<svg class="search__results__table__sort-icon--asc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
 										</svg>
-										<svg class="feather-icon search__results__table__sort-icon--desc">
+										<svg class="search__results__table__sort-icon--desc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
 										</svg>
 									</div>
@@ -371,10 +371,10 @@
 								<th class="search__results__table__title noselect">
 									<span>Title</span>
 									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
-										<svg class="feather-icon search__results__table__sort-icon--asc">
+										<svg class="search__results__table__sort-icon--asc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
 										</svg>
-										<svg class="feather-icon search__results__table__sort-icon--desc">
+										<svg class="search__results__table__sort-icon--desc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
 										</svg>
 									</div>
@@ -384,10 +384,10 @@
 								<th class="search__results__table__cost noselect">
 									<span>Cost</span>
 									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
-										<svg class="feather-icon search__results__table__sort-icon--asc">
+										<svg class="search__results__table__sort-icon--asc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
 										</svg>
-										<svg class="feather-icon search__results__table__sort-icon--desc">
+										<svg class="search__results__table__sort-icon--desc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
 										</svg>
 									</div>
@@ -398,7 +398,7 @@
 						<tbody>
 							{{ range .Spends }}
 							<tr>
-								<td class="search__results__table__date">{{ printf "%02d" .Month }} / {{ printf "%02d" .Day }} / {{ .Year }}</td>
+								<td class="search__results__table__date">{{ .Year }}-{{ printf "%02d" .Month }}-{{ printf "%02d" .Day }}</td>
 								<td class="search__results__table__title">{{ .Title }}</td>
 								<td class="search__results__table__notes">{{ .Notes }}</td>
 								<td class="search__results__table__type">
@@ -576,8 +576,8 @@
 				const originalDate = dates[i].textContent;
 				let date = cache[originalDate];
 				if (!date) {
-					// Remove thin spaces and format like 'Friday, November 1, 2019'
-					date = new Date(originalDate.replace(/ /g, "", -1)).toLocaleDateString("en-US", dateFormatOptions);
+					// Format like 'Friday, November 1, 2019'
+					date = new Date(originalDate).toLocaleDateString("en-US", dateFormatOptions);
 					cache[originalDate] = date;
 				}
 
