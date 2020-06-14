@@ -4,22 +4,18 @@
 
 ### Large screen
 
-![Large screen](./month_page_large.png)
+<center><img src="./month_page_large.png" width="1200px"></center>
 
 ### Medium screen
 
-![Medium screen](./month_page_medium.png)
-
-### Small screen
-
-![Small screen](./month_page_small.png)
+<center><img src="./month_page_medium.png" width="800px"></center>
 
 ## Year Page
 
 ### Large screen
 
-![Large screen](./year_page_large.png)
+<center><img src="./year_page_large.png" width="1200px"></center>
 
 ### Medium screen
 
-![Medium screen](./year_page_medium.png)
+<center><img src="./year_page_medium.png" width="800px"></center>
