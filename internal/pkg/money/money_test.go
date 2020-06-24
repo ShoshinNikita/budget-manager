@@ -55,6 +55,7 @@ func testConvertMoney_FloatToFloat(t *testing.T) {
 		{in: 0.75, res: Money(75), converted: 0.75},
 		{in: 15.30, res: Money(1530), converted: 15.30},
 		{in: 1000000.87, res: Money(100000087), converted: 1000000.87},
+		{in: 69.99, res: Money(6999), converted: 69.99},
 	}
 
 	for _, tt := range tests {

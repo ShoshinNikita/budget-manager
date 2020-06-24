@@ -36,7 +36,14 @@ func FromInt(m int64) Money {
 
 // FromFloat converts float64 to Money
 func FromFloat(m float64) Money {
-	return Money(int64(m * precision))
+	// Multiply 'm' by 'precision' 2 times to avoid some strange results caused by
+	// Floating Point Math - https://0.30000000000000004.com/
+	//
+	// For example, 69.99 * 100 = 6998.99999 -> int64(6998.99999) = 6998
+
+	m *= precision * precision
+	m /= precision
+	return Money(int64(m))
 }
 
 // ToInt converts Money to int64
