@@ -3,13 +3,25 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
+	"net/url"
 
+	"github.com/gorilla/schema"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
+
+// nolint:gochecknoglobals
+var queryDecoder = schema.NewDecoder()
+
+// nolint:gochecknoinits
+func init() {
+	queryDecoder.IgnoreUnknownKeys(true)
+	queryDecoder.SetAliasTag("json")
+}
 
 type RequestChecker interface {
 	Check() error
@@ -19,10 +31,20 @@ type RequestChecker interface {
 func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogger, req RequestChecker) (ok bool) {
 	ctx := r.Context()
 
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(req); err != nil {
-		ProcessError(ctx, log, w, "couldn't decode request", http.StatusBadRequest, err)
+	if err := r.ParseForm(); err != nil {
+		ProcessError(ctx, log, w, "couldn't parse form: "+err.Error(), http.StatusBadRequest, nil)
+		return false
+	}
+
+	var err error
+	switch r.Method {
+	case http.MethodGet, http.MethodHead:
+		err = decodeQueryRequest(r.Form, req)
+	default:
+		err = decodeJSONRequest(r.Body, req)
+	}
+	if err != nil {
+		ProcessError(ctx, log, w, "couldn't decode request: "+err.Error(), http.StatusBadRequest, nil)
 		return false
 	}
 
@@ -32,6 +54,16 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogge
 	}
 
 	return true
+}
+
+func decodeJSONRequest(body io.Reader, req interface{}) error {
+	decoder := json.NewDecoder(body)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(req)
+}
+
+func decodeQueryRequest(form url.Values, req interface{}) error {
+	return queryDecoder.Decode(req, form)
 }
 
 // EncodeResponse encodes response. It process error if needed

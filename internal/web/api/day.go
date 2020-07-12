@@ -25,8 +25,7 @@ type DaysDB interface {
 // @Summary Get Day by id
 // @Tags Days
 // @Router /api/days/id [get]
-// @Accept json
-// @Param body body models.GetDayByIDReq true "Day id"
+// @Param params query models.GetDayByIDReq true "Day id"
 // @Produce json
 // @Success 200 {object} models.GetDayResp
 // @Failure 400 {object} models.Response "Invalid request"
@@ -73,8 +72,7 @@ func (h DaysHandlers) GetDayByID(w http.ResponseWriter, r *http.Request) {
 // @Summary Get Day by date
 // @Tags Days
 // @Router /api/days/date [get]
-// @Accept json
-// @Param body body models.GetDayByDateReq true "Date"
+// @Param params query models.GetDayByDateReq true "Date"
 // @Produce json
 // @Success 200 {object} models.GetDayResp
 // @Failure 400 {object} models.Response "Invalid request"

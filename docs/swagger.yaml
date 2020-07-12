@@ -301,30 +301,6 @@ definitions:
     required:
     - id
     type: object
-  models.GetDayByDateReq:
-    properties:
-      day:
-        example: 12
-        type: integer
-      month:
-        example: 4
-        type: integer
-      year:
-        example: 2020
-        type: integer
-    required:
-    - day
-    - month
-    - year
-    type: object
-  models.GetDayByIDReq:
-    properties:
-      id:
-        example: 1
-        type: integer
-    required:
-    - id
-    type: object
   models.GetDayResp:
     properties:
       day:
@@ -336,26 +312,6 @@ definitions:
         type: string
       success:
         type: boolean
-    type: object
-  models.GetMonthByDateReq:
-    properties:
-      month:
-        example: 4
-        type: integer
-      year:
-        example: 2020
-        type: integer
-    required:
-    - month
-    - year
-    type: object
-  models.GetMonthByIDReq:
-    properties:
-      id:
-        example: 1
-        type: integer
-    required:
-    - id
     type: object
   models.GetMonthResp:
     properties:
@@ -425,47 +381,6 @@ definitions:
       success:
         type: boolean
     type: object
-  models.SearchSpendsReq:
-    properties:
-      after:
-        description: After must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
-        format: date
-        type: string
-      before:
-        description: Before must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
-        format: date
-        type: string
-      max_cost:
-        type: number
-      min_cost:
-        type: number
-      notes:
-        description: Notes can be in any case. Search will be performed by lowercased value
-        type: string
-      notes_exactly:
-        description: NotesExactly defines should we search exactly for the given notes
-        type: boolean
-      order:
-        description: 'Order specify sort order. Available options: asc (default), desc'
-        type: string
-      sort:
-        description: 'Sort specify field to sort by. Available options: title, cost, date (default)'
-        type: string
-      title:
-        description: Title can be in any case. Search will be performed by lowercased value
-        type: string
-      title_exactly:
-        description: TitleExactly defines should we search exactly for the given title
-        type: boolean
-      type_ids:
-        description: TypeIDs is a list of Spend Type ids to search for
-        items:
-          type: integer
-        type: array
-      without_type:
-        description: WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
-        type: boolean
-    type: object
   models.SearchSpendsResp:
     properties:
       error:
@@ -491,15 +406,19 @@ info:
 paths:
   /api/days/date:
     get:
-      consumes:
-      - application/json
       parameters:
-      - description: Date
-        in: body
-        name: body
+      - in: query
+        name: day
         required: true
-        schema:
-          $ref: '#/definitions/models.GetDayByDateReq'
+        type: integer
+      - in: query
+        name: month
+        required: true
+        type: integer
+      - in: query
+        name: year
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -524,15 +443,11 @@ paths:
       - Days
   /api/days/id:
     get:
-      consumes:
-      - application/json
       parameters:
-      - description: Day id
-        in: body
-        name: body
+      - in: query
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/models.GetDayByIDReq'
+        type: integer
       produces:
       - application/json
       responses:
@@ -751,15 +666,15 @@ paths:
       - Monthly Payments
   /api/months/date:
     get:
-      consumes:
-      - application/json
       parameters:
-      - description: Date
-        in: body
-        name: body
+      - in: query
+        name: month
         required: true
-        schema:
-          $ref: '#/definitions/models.GetMonthByDateReq'
+        type: integer
+      - in: query
+        name: year
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -784,15 +699,11 @@ paths:
       - Months
   /api/months/id:
     get:
-      consumes:
-      - application/json
       parameters:
-      - description: Month ID
-        in: body
-        name: body
+      - in: query
+        name: id
         required: true
-        schema:
-          $ref: '#/definitions/models.GetMonthByIDReq'
+        type: integer
       produces:
       - application/json
       responses:
@@ -817,15 +728,57 @@ paths:
       - Months
   /api/search/spends:
     get:
-      consumes:
-      - application/json
       parameters:
-      - description: Search args
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/models.SearchSpendsReq'
+      - description: After must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
+        format: date
+        in: query
+        name: after
+        type: string
+      - description: Before must be in the RFC3339 format (https://tools.ietf.org/html/rfc3339#section-5.8)
+        format: date
+        in: query
+        name: before
+        type: string
+      - in: query
+        name: max_cost
+        type: number
+      - in: query
+        name: min_cost
+        type: number
+      - description: Notes can be in any case. Search will be performed by lowercased value
+        in: query
+        name: notes
+        type: string
+      - description: NotesExactly defines should we search exactly for the given notes
+        in: query
+        name: notes_exactly
+        type: boolean
+      - description: 'Order specify sort order. Available options: asc (default), desc'
+        in: query
+        name: order
+        type: string
+      - description: 'Sort specify field to sort by. Available options: title, cost, date (default)'
+        in: query
+        name: sort
+        type: string
+      - description: Title can be in any case. Search will be performed by lowercased value
+        in: query
+        name: title
+        type: string
+      - description: TitleExactly defines should we search exactly for the given title
+        in: query
+        name: title_exactly
+        type: boolean
+      - description: TypeIDs is a list of Spend Type ids to search for
+        in: query
+        items:
+          type: integer
+        name: type_ids
+        type: array
+      - description: WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
+        in: query
+        name: without_type
+        type: boolean
       produces:
       - application/json
       responses:

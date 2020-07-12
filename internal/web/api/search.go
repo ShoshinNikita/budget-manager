@@ -26,8 +26,7 @@ type SearchDB interface {
 // @Summary Search Spends
 // @Tags Search
 // @Router /api/search/spends [get]
-// @Accept json
-// @Param body body models.SearchSpendsReq true "Search args"
+// @Param params query models.SearchSpendsReq true "Search args"
 // @Produce json
 // @Success 200 {object} models.SearchSpendsResp
 // @Failure 400 {object} models.Response "Invalid request"

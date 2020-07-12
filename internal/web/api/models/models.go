@@ -29,14 +29,14 @@ type Response struct {
 type GetMonthByIDReq struct {
 	Request
 
-	ID uint `json:"id" validate:"required" example:"1"`
+	ID uint `json:"id" validate:"required"`
 }
 
 type GetMonthByDateReq struct {
 	Request
 
-	Year  int `json:"year" validate:"required" example:"2020"`
-	Month int `json:"month" validate:"required" example:"4"`
+	Year  int `json:"year" validate:"required"`
+	Month int `json:"month" validate:"required"`
 }
 
 type GetMonthResp struct {
@@ -52,15 +52,15 @@ type GetMonthResp struct {
 type GetDayByIDReq struct {
 	Request
 
-	ID uint `json:"id" validate:"required" example:"1"`
+	ID uint `json:"id" validate:"required"`
 }
 
 type GetDayByDateReq struct {
 	Request
 
-	Year  int `json:"year" validate:"required" example:"2020"`
-	Month int `json:"month" validate:"required" example:"4"`
-	Day   int `json:"day" validate:"required" example:"12"`
+	Year  int `json:"year" validate:"required"`
+	Month int `json:"month" validate:"required"`
+	Day   int `json:"day" validate:"required"`
 }
 
 type GetDayResp struct {
