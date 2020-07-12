@@ -36,8 +36,7 @@ definitions:
   db.Month:
     properties:
       daily_budget:
-        description: DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number
-          of Days
+        description: DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
         type: number
       days:
         items:
@@ -80,7 +79,6 @@ definitions:
         type: string
       type:
         $ref: '#/definitions/db.SpendType'
-        type: object
       year:
         type: integer
     type: object
@@ -100,7 +98,6 @@ definitions:
         type: string
       type:
         $ref: '#/definitions/db.SpendType'
-        type: object
       year:
         type: integer
     type: object
@@ -332,7 +329,6 @@ definitions:
     properties:
       day:
         $ref: '#/definitions/db.Day'
-        type: object
       error:
         description: Error is specified only when success if false
         type: string
@@ -368,7 +364,6 @@ definitions:
         type: string
       month:
         $ref: '#/definitions/db.Month'
-        type: object
       request_id:
         type: string
       success:
@@ -445,23 +440,19 @@ definitions:
       min_cost:
         type: number
       notes:
-        description: Notes can be in any case. Search will be performed by lowercased
-          value
+        description: Notes can be in any case. Search will be performed by lowercased value
         type: string
       notes_exactly:
         description: NotesExactly defines should we search exactly for the given notes
         type: boolean
       order:
-        description: 'Order specify sort order. Available options: asc (default),
-          desc'
+        description: 'Order specify sort order. Available options: asc (default), desc'
         type: string
       sort:
-        description: 'Sort specify field to sort by. Available options: title, cost,
-          date (default)'
+        description: 'Sort specify field to sort by. Available options: title, cost, date (default)'
         type: string
       title:
-        description: Title can be in any case. Search will be performed by lowercased
-          value
+        description: Title can be in any case. Search will be performed by lowercased value
         type: string
       title_exactly:
         description: TitleExactly defines should we search exactly for the given title
@@ -472,8 +463,7 @@ definitions:
           type: integer
         type: array
       without_type:
-        description: WithoutType is used to search for Spends without Spend Type.
-          TypeIDs are ignored when it is true
+        description: WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
         type: boolean
     type: object
   models.SearchSpendsResp:
@@ -492,8 +482,7 @@ definitions:
     type: object
 info:
   contact: {}
-  description: Easy-to-use, lightweight and self-hosted solution to track your finances
-    - [GitHub](https://github.com/ShoshinNikita/budget-manager)
+  description: Easy-to-use, lightweight and self-hosted solution to track your finances - [GitHub](https://github.com/ShoshinNikita/budget-manager)
   license:
     name: MIT
     url: https://github.com/ShoshinNikita/budget-manager/blob/master/LICENSE
