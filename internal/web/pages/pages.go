@@ -15,7 +15,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
-	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
+	"github.com/ShoshinNikita/budget-manager/internal/web/pages/templates"
 )
 
 const (

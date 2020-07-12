@@ -8,7 +8,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
-	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
+	"github.com/ShoshinNikita/budget-manager/internal/web/pages/templates"
 )
 
 type route struct {
