@@ -9,12 +9,12 @@ default: run
 
 # build builds a binary file
 build: export-ldflags
-	go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
+	@ go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 # docker-build builds a Docker image
 docker-build: TAG?=budget-manager:latest
 docker-build: export-ldflags
-	docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
+	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # Run
 
