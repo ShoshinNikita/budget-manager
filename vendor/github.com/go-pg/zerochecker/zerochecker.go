@@ -30,7 +30,7 @@ func Checker(typ reflect.Type) Func {
 			return isZeroBytes
 		}
 		return isZeroLen
-	case reflect.Map, reflect.Slice, reflect.String:
+	case reflect.String:
 		return isZeroLen
 	case reflect.Bool:
 		return isZeroBool
@@ -40,8 +40,8 @@ func Checker(typ reflect.Type) Func {
 		return isZeroUint
 	case reflect.Float32, reflect.Float64:
 		return isZeroFloat
-	case reflect.Interface, reflect.Ptr:
-		return isZeroNil
+	case reflect.Interface, reflect.Ptr, reflect.Slice, reflect.Map:
+		return isNil
 	}
 
 	if typ.Implements(appenderType) {
@@ -91,7 +91,7 @@ func isZeroLen(v reflect.Value) bool {
 	return v.Len() == 0
 }
 
-func isZeroNil(v reflect.Value) bool {
+func isNil(v reflect.Value) bool {
 	return v.IsNil()
 }
 

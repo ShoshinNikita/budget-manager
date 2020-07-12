@@ -62,12 +62,6 @@ func getDecoder(typ reflect.Type) decoderFunc {
 func _getDecoder(typ reflect.Type) decoderFunc {
 	kind := typ.Kind()
 
-	if kind == reflect.Ptr {
-		if _, ok := typeDecMap.Load(typ.Elem()); ok {
-			return ptrDecoderFunc(typ)
-		}
-	}
-
 	if typ.Implements(customDecoderType) {
 		return decodeCustomValue
 	}
