@@ -19,8 +19,6 @@ type TemplateCacheExecutor struct {
 	mu        sync.RWMutex
 }
 
-var _ TemplateExecutor = (*TemplateCacheExecutor)(nil)
-
 func NewTemplateCacheExecutor(log logrus.FieldLogger) *TemplateCacheExecutor {
 	return &TemplateCacheExecutor{
 		log: log,

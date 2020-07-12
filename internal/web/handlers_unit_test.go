@@ -15,7 +15,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/web/models"
+	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
 func TestSearchSpends(t *testing.T) {

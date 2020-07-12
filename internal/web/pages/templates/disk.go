@@ -15,8 +15,6 @@ type TemplateDiskExecutor struct {
 	log logrus.FieldLogger
 }
 
-var _ TemplateExecutor = (*TemplateDiskExecutor)(nil)
-
 func NewTemplateDiskExecutor(log logrus.FieldLogger) *TemplateDiskExecutor {
 	return &TemplateDiskExecutor{
 		log: log,
