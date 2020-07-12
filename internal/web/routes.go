@@ -34,7 +34,7 @@ func (s Server) addRoutes(router *mux.Router) {
 		{methods: "GET", path: "/overview/{year:[0-9]+}/{month:[0-9]+}", handler: pageHandlers.MonthPage},
 		{methods: "GET", path: "/search/spends", handler: pageHandlers.SearchSpendsPage},
 		// 'GET /' redirects to the current month page
-		{methods: "GET", path: "/", handler: s.indexHandler},
+		{methods: "GET", path: "/", handler: pageHandlers.IndexPage},
 
 		// API
 		{methods: "GET", path: "/api/months/id", handler: apiHandlers.GetMonthByID},

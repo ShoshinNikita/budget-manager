@@ -12,7 +12,7 @@ type Handlers struct {
 	SearchHandlers
 }
 
-type HandlersDB interface {
+type DB interface {
 	DaysDB
 	MonthsDB
 	IncomesDB
@@ -22,7 +22,7 @@ type HandlersDB interface {
 	SearchDB
 }
 
-func NewHandlers(db HandlersDB, log logrus.FieldLogger) *Handlers {
+func NewHandlers(db DB, log logrus.FieldLogger) *Handlers {
 	return &Handlers{
 		DaysHandlers:            DaysHandlers{db: db, log: log},
 		MonthsHandlers:          MonthsHandlers{db: db, log: log},

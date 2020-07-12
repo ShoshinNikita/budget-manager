@@ -12,7 +12,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/web/api"
+	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
 )
 
 // -------------------------------------------------
@@ -68,54 +69,23 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 // -------------------------------------------------
 
 type Server struct {
-	log logrus.FieldLogger
-	db  Database
+	config Config
+	log    logrus.FieldLogger
+	db     Database
 
 	server *http.Server
-
-	config Config
 }
 
 type Database interface {
-	// Month
-	GetMonths(ctx context.Context, year int) ([]*db.Month, error)
-	GetMonth(ctx context.Context, id uint) (*db.Month, error)
-	GetMonthID(ctx context.Context, year, month int) (id uint, err error)
-
-	// Day
-	GetDay(ctx context.Context, id uint) (*db.Day, error)
-	GetDayIDByDate(ctx context.Context, year, month, day int) (id uint, err error)
-
-	// Income
-	AddIncome(ctx context.Context, args db.AddIncomeArgs) (id uint, err error)
-	EditIncome(ctx context.Context, args db.EditIncomeArgs) error
-	RemoveIncome(ctx context.Context, id uint) error
-
-	// Monthly Payment
-	AddMonthlyPayment(ctx context.Context, args db.AddMonthlyPaymentArgs) (id uint, err error)
-	EditMonthlyPayment(ctx context.Context, args db.EditMonthlyPaymentArgs) error
-	RemoveMonthlyPayment(ctx context.Context, id uint) error
-
-	// Spend
-	AddSpend(ctx context.Context, args db.AddSpendArgs) (id uint, err error)
-	EditSpend(ctx context.Context, args db.EditSpendArgs) error
-	RemoveSpend(ctx context.Context, id uint) error
-
-	// Spend Type
-	GetSpendTypes(ctx context.Context) ([]*db.SpendType, error)
-	AddSpendType(ctx context.Context, name string) (id uint, err error)
-	EditSpendType(ctx context.Context, id uint, newName string) error
-	RemoveSpendType(ctx context.Context, id uint) error
-
-	// Other
-	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]*db.Spend, error)
+	api.DB
+	pages.DB
 }
 
 func NewServer(cnf Config, db Database, log logrus.FieldLogger) *Server {
 	return &Server{
+		config: cnf,
 		db:     db,
 		log:    log,
-		config: cnf,
 	}
 }
 
@@ -167,10 +137,10 @@ func (s Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	err := s.server.Shutdown(ctx)
-	if err != nil {
+	if err := s.server.Shutdown(ctx); err != nil {
 		s.log.WithError(err).Errorf("couldn't shutdown server gracefully")
+		return err
 	}
 
-	return err
+	return nil
 }

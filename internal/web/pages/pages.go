@@ -3,6 +3,7 @@ package pages
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -73,6 +74,19 @@ func NewHandlers(db DB, tplExecutor TemplateExecutor, log logrus.FieldLogger) *H
 		tplExecutor: tplExecutor,
 		log:         log,
 	}
+}
+
+// GET / - redirects to the current month page
+//
+func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
+	year, month, _ := time.Now().Date()
+
+	request_id.FromContextToLogger(r.Context(), h.log).
+		WithFields(logrus.Fields{"year": year, "month": int(month)}).
+		Debug("redirect to the current month")
+
+	url := fmt.Sprintf("/overview/%d/%d", year, month)
+	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
 // GET /overview

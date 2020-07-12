@@ -35,8 +35,6 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogge
 }
 
 // EncodeResponse encodes response. It process error if needed
-//
-// nolint:unparam
 func EncodeResponse(w http.ResponseWriter, r *http.Request, log logrus.FieldLogger, resp interface{}) (ok bool) {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
