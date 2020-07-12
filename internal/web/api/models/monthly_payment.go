@@ -1,9 +1,5 @@
 package models
 
-import (
-	"github.com/pkg/errors"
-)
-
 type AddMonthlyPaymentReq struct {
 	Request
 
@@ -16,13 +12,16 @@ type AddMonthlyPaymentReq struct {
 }
 
 func (req AddMonthlyPaymentReq) Check() error {
+	if req.MonthID == 0 {
+		return emptyOrZeroFieldError("month_id")
+	}
 	if req.Title == "" {
-		return errors.New("title can't be empty")
+		return emptyFieldError("title")
 	}
 	// Skip Type
 	// Skip Notes
 	if req.Cost <= 0 {
-		return errors.Errorf("invalid cost: '%.2f'", req.Cost)
+		return notPositiveFieldError("cost")
 	}
 	return nil
 }
@@ -44,13 +43,16 @@ type EditMonthlyPaymentReq struct {
 }
 
 func (req EditMonthlyPaymentReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
 	if req.Title != nil && *req.Title == "" {
-		return errors.New("title can't be empty")
+		return emptyFieldError("title")
 	}
 	// Skip Type
 	// Skip Notes
 	if req.Cost != nil && *req.Cost <= 0 {
-		return errors.Errorf("invalid cost: '%.2f'", *req.Cost)
+		return notPositiveFieldError("cost")
 	}
 	return nil
 }
@@ -59,4 +61,11 @@ type RemoveMonthlyPaymentReq struct {
 	Request
 
 	ID uint `json:"id" validate:"required" example:"1"`
+}
+
+func (req RemoveMonthlyPaymentReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
+	return nil
 }

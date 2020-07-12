@@ -1,8 +1,6 @@
 package models
 
 import (
-	"github.com/pkg/errors"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
@@ -20,7 +18,7 @@ type AddSpendTypeReq struct {
 
 func (req AddSpendTypeReq) Check() error {
 	if req.Name == "" {
-		return errors.New("name can't be empty")
+		return emptyFieldError("name")
 	}
 	return nil
 }
@@ -39,8 +37,11 @@ type EditSpendTypeReq struct {
 }
 
 func (req EditSpendTypeReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
 	if req.Name == "" {
-		return errors.New("name can't be empty")
+		return emptyFieldError("name")
 	}
 	return nil
 }
@@ -49,4 +50,11 @@ type RemoveSpendTypeReq struct {
 	Request
 
 	ID uint `json:"id" validate:"required" example:"1"`
+}
+
+func (req RemoveSpendTypeReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
+	return nil
 }

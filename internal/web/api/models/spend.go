@@ -1,9 +1,5 @@
 package models
 
-import (
-	"github.com/pkg/errors"
-)
-
 type AddSpendReq struct {
 	Request
 
@@ -16,13 +12,16 @@ type AddSpendReq struct {
 }
 
 func (req AddSpendReq) Check() error {
+	if req.DayID == 0 {
+		return emptyOrZeroFieldError("day_id")
+	}
 	if req.Title == "" {
-		return errors.New("title can't be empty")
+		return emptyFieldError("title")
 	}
 	// Skip Type
 	// Skip Notes
 	if req.Cost <= 0 {
-		return errors.Errorf("invalid cost: '%.2f'", req.Cost)
+		return notPositiveFieldError("cost")
 	}
 	return nil
 }
@@ -44,13 +43,16 @@ type EditSpendReq struct {
 }
 
 func (req EditSpendReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
 	if req.Title != nil && *req.Title == "" {
-		return errors.New("title can't be empty")
+		return emptyFieldError("title")
 	}
 	// Skip Type
 	// Skip Notes
 	if req.Cost != nil && *req.Cost <= 0 {
-		return errors.Errorf("invalid cost: '%.2f'", *req.Cost)
+		return notPositiveFieldError("cost")
 	}
 	return nil
 }
@@ -59,4 +61,11 @@ type RemoveSpendReq struct {
 	Request
 
 	ID uint `json:"id" validate:"required" example:"1"`
+}
+
+func (req RemoveSpendReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
+	return nil
 }

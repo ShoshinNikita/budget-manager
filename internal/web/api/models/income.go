@@ -1,7 +1,5 @@
 package models
 
-import "github.com/pkg/errors"
-
 type AddIncomeReq struct {
 	Request
 
@@ -12,12 +10,15 @@ type AddIncomeReq struct {
 }
 
 func (req AddIncomeReq) Check() error {
+	if req.MonthID == 0 {
+		return emptyOrZeroFieldError("month_id")
+	}
 	if req.Title == "" {
-		return errors.New("title can't be empty")
+		return emptyFieldError("title")
 	}
 	// Skip Notes
 	if req.Income <= 0 {
-		return errors.Errorf("invalid income: '%.2f'", req.Income)
+		return notPositiveFieldError("income")
 	}
 	return nil
 }
@@ -38,12 +39,15 @@ type EditIncomeReq struct {
 }
 
 func (req EditIncomeReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
 	if req.Title != nil && *req.Title == "" {
-		return errors.New("title can't be empty")
+		return emptyFieldError("title")
 	}
 	// Skip Notes
 	if req.Income != nil && *req.Income <= 0 {
-		return errors.Errorf("invalid income: '%.2f'", *req.Income)
+		return notPositiveFieldError("income")
 	}
 	return nil
 }
@@ -52,4 +56,11 @@ type RemoveIncomeReq struct {
 	Request
 
 	ID uint `json:"id" validate:"required" example:"1"`
+}
+
+func (req RemoveIncomeReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
+	return nil
 }
