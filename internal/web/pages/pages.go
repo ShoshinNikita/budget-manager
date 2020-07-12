@@ -1,13 +1,15 @@
-package web
+package pages
 
 import (
+	"context"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
@@ -45,34 +47,64 @@ var (
 	errorPageTemplatePath = templates.Template{Path: "./templates/error_page.html"}
 )
 
+type Handlers struct {
+	db          DB
+	tplExecutor TemplateExecutor
+	log         logrus.FieldLogger
+}
+
+type DB interface {
+	GetMonth(ctx context.Context, id uint) (*db.Month, error)
+	GetMonthID(ctx context.Context, year, month int) (uint, error)
+	GetMonths(ctx context.Context, year int) ([]*db.Month, error)
+
+	GetSpendTypes(ctx context.Context) ([]*db.SpendType, error)
+
+	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]*db.Spend, error)
+}
+
+type TemplateExecutor interface {
+	Execute(ctx context.Context, t templates.Template, w io.Writer, data interface{}) error
+}
+
+func NewHandlers(db DB, tplExecutor TemplateExecutor, log logrus.FieldLogger) *Handlers {
+	return &Handlers{
+		db:          db,
+		tplExecutor: tplExecutor,
+		log:         log,
+	}
+}
+
 // GET /overview
 //
-func (s Server) overviewPage(w http.ResponseWriter, r *http.Request) {
-	log := request_id.FromContextToLogger(r.Context(), s.log)
+func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	log := request_id.FromContextToLogger(ctx, h.log)
 
-	if err := s.tplStore.Execute(r.Context(), overviewTemplatePath, w, nil); err != nil {
-		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
+	if err := h.tplExecutor.Execute(ctx, overviewTemplatePath, w, nil); err != nil {
+		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
 // GET /overview/{year:[0-9]+}
 //
-func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
-	log := request_id.FromContextToLogger(r.Context(), s.log)
+func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	log := request_id.FromContextToLogger(ctx, h.log)
 
 	year, ok := getYear(r)
 	if !ok {
-		s.processErrorWithPage(
-			r.Context(), log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
+		h.processErrorWithPage(
+			ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
 		)
 		return
 	}
 
-	months, err := s.db.GetMonths(r.Context(), year)
+	months, err := h.db.GetMonths(ctx, year)
 	// Render the page even theare no months for passed year
 	if err != nil && !errors.Is(err, db.ErrYearNotExist) {
 		msg := dbErrorMessagePrefix + "couldn't get months"
-		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -130,53 +162,54 @@ func (s Server) yearPage(w http.ResponseWriter, r *http.Request) {
 			GitHash: version.GitHash,
 		},
 	}
-	if err := s.tplStore.Execute(r.Context(), yearTemplatePath, w, resp); err != nil {
-		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
+	if err := h.tplExecutor.Execute(ctx, yearTemplatePath, w, resp); err != nil {
+		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
 // GET /overview/{year:[0-9]+}/{month:[0-9]+}
 //
-func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
-	log := request_id.FromContextToLogger(r.Context(), s.log)
+func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	log := request_id.FromContextToLogger(ctx, h.log)
 
 	year, ok := getYear(r)
 	if !ok {
-		s.processErrorWithPage(
-			r.Context(), log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
+		h.processErrorWithPage(
+			ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
 		)
 		return
 	}
 	monthNumber, ok := getMonth(r)
 	if !ok {
-		s.processErrorWithPage(r.Context(), log, w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest, nil)
+		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest, nil)
 		return
 	}
 
-	monthID, err := s.db.GetMonthID(r.Context(), year, int(monthNumber))
+	monthID, err := h.db.GetMonthID(ctx, year, int(monthNumber))
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			s.processErrorWithPage(r.Context(), log, w, err.Error(), http.StatusNotFound, nil)
+			h.processErrorWithPage(ctx, log, w, err.Error(), http.StatusNotFound, nil)
 		default:
 			msg := dbErrorMessagePrefix + "couldn't get month"
-			s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+			h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
 		}
 		return
 	}
 
 	// Process
-	month, err := s.db.GetMonth(r.Context(), monthID)
+	month, err := h.db.GetMonth(ctx, monthID)
 	if err != nil {
 		// Month must exist
 		msg := dbErrorMessagePrefix + "couldn't get Month info"
-		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
-	spendTypes, err := s.db.GetSpendTypes(r.Context())
+	spendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
-		s.processErrorWithPage(r.Context(), log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types",
+		h.processErrorWithPage(ctx, log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types",
 			http.StatusInternalServerError, err)
 		return
 	}
@@ -199,8 +232,8 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 			GitHash: version.GitHash,
 		},
 	}
-	if err := s.tplStore.Execute(r.Context(), monthTemplatePath, w, resp); err != nil {
-		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
+	if err := h.tplExecutor.Execute(ctx, monthTemplatePath, w, resp); err != nil {
+		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
@@ -219,8 +252,9 @@ func (s Server) monthPage(w http.ResponseWriter, r *http.Request) {
 //   - order - sort order: 'asc' or 'desc'
 //
 // nolint:funlen
-func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
-	log := request_id.FromContextToLogger(r.Context(), s.log)
+func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	log := request_id.FromContextToLogger(ctx, h.log)
 
 	// Parse the query
 
@@ -342,17 +376,17 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		TitleExactly: false,
 		NotesExactly: false,
 	}
-	spends, err := s.db.SearchSpends(r.Context(), args)
+	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't complete Spend search"
-		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
-	spendTypes, err := s.db.GetSpendTypes(r.Context())
+	spendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
-		s.processErrorWithPage(r.Context(), log, w, msg, http.StatusInternalServerError, err)
+		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -373,70 +407,12 @@ func (s Server) searchSpendsPage(w http.ResponseWriter, r *http.Request) {
 			GitHash: version.GitHash,
 		},
 	}
-	if err := s.tplStore.Execute(r.Context(), searchSpendsTemplatePath, w, resp); err != nil {
-		s.processErrorWithPage(r.Context(), log, w, executeErrorMessage, http.StatusInternalServerError, err)
+	if err := h.tplExecutor.Execute(ctx, searchSpendsTemplatePath, w, resp); err != nil {
+		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
 	}
 }
 
 type FooterTemplateData struct {
 	Version string
 	GitHash string
-}
-
-// -------------------------------------------------
-// Helpers
-// -------------------------------------------------
-
-func toShortMonth(m time.Month) string {
-	month := m.String()
-	// Don't trim June and July
-	if len(month) > 4 {
-		month = m.String()[:3]
-	}
-	return month
-}
-
-func sumSpendCosts(spends []*db.Spend) money.Money {
-	var m money.Money
-	for i := range spends {
-		m = m.Sub(spends[i].Cost)
-	}
-	return m
-}
-
-const yearKey = "year"
-
-func getYear(r *http.Request) (year int, ok bool) {
-	s, ok := mux.Vars(r)[yearKey]
-	if !ok {
-		return 0, false
-	}
-
-	year, err := strconv.Atoi(s)
-	if err != nil {
-		return 0, false
-	}
-
-	return year, true
-}
-
-const monthKey = "month"
-
-func getMonth(r *http.Request) (month time.Month, ok bool) {
-	monthStr, ok := mux.Vars(r)[monthKey]
-	if !ok {
-		return 0, false
-	}
-
-	monthInt, err := strconv.Atoi(monthStr)
-	if err != nil {
-		return 0, false
-	}
-
-	month = time.Month(monthInt)
-	if !(time.January <= month && month <= time.December) {
-		return 0, false
-	}
-
-	return month, true
 }

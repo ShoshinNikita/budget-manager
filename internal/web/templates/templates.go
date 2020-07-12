@@ -3,7 +3,6 @@ package templates
 
 import (
 	"bytes"
-	"context"
 	htmlTemplate "html/template"
 	"io"
 	"io/ioutil"
@@ -12,13 +11,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-type TemplateExecutor interface {
-	// Get returns template with passed path. It should panic if template doesn't exist
-	Get(ctx context.Context, t Template) *htmlTemplate.Template
-	// Execute executes template. It should panic if template doesn't exist
-	Execute(ctx context.Context, t Template, w io.Writer, data interface{}) error
-}
 
 type Template struct {
 	Path string

@@ -13,7 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
 // -------------------------------------------------
@@ -69,9 +68,8 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 // -------------------------------------------------
 
 type Server struct {
-	log      logrus.FieldLogger
-	db       Database
-	tplStore templates.TemplateExecutor
+	log logrus.FieldLogger
+	db  Database
 
 	server *http.Server
 
@@ -114,17 +112,10 @@ type Database interface {
 }
 
 func NewServer(cnf Config, db Database, log logrus.FieldLogger) *Server {
-	executorLog := log.WithField("component", "template_executor")
-	var executor templates.TemplateExecutor = templates.NewTemplateDiskExecutor(executorLog)
-	if cnf.CacheTemplates {
-		executor = templates.NewTemplateCacheExecutor(executorLog)
-	}
-
 	return &Server{
-		db:       db,
-		log:      log,
-		tplStore: executor,
-		config:   cnf,
+		db:     db,
+		log:    log,
+		config: cnf,
 	}
 }
 

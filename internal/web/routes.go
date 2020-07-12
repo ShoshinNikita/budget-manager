@@ -7,6 +7,8 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
+	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
+	"github.com/ShoshinNikita/budget-manager/internal/web/templates"
 )
 
 type route struct {
@@ -16,14 +18,21 @@ type route struct {
 }
 
 func (s Server) addRoutes(router *mux.Router) {
+	executorLog := s.log.WithField("component", "template_executor")
+	var tplExecutor pages.TemplateExecutor = templates.NewTemplateDiskExecutor(executorLog)
+	if s.config.CacheTemplates {
+		tplExecutor = templates.NewTemplateCacheExecutor(executorLog)
+	}
+	pageHandlers := pages.NewHandlers(s.db, tplExecutor, s.log)
+
 	apiHandlers := api.NewHandlers(s.db, s.log)
 
 	routes := []route{
 		// Pages
-		{methods: "GET", path: "/overview", handler: s.overviewPage},
-		{methods: "GET", path: "/overview/{year:[0-9]+}", handler: s.yearPage},
-		{methods: "GET", path: "/overview/{year:[0-9]+}/{month:[0-9]+}", handler: s.monthPage},
-		{methods: "GET", path: "/search/spends", handler: s.searchSpendsPage},
+		{methods: "GET", path: "/overview", handler: pageHandlers.OverviewPage},
+		{methods: "GET", path: "/overview/{year:[0-9]+}", handler: pageHandlers.YearPage},
+		{methods: "GET", path: "/overview/{year:[0-9]+}/{month:[0-9]+}", handler: pageHandlers.MonthPage},
+		{methods: "GET", path: "/search/spends", handler: pageHandlers.SearchSpendsPage},
 		// 'GET /' redirects to the current month page
 		{methods: "GET", path: "/", handler: s.indexHandler},
 
