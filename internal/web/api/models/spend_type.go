@@ -33,7 +33,7 @@ type EditSpendTypeReq struct {
 	Request
 
 	ID   uint   `json:"id" validate:"required" example:"1"`
-	Name string `json:"name" example:"Vegetables"`
+	Name string `json:"name" validate:"required" example:"Vegetables"`
 }
 
 func (req EditSpendTypeReq) Check() error {

@@ -5,7 +5,7 @@ type AddIncomeReq struct {
 
 	MonthID uint    `json:"month_id" validate:"required" example:"1"`
 	Title   string  `json:"title" validate:"required" example:"Salary"`
-	Notes   string  `json:"notes,omitempty"` // optional
+	Notes   string  `json:"notes"`
 	Income  float64 `json:"income" validate:"required" example:"10000"`
 }
 
@@ -33,9 +33,9 @@ type EditIncomeReq struct {
 	Request
 
 	ID     uint     `json:"id" validate:"required" example:"1"`
-	Title  *string  `json:"title,omitempty"`                     // optional
-	Notes  *string  `json:"notes,omitempty" example:"New notes"` // optional
-	Income *float64 `json:"income,omitempty" example:"15000"`    // optional
+	Title  *string  `json:"title"`
+	Notes  *string  `json:"notes"`
+	Income *float64 `json:"income"`
 }
 
 func (req EditIncomeReq) Check() error {

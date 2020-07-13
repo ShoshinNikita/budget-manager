@@ -3,11 +3,11 @@ package models
 type AddSpendReq struct {
 	Request
 
-	DayID uint `json:"day_id" validate:"required"`
+	DayID uint `json:"day_id" validate:"required" example:"1"`
 
 	Title  string  `json:"title" validate:"required" example:"Food"`
-	TypeID uint    `json:"type_id,omitempty"` // optional
-	Notes  string  `json:"notes,omitempty"`   // optional
+	TypeID uint    `json:"type_id"`
+	Notes  string  `json:"notes"`
 	Cost   float64 `json:"cost" validate:"required" example:"30"`
 }
 
@@ -36,10 +36,10 @@ type EditSpendReq struct {
 	Request
 
 	ID     uint     `json:"id" validate:"required" example:"1"`
-	Title  *string  `json:"title,omitempty"`                      // optional
-	TypeID *uint    `json:"type_id,omitempty"`                    // optional
-	Notes  *string  `json:"notes,omitempty" example:"Vegetables"` // optional
-	Cost   *float64 `json:"cost,omitempty" example:"30.15"`       // optional
+	Title  *string  `json:"title"`
+	TypeID *uint    `json:"type_id"`
+	Notes  *string  `json:"notes"`
+	Cost   *float64 `json:"cost"`
 }
 
 func (req EditSpendReq) Check() error {

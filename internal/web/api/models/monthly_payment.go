@@ -6,8 +6,8 @@ type AddMonthlyPaymentReq struct {
 	MonthID uint `json:"month_id" validate:"required" example:"1"`
 
 	Title  string  `json:"title" validate:"required" example:"Rent"`
-	TypeID uint    `json:"type_id,omitempty"` // optional
-	Notes  string  `json:"notes,omitempty"`   // optional
+	TypeID uint    `json:"type_id"`
+	Notes  string  `json:"notes"`
 	Cost   float64 `json:"cost" validate:"required" example:"1500"`
 }
 
@@ -36,10 +36,10 @@ type EditMonthlyPaymentReq struct {
 	Request
 
 	ID     uint     `json:"id" validate:"required" example:"1"`
-	Title  *string  `json:"title,omitempty"`                     // optional
-	TypeID *uint    `json:"type_id,omitempty" example:"1"`       // optional
-	Notes  *string  `json:"notes,omitempty" example:"New notes"` // optional
-	Cost   *float64 `json:"cost,omitempty" example:"1550"`       // optional
+	Title  *string  `json:"title"`
+	TypeID *uint    `json:"type_id"`
+	Notes  *string  `json:"notes"`
+	Cost   *float64 `json:"cost"`
 }
 
 func (req EditMonthlyPaymentReq) Check() error {

@@ -117,7 +117,6 @@ definitions:
         example: 1
         type: integer
       notes:
-        description: optional
         type: string
       title:
         example: Salary
@@ -148,13 +147,11 @@ definitions:
         example: 1
         type: integer
       notes:
-        description: optional
         type: string
       title:
         example: Rent
         type: string
       type_id:
-        description: optional
         type: integer
     required:
     - cost
@@ -179,15 +176,14 @@ definitions:
         example: 30
         type: number
       day_id:
+        example: 1
         type: integer
       notes:
-        description: optional
         type: string
       title:
         example: Food
         type: string
       type_id:
-        description: optional
         type: integer
     required:
     - cost
@@ -232,15 +228,10 @@ definitions:
         example: 1
         type: integer
       income:
-        description: optional
-        example: 15000
         type: number
       notes:
-        description: optional
-        example: New notes
         type: string
       title:
-        description: optional
         type: string
     required:
     - id
@@ -248,22 +239,15 @@ definitions:
   models.EditMonthlyPaymentReq:
     properties:
       cost:
-        description: optional
-        example: 1550
         type: number
       id:
         example: 1
         type: integer
       notes:
-        description: optional
-        example: New notes
         type: string
       title:
-        description: optional
         type: string
       type_id:
-        description: optional
-        example: 1
         type: integer
     required:
     - id
@@ -271,21 +255,15 @@ definitions:
   models.EditSpendReq:
     properties:
       cost:
-        description: optional
-        example: 30.15
         type: number
       id:
         example: 1
         type: integer
       notes:
-        description: optional
-        example: Vegetables
         type: string
       title:
-        description: optional
         type: string
       type_id:
-        description: optional
         type: integer
     required:
     - id
@@ -300,6 +278,7 @@ definitions:
         type: string
     required:
     - id
+    - name
     type: object
   models.GetDayResp:
     properties:
@@ -407,15 +386,18 @@ paths:
   /api/days/date:
     get:
       parameters:
-      - in: query
+      - example: 13
+        in: query
         name: day
         required: true
         type: integer
-      - in: query
+      - example: 7
+        in: query
         name: month
         required: true
         type: integer
-      - in: query
+      - example: 2020
+        in: query
         name: year
         required: true
         type: integer
@@ -444,7 +426,8 @@ paths:
   /api/days/id:
     get:
       parameters:
-      - in: query
+      - example: 1
+        in: query
         name: id
         required: true
         type: integer
@@ -667,11 +650,13 @@ paths:
   /api/months/date:
     get:
       parameters:
-      - in: query
+      - example: 7
+        in: query
         name: month
         required: true
         type: integer
-      - in: query
+      - example: 2020
+        in: query
         name: year
         required: true
         type: integer
@@ -700,7 +685,8 @@ paths:
   /api/months/id:
     get:
       parameters:
-      - in: query
+      - example: 1
+        in: query
         name: id
         required: true
         type: integer
@@ -749,15 +735,25 @@ paths:
         in: query
         name: notes
         type: string
-      - description: NotesExactly defines should we search exactly for the given notes
+      - default: false
+        description: NotesExactly defines should we search exactly for the given notes
         in: query
         name: notes_exactly
         type: boolean
-      - description: 'Order specify sort order. Available options: asc (default), desc'
+      - default: asc
+        description: Order specify sort order
+        enum:
+        - asc
+        - desc
         in: query
         name: order
         type: string
-      - description: 'Sort specify field to sort by. Available options: title, cost, date (default)'
+      - default: date
+        description: Sort specify field to sort by
+        enum:
+        - title
+        - cost
+        - date
         in: query
         name: sort
         type: string
@@ -765,7 +761,8 @@ paths:
         in: query
         name: title
         type: string
-      - description: TitleExactly defines should we search exactly for the given title
+      - default: false
+        description: TitleExactly defines should we search exactly for the given title
         in: query
         name: title_exactly
         type: boolean
@@ -775,7 +772,8 @@ paths:
           type: integer
         name: type_ids
         type: array
-      - description: WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
+      - default: false
+        description: WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
         in: query
         name: without_type
         type: boolean

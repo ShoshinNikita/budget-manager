@@ -29,7 +29,7 @@ type Response struct {
 type GetMonthByIDReq struct {
 	Request
 
-	ID uint `json:"id" validate:"required"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 func (req GetMonthByIDReq) Check() error {
@@ -42,8 +42,8 @@ func (req GetMonthByIDReq) Check() error {
 type GetMonthByDateReq struct {
 	Request
 
-	Year  int `json:"year" validate:"required"`
-	Month int `json:"month" validate:"required"`
+	Year  int `json:"year" validate:"required" example:"2020"`
+	Month int `json:"month" validate:"required" example:"7"`
 }
 
 func (req GetMonthByDateReq) Check() error {
@@ -69,7 +69,7 @@ type GetMonthResp struct {
 type GetDayByIDReq struct {
 	Request
 
-	ID uint `json:"id" validate:"required"`
+	ID uint `json:"id" validate:"required" example:"1"`
 }
 
 func (req GetDayByIDReq) Check() error {
@@ -82,9 +82,9 @@ func (req GetDayByIDReq) Check() error {
 type GetDayByDateReq struct {
 	Request
 
-	Year  int `json:"year" validate:"required"`
-	Month int `json:"month" validate:"required"`
-	Day   int `json:"day" validate:"required"`
+	Year  int `json:"year" validate:"required" example:"2020"`
+	Month int `json:"month" validate:"required" example:"7"`
+	Day   int `json:"day" validate:"required" example:"13"`
 }
 
 func (req GetDayByDateReq) Check() error {
