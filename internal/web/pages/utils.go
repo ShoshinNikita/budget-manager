@@ -20,7 +20,7 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 	respMsg string, code int, internalErr error) {
 
 	if internalErr != nil {
-		utils.LogHTTPError(log, respMsg, code, internalErr)
+		utils.LogInternalError(log, respMsg, internalErr)
 	}
 
 	data := struct {
