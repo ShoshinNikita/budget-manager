@@ -32,11 +32,28 @@ type GetMonthByIDReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
+func (req GetMonthByIDReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
+	return nil
+}
+
 type GetMonthByDateReq struct {
 	Request
 
 	Year  int `json:"year" validate:"required" example:"2020"`
-	Month int `json:"month" validate:"required" example:"4"`
+	Month int `json:"month" validate:"required" example:"7"`
+}
+
+func (req GetMonthByDateReq) Check() error {
+	if req.Year == 0 {
+		return emptyOrZeroFieldError("year")
+	}
+	if req.Month == 0 {
+		return emptyOrZeroFieldError("month")
+	}
+	return nil
 }
 
 type GetMonthResp struct {
@@ -55,12 +72,32 @@ type GetDayByIDReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
+func (req GetDayByIDReq) Check() error {
+	if req.ID == 0 {
+		return emptyOrZeroFieldError("id")
+	}
+	return nil
+}
+
 type GetDayByDateReq struct {
 	Request
 
 	Year  int `json:"year" validate:"required" example:"2020"`
-	Month int `json:"month" validate:"required" example:"4"`
-	Day   int `json:"day" validate:"required" example:"12"`
+	Month int `json:"month" validate:"required" example:"7"`
+	Day   int `json:"day" validate:"required" example:"13"`
+}
+
+func (req GetDayByDateReq) Check() error {
+	if req.Year == 0 {
+		return emptyOrZeroFieldError("year")
+	}
+	if req.Month == 0 {
+		return emptyOrZeroFieldError("month")
+	}
+	if req.Day == 0 {
+		return emptyOrZeroFieldError("day")
+	}
+	return nil
 }
 
 type GetDayResp struct {

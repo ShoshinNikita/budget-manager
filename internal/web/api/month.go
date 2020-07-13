@@ -25,8 +25,7 @@ type MonthsDB interface {
 // @Summary Get Month by id
 // @Tags Months
 // @Router /api/months/id [get]
-// @Accept json
-// @Param body body models.GetMonthByIDReq true "Month ID"
+// @Param params query models.GetMonthByIDReq true "Month ID"
 // @Produce json
 // @Success 200 {object} models.GetMonthResp
 // @Failure 400 {object} models.Response "Invalid request"
@@ -73,8 +72,7 @@ func (h MonthsHandlers) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 // @Summary Get Month by date
 // @Tags Months
 // @Router /api/months/date [get]
-// @Accept json
-// @Param body body models.GetMonthByDateReq true "Date"
+// @Param params query models.GetMonthByDateReq true "Date"
 // @Produce json
 // @Success 200 {object} models.GetMonthResp
 // @Failure 400 {object} models.Response "Invalid request"

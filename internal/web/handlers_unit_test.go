@@ -1,10 +1,9 @@
 package web
 
 import (
-	"bytes"
 	"io/ioutil"
-	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
@@ -29,7 +28,7 @@ func TestSearchSpends(t *testing.T) {
 	tests := []struct {
 		desc string
 		//
-		req    models.SearchSpendsReq
+		query  url.Values
 		expect func(*MockDatabase)
 		//
 		statusCode int
@@ -52,14 +51,14 @@ func TestSearchSpends(t *testing.T) {
 		{
 			desc: "pass all fields",
 			//
-			req: models.SearchSpendsReq{
-				Title:        "Title",
-				TitleExactly: true,
-				Notes:        "NOTES",
-				MinCost:      150.55,
-				MaxCost:      1000.89,
-				After:        time.Date(2020, 2, 20, 0, 0, 0, 0, time.UTC),
-				TypeIDs:      []uint{1, 2, 3},
+			query: url.Values{
+				"title":         {"Title"},
+				"title_exactly": {"true"},
+				"notes":         {"NOTES"},
+				"min_cost":      {"150.55"},
+				"max_cost":      {"1000.89"},
+				"after":         {"2020-02-20T00:00:00Z"},
+				"type_ids":      {"1", "2", "3"},
 			},
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{
@@ -83,9 +82,9 @@ func TestSearchSpends(t *testing.T) {
 		{
 			desc: "pass without type",
 			//
-			req: models.SearchSpendsReq{
-				WithoutType: true,
-				TypeIDs:     []uint{1, 2, 3},
+			query: url.Values{
+				"without_type": {"true"},
+				"type_ids":     {"1", "2", "3"},
 			},
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{
@@ -103,9 +102,9 @@ func TestSearchSpends(t *testing.T) {
 		{
 			desc: "sort by title, desc",
 			//
-			req: models.SearchSpendsReq{
-				Sort:  "title",
-				Order: "desc",
+			query: url.Values{
+				"sort":  {"title"},
+				"order": {"desc"},
 			},
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{
@@ -124,9 +123,9 @@ func TestSearchSpends(t *testing.T) {
 		{
 			desc: "sort by cost",
 			//
-			req: models.SearchSpendsReq{
-				Sort:  "cost",
-				Order: "abcde",
+			query: url.Values{
+				"sort":  {"cost"},
+				"order": {"abcde"},
 			},
 			expect: func(m *MockDatabase) {
 				args := db.SearchSpendsArgs{
@@ -171,8 +170,8 @@ func TestSearchSpends(t *testing.T) {
 			// Prepare request
 			w := httptest.NewRecorder()
 			//
-			body := encodeRequest(require, tt.req)
-			request := httptest.NewRequest(method, target, body)
+			request := httptest.NewRequest(method, target, nil)
+			request.URL.RawQuery = tt.query.Encode()
 			request.Header.Set(requestIDHeader, requestID.ToString())
 
 			// Send request
@@ -189,40 +188,6 @@ func TestSearchSpends(t *testing.T) {
 			require.Equal(tt.resp, resp)
 		})
 	}
-
-	testCommonErrors(t, method, target)
-}
-
-func testCommonErrors(t *testing.T, method, target string) {
-	t.Run("unmarshal error", func(t *testing.T) {
-		server, _ := prepareServer(t)
-
-		// Prepare request
-		require := require.New(t)
-		w := httptest.NewRecorder()
-		//
-		body := bytes.NewBuffer([]byte("qwerty"))
-		request := httptest.NewRequest(method, target, body)
-		request.Header.Set(requestIDHeader, requestID.ToString())
-
-		// Send request
-		server.server.Handler.ServeHTTP(w, request)
-
-		// Check response
-		response := w.Result()
-		require.Equal(http.StatusBadRequest, response.StatusCode)
-
-		resp := models.Response{}
-		decodeResponse(require, response.Body, &resp)
-		response.Body.Close()
-
-		wantResp := models.Response{
-			Error:     "couldn't decode request",
-			RequestID: requestID.ToString(),
-			Success:   false,
-		}
-		require.Equal(wantResp, resp)
-	})
 }
 
 func prepareServer(t *testing.T) (*Server, *MockDatabase) { // nolint:unparam

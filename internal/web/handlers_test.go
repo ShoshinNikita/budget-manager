@@ -121,7 +121,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "invalid income: '0.00'",
+				Error:     "income must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -247,7 +247,7 @@ func testHandlers_Income_EditIncome(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "invalid income: '0.00'",
+				Error:     "income must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -451,7 +451,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "invalid cost: '0.00'",
+				Error:     "cost must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -579,7 +579,7 @@ func testHandlers_MonthlyPayment_EditMonthlyPayment(t *testing.T, server *Server
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "invalid cost: '0.00'",
+				Error:     "cost must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -765,7 +765,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "invalid cost: '0.00'",
+				Error:     "cost must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -905,7 +905,7 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			statusCode: http.StatusBadRequest,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
-				Error:     "invalid cost: '0.00'",
+				Error:     "cost must be greater than zero",
 				Success:   false,
 			},
 		},
