@@ -6,29 +6,19 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
-	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) ([]*db_common.Spend, error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithFields(logrus.Fields{
-		"title": args.Title, "notes": args.Notes, "after": args.After, "before": args.Before,
-		"min_cost": args.MinCost, "max_cost": args.MaxCost, "type_ids": args.TypeIDs,
-	})
-
 	var pgSpends []*searchSpendsModel
 
-	startTime := time.Now()
 	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
 		query := db.buildSearchSpendsQuery(tx, args)
 		return query.Select(&pgSpends)
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't select Spends")
 		return nil, err
 	}
 
@@ -54,12 +44,6 @@ func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) 
 		spends = append(spends, s)
 	}
 
-	log = log.WithFields(logrus.Fields{
-		"time":         time.Since(startTime),
-		"spend_number": len(spends),
-	})
-
-	log.Debug("return found Spends")
 	return spends, nil
 }
 
