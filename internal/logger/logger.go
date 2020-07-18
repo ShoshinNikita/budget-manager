@@ -12,8 +12,8 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
 )
 
-// {year}/{month}/{day} {hour}:{minute}:{second}
-const timeLayout = "2006/01/02 15:04:05"
+// {year}-{month}-{day} {hour}:{minute}:{second}
+const timeLayout = "2006-01-02 15:04:05"
 
 type Config struct {
 	Debug bool `env:"DEBUG" envDefault:"false"`
