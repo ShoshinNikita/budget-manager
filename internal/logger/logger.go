@@ -86,39 +86,43 @@ func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 		buff = entry.Buffer
 	}
 
-	// Write time
+	// Time
 	buff.WriteString(color.HiGreenString(entry.Time.Format(timeLayout)))
 	buff.WriteByte(' ')
 
-	// Write level
+	// Level
 	buff.Write(logLevelToString(entry.Level))
 	buff.WriteByte(' ')
 
-	// Write message
+	// Message
 	buff.WriteString(entry.Message)
 	buff.WriteByte(' ')
+
+	// Fields
 
 	// Add the caller to fields
 	if entry.HasCaller() {
 		entry.Data["func"] = caller.FormatCaller(entry.Caller.Func)
 	}
 
-	// Sort data keys
+	// Sort field keys
 	keys := make([]string, 0, len(entry.Data))
 	for k := range entry.Data {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
-	// Write data
+	// Write
 	coloredPrintf := logLevelToPrintfFunction(entry.Level)
-	for _, k := range keys {
+	for i, k := range keys {
 		v := entry.Data[k]
 
 		buff.WriteString(coloredPrintf(k))
 		buff.WriteByte('=')
 		fmt.Fprint(buff, v)
-		buff.WriteByte(' ')
+		if i+1 != len(keys) {
+			buff.WriteByte(' ')
+		}
 	}
 
 	buff.WriteByte('\n')
