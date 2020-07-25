@@ -84,32 +84,25 @@ func (db *DB) Prepare() error {
 	// Register migrations
 	pg_migrations.RegisterMigrations(migrator)
 	if len(migrator.Migrations()) != pg_migrations.MigrationNumber {
-		const msg = "invalid number of registered migrations"
-		db.log.WithFields(logrus.Fields{
-			"got": len(migrator.Migrations()), "want": pg_migrations.MigrationNumber,
-		}).Error(msg)
-		return errors.New(msg)
+		return errors.Errorf("invalid number of registered migrations: %d (want %d)",
+			len(migrator.Migrations()), pg_migrations.MigrationNumber)
 	}
 
 	// Init migration table
 	if _, _, err := migrator.Run(db.db, "init"); err != nil {
-		const msg = "couldn't init migration table"
-		db.log.WithError(err).Error(err)
-		return errors.Wrap(err, msg)
+		return errors.Wrap(err, "couldn't init migration table")
 	}
 
 	// Run migrations
 	db.log.Debug("run migrations")
 	oldVersion, newVersion, err := migrator.Run(db.db, "up")
 	if err != nil {
-		const msg = "couldn't run migrations"
-		db.log.WithError(err).Error(err)
-		return errors.Wrap(err, msg)
+		return errors.Wrap(err, "couldn't run migrations")
 	}
 
 	db.log.WithFields(logrus.Fields{
 		"old_version": oldVersion, "new_version": newVersion,
-	}).Info("migration process is finished")
+	}).Info("migration process was finished")
 
 	// Check the tables
 	if err := db.checkCreatedTables(); err != nil {
@@ -118,9 +111,7 @@ func (db *DB) Prepare() error {
 
 	// Init tables if needed
 	if err = db.initCurrentMonth(); err != nil {
-		const msg = "couldn't init the current month"
-		db.log.WithError(err).Error(msg)
-		return errors.Wrap(err, msg)
+		return errors.Wrap(err, "couldn't init the current month")
 	}
 
 	// Init a new month monthly at 00:00
@@ -131,9 +122,7 @@ func (db *DB) Prepare() error {
 		}
 	})
 	if err != nil {
-		const msg = "couldn't add a function to cron"
-		db.log.WithError(err).Error(msg)
-		return errors.Wrap(err, msg)
+		return errors.Wrap(err, "couldn't add a function to cron")
 	}
 
 	// Start cron
@@ -290,8 +279,7 @@ func (db *DB) addMonth(year int, month time.Month) error {
 	}
 	if !errors.Is(err, pg.ErrNoRows) {
 		// Unexpected error
-		db.log.WithError(err).Error("unexpected error: couldn't select the current month")
-		return err
+		return errors.Wrap(err, "couldn't check if the current month exists")
 	}
 
 	// We have to init the current month
@@ -302,9 +290,7 @@ func (db *DB) addMonth(year int, month time.Month) error {
 
 	currentMonth := &Month{Year: year, Month: month}
 	if err = db.db.Insert(currentMonth); err != nil {
-		const msg = "couldn't init the current month"
-		log.WithError(err).Error(msg)
-		return errors.Wrap(err, msg)
+		return errors.Wrap(err, "couldn't init the current month")
 	}
 
 	monthID := currentMonth.ID
@@ -321,8 +307,7 @@ func (db *DB) addMonth(year int, month time.Month) error {
 	}
 
 	if err = db.db.Insert(&days); err != nil {
-		log.WithError(err).Error("couldn't insert days for current month")
-		return errors.Wrap(err, "couldn't insert days for current month")
+		return errors.Wrap(err, "couldn't insert days for the current month")
 	}
 	log.Debug("days of the current month was successfully inited")
 

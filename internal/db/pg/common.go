@@ -7,21 +7,16 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // -----------------------------------------------------------------------------
 // Month
 // -----------------------------------------------------------------------------
 
-func (db DB) GetMonth(ctx context.Context, id uint) (month *db_common.Month, err error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithField("id", id)
-
+func (db DB) GetMonth(_ context.Context, id uint) (month *db_common.Month, err error) {
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
 		pgMonth, err := db.getMonth(tx, id)
 		if err != nil {
@@ -32,40 +27,24 @@ func (db DB) GetMonth(ctx context.Context, id uint) (month *db_common.Month, err
 	})
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			err = db_common.ErrMonthNotExist
-			log.Error(err)
-			return nil, err
+			return nil, db_common.ErrMonthNotExist
 		}
-
-		const msg = "couldn't select month with passed id"
-		log.WithError(err).Error(msg)
-		return nil, errors.Wrap(err, msg)
+		return nil, err
 	}
 
-	log.Debug("return the Month")
 	return month, nil
 }
 
-func (db DB) GetMonthID(ctx context.Context, year, month int) (uint, error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithFields(logrus.Fields{"year": year, "month": month})
-
+func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
 	m := &Month{}
 	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			err = db_common.ErrMonthNotExist
-			log.Error(err)
-			return 0, err
+			return 0, db_common.ErrMonthNotExist
 		}
-
-		const msg = "couldn't select Month with passed year and month"
-		log.WithError(err).Error(msg)
-		return 0, errors.Wrap(err, msg)
+		return 0, err
 	}
 
-	log = log.WithField("id", m.ID)
-	log.Debug("return the Month id")
 	return m.ID, nil
 }
 
@@ -76,8 +55,7 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 		if errors.Is(err, pg.ErrNoRows) {
 			return 0, db_common.ErrDayNotExist
 		}
-
-		return 0, errors.Wrap(err, "couldn't select day with passed id")
+		return 0, err
 	}
 
 	return day.MonthID, nil
@@ -85,28 +63,19 @@ func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, err
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(ctx context.Context, year int) ([]*db_common.Month, error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithField("year", year)
-
+func (db DB) GetMonths(_ context.Context, year int) ([]*db_common.Month, error) {
 	pgMonths := []*Month{}
 	err := db.db.Model(&pgMonths).
 		Where("year = ?", year).
 		Order("month ASC").
 		Select()
 	if err != nil {
-		const msg = "couldn't select months with passed year"
-		log.WithError(err).Error(msg)
-		return nil, errors.Wrap(err, msg)
-	}
-	if len(pgMonths) == 0 {
-		err := db_common.ErrYearNotExist
-		log.Error(err)
 		return nil, err
 	}
-	log = log.WithField("month_number", len(pgMonths))
+	if len(pgMonths) == 0 {
+		return nil, db_common.ErrYearNotExist
+	}
 
-	log.Debug("return all Months")
 	months := make([]*db_common.Month, 0, len(pgMonths))
 	for i := range pgMonths {
 		months = append(months, pgMonths[i].ToCommon())
@@ -118,10 +87,7 @@ func (db DB) GetMonths(ctx context.Context, year int) ([]*db_common.Month, error
 // Day
 // -----------------------------------------------------------------------------
 
-func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithField("id", id)
-
+func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
 	var (
 		day   *Day
 		year  int
@@ -146,37 +112,26 @@ func (db DB) GetDay(ctx context.Context, id uint) (*db_common.Day, error) {
 			Where("id = ?", day.MonthID).
 			Select(&year, &month)
 		if err != nil {
-			return errors.Wrap(err, "couldn't get year and month of Month which contains passed Day")
+			return errors.Wrap(err, "couldn't get year and month for Day")
 		}
 
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't get Day with passed id")
 		return nil, err
 	}
 
-	log.Debug("return Day")
 	return day.ToCommon(year, month), nil
 }
 
 func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithFields(logrus.Fields{"year": year, "month": "month", "day": day})
-
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
 		if errors.Is(err, db_common.ErrMonthNotExist) {
-			err = db_common.ErrMonthNotExist
-			log.Error(err)
-			return 0, err
+			return 0, db_common.ErrMonthNotExist
 		}
-
-		const msg = "couldn't define month id with passed year and month"
-		log.WithError(err).Error(msg)
-		return 0, errors.Wrap(err, msg)
+		return 0, errors.Wrap(err, "couldn't define month id with passed year and month")
 	}
-	log = log.WithField("month_id", monthID)
 
 	d := &Day{}
 	err = db.db.Model(d).
@@ -185,17 +140,11 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		Select()
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			err = db_common.ErrDayNotExist
-			log.Error(err)
-			return 0, err
+			return 0, db_common.ErrDayNotExist
 		}
-		const msg = "couldn't select day with passed id"
-		log.WithError(err).Error(msg)
-		return 0, errors.Wrap(err, msg)
+		return 0, err
 	}
-	log = log.WithField("day_id", d.ID)
 
-	log.Debug("return Day id")
 	return d.ID, nil
 }
 

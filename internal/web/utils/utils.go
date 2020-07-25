@@ -82,7 +82,7 @@ func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWr
 	respMsg string, code int, internalErr error) {
 
 	if internalErr != nil {
-		LogHTTPError(log, respMsg, code, internalErr)
+		LogInternalError(log, respMsg, internalErr)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -95,7 +95,6 @@ func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWr
 	json.NewEncoder(w).Encode(resp) // nolint:errcheck
 }
 
-func LogHTTPError(log logrus.FieldLogger, respMsg string, code int, internalErr error) {
-	log = log.WithFields(logrus.Fields{"msg": respMsg, "code": code, "error": internalErr})
-	log.Error("request error")
+func LogInternalError(log logrus.FieldLogger, respMsg string, internalErr error) {
+	log.WithFields(logrus.Fields{"msg": respMsg, "error": internalErr}).Error("request error")
 }

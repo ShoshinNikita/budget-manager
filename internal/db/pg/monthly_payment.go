@@ -5,23 +5,14 @@ import (
 
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(ctx context.Context, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithFields(logrus.Fields{
-		"month_id": args.MonthID, "title": args.Title, "type_id": args.TypeID, "cost": args.Cost,
-	})
-
+func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
-		err := db_common.ErrMonthNotExist
-		log.Error(err)
-		return 0, err
+		return 0, db_common.ErrMonthNotExist
 	}
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -39,11 +30,9 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args db_common.AddMonthlyPay
 		return nil
 	})
 	if err != nil {
-		log.WithError(err).Error("couldn't add a new Monthly Payment")
 		return 0, err
 	}
 
-	log.WithField("monthly_payment_id", id).Debug("a new Monthly Payment was successfully created")
 	return id, nil
 }
 
@@ -62,46 +51,32 @@ func (DB) addMonthlyPayment(tx *pg.Tx, args db_common.AddMonthlyPaymentArgs) (id
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(ctx context.Context, args db_common.EditMonthlyPaymentArgs) error {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithFields(logrus.Fields{
-		"id": args.ID, "new_title": args.Title, "new_type_id": args.TypeID, "new_cost": args.Cost,
-	})
-
+func (db DB) EditMonthlyPayment(_ context.Context, args db_common.EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(args.ID) {
-		err := db_common.ErrMonthlyPaymentNotExist
-		log.Error(err)
-		return err
+		return db_common.ErrMonthlyPaymentNotExist
 	}
 
-	mp := &MonthlyPayment{ID: args.ID}
-	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		err = tx.Select(mp)
-		if err != nil {
+	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+		mp := &MonthlyPayment{ID: args.ID}
+
+		if err := tx.Select(mp); err != nil {
 			if errors.Is(err, pg.ErrNoRows) {
 				return db_common.ErrMonthlyPaymentNotExist
 			}
-			return errors.Wrap(err, "couldn't get Monthly Payment with passed id")
+			return errors.Wrap(err, "couldn't select Monthly Payment to edit")
 		}
 
 		// Edit Monthly Payment
-		if err = db.editMonthlyPayment(tx, mp, args); err != nil {
+		if err := db.editMonthlyPayment(tx, mp, args); err != nil {
 			return err
 		}
 
 		// Recompute month budget
-		if err = db.recomputeMonth(tx, mp.MonthID); err != nil {
+		if err := db.recomputeMonth(tx, mp.MonthID); err != nil {
 			return errRecomputeBudget(err)
 		}
 		return nil
 	})
-	if err != nil {
-		log.WithError(err).Error("couldn't edit the Monthly Payment")
-		return err
-	}
-
-	log.Debug("the Monthly Payment was successfully edited")
-	return nil
 }
 
 func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args db_common.EditMonthlyPaymentArgs) error {
@@ -121,41 +96,30 @@ func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args db_common.EditM
 }
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
-func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
-	log := request_id.FromContextToLogger(ctx, db.log)
-	log = log.WithField("id", id)
-
+func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 	if !db.checkMonthlyPayment(id) {
-		err := db_common.ErrMonthlyPaymentNotExist
-		log.Error(err)
-		return err
+		return db_common.ErrMonthlyPaymentNotExist
 	}
 
-	mp := &MonthlyPayment{ID: id}
-	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+		mp := &MonthlyPayment{ID: id}
+
 		// Remove Monthly Payment
-		err = tx.Model(mp).Column("month_id").WherePK().Select()
+		err := tx.Model(mp).Column("month_id").WherePK().Select()
 		if err != nil {
 			// Monthly Payment must exist
-			return errors.Wrap(err, "couldn't select Monthly Payment with passed id")
+			return errors.Wrap(err, "couldn't select Monthly Payment to remove")
 		}
 
-		if err = tx.Delete(mp); err != nil {
+		if err := tx.Delete(mp); err != nil {
 			return err
 		}
 
 		// Recompute month budget
-		if err = db.recomputeMonth(tx, mp.MonthID); err != nil {
+		if err := db.recomputeMonth(tx, mp.MonthID); err != nil {
 			return errRecomputeBudget(err)
 		}
 
 		return nil
 	})
-	if err != nil {
-		log.WithError(err).Error("couldn't remove the Monthly Payment")
-		return err
-	}
-
-	log.Debug("the Monthly Payment was successfully removed")
-	return nil
 }
