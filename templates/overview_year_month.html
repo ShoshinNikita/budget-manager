@@ -979,6 +979,12 @@
 			dayElem.style.display = "block";
 			// Set day number in URL
 			location.hash = dayNumber;
+
+			// Focus new Spend title input
+			const newSpendForm = dayElem.querySelector(".detailed-info__days__day__spends__new-spend");
+			const newSpendTitle = newSpendForm.querySelector(".detailed-info__block__table__title");
+			const newSpendTitleInput = newSpendTitle.querySelector("input");
+			newSpendTitleInput.focus();
 		}
 
 		// ----------------------------------------------------
