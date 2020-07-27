@@ -1493,23 +1493,25 @@
 	<!-- Spend Autocompletion -->
 	<script>
 		// A special character which is added to option values in <datalist>.
-		// Use Braille Pattern Blank - https://www.compart.com/en/unicode/U+2800
-		const suggestionMark = "⠀";
+		// Use 'three-per-em space' - https://en.wikipedia.org/wiki/Whitespace_character
+		const suggestionMark = " ";
+		const suggestionRegexp = new RegExp(`${suggestionMark}•${suggestionMark}\\d+`);
 
 		/**
 		 * @param {string} title
 		 * @return {boolean}
 		 */
 		function isSuggestion(title) {
-			return title.length !== 0 && title[title.length - 1] === suggestionMark;
+			return suggestionRegexp.test(title);
 		}
 
 		/**
 		 * @param {string} title
+		 * @param {number} count
 		 * @return {string}
 		 */
-		function addSuggestionMark(title) {
-			return title + suggestionMark;
+		function addSuggestionMark(title, count) {
+			return title + `${suggestionMark}•${suggestionMark}${count}`;
 		}
 
 		/**
@@ -1517,7 +1519,7 @@
 		 * @return {string}
 		 */
 		function removeSuggestionMark(title) {
-			return title.substr(0, title.length - 1);
+			return title.replace(suggestionRegexp, "");
 		}
 
 		class SpendAutocompleter {
@@ -1531,15 +1533,21 @@
 			 */
 
 			/**
+			 * @typedef {Object} Counter
+			 * @property {number} count
+			 *
+			 * @typedef {Spend & Counter} SpendWithCounter
+			 */
+
+			/**
 			 * @param {number} dayID
 			 */
 			constructor(dayID) {
 				this.dayID = dayID;
-				/** @type {Spend[]} */
+				/** @type {SpendWithCounter[]} */
 				this.cachedSpends = [];
-				/** @type {(undefined|number)} */
-				this.getSpendsTimeoutID = undefined;
-
+				/** @type {?number} */
+				this.getSpendsTimeoutID = null;
 
 				this.titleInput = document.getElementById("new-spend-title-" + dayID);
 				this.titleInput.addEventListener("input", this.oninputListener.bind(this));
@@ -1578,28 +1586,39 @@
 			}
 
 			/**
-			 * Returns spends with passed title and remove all with duplicate titles leaving the newest ones
+			 * Get spends with passed title and unite duplicates (leave only newest). Spends are sorted by frequency
 			 * @param {string} title
-			 * @return {Spend[]}
+			 * @return {SpendWithCounter[]}
 			 */
 			async getSpends(title) {
 				const spends = await this.searchSpendsViaAPI(title);
 
-				// Remove duplicates
+				// Unite duplicates
+
+				/** @type {Object.<string, SpendWithCounter>} */
 				const uniqueSpends = {};
 				for (let spend of spends) {
-					if (uniqueSpends[spend.title]) continue;
+					if (uniqueSpends[spend.title]) {
+						uniqueSpends[spend.title].count++;
+						continue;
+					}
 					uniqueSpends[spend.title] = spend;
+					uniqueSpends[spend.title].count = 1;
 				}
 
-				// Sort in alphabetical order
+				// Sort by frequency
 
-				/** @type {Spend[]} */
-				let sortedSpends = [];
+				/** @type {SpendWithCounter[]} */
+				const sortedSpends = [];
 				for (let title in uniqueSpends) {
 					sortedSpends.push(uniqueSpends[title])
 				}
-				sortedSpends.sort((a, b) => a.title > b.title);
+				sortedSpends.sort((a, b) => {
+					if (a.count !== b.count) {
+						return a.count < b.count;
+					}
+					return a.title > b.title;
+				});
 
 				return sortedSpends;
 			}
@@ -1633,7 +1652,7 @@
 
 				for (let spend of this.cachedSpends) {
 					const option = document.createElement("option");
-					option.value = addSuggestionMark(spend.title);
+					option.value = addSuggestionMark(spend.title, spend.count);
 					this.spendDatalist.appendChild(option);
 				}
 			}
