@@ -624,10 +624,11 @@
 									So, ids without this suffix wouldn't be unique. We use day id instead of
 									day number because we pass into 'addSpend' function day id.
 								-->
-								<tr>
+								<tr class="detailed-info__days__day__spends__new-spend" data-day-id="{{ .ID }}">
 									<form onsubmit="addSpend(Number('{{ .ID }}'))">
 										<td class="detailed-info__block__table__title">
-											<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off">
+											<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off" list="spend-datalist-{{ .ID }}">
+											<datalist id="spend-datalist-{{ .ID }}"></datalist>
 										</td>
 										<td class="detailed-info__block__table__notes">
 											<input
@@ -978,6 +979,12 @@
 			dayElem.style.display = "block";
 			// Set day number in URL
 			location.hash = dayNumber;
+
+			// Focus new Spend title input
+			const newSpendForm = dayElem.querySelector(".detailed-info__days__day__spends__new-spend");
+			const newSpendTitle = newSpendForm.querySelector(".detailed-info__block__table__title");
+			const newSpendTitleInput = newSpendTitle.querySelector("input");
+			newSpendTitleInput.focus();
 		}
 
 		// ----------------------------------------------------
@@ -1487,6 +1494,201 @@
 			return s.replace(",", ".");
 		}
 
+	</script>
+
+	<!-- Spend Autocompletion -->
+	<script>
+		// A special character which is added to option values in <datalist>.
+		// Use 'three-per-em space' - https://en.wikipedia.org/wiki/Whitespace_character
+		const suggestionMark = " ";
+		const suggestionRegexp = new RegExp(`${suggestionMark}•${suggestionMark}\\d+`);
+
+		/**
+		 * @param {string} title
+		 * @return {boolean}
+		 */
+		function isSuggestion(title) {
+			return suggestionRegexp.test(title);
+		}
+
+		/**
+		 * @param {string} title
+		 * @param {number} count
+		 * @return {string}
+		 */
+		function addSuggestionMark(title, count) {
+			return title + `${suggestionMark}•${suggestionMark}${count}`;
+		}
+
+		/**
+		 * @param {string} title
+		 * @return {string}
+		 */
+		function removeSuggestionMark(title) {
+			return title.replace(suggestionRegexp, "");
+		}
+
+		class SpendAutocompleter {
+			/**
+			 * @typedef {Object} Spend
+			 * @property {string} title
+			 * @property {Object} type
+			 * @property {number} type.id
+			 * @property {string} type.name
+			 * @property {number} cost
+			 */
+
+			/**
+			 * @typedef {Object} Counter
+			 * @property {number} count
+			 *
+			 * @typedef {Spend & Counter} SpendWithCounter
+			 */
+
+			/**
+			 * @param {number} dayID
+			 */
+			constructor(dayID) {
+				this.dayID = dayID;
+				/** @type {SpendWithCounter[]} */
+				this.cachedSpends = [];
+				/** @type {?number} */
+				this.getSpendsTimeoutID = null;
+
+				this.titleInput = document.getElementById("new-spend-title-" + dayID);
+				this.titleInput.addEventListener("input", this.oninputListener.bind(this));
+
+				this.typeSelector = document.getElementById("new-spend-type-" + dayID);
+				this.costInput = document.getElementById("new-spend-cost-" + dayID);
+
+				this.spendDatalist = document.getElementById("spend-datalist-" + this.dayID);
+			}
+
+			/**
+			 * @param ev {Event}
+			 */
+			oninputListener(ev) {
+				const title = ev.target.value;
+
+				if (isSuggestion(title)) {
+					// User chose a suggestion. Remove the suggestion mark and complete it
+					ev.target.value = removeSuggestionMark(title);
+					this.completeSuggestion(ev.target.value)
+					return;
+				}
+
+				if (title.length < 3) {
+					this.clearSuggestionList();
+					return;
+				}
+
+				if (this.getSpendsTimeoutID) {
+					clearTimeout(this.getSpendsTimeoutID);
+				}
+				this.getSpendsTimeoutID = setTimeout(async () => {
+					this.cachedSpends = await this.getSpends(title);
+					this.updateSuggestionList();
+				}, 100);
+			}
+
+			/**
+			 * Get spends with passed title and unite duplicates (leave only newest). Spends are sorted by frequency
+			 * @param {string} title
+			 * @return {SpendWithCounter[]}
+			 */
+			async getSpends(title) {
+				const spends = await this.searchSpendsViaAPI(title);
+
+				// Unite duplicates
+
+				/** @type {Object.<string, SpendWithCounter>} */
+				const uniqueSpends = {};
+				for (let spend of spends) {
+					if (uniqueSpends[spend.title]) {
+						uniqueSpends[spend.title].count++;
+						continue;
+					}
+					uniqueSpends[spend.title] = spend;
+					uniqueSpends[spend.title].count = 1;
+				}
+
+				// Sort by frequency
+
+				/** @type {SpendWithCounter[]} */
+				const sortedSpends = [];
+				for (let title in uniqueSpends) {
+					sortedSpends.push(uniqueSpends[title])
+				}
+				sortedSpends.sort((a, b) => {
+					if (a.count !== b.count) {
+						return a.count < b.count;
+					}
+					return a.title > b.title;
+				});
+
+				return sortedSpends;
+			}
+
+			/**
+			 * Search spends with passed title via API. Spends are sorted by date from newest to oldest
+			 * @param {string} title
+			 * @return {Spend[]}
+			 */
+			async searchSpendsViaAPI(title) {
+				const params = new URLSearchParams({ "title": title, "sort": "date", "order": "desc" });
+
+				const spends = await fetch("/api/search/spends?" + params.toString()).
+					then(rawResp => rawResp.json()).
+					then(resp => {
+						if (!resp.success) {
+							throw resp.error;
+						}
+						return resp.spends;
+					}).
+					catch(err => console.error(err));
+
+				return spends || [];
+			}
+
+			/**
+			 * Update <datalist> with cached spends. Option values are marked with suggestion mark
+			 */
+			updateSuggestionList() {
+				this.clearSuggestionList();
+
+				for (let spend of this.cachedSpends) {
+					const option = document.createElement("option");
+					option.value = addSuggestionMark(spend.title, spend.count);
+					this.spendDatalist.appendChild(option);
+				}
+			}
+
+			clearSuggestionList() {
+				this.spendDatalist.innerHTML = "";
+			}
+
+			/**
+			 * Complete the suggestion by setting spend type and cost
+			 * @param {string} title - Title without suggestion mark
+			 */
+			completeSuggestion(title) {
+				for (let spend of this.cachedSpends) {
+					if (spend.title != title) continue;
+
+					this.typeSelector.value = spend.type ? spend.type.id : 0;
+					this.costInput.value = spend.cost;
+					break;
+				}
+			}
+		}
+
+		window.addEventListener("load", () => {
+			const elements = document.getElementsByClassName("detailed-info__days__day__spends__new-spend");
+			for (let elem of elements) {
+				const dayID = Number(elem.getAttribute("data-day-id"));
+				new SpendAutocompleter(dayID);
+			}
+		})
 	</script>
 </body>
 
