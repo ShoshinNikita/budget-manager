@@ -123,6 +123,17 @@
 			padding-right: 10px;
 		}
 
+		#detailed-info__block__table__copy-from-previous-month-button {
+			height: 30px;
+			margin-top: 30px;
+			text-align: center;
+		}
+
+		#detailed-info__block__table__copy-from-previous-month-button>input {
+			width: auto;
+			padding: 6px;
+		}
+
 		/* || Income */
 
 		#detailed-info__incomes {
@@ -458,6 +469,12 @@
 								</form>
 							</tr>
 						</table>
+
+						{{ if not .Incomes }}
+						<div id="detailed-info__block__table__copy-from-previous-month-button">
+							<input type="button" value="Copy from previous Month" onclick="copyIncomesFromPreviousMonth()">
+						</div>
+						{{ end }}
 					</div>
 				</div>
 
@@ -540,6 +557,12 @@
 								</form>
 							</tr>
 						</table>
+
+						{{ if not .MonthlyPayments }}
+						<div id="detailed-info__block__table__copy-from-previous-month-button">
+							<input type="button" value="Copy from previous Month" onclick="copyMonthlyPaymentsFromPreviousMonth()">
+						</div>
+						{{ end }}
 					</div>
 				</div>
 
@@ -1042,6 +1065,9 @@
 			sendRequest("DELETE", "/api/incomes", fields);
 		}
 
+		async function copyIncomesFromPreviousMonth() {
+		}
+
 		// Monthly Payments
 
 		function addMonthlyPayment() {
@@ -1099,6 +1125,9 @@
 
 			const fields = { "id": Number(id) };
 			sendRequest("DELETE", "/api/monthly-payments", fields);
+		}
+
+		async function copyMonthlyPaymentsFromPreviousMonth() {
 		}
 
 		// Spends
