@@ -123,6 +123,17 @@
 			padding-right: 10px;
 		}
 
+		#detailed-info__block__table__copy-from-previous-month-button {
+			height: 30px;
+			margin-top: 30px;
+			text-align: center;
+		}
+
+		#detailed-info__block__table__copy-from-previous-month-button>input {
+			width: auto;
+			padding: 6px;
+		}
+
 		/* || Income */
 
 		#detailed-info__incomes {
@@ -458,6 +469,12 @@
 								</form>
 							</tr>
 						</table>
+
+						{{ if not .Incomes }}
+						<div id="detailed-info__block__table__copy-from-previous-month-button">
+							<input type="button" value="Copy from previous Month" onclick="copyIncomesFromPreviousMonth()">
+						</div>
+						{{ end }}
 					</div>
 				</div>
 
@@ -540,6 +557,12 @@
 								</form>
 							</tr>
 						</table>
+
+						{{ if not .MonthlyPayments }}
+						<div id="detailed-info__block__table__copy-from-previous-month-button">
+							<input type="button" value="Copy from previous Month" onclick="copyMonthlyPaymentsFromPreviousMonth()">
+						</div>
+						{{ end }}
 					</div>
 				</div>
 
@@ -1042,6 +1065,23 @@
 			sendRequest("DELETE", "/api/incomes", fields);
 		}
 
+		async function copyIncomesFromPreviousMonth() {
+			const previousMonth = await getPreviousMonth();
+			if (!previousMonth) return;
+			const incomes = previousMonth.incomes;
+
+			for (const income of incomes) {
+				const fields = {
+					"month_id": MonthID,
+					"title": income.title,
+					"notes": income.notes || "",
+					"income": income.income,
+				};
+				await sendRequest("POST", "/api/incomes", fields, () => { });
+			}
+			location.reload()
+		}
+
 		// Monthly Payments
 
 		function addMonthlyPayment() {
@@ -1099,6 +1139,24 @@
 
 			const fields = { "id": Number(id) };
 			sendRequest("DELETE", "/api/monthly-payments", fields);
+		}
+
+		async function copyMonthlyPaymentsFromPreviousMonth() {
+			const previousMonth = await getPreviousMonth();
+			if (!previousMonth) return;
+			const monthlyPayments = previousMonth.monthly_payments;
+
+			for (const payment of monthlyPayments) {
+				const fields = {
+					"month_id": MonthID,
+					"title": payment.title,
+					"notes": payment.notes || "",
+					"type_id": payment.type_id || 0,
+					"cost": payment.cost,
+				};
+				await sendRequest("POST", "/api/monthly-payments", fields, () => { });
+			}
+			location.reload()
 		}
 
 		// Spends
@@ -1222,40 +1280,42 @@
 			sendRequest("DELETE", "/api/spend-types", fields, hideRemovedSpendType);
 		}
 
+		async function getPreviousMonth() {
+			let year = Year, month = MonthNumber - 1;
+			if (month === 0) {
+				year--;
+				month = 12;
+			}
+
+			const params = new URLSearchParams({ "year": year, "month": month });
+			return fetch("/api/months/date?" + params.toString()).
+				then(rawResp => rawResp.json()).
+				then(resp => {
+					if (!resp.success) throw resp.error;
+					return resp.month;
+				}).
+				catch(err => processError(err))
+		}
+
 		/**
 		 * @param {string} method - HTTP method (POST or PUT)
 		 * @param {string} url - request url
 		 * @param {Object} fields - additional json fields (like month id, day id and etc.)
 		 * @param {Function} successHandler - success handler (page are reloaded by default)
 		 */
-		function sendRequest(method, url, fields, successHandler = () => { location.reload() }) {
-			if (!fields) {
-				return;
-			}
-
-			fetch(url, {
+		async function sendRequest(method, url, fields, successHandler = () => { location.reload() }) {
+			return fetch(url, {
 				method: method,
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(fields)
-			}).then(resp => {
-				if (resp.status === 200 || resp.status === 201) {
-					return { success: true };
-				}
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(fields || null)
+			}).
+				then(rawResp => rawResp.json()).
+				then(resp => {
+					if (!resp.success) throw resp.error;
 
-				// Retunr an error
-				return resp.json()
-			}).then(resp => {
-				if (resp.success) {
 					successHandler();
-					return;
-				}
 
-				processError(resp.error);
-			}).catch(err => {
-				processError(err);
-			})
+				}).catch(err => processError(err));
 		}
 
 		// ----------------------------------------------------
@@ -1640,9 +1700,7 @@
 				const spends = await fetch("/api/search/spends?" + params.toString()).
 					then(rawResp => rawResp.json()).
 					then(resp => {
-						if (!resp.success) {
-							throw resp.error;
-						}
+						if (!resp.success) throw resp.error;
 						return resp.spends;
 					}).
 					catch(err => console.error(err));
