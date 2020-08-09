@@ -12,7 +12,7 @@ github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.9.0
 ## explicit
 github.com/fatih/color
-# github.com/go-pg/migrations/v7 v7.1.10
+# github.com/go-pg/migrations/v7 v7.1.11
 ## explicit
 github.com/go-pg/migrations/v7
 # github.com/go-pg/pg/v9 v9.1.6
@@ -24,13 +24,12 @@ github.com/go-pg/pg/v9/internal/pool
 github.com/go-pg/pg/v9/orm
 github.com/go-pg/pg/v9/pgjson
 github.com/go-pg/pg/v9/types
-# github.com/go-pg/urlstruct v0.4.0
+# github.com/go-pg/urlstruct v0.5.1
+## explicit
 github.com/go-pg/urlstruct
 # github.com/go-pg/zerochecker v0.2.0
-## explicit
 github.com/go-pg/zerochecker
 # github.com/golang/protobuf v1.4.2
-## explicit
 github.com/golang/protobuf/proto
 # github.com/gorilla/mux v1.7.4
 ## explicit
@@ -56,7 +55,6 @@ github.com/pmezard/go-difflib/difflib
 ## explicit
 github.com/robfig/cron/v3
 # github.com/segmentio/encoding v0.1.14
-## explicit
 github.com/segmentio/encoding/ascii
 github.com/segmentio/encoding/json
 # github.com/sirupsen/logrus v1.6.0
@@ -65,7 +63,7 @@ github.com/sirupsen/logrus
 # github.com/stretchr/objx v0.1.1
 ## explicit
 github.com/stretchr/objx
-# github.com/stretchr/testify v1.5.1
+# github.com/stretchr/testify v1.6.1
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/mock
@@ -80,7 +78,7 @@ github.com/vmihailenco/msgpack/v4/codes
 github.com/vmihailenco/tagparser
 github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
-# golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
+# golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 ## explicit
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
@@ -88,7 +86,7 @@ golang.org/x/crypto/pbkdf2
 # golang.org/x/net v0.0.0-20200707034311-ab3426394381
 ## explicit
 golang.org/x/net/context
-# golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae
+# golang.org/x/sys v0.0.0-20200808120158-1030fc2bf1d9
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -105,7 +103,6 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
 # google.golang.org/protobuf v1.25.0
-## explicit
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
@@ -132,7 +129,7 @@ google.golang.org/protobuf/reflect/protoreflect
 google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
-# gopkg.in/yaml.v2 v2.2.4
-gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3
 # mellium.im/sasl v0.2.1
 mellium.im/sasl

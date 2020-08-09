@@ -82,12 +82,12 @@ func addFields(sinfo *StructInfo, typ reflect.Type, baseIndex []int) {
 				continue
 			}
 
-			addFields(sinfo, sfType, sf.Index)
-
 			if isUnmarshaler(reflect.PtrTo(sfType)) {
 				index := joinIndex(baseIndex, sf.Index)
 				sinfo.unmarshalerIndexes = append(sinfo.unmarshalerIndexes, index)
 			}
+
+			addFields(sinfo, sfType, joinIndex(baseIndex, sf.Index))
 		} else {
 			addField(sinfo, sf, baseIndex)
 		}

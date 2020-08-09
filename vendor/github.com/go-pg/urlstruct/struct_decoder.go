@@ -2,6 +2,7 @@ package urlstruct
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"reflect"
 	"strings"
@@ -93,6 +94,13 @@ func (d *structDecoder) mapDecoder(name string) *structDecoder {
 }
 
 func (d *structDecoder) decodeParam(ctx context.Context, name string, values []string) error {
+	if err := d._decodeParam(ctx, name, values); err != nil {
+		return fmt.Errorf("urlstruct: can't decode %q: %w", name, err)
+	}
+	return nil
+}
+
+func (d *structDecoder) _decodeParam(ctx context.Context, name string, values []string) error {
 	if field := d.sinfo.Field(name); field != nil && !field.noDecode {
 		return field.scanValue(field.Value(d.v), values)
 	}
