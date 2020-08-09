@@ -1151,7 +1151,7 @@
 					"month_id": MonthID,
 					"title": payment.title,
 					"notes": payment.notes || "",
-					"type_id": payment.type_id || 0,
+					"type_id": payment.type ? payment.type.id : 0,
 					"cost": payment.cost,
 				};
 				await sendRequest("POST", "/api/monthly-payments", fields, () => { });
