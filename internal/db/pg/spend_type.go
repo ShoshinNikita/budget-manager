@@ -60,28 +60,40 @@ func (db DB) GetSpendTypes(_ context.Context) ([]*common.SpendType, error) {
 }
 
 // AddSpendType adds new Spend Type
-func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err error) {
-	spendType := &SpendType{Name: name}
+func (db DB) AddSpendType(_ context.Context, args common.AddSpendTypeArgs) (id uint, err error) {
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
-		_, err := tx.Model(spendType).Returning("id").Insert()
-		return err
+		spendType := &SpendType{
+			Name:     args.Name,
+			ParentID: args.ParentID,
+		}
+		if _, err := tx.Model(spendType).Returning("id").Insert(); err != nil {
+			return err
+		}
+		id = spendType.ID
+
+		return nil
 	})
 	if err != nil {
 		return 0, err
 	}
 
-	return spendType.ID, nil
+	return id, nil
 }
 
 // EditSpendType modifies existing Spend Type
-func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
-	if !db.checkSpendType(id) {
+func (db DB) EditSpendType(_ context.Context, args common.EditSpendTypeArgs) error {
+	if !db.checkSpendType(args.ID) {
 		return common.ErrSpendTypeNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		query := tx.Model((*SpendType)(nil)).Where("id = ?", id)
-		query = query.Set("name = ?", newName)
+		query := tx.Model((*SpendType)(nil)).Where("id = ?", args.ID)
+		if args.Name != nil {
+			query = query.Set("name = ?", *args.Name)
+		}
+		if args.ParentID != nil {
+			query = query.Set("parent_id = ?", *args.ParentID)
+		}
 
 		_, err := query.Update()
 		return err

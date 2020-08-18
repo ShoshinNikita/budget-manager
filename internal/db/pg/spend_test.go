@@ -95,7 +95,7 @@ func TestEditSpend(t *testing.T) {
 
 	// Add Spend Types
 	for _, name := range []string{"first", "second"} {
-		_, err := db.AddSpendType(context.Background(), name)
+		_, err := db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: name})
 		require.Nil(err)
 	}
 

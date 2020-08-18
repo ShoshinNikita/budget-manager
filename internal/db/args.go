@@ -66,6 +66,21 @@ type EditSpendArgs struct {
 }
 
 // ----------------------------------------------------
+// Spend
+// ----------------------------------------------------
+
+type AddSpendTypeArgs struct {
+	Name     string
+	ParentID uint // optional
+}
+
+type EditSpendTypeArgs struct {
+	ID       uint
+	Name     *string
+	ParentID *uint
+}
+
+// ----------------------------------------------------
 // Search
 // ----------------------------------------------------
 

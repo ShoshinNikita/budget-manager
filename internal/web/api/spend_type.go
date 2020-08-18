@@ -20,8 +20,8 @@ type SpendTypesHandlers struct {
 
 type SpendTypesDB interface {
 	GetSpendTypes(ctx context.Context) ([]*db.SpendType, error)
-	AddSpendType(ctx context.Context, name string) (id uint, err error)
-	EditSpendType(ctx context.Context, id uint, newName string) error
+	AddSpendType(ctx context.Context, args db.AddSpendTypeArgs) (id uint, err error)
+	EditSpendType(ctx context.Context, args db.EditSpendTypeArgs) error
 	RemoveSpendType(ctx context.Context, id uint) error
 }
 
@@ -79,7 +79,10 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 
 	// Process
 	log.Debug("add Spend Type")
-	id, err := h.db.AddSpendType(ctx, strings.TrimSpace(req.Name))
+	args := db.AddSpendTypeArgs{
+		Name: strings.TrimSpace(req.Name),
+	}
+	id, err := h.db.AddSpendType(ctx, args)
 	if err != nil {
 		utils.ProcessError(ctx, log, w, "couldn't add Spend Type", http.StatusInternalServerError, err)
 		return
@@ -123,7 +126,12 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 
 	// Process
 	log.Debug("edit Spend Type")
-	err := h.db.EditSpendType(ctx, req.ID, strings.TrimSpace(req.Name))
+	newName := strings.TrimSpace(req.Name)
+	args := db.EditSpendTypeArgs{
+		ID:   req.ID,
+		Name: &newName,
+	}
+	err := h.db.EditSpendType(ctx, args)
 	if err != nil {
 		switch err {
 		case db.ErrSpendTypeNotExist:

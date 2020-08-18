@@ -26,7 +26,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 	)
 	require.Nil(err)
 
-	_, err = db.AddSpendType(context.Background(), "spend type")
+	_, err = db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: "spend type"})
 	require.Nil(err)
 
 	payments := []MonthlyPayment{

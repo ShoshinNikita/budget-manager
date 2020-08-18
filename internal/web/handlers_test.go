@@ -366,7 +366,7 @@ func TestHandlers_MonthlyPayment(t *testing.T) {
 
 	// Add Spend Types for testing
 	for _, name := range []string{"first", "second"} {
-		_, err := server.db.AddSpendType(context.Background(), name)
+		_, err := server.db.AddSpendType(context.Background(), db.AddSpendTypeArgs{Name: name})
 		requireGlobal.Nil(err)
 	}
 
@@ -698,7 +698,7 @@ func TestHandlers_Spend(t *testing.T) {
 
 	// Add Spend Types for testing
 	for _, name := range []string{"first", "second"} {
-		_, err := server.db.AddSpendType(context.Background(), name)
+		_, err := server.db.AddSpendType(context.Background(), db.AddSpendTypeArgs{Name: name})
 		requireGlobal.Nil(err)
 	}
 
