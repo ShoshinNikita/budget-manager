@@ -649,6 +649,14 @@
 			form.submit();
 		}
 	</script>
+
+	<!-- Link Formatter -->
+	<script src="/static/js/link-formatter.js"></script>
+	<script>
+		window.addEventListener("load", () => {
+			formatLinks(".search__results__table__notes");
+		})
+	</script>
 </body>
 
 </html>
