@@ -1556,6 +1556,14 @@
 
 	</script>
 
+	<!-- Link Formatter -->
+	<script src="/static/js/link-formatter.js"></script>
+	<script>
+		window.addEventListener("load", () => {
+			formatLinks(".detailed-info__block__table__notes:not(.noselect)");
+		})
+	</script>
+
 	<!-- Spend Autocompletion -->
 	<script>
 		// A special character which is added to option values in <datalist>.
