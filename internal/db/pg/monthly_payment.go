@@ -24,7 +24,7 @@ func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPayme
 
 		// Recompute month budget
 		if err = db.recomputeMonth(tx, args.MonthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
@@ -73,7 +73,7 @@ func (db DB) EditMonthlyPayment(_ context.Context, args db_common.EditMonthlyPay
 
 		// Recompute month budget
 		if err := db.recomputeMonth(tx, mp.MonthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 		return nil
 	})
@@ -117,7 +117,7 @@ func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 
 		// Recompute month budget
 		if err := db.recomputeMonth(tx, mp.MonthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil

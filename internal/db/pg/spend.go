@@ -29,7 +29,7 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 		}
 
 		if err := db.recomputeMonth(tx, monthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
@@ -80,7 +80,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 		}
 
 		if err := db.recomputeMonth(tx, monthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
@@ -130,9 +130,22 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		}
 
 		if err := db.recomputeMonth(tx, monthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
 	})
+}
+
+func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, error) {
+	day := &Day{ID: dayID}
+	err := tx.Model(day).Column("month_id").WherePK().Select()
+	if err != nil {
+		if errors.Is(err, pg.ErrNoRows) {
+			return 0, db_common.ErrDayNotExist
+		}
+		return 0, err
+	}
+
+	return day.MonthID, nil
 }

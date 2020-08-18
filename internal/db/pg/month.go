@@ -12,10 +12,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-// -----------------------------------------------------------------------------
-// Month
-// -----------------------------------------------------------------------------
-
 func (db DB) GetMonth(_ context.Context, id uint) (month *db_common.Month, err error) {
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
 		pgMonth, err := db.getMonth(tx, id)
@@ -48,19 +44,6 @@ func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
 	return m.ID, nil
 }
 
-func (DB) getMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (uint, error) {
-	day := &Day{ID: dayID}
-	err := tx.Model(day).Column("month_id").WherePK().Select()
-	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
-			return 0, db_common.ErrDayNotExist
-		}
-		return 0, err
-	}
-
-	return day.MonthID, nil
-}
-
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
 func (db DB) GetMonths(_ context.Context, year int) ([]*db_common.Month, error) {
@@ -83,76 +66,14 @@ func (db DB) GetMonths(_ context.Context, year int) ([]*db_common.Month, error) 
 	return months, nil
 }
 
-// -----------------------------------------------------------------------------
-// Day
-// -----------------------------------------------------------------------------
-
-func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
-	var (
-		day   *Day
-		year  int
-		month time.Month
-	)
-	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
-		day = &Day{ID: id}
-		err := tx.Model(day).
-			Relation("Spends", orderByID).
-			Relation("Spends.Type").
-			WherePK().Select()
+// nolint:funlen
+func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) (err error) {
+	defer func() {
 		if err != nil {
-			if errors.Is(err, pg.ErrNoRows) {
-				return db_common.ErrDayNotExist
-			}
-			return err
+			err = errors.Wrap(err, "couldn't recompute the month budget")
 		}
+	}()
 
-		// Get year and month
-		err = tx.Model((*Month)(nil)).
-			Column("year", "month").
-			Where("id = ?", day.MonthID).
-			Select(&year, &month)
-		if err != nil {
-			return errors.Wrap(err, "couldn't get year and month for Day")
-		}
-
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return day.ToCommon(year, month), nil
-}
-
-func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {
-	monthID, err := db.GetMonthID(ctx, year, month)
-	if err != nil {
-		if errors.Is(err, db_common.ErrMonthNotExist) {
-			return 0, db_common.ErrMonthNotExist
-		}
-		return 0, errors.Wrap(err, "couldn't define month id with passed year and month")
-	}
-
-	d := &Day{}
-	err = db.db.Model(d).
-		Column("id").
-		Where("month_id = ? AND day = ?", monthID, day).
-		Select()
-	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
-			return 0, db_common.ErrDayNotExist
-		}
-		return 0, err
-	}
-
-	return d.ID, nil
-}
-
-// -----------------------------------------------------------------------------
-// Internal methods
-// -----------------------------------------------------------------------------
-
-func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) error {
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
 		return errors.Wrap(err, "couldn't select month")
@@ -250,57 +171,4 @@ func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
 
 func orderByID(q *orm.Query) (*orm.Query, error) {
 	return q.Order("id ASC"), nil
-}
-
-// Checks
-
-// checkMonth checks if Month with passed id exists
-func (db DB) checkMonth(id uint) (ok bool) {
-	m := &Month{ID: id}
-	return db.checkModel(m)
-}
-
-// checkDay checks if Dat with passed id exists
-func (db DB) checkDay(id uint) (ok bool) {
-	d := &Day{ID: id}
-	return db.checkModel(d)
-}
-
-// checkSpendType checks if Spend Type with passed id exists
-func (db DB) checkIncome(id uint) (ok bool) {
-	st := &Income{ID: id}
-	return db.checkModel(st)
-}
-
-// checkSpendType checks if Spend Type with passed id exists
-func (db DB) checkMonthlyPayment(id uint) (ok bool) {
-	st := &MonthlyPayment{ID: id}
-	return db.checkModel(st)
-}
-
-// checkSpendType checks if Spend Type with passed id exists
-func (db DB) checkSpend(id uint) (ok bool) {
-	st := &Spend{ID: id}
-	return db.checkModel(st)
-}
-
-// checkSpendType checks if Spend Type with passed id exists
-func (db DB) checkSpendType(id uint) (ok bool) {
-	st := &SpendType{ID: id}
-	return db.checkModel(st)
-}
-
-// checkModel checks if model with primary key exists
-func (db DB) checkModel(model interface{}) (ok bool) {
-	c, err := db.db.Model(model).WherePK().Count()
-	if c == 0 || err != nil {
-		return false
-	}
-	return true
-}
-
-// Other
-
-func errRecomputeBudget(err error) error {
-	return errors.Wrap(err, "couldn't recompute the month budget")
 }

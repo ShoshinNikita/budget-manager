@@ -24,7 +24,7 @@ func (db DB) AddIncome(_ context.Context, args db_common.AddIncomeArgs) (incomeI
 
 		// Recompute Month budget
 		if err = db.recomputeMonth(tx, args.MonthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
@@ -74,7 +74,7 @@ func (db DB) EditIncome(_ context.Context, args db_common.EditIncomeArgs) error 
 
 		// Recompute Month budget
 		if err := db.recomputeMonth(tx, in.MonthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
@@ -125,7 +125,7 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 
 		// Recompute Month budget
 		if err := db.recomputeMonth(tx, monthID); err != nil {
-			return errRecomputeBudget(err)
+			return err
 		}
 
 		return nil
