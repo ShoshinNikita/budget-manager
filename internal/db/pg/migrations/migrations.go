@@ -13,11 +13,12 @@ func NewMigrator() *migrations.Collection {
 }
 
 // Number of registered migrations. It can be used to check whether we registered all migrations
-const MigrationNumber = 3
+const MigrationNumber = 4
 
 // RegisterMigrations registers all migrations
 func registerMigrations(migrator *migrations.Collection) {
 	registerInit(migrator)
 	registerAddNotNull(migrator)
 	registerAddForeignKeys(migrator)
+	registerAddParentIDToSpendTypes(migrator)
 }

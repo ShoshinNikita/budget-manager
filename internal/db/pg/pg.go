@@ -212,6 +212,7 @@ func (db *DB) checkCreatedTables() error {
 			columns: []column{
 				{Name: "id", Type: "bigint", Default: "nextval('spend_types_id_seq'::regclass)"},
 				{Name: "name", Type: "text"},
+				{Name: "parent_id", Type: "bigint", IsNull: true},
 			},
 		},
 		{
@@ -235,7 +236,7 @@ func (db *DB) checkCreatedTables() error {
 			return errors.Wrapf(err, "couldn't get description of table '%s'", table.name)
 		}
 
-		err = errors.Wrapf(err, "table has wrong columns: '%+v', expected: '%+v'", columnsInDB, table.columns)
+		err = errors.Errorf("table '%s' has wrong columns: '%+v', expected: '%+v'", table.name, columnsInDB, table.columns)
 		if len(table.columns) != len(columnsInDB) {
 			return err
 		}
