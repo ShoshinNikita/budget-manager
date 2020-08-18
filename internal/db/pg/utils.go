@@ -19,46 +19,40 @@ func ping(db *pg.DB) (ok bool) {
 	return err == nil
 }
 
-// checkMonth checks if Month with passed id exists
+// checkMonth checks if a Month with passed id exists
 func (db DB) checkMonth(id uint) (ok bool) {
-	m := &Month{ID: id}
-	return db.checkModel(m)
+	return db.checkModel((*Month)(nil), id)
 }
 
-// checkDay checks if Dat with passed id exists
+// checkDay checks if a Day with passed id exists
 func (db DB) checkDay(id uint) (ok bool) {
-	d := &Day{ID: id}
-	return db.checkModel(d)
+	return db.checkModel((*Day)(nil), id)
 }
 
-// checkSpendType checks if Spend Type with passed id exists
+// checkIncome checks if an Income with passed id exists
 func (db DB) checkIncome(id uint) (ok bool) {
-	st := &Income{ID: id}
-	return db.checkModel(st)
+	return db.checkModel((*Income)(nil), id)
 }
 
-// checkSpendType checks if Spend Type with passed id exists
+// checkMonthlyPayment checks if a Monthly Payment with passed id exists
 func (db DB) checkMonthlyPayment(id uint) (ok bool) {
-	st := &MonthlyPayment{ID: id}
-	return db.checkModel(st)
+	return db.checkModel((*MonthlyPayment)(nil), id)
 }
 
-// checkSpendType checks if Spend Type with passed id exists
+// checkSpend checks if a Spend with passed id exists
 func (db DB) checkSpend(id uint) (ok bool) {
-	st := &Spend{ID: id}
-	return db.checkModel(st)
+	return db.checkModel((*Spend)(nil), id)
 }
 
-// checkSpendType checks if Spend Type with passed id exists
+// checkSpendType checks if a Spend Type with passed id exists
 func (db DB) checkSpendType(id uint) (ok bool) {
-	st := &SpendType{ID: id}
-	return db.checkModel(st)
+	return db.checkModel((*SpendType)(nil), id)
 }
 
-// checkModel checks if model with primary key exists
-func (db DB) checkModel(model interface{}) (ok bool) {
-	c, err := db.db.Model(model).WherePK().Count()
-	if c == 0 || err != nil {
+// checkModel checks if a model with passed id exists
+func (db DB) checkModel(model interface{}, id uint) (ok bool) {
+	c, err := db.db.Model(model).Where("id = ?", id).Count()
+	if err != nil || c == 0 {
 		return false
 	}
 	return true
