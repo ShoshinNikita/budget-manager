@@ -79,6 +79,7 @@ type Spend struct {
 
 // SpendType contains information about spend type
 type SpendType struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	ParentID uint   `json:"parent_id"`
 }

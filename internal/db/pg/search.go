@@ -34,10 +34,7 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 		}
 		if pgSpends[i].Type.ID != 0 {
 			// Don't check if a name is empty because Spend Types with non-zero id always have a name
-			s.Type = &common.SpendType{
-				ID:   pgSpends[i].Type.ID,
-				Name: pgSpends[i].Type.Name,
-			}
+			s.Type = pgSpends[i].Type.ToCommon()
 		}
 		spends = append(spends, s)
 	}
@@ -55,10 +52,7 @@ type searchSpendsModel struct {
 	Title string
 	Notes string
 	Cost  money.Money
-	Type  struct {
-		ID   uint
-		Name string
-	}
+	Type  SpendType
 }
 
 // buildSearchSpendsQuery builds a query to search for spends
@@ -99,6 +93,7 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Q
 		ColumnExpr("spend.cost AS cost").
 		ColumnExpr("spend_type.id AS type__id").
 		ColumnExpr("spend_type.name AS type__name").
+		ColumnExpr("spend_type.parent_id AS type__parent_id").
 		//
 		Join("INNER JOIN days AS day ON day.id = spend.day_id").
 		Join("INNER JOIN months AS month ON month.id = day.month_id").

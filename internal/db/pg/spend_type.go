@@ -13,8 +13,9 @@ import (
 type SpendType struct {
 	tableName struct{} `pg:"spend_types"`
 
-	ID   uint   `pg:"id,pk"`
-	Name string `pg:"name"`
+	ID       uint   `pg:"id,pk"`
+	Name     string `pg:"name"`
+	ParentID uint   `pg:"parent_id"`
 }
 
 // ToCommon converts SpendType to common SpendType structure from
@@ -24,8 +25,9 @@ func (s *SpendType) ToCommon() *common.SpendType {
 		return nil
 	}
 	return &common.SpendType{
-		ID:   s.ID,
-		Name: s.Name,
+		ID:       s.ID,
+		Name:     s.Name,
+		ParentID: s.ParentID,
 	}
 }
 
