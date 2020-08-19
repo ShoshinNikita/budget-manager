@@ -5,13 +5,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 
-	pg_migrations "github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 )
 
 const (
@@ -70,8 +69,6 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 	return db, nil
 }
 
-const migrationTable = "migrations"
-
 // Prepare prepares the database:
 //   - create tables
 //   - init tables (add days for current month if needed)
@@ -79,13 +76,12 @@ const migrationTable = "migrations"
 //
 func (db *DB) Prepare() error {
 	// Create a new migrator
-	migrator := migrations.NewCollection().SetTableName(migrationTable).DisableSQLAutodiscover(true)
+	migrator := migrations.NewMigrator()
 
-	// Register migrations
-	pg_migrations.RegisterMigrations(migrator)
-	if len(migrator.Migrations()) != pg_migrations.MigrationNumber {
+	// Check number of migrations
+	if len(migrator.Migrations()) != migrations.MigrationNumber {
 		return errors.Errorf("invalid number of registered migrations: %d (want %d)",
-			len(migrator.Migrations()), pg_migrations.MigrationNumber)
+			len(migrator.Migrations()), migrations.MigrationNumber)
 	}
 
 	// Init migration table
