@@ -28,7 +28,7 @@ func (db DB) AddIncome(_ context.Context, args db_common.AddIncomeArgs) (id uint
 		}
 		id = income.ID
 
-		return db.recomputeMonth(tx, args.MonthID)
+		return db.recomputeAndUpdateMonth(tx, args.MonthID)
 	})
 	if err != nil {
 		return 0, err
@@ -63,7 +63,7 @@ func (db DB) EditIncome(_ context.Context, args db_common.EditIncomeArgs) error 
 			return err
 		}
 
-		return db.recomputeMonth(tx, monthID)
+		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
 }
 
@@ -84,7 +84,7 @@ func (db DB) RemoveIncome(_ context.Context, id uint) error {
 			return err
 		}
 
-		return db.recomputeMonth(tx, monthID)
+		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
 }
 

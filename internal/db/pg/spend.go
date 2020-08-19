@@ -33,7 +33,7 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 			return err
 		}
 
-		return db.recomputeMonth(tx, monthID)
+		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
 	if err != nil {
 		return 0, err
@@ -79,7 +79,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 		if err != nil {
 			return err
 		}
-		return db.recomputeMonth(tx, monthID)
+		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
 }
 
@@ -104,7 +104,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		if err != nil {
 			return err
 		}
-		return db.recomputeMonth(tx, monthID)
+		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
 }
 

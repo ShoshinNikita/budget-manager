@@ -111,8 +111,7 @@ func (db *DB) initMonth(year int, month time.Month) error {
 	return nil
 }
 
-// nolint:funlen
-func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) (err error) {
+func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 	defer func() {
 		if err != nil {
 			err = errors.Wrap(err, "couldn't recompute the month budget")
@@ -124,44 +123,62 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) (err error) {
 		return errors.Wrap(err, "couldn't select month")
 	}
 
-	// Update Total Income
-	m.TotalIncome = func() money.Money {
-		var income money.Money
-		for _, in := range m.Incomes {
-			income = income.Add(in.Income)
+	m = recomputeMonth(m)
+
+	// Update Month
+	query := tx.Model((*Month)(nil)).Where("id = ?", m.ID)
+	query = query.Set("daily_budget = ?", m.DailyBudget)
+	query = query.Set("total_income = ?", m.TotalIncome)
+	query = query.Set("total_spend = ?", m.TotalSpend)
+	query = query.Set("result = ?", m.Result)
+	if _, err := query.Update(); err != nil {
+		return errors.Wrap(err, "couldn't update month")
+	}
+
+	// Update Days
+	for _, day := range m.Days {
+		query := tx.Model((*Day)(nil)).Where("id = ?", day.ID).Set("saldo = ?", day.Saldo)
+		if _, err := query.Update(); err != nil {
+			return errors.Wrap(err, "couldn't update days")
 		}
-		return income
-	}()
+	}
+
+	return nil
+}
+
+func recomputeMonth(m *Month) *Month {
+	// Update Total Income
+	m.TotalIncome = 0
+	for _, in := range m.Incomes {
+		m.TotalIncome = m.TotalIncome.Add(in.Income)
+	}
 
 	// Update Total Spends and Daily Budget
 
-	monthlyPaymentCost := func() money.Money {
-		var cost money.Money
-		for _, mp := range m.MonthlyPayments {
-			cost = cost.Sub(mp.Cost)
+	var monthlyPaymentsCost money.Money
+	for _, mp := range m.MonthlyPayments {
+		monthlyPaymentsCost = monthlyPaymentsCost.Sub(mp.Cost)
+	}
+
+	var spendsCost money.Money
+	for _, day := range m.Days {
+		if day == nil {
+			continue
 		}
-		return cost
-	}()
-	spendCost := func() money.Money {
-		var cost money.Money
-		for _, day := range m.Days {
-			if day == nil {
+		for _, spend := range day.Spends {
+			if spend == nil {
 				continue
 			}
-			for _, spend := range day.Spends {
-				if spend == nil {
-					continue
-				}
-				cost = cost.Sub(spend.Cost)
-			}
+			spendsCost = spendsCost.Sub(spend.Cost)
 		}
-		return cost
-	}()
+	}
 
 	date := time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
+	daysNumber := daysInMonth(date.Year(), date.Month())
+
 	// Use "Add" because monthlyPaymentCost and TotalSpend are negative
-	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentCost).Divide(int64(daysInMonth(date.Year(), date.Month())))
-	m.TotalSpend = monthlyPaymentCost.Add(spendCost)
+	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentsCost).Divide(int64(daysNumber))
+	m.TotalSpend = monthlyPaymentsCost.Add(spendsCost)
 	m.Result = m.TotalIncome.Add(m.TotalSpend)
 
 	// Update Saldos (it is accumulated)
@@ -181,19 +198,7 @@ func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) (err error) {
 		saldo = m.Days[i].Saldo + m.DailyBudget
 	}
 
-	// Update Month
-	err = tx.Update(m)
-	if err != nil {
-		return errors.Wrap(err, "couldn't update month")
-	}
-
-	// Update Days
-	_, err = tx.Model(&m.Days).Update()
-	if err != nil {
-		return errors.Wrap(err, "couldn't update days")
-	}
-
-	return nil
+	return m
 }
 
 func (DB) getMonth(tx *pg.Tx, id uint) (*Month, error) {
