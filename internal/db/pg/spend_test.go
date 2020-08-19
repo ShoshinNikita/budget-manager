@@ -130,11 +130,13 @@ func TestEditSpend(t *testing.T) {
 		}
 
 		args := db_common.EditSpendArgs{
-			ID:     sp.edited.ID,
-			Title:  &sp.edited.Title,
-			TypeID: &sp.edited.TypeID,
-			Notes:  &sp.edited.Notes,
-			Cost:   &sp.edited.Cost,
+			ID:    sp.edited.ID,
+			Title: &sp.edited.Title,
+			Notes: &sp.edited.Notes,
+			Cost:  &sp.edited.Cost,
+		}
+		if sp.origin.TypeID != sp.edited.TypeID {
+			args.TypeID = &sp.edited.TypeID
 		}
 		err := db.EditSpend(context.Background(), args)
 		require.Nil(err)

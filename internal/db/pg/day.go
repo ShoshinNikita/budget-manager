@@ -12,17 +12,15 @@ import (
 
 func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
 	var (
-		day   *Day
+		day   Day
 		year  int
 		month time.Month
 	)
 	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
-		day = &Day{ID: id}
-		err := tx.Model(day).
+		query := tx.Model(&day).Where("id = ?", id).
 			Relation("Spends", orderByID).
-			Relation("Spends.Type").
-			WherePK().Select()
-		if err != nil {
+			Relation("Spends.Type")
+		if err := query.Select(); err != nil {
 			if errors.Is(err, pg.ErrNoRows) {
 				return db_common.ErrDayNotExist
 			}
@@ -30,11 +28,8 @@ func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
 		}
 
 		// Get year and month
-		err = tx.Model((*Month)(nil)).
-			Column("year", "month").
-			Where("id = ?", day.MonthID).
-			Select(&year, &month)
-		if err != nil {
+		query = tx.Model((*Month)(nil)).Column("year", "month").Where("id = ?", day.MonthID)
+		if err := query.Select(&year, &month); err != nil {
 			return errors.Wrap(err, "couldn't get year and month for Day")
 		}
 
@@ -47,7 +42,7 @@ func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
 	return day.ToCommon(year, month), nil
 }
 
-func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (uint, error) {
+func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (id uint, err error) {
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
 		if errors.Is(err, db_common.ErrMonthNotExist) {
@@ -56,17 +51,13 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		return 0, errors.Wrap(err, "couldn't define month id with passed year and month")
 	}
 
-	d := &Day{}
-	err = db.db.Model(d).
-		Column("id").
-		Where("month_id = ? AND day = ?", monthID, day).
-		Select()
-	if err != nil {
+	query := db.db.Model((*Day)(nil)).Column("id").Where("month_id = ? AND day = ?", monthID, day)
+	if err = query.Select(&id); err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			return 0, db_common.ErrDayNotExist
 		}
 		return 0, err
 	}
 
-	return d.ID, nil
+	return id, nil
 }

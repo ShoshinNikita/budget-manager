@@ -12,14 +12,11 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-func (db DB) GetMonth(_ context.Context, id uint) (month *db_common.Month, err error) {
-	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
-		pgMonth, err := db.getMonth(tx, id)
-		if err != nil {
-			return err
-		}
-		month = pgMonth.ToCommon()
-		return nil
+func (db DB) GetMonth(_ context.Context, id uint) (*db_common.Month, error) {
+	var pgMonth *Month
+	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+		pgMonth, err = db.getMonth(tx, id)
+		return err
 	})
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
@@ -28,12 +25,11 @@ func (db DB) GetMonth(_ context.Context, id uint) (month *db_common.Month, err e
 		return nil, err
 	}
 
-	return month, nil
+	return pgMonth.ToCommon(), nil
 }
 
-func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
-	m := &Month{}
-	err := db.db.Model(m).Column("id").Where("year = ? AND month = ?", year, month).Select()
+func (db DB) GetMonthID(_ context.Context, year, month int) (id uint, err error) {
+	err = db.db.Model((*Month)(nil)).Column("id").Where("year = ? AND month = ?", year, month).Select(&id)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			return 0, db_common.ErrMonthNotExist
@@ -41,17 +37,14 @@ func (db DB) GetMonthID(_ context.Context, year, month int) (uint, error) {
 		return 0, err
 	}
 
-	return m.ID, nil
+	return id, nil
 }
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
 func (db DB) GetMonths(_ context.Context, year int) ([]*db_common.Month, error) {
-	pgMonths := []*Month{}
-	err := db.db.Model(&pgMonths).
-		Where("year = ?", year).
-		Order("month ASC").
-		Select()
+	var pgMonths []*Month
+	err := db.db.Model(&pgMonths).Where("year = ?", year).Order("month ASC").Select()
 	if err != nil {
 		return nil, err
 	}
