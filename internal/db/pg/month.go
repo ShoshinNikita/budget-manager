@@ -12,6 +12,68 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
+// Month represents month entity in PostgreSQL db
+type Month struct {
+	tableName struct{} `pg:"months"` // nolint:structcheck,unused
+
+	ID uint `pg:"id,pk"`
+
+	Year  int        `pg:"year"`
+	Month time.Month `pg:"month"`
+
+	Incomes         []*Income         `pg:"fk:month_id"`
+	MonthlyPayments []*MonthlyPayment `pg:"fk:month_id"`
+
+	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
+	DailyBudget money.Money `pg:"daily_budget,use_zero"`
+	Days        []*Day      `pg:"fk:month_id"`
+
+	TotalIncome money.Money `pg:"total_income,use_zero"`
+	// TotalSpend is a cost of all Monthly Payments and Spends
+	TotalSpend money.Money `pg:"total_spend,use_zero"`
+	// Result is TotalIncome - TotalSpend
+	Result money.Money `pg:"result,use_zero"`
+}
+
+// ToCommon converts Month to common Month structure from
+// "github.com/ShoshinNikita/budget-manager/internal/db" package
+func (m *Month) ToCommon() *db_common.Month {
+	if m == nil {
+		return nil
+	}
+	return &db_common.Month{
+		ID:          m.ID,
+		Year:        m.Year,
+		Month:       m.Month,
+		TotalIncome: m.TotalIncome,
+		TotalSpend:  m.TotalSpend,
+		DailyBudget: m.DailyBudget,
+		Result:      m.Result,
+		//
+		Incomes: func() []*db_common.Income {
+			incomes := make([]*db_common.Income, 0, len(m.Incomes))
+			for i := range m.Incomes {
+				incomes = append(incomes, m.Incomes[i].ToCommon(m.Year, m.Month))
+			}
+			return incomes
+		}(),
+		MonthlyPayments: func() []*db_common.MonthlyPayment {
+			mp := make([]*db_common.MonthlyPayment, 0, len(m.MonthlyPayments))
+			for i := range m.MonthlyPayments {
+				mp = append(mp, m.MonthlyPayments[i].ToCommon(m.Year, m.Month))
+			}
+			return mp
+		}(),
+		Days: func() []*db_common.Day {
+			days := make([]*db_common.Day, 0, len(m.Days))
+			for i := range m.Days {
+				days = append(days, m.Days[i].ToCommon(m.Year, m.Month))
+			}
+			return days
+		}(),
+	}
+}
+
 func (db DB) GetMonth(_ context.Context, id uint) (*db_common.Month, error) {
 	var pgMonth *Month
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {

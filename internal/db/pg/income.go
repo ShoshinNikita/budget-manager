@@ -2,12 +2,44 @@ package pg
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
+
+// Income represents income entity in PostgreSQL db
+type Income struct {
+	tableName struct{} `pg:"incomes"` // nolint:structcheck,unused
+
+	// MonthID is a foreign key to 'months' table
+	MonthID uint `pg:"month_id"`
+
+	ID uint `pg:"id,pk"`
+
+	Title  string      `pg:"title"`
+	Notes  string      `pg:"notes"`
+	Income money.Money `pg:"income"`
+}
+
+// ToCommon converts Income to common Income structure from
+// "github.com/ShoshinNikita/budget-manager/internal/db" package
+func (in *Income) ToCommon(year int, month time.Month) *db_common.Income {
+	if in == nil {
+		return nil
+	}
+	return &db_common.Income{
+		ID:     in.ID,
+		Year:   year,
+		Month:  month,
+		Title:  in.Title,
+		Notes:  in.Notes,
+		Income: in.Income,
+	}
+}
 
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(_ context.Context, args db_common.AddIncomeArgs) (id uint, err error) {

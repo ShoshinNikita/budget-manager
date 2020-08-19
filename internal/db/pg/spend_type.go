@@ -9,6 +9,26 @@ import (
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
+// SpendType represents spend type entity in PostgreSQL db
+type SpendType struct {
+	tableName struct{} `pg:"spend_types"` // nolint:structcheck,unused
+
+	ID   uint   `pg:"id,pk"`
+	Name string `pg:"name"`
+}
+
+// ToCommon converts SpendType to common SpendType structure from
+// "github.com/ShoshinNikita/budget-manager/internal/db" package
+func (s *SpendType) ToCommon() *db_common.SpendType {
+	if s == nil {
+		return nil
+	}
+	return &db_common.SpendType{
+		ID:   s.ID,
+		Name: s.Name,
+	}
+}
+
 // GetSpendType returns Spend Type with passed id
 func (db DB) GetSpendType(_ context.Context, id uint) (*db_common.SpendType, error) {
 	var spendType SpendType

@@ -2,12 +2,48 @@ package pg
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
+
+// Spend represents spend entity in PostgreSQL db
+type Spend struct {
+	tableName struct{} `pg:"spends"` // nolint:structcheck,unused
+
+	// DayID is a foreign key to 'days' table
+	DayID uint `pg:"day_id"`
+
+	ID uint `pg:"id,pk"`
+
+	Title  string      `pg:"title"`
+	TypeID uint        `pg:"type_id"`
+	Type   *SpendType  `pg:"fk:type_id"`
+	Notes  string      `pg:"notes"`
+	Cost   money.Money `pg:"cost"`
+}
+
+// ToCommon converts Spend to common Spend structure from
+// "github.com/ShoshinNikita/budget-manager/internal/db" package
+func (s *Spend) ToCommon(year int, month time.Month, day int) *db_common.Spend {
+	if s == nil {
+		return nil
+	}
+	return &db_common.Spend{
+		ID:    s.ID,
+		Year:  year,
+		Month: month,
+		Day:   day,
+		Title: s.Title,
+		Type:  s.Type.ToCommon(),
+		Notes: s.Notes,
+		Cost:  s.Cost,
+	}
+}
 
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint, err error) {

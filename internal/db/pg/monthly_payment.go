@@ -2,12 +2,47 @@ package pg
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
 	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
+
+// MonthlyPayment represents monthly payment entity in PostgreSQL db
+type MonthlyPayment struct {
+	tableName struct{} `pg:"monthly_payments"` // nolint:structcheck,unused
+
+	// MonthID is a foreign key to 'months' table
+	MonthID uint `pg:"month_id"`
+
+	ID uint `pg:"id,pk"`
+
+	Title  string      `pg:"title"`
+	TypeID uint        `pg:"type_id"`
+	Type   *SpendType  `pg:"fk:type_id"`
+	Notes  string      `pg:"notes"`
+	Cost   money.Money `pg:"cost"`
+}
+
+// ToCommon converts MonthlyPayment to common MonthlyPayment structure from
+// "github.com/ShoshinNikita/budget-manager/internal/db" package
+func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *db_common.MonthlyPayment {
+	if mp == nil {
+		return nil
+	}
+	return &db_common.MonthlyPayment{
+		ID:    mp.ID,
+		Year:  year,
+		Month: month,
+		Title: mp.Title,
+		Type:  mp.Type.ToCommon(),
+		Notes: mp.Notes,
+		Cost:  mp.Cost,
+	}
+}
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
