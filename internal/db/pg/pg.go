@@ -259,57 +259,6 @@ func (db *DB) DropDB() error {
 	return err
 }
 
-func (db *DB) initCurrentMonth() error {
-	year, month, _ := time.Now().Date()
-	return db.addMonth(year, month)
-}
-
-func (db *DB) addMonth(year int, month time.Month) error {
-	err := db.db.Model(&Month{}).
-		Column("id").
-		Where("year = ? AND month = ?", year, month).
-		Select()
-	if err == nil {
-		// The month is already created
-		return nil
-	}
-	if !errors.Is(err, pg.ErrNoRows) {
-		// Unexpected error
-		return errors.Wrap(err, "couldn't check if the current month exists")
-	}
-
-	// We have to init the current month
-	log := db.log
-
-	// Add the current month
-	log.Debug("init the current month")
-
-	currentMonth := &Month{Year: year, Month: month}
-	if err = db.db.Insert(currentMonth); err != nil {
-		return errors.Wrap(err, "couldn't init the current month")
-	}
-
-	monthID := currentMonth.ID
-	log = log.WithField("month_id", monthID)
-	log.Debug("current month was successfully inited")
-
-	// Add days for the current month
-	log.Debug("init days of the current month")
-
-	daysNumber := daysInMonth(year, month)
-	days := make([]*Day, daysNumber)
-	for i := range days {
-		days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
-	}
-
-	if err = db.db.Insert(&days); err != nil {
-		return errors.Wrap(err, "couldn't insert days for the current month")
-	}
-	log.Debug("days of the current month was successfully inited")
-
-	return nil
-}
-
 // Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
 	// cron

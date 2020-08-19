@@ -59,6 +59,58 @@ func (db DB) GetMonths(_ context.Context, year int) ([]*db_common.Month, error) 
 	return months, nil
 }
 
+// Internal methods
+
+// initCurrentMonth inits month for current year and month
+func (db *DB) initCurrentMonth() error {
+	year, month, _ := time.Now().Date()
+	return db.initMonth(year, month)
+}
+
+// initMonth inits month and days for passed date
+func (db *DB) initMonth(year int, month time.Month) error {
+	count, err := db.db.Model((*Month)(nil)).Where("year = ? AND month = ?", year, month).Count()
+	if err != nil {
+		return errors.Wrap(err, "couldn't check if the current month exists")
+	}
+	if count != 0 {
+		// The month is already created
+		return nil
+	}
+
+	// We have to init the current month
+
+	log := db.log
+
+	// Add the current month
+	log.Debug("init the current month")
+
+	currentMonth := &Month{Year: year, Month: month}
+	if _, err = db.db.Model(currentMonth).Returning("id").Insert(); err != nil {
+		return errors.Wrap(err, "couldn't init the current month")
+	}
+
+	monthID := currentMonth.ID
+	log = log.WithField("month_id", monthID)
+	log.Debug("current month was successfully inited")
+
+	// Add days for the current month
+	log.Debug("init days of the current month")
+
+	daysNumber := daysInMonth(year, month)
+	days := make([]*Day, daysNumber)
+	for i := range days {
+		days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
+	}
+
+	if err = db.db.Insert(&days); err != nil {
+		return errors.Wrap(err, "couldn't insert days for the current month")
+	}
+	log.Debug("days of the current month was successfully inited")
+
+	return nil
+}
+
 // nolint:funlen
 func (db DB) recomputeMonth(tx *pg.Tx, monthID uint) (err error) {
 	defer func() {
