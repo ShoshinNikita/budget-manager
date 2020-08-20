@@ -95,7 +95,11 @@ func (db DB) EditIncome(_ context.Context, args common.EditIncomeArgs) error {
 			return err
 		}
 
-		return db.recomputeAndUpdateMonth(tx, monthID)
+		if args.Income != nil {
+			// Recompute month only when income has been changed
+			return db.recomputeAndUpdateMonth(tx, monthID)
+		}
+		return nil
 	})
 }
 
