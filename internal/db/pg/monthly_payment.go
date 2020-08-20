@@ -2,32 +2,68 @@ package pg
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
+// MonthlyPayment represents monthly payment entity in PostgreSQL db
+type MonthlyPayment struct {
+	tableName struct{} `pg:"monthly_payments"` // nolint:structcheck,unused
+
+	// MonthID is a foreign key to 'months' table
+	MonthID uint `pg:"month_id"`
+
+	ID uint `pg:"id,pk"`
+
+	Title  string      `pg:"title"`
+	TypeID uint        `pg:"type_id"`
+	Type   *SpendType  `pg:"fk:type_id"`
+	Notes  string      `pg:"notes"`
+	Cost   money.Money `pg:"cost"`
+}
+
+// ToCommon converts MonthlyPayment to common MonthlyPayment structure from
+// "github.com/ShoshinNikita/budget-manager/internal/db" package
+func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *common.MonthlyPayment {
+	if mp == nil {
+		return nil
+	}
+	return &common.MonthlyPayment{
+		ID:    mp.ID,
+		Year:  year,
+		Month: month,
+		Title: mp.Title,
+		Type:  mp.Type.ToCommon(),
+		Notes: mp.Notes,
+		Cost:  mp.Cost,
+	}
+}
+
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
+func (db DB) AddMonthlyPayment(_ context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
-		return 0, db_common.ErrMonthNotExist
+		return 0, common.ErrMonthNotExist
 	}
 
-	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
-		// Add Monthly Payment
-		id, err = db.addMonthlyPayment(tx, args)
-		if err != nil {
+	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
+		mp := &MonthlyPayment{
+			MonthID: args.MonthID,
+			Title:   args.Title,
+			Notes:   args.Notes,
+			TypeID:  args.TypeID,
+			Cost:    args.Cost,
+		}
+		if _, err := tx.Model(mp).Returning("id").Insert(); err != nil {
 			return err
 		}
+		id = mp.ID
 
-		// Recompute month budget
-		if err = db.recomputeMonth(tx, args.MonthID); err != nil {
-			return errRecomputeBudget(err)
-		}
-
-		return nil
+		return db.recomputeAndUpdateMonth(tx, args.MonthID)
 	})
 	if err != nil {
 		return 0, err
@@ -36,90 +72,68 @@ func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPayme
 	return id, nil
 }
 
-func (DB) addMonthlyPayment(tx *pg.Tx, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
-	mp := &MonthlyPayment{
-		MonthID: args.MonthID,
-		Title:   args.Title,
-		Notes:   args.Notes,
-		TypeID:  args.TypeID,
-		Cost:    args.Cost,
-	}
-	if err := tx.Insert(mp); err != nil {
-		return 0, err
-	}
-	return mp.ID, nil
-}
-
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(_ context.Context, args db_common.EditMonthlyPaymentArgs) error {
+func (db DB) EditMonthlyPayment(_ context.Context, args common.EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(args.ID) {
-		return db_common.ErrMonthlyPaymentNotExist
+		return common.ErrMonthlyPaymentNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		mp := &MonthlyPayment{ID: args.ID}
-
-		if err := tx.Select(mp); err != nil {
-			if errors.Is(err, pg.ErrNoRows) {
-				return db_common.ErrMonthlyPaymentNotExist
-			}
-			return errors.Wrap(err, "couldn't select Monthly Payment to edit")
-		}
-
-		// Edit Monthly Payment
-		if err := db.editMonthlyPayment(tx, mp, args); err != nil {
+		monthID, err := db.selectMonthlyPaymentMonthID(tx, args.ID)
+		if err != nil {
 			return err
 		}
 
-		// Recompute month budget
-		if err := db.recomputeMonth(tx, mp.MonthID); err != nil {
-			return errRecomputeBudget(err)
+		query := tx.Model((*MonthlyPayment)(nil)).Where("id = ?", args.ID)
+		if args.Title != nil {
+			query = query.Set("title = ?", *args.Title)
 		}
-		return nil
-	})
-}
+		if args.TypeID != nil {
+			if *args.TypeID == 0 {
+				query = query.Set("type_id = NULL")
+			} else {
+				query = query.Set("type_id = ?", *args.TypeID)
+			}
+		}
+		if args.Notes != nil {
+			query = query.Set("notes = ?", *args.Notes)
+		}
+		if args.Cost != nil {
+			query = query.Set("cost = ?", *args.Cost)
+		}
+		if _, err := query.Update(); err != nil {
+			return err
+		}
 
-func (DB) editMonthlyPayment(tx *pg.Tx, mp *MonthlyPayment, args db_common.EditMonthlyPaymentArgs) error {
-	if args.Title != nil {
-		mp.Title = *args.Title
-	}
-	if args.TypeID != nil {
-		mp.TypeID = *args.TypeID
-	}
-	if args.Notes != nil {
-		mp.Notes = *args.Notes
-	}
-	if args.Cost != nil {
-		mp.Cost = *args.Cost
-	}
-	return tx.Update(mp)
+		return db.recomputeAndUpdateMonth(tx, monthID)
+	})
 }
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
 func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 	if !db.checkMonthlyPayment(id) {
-		return db_common.ErrMonthlyPaymentNotExist
+		return common.ErrMonthlyPaymentNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		mp := &MonthlyPayment{ID: id}
-
-		// Remove Monthly Payment
-		err := tx.Model(mp).Column("month_id").WherePK().Select()
+		monthID, err := db.selectMonthlyPaymentMonthID(tx, id)
 		if err != nil {
-			// Monthly Payment must exist
-			return errors.Wrap(err, "couldn't select Monthly Payment to remove")
-		}
-
-		if err := tx.Delete(mp); err != nil {
 			return err
 		}
 
-		// Recompute month budget
-		if err := db.recomputeMonth(tx, mp.MonthID); err != nil {
-			return errRecomputeBudget(err)
+		_, err = tx.Model((*MonthlyPayment)(nil)).Where("id = ?", id).Delete()
+		if err != nil {
+			return err
 		}
 
-		return nil
+		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
+}
+
+func (DB) selectMonthlyPaymentMonthID(tx *pg.Tx, id uint) (monthID uint, err error) {
+	err = tx.Model((*MonthlyPayment)(nil)).Column("month_id").Where("id = ?", id).Select(&monthID)
+	if err != nil {
+		return 0, errors.Wrap(err, "couldn't select month id of Monthly Payment")
+	}
+	return monthID, nil
 }

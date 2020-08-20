@@ -7,25 +7,23 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/go-pg/pg/v9/orm"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) ([]*db_common.Spend, error) {
+func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]*common.Spend, error) {
 	var pgSpends []*searchSpendsModel
-
 	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
-		query := db.buildSearchSpendsQuery(tx, args)
-		return query.Select(&pgSpends)
+		return db.buildSearchSpendsQuery(tx, args).Select(&pgSpends)
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	// Convert the internal model to the common one
-	spends := make([]*db_common.Spend, 0, len(pgSpends))
+	spends := make([]*common.Spend, 0, len(pgSpends))
 	for i := range pgSpends {
-		s := &db_common.Spend{
+		s := &common.Spend{
 			ID:    pgSpends[i].ID,
 			Year:  pgSpends[i].Year,
 			Month: pgSpends[i].Month,
@@ -36,7 +34,7 @@ func (db DB) SearchSpends(ctx context.Context, args db_common.SearchSpendsArgs) 
 		}
 		if pgSpends[i].Type.ID != 0 {
 			// Don't check if a name is empty because Spend Types with non-zero id always have a name
-			s.Type = &db_common.SpendType{
+			s.Type = &common.SpendType{
 				ID:   pgSpends[i].Type.ID,
 				Name: pgSpends[i].Type.Name,
 			}
@@ -90,7 +88,7 @@ type searchSpendsModel struct {
 //   ORDER BY month.year, month.month, day.day, spend.id;
 //
 // nolint:funlen
-func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *orm.Query {
+func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Query {
 	query := tx.Model((*Spend)(nil)).
 		ColumnExpr("spend.id AS id").
 		ColumnExpr("month.year AS year").
@@ -150,14 +148,14 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args db_common.SearchSpendsArgs) *or
 
 	var orders []string
 	switch args.Sort {
-	case db_common.SortSpendsByDate:
+	case common.SortSpendsByDate:
 		orders = []string{"month.year", "month.month", "day.day"}
-	case db_common.SortSpendsByTitle:
+	case common.SortSpendsByTitle:
 		orders = []string{"spend.title"}
-	case db_common.SortSpendsByCost:
+	case common.SortSpendsByCost:
 		orders = []string{"spend.cost"}
 	}
-	if args.Order == db_common.OrderByDesc {
+	if args.Order == common.OrderByDesc {
 		for i := range orders {
 			orders[i] += " DESC"
 		}

@@ -19,6 +19,45 @@ func ping(db *pg.DB) (ok bool) {
 	return err == nil
 }
 
+// checkMonth checks if a Month with passed id exists
+func (db DB) checkMonth(id uint) (ok bool) {
+	return db.checkModel((*Month)(nil), id)
+}
+
+// checkDay checks if a Day with passed id exists
+func (db DB) checkDay(id uint) (ok bool) {
+	return db.checkModel((*Day)(nil), id)
+}
+
+// checkIncome checks if an Income with passed id exists
+func (db DB) checkIncome(id uint) (ok bool) {
+	return db.checkModel((*Income)(nil), id)
+}
+
+// checkMonthlyPayment checks if a Monthly Payment with passed id exists
+func (db DB) checkMonthlyPayment(id uint) (ok bool) {
+	return db.checkModel((*MonthlyPayment)(nil), id)
+}
+
+// checkSpend checks if a Spend with passed id exists
+func (db DB) checkSpend(id uint) (ok bool) {
+	return db.checkModel((*Spend)(nil), id)
+}
+
+// checkSpendType checks if a Spend Type with passed id exists
+func (db DB) checkSpendType(id uint) (ok bool) {
+	return db.checkModel((*SpendType)(nil), id)
+}
+
+// checkModel checks if a model with passed id exists
+func (db DB) checkModel(model interface{}, id uint) (ok bool) {
+	c, err := db.db.Model(model).Where("id = ?", id).Count()
+	if err != nil || c == 0 {
+		return false
+	}
+	return true
+}
+
 // --------------------------------------------------
 // Time
 // --------------------------------------------------

@@ -135,11 +135,13 @@ func TestEditMonthlyPayment(t *testing.T) {
 		}
 
 		args := db_common.EditMonthlyPaymentArgs{
-			ID:     p.edited.ID,
-			Title:  &p.edited.Title,
-			TypeID: &p.edited.TypeID,
-			Notes:  &p.edited.Notes,
-			Cost:   &p.edited.Cost,
+			ID:    p.edited.ID,
+			Title: &p.edited.Title,
+			Notes: &p.edited.Notes,
+			Cost:  &p.edited.Cost,
+		}
+		if p.origin.TypeID != p.edited.TypeID {
+			args.TypeID = &p.edited.TypeID
 		}
 		err := db.EditMonthlyPayment(context.Background(), args)
 		require.Nil(err)

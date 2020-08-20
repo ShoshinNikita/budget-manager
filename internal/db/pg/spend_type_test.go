@@ -80,18 +80,12 @@ func TestEditSpendType(t *testing.T) {
 	defer cleanUp(t, db)
 
 	spendTypes := []struct {
-		origin  SpendType
-		edited  SpendType
-		isError bool
+		origin SpendType
+		edited SpendType
 	}{
 		{
 			origin: SpendType{ID: 1, Name: "first type"},
 			edited: SpendType{ID: 1, Name: "new name"},
-		},
-		{
-			origin:  SpendType{ID: 2, Name: "first type"},
-			edited:  SpendType{ID: 2, Name: ""},
-			isError: true,
 		},
 	}
 
@@ -105,20 +99,12 @@ func TestEditSpendType(t *testing.T) {
 	// Edit Spend Types
 	for _, t := range spendTypes {
 		err := db.EditSpendType(context.Background(), t.edited.ID, t.edited.Name)
-		if t.isError {
-			require.NotNil(err)
-			continue
-		}
 		require.Nil(err)
 	}
 
 	// Check Spend Types
 	for _, t := range spendTypes {
 		spendType, err := db.GetSpendType(context.Background(), t.origin.ID)
-		if t.isError {
-			require.Equal(t.origin.ToCommon(), spendType)
-			continue
-		}
 		require.Nil(err)
 		require.Equal(t.edited.ToCommon(), spendType)
 	}

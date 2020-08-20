@@ -5,13 +5,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-pg/migrations/v7"
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 
-	pg_migrations "github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 )
 
 const (
@@ -70,8 +69,6 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 	return db, nil
 }
 
-const migrationTable = "migrations"
-
 // Prepare prepares the database:
 //   - create tables
 //   - init tables (add days for current month if needed)
@@ -79,13 +76,12 @@ const migrationTable = "migrations"
 //
 func (db *DB) Prepare() error {
 	// Create a new migrator
-	migrator := migrations.NewCollection().SetTableName(migrationTable).DisableSQLAutodiscover(true)
+	migrator := migrations.NewMigrator()
 
-	// Register migrations
-	pg_migrations.RegisterMigrations(migrator)
-	if len(migrator.Migrations()) != pg_migrations.MigrationNumber {
+	// Check number of migrations
+	if len(migrator.Migrations()) != migrations.MigrationNumber {
 		return errors.Errorf("invalid number of registered migrations: %d (want %d)",
-			len(migrator.Migrations()), pg_migrations.MigrationNumber)
+			len(migrator.Migrations()), migrations.MigrationNumber)
 	}
 
 	// Init migration table
@@ -261,57 +257,6 @@ func (db *DB) DropDB() error {
 		GRANT ALL ON SCHEMA public TO public;
 	`)
 	return err
-}
-
-func (db *DB) initCurrentMonth() error {
-	year, month, _ := time.Now().Date()
-	return db.addMonth(year, month)
-}
-
-func (db *DB) addMonth(year int, month time.Month) error {
-	err := db.db.Model(&Month{}).
-		Column("id").
-		Where("year = ? AND month = ?", year, month).
-		Select()
-	if err == nil {
-		// The month is already created
-		return nil
-	}
-	if !errors.Is(err, pg.ErrNoRows) {
-		// Unexpected error
-		return errors.Wrap(err, "couldn't check if the current month exists")
-	}
-
-	// We have to init the current month
-	log := db.log
-
-	// Add the current month
-	log.Debug("init the current month")
-
-	currentMonth := &Month{Year: year, Month: month}
-	if err = db.db.Insert(currentMonth); err != nil {
-		return errors.Wrap(err, "couldn't init the current month")
-	}
-
-	monthID := currentMonth.ID
-	log = log.WithField("month_id", monthID)
-	log.Debug("current month was successfully inited")
-
-	// Add days for the current month
-	log.Debug("init days of the current month")
-
-	daysNumber := daysInMonth(year, month)
-	days := make([]*Day, daysNumber)
-	for i := range days {
-		days[i] = &Day{MonthID: monthID, Day: i + 1, Saldo: 0}
-	}
-
-	if err = db.db.Insert(&days); err != nil {
-		return errors.Wrap(err, "couldn't insert days for the current month")
-	}
-	log.Debug("days of the current month was successfully inited")
-
-	return nil
 }
 
 // Shutdown closes the connection to the db
