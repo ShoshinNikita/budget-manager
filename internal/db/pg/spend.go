@@ -111,11 +111,15 @@ func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 			return err
 		}
 
-		monthID, err := db.selectMonthIDByDayID(ctx, tx, dayID)
-		if err != nil {
-			return err
+		if args.Cost != nil {
+			// Recompute month only when cost has been changed
+			monthID, err := db.selectMonthIDByDayID(ctx, tx, dayID)
+			if err != nil {
+				return err
+			}
+			return db.recomputeAndUpdateMonth(tx, monthID)
 		}
-		return db.recomputeAndUpdateMonth(tx, monthID)
+		return nil
 	})
 }
 

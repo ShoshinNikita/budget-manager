@@ -105,7 +105,11 @@ func (db DB) EditMonthlyPayment(_ context.Context, args common.EditMonthlyPaymen
 			return err
 		}
 
-		return db.recomputeAndUpdateMonth(tx, monthID)
+		if args.Cost != nil {
+			// Recompute month only when cost has been changed
+			return db.recomputeAndUpdateMonth(tx, monthID)
+		}
+		return nil
 	})
 }
 
