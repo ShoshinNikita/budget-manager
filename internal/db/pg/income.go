@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -27,11 +27,11 @@ type Income struct {
 
 // ToCommon converts Income to common Income structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (in *Income) ToCommon(year int, month time.Month) *db_common.Income {
+func (in *Income) ToCommon(year int, month time.Month) *common.Income {
 	if in == nil {
 		return nil
 	}
-	return &db_common.Income{
+	return &common.Income{
 		ID:     in.ID,
 		Year:   year,
 		Month:  month,
@@ -42,9 +42,9 @@ func (in *Income) ToCommon(year int, month time.Month) *db_common.Income {
 }
 
 // AddIncome adds a new income with passed params
-func (db DB) AddIncome(_ context.Context, args db_common.AddIncomeArgs) (id uint, err error) {
+func (db DB) AddIncome(_ context.Context, args common.AddIncomeArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
-		return 0, db_common.ErrMonthNotExist
+		return 0, common.ErrMonthNotExist
 	}
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -70,9 +70,9 @@ func (db DB) AddIncome(_ context.Context, args db_common.AddIncomeArgs) (id uint
 }
 
 // EditIncome edits income with passed id, nil args are ignored
-func (db DB) EditIncome(_ context.Context, args db_common.EditIncomeArgs) error {
+func (db DB) EditIncome(_ context.Context, args common.EditIncomeArgs) error {
 	if !db.checkIncome(args.ID) {
-		return db_common.ErrIncomeNotExist
+		return common.ErrIncomeNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
@@ -102,7 +102,7 @@ func (db DB) EditIncome(_ context.Context, args db_common.EditIncomeArgs) error 
 // RemoveIncome removes income with passed id
 func (db DB) RemoveIncome(_ context.Context, id uint) error {
 	if !db.checkIncome(id) {
-		return db_common.ErrIncomeNotExist
+		return common.ErrIncomeNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {

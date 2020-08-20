@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -29,11 +29,11 @@ type MonthlyPayment struct {
 
 // ToCommon converts MonthlyPayment to common MonthlyPayment structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *db_common.MonthlyPayment {
+func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *common.MonthlyPayment {
 	if mp == nil {
 		return nil
 	}
-	return &db_common.MonthlyPayment{
+	return &common.MonthlyPayment{
 		ID:    mp.ID,
 		Year:  year,
 		Month: month,
@@ -45,9 +45,9 @@ func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *db_common.Monthl
 }
 
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPaymentArgs) (id uint, err error) {
+func (db DB) AddMonthlyPayment(_ context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
-		return 0, db_common.ErrMonthNotExist
+		return 0, common.ErrMonthNotExist
 	}
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
@@ -73,9 +73,9 @@ func (db DB) AddMonthlyPayment(_ context.Context, args db_common.AddMonthlyPayme
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(_ context.Context, args db_common.EditMonthlyPaymentArgs) error {
+func (db DB) EditMonthlyPayment(_ context.Context, args common.EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(args.ID) {
-		return db_common.ErrMonthlyPaymentNotExist
+		return common.ErrMonthlyPaymentNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
@@ -112,7 +112,7 @@ func (db DB) EditMonthlyPayment(_ context.Context, args db_common.EditMonthlyPay
 // RemoveMonthlyPayment removes Monthly Payment with passed id
 func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
 	if !db.checkMonthlyPayment(id) {
-		return db_common.ErrMonthlyPaymentNotExist
+		return common.ErrMonthlyPaymentNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {

@@ -6,7 +6,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
 // SpendType represents spend type entity in PostgreSQL db
@@ -19,22 +19,22 @@ type SpendType struct {
 
 // ToCommon converts SpendType to common SpendType structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (s *SpendType) ToCommon() *db_common.SpendType {
+func (s *SpendType) ToCommon() *common.SpendType {
 	if s == nil {
 		return nil
 	}
-	return &db_common.SpendType{
+	return &common.SpendType{
 		ID:   s.ID,
 		Name: s.Name,
 	}
 }
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(_ context.Context, id uint) (*db_common.SpendType, error) {
+func (db DB) GetSpendType(_ context.Context, id uint) (*common.SpendType, error) {
 	var spendType SpendType
 	if err := db.db.Model(&spendType).Where("id = ?", id).Select(); err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			err = db_common.ErrSpendTypeNotExist
+			err = common.ErrSpendTypeNotExist
 		}
 		return nil, err
 	}
@@ -43,14 +43,14 @@ func (db DB) GetSpendType(_ context.Context, id uint) (*db_common.SpendType, err
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(_ context.Context) ([]*db_common.SpendType, error) {
+func (db DB) GetSpendTypes(_ context.Context) ([]*common.SpendType, error) {
 	var spendTypes []SpendType
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]*db_common.SpendType, 0, len(spendTypes))
+	res := make([]*common.SpendType, 0, len(spendTypes))
 	for i := range spendTypes {
 		res = append(res, spendTypes[i].ToCommon())
 	}
@@ -74,7 +74,7 @@ func (db DB) AddSpendType(_ context.Context, name string) (typeID uint, err erro
 // EditSpendType modifies existing Spend Type
 func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
 	if !db.checkSpendType(id) {
-		return db_common.ErrSpendTypeNotExist
+		return common.ErrSpendTypeNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
@@ -89,7 +89,7 @@ func (db DB) EditSpendType(_ context.Context, id uint, newName string) error {
 // RemoveSpendType removes Spend Type with passed id
 func (db DB) RemoveSpendType(_ context.Context, id uint) error {
 	if !db.checkSpendType(id) {
-		return db_common.ErrSpendTypeNotExist
+		return common.ErrSpendTypeNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {

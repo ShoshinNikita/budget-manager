@@ -8,7 +8,7 @@ import (
 	"github.com/go-pg/pg/v9/orm"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -37,11 +37,11 @@ type Month struct {
 
 // ToCommon converts Month to common Month structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (m *Month) ToCommon() *db_common.Month {
+func (m *Month) ToCommon() *common.Month {
 	if m == nil {
 		return nil
 	}
-	return &db_common.Month{
+	return &common.Month{
 		ID:          m.ID,
 		Year:        m.Year,
 		Month:       m.Month,
@@ -50,22 +50,22 @@ func (m *Month) ToCommon() *db_common.Month {
 		DailyBudget: m.DailyBudget,
 		Result:      m.Result,
 		//
-		Incomes: func() []*db_common.Income {
-			incomes := make([]*db_common.Income, 0, len(m.Incomes))
+		Incomes: func() []*common.Income {
+			incomes := make([]*common.Income, 0, len(m.Incomes))
 			for i := range m.Incomes {
 				incomes = append(incomes, m.Incomes[i].ToCommon(m.Year, m.Month))
 			}
 			return incomes
 		}(),
-		MonthlyPayments: func() []*db_common.MonthlyPayment {
-			mp := make([]*db_common.MonthlyPayment, 0, len(m.MonthlyPayments))
+		MonthlyPayments: func() []*common.MonthlyPayment {
+			mp := make([]*common.MonthlyPayment, 0, len(m.MonthlyPayments))
 			for i := range m.MonthlyPayments {
 				mp = append(mp, m.MonthlyPayments[i].ToCommon(m.Year, m.Month))
 			}
 			return mp
 		}(),
-		Days: func() []*db_common.Day {
-			days := make([]*db_common.Day, 0, len(m.Days))
+		Days: func() []*common.Day {
+			days := make([]*common.Day, 0, len(m.Days))
 			for i := range m.Days {
 				days = append(days, m.Days[i].ToCommon(m.Year, m.Month))
 			}
@@ -74,7 +74,7 @@ func (m *Month) ToCommon() *db_common.Month {
 	}
 }
 
-func (db DB) GetMonth(_ context.Context, id uint) (*db_common.Month, error) {
+func (db DB) GetMonth(_ context.Context, id uint) (*common.Month, error) {
 	var pgMonth *Month
 	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
 		pgMonth, err = db.getMonth(tx, id)
@@ -82,7 +82,7 @@ func (db DB) GetMonth(_ context.Context, id uint) (*db_common.Month, error) {
 	})
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			return nil, db_common.ErrMonthNotExist
+			return nil, common.ErrMonthNotExist
 		}
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (db DB) GetMonthID(_ context.Context, year, month int) (id uint, err error)
 	err = db.db.Model((*Month)(nil)).Column("id").Where("year = ? AND month = ?", year, month).Select(&id)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			return 0, db_common.ErrMonthNotExist
+			return 0, common.ErrMonthNotExist
 		}
 		return 0, err
 	}
@@ -104,17 +104,17 @@ func (db DB) GetMonthID(_ context.Context, year, month int) (id uint, err error)
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(_ context.Context, year int) ([]*db_common.Month, error) {
+func (db DB) GetMonths(_ context.Context, year int) ([]*common.Month, error) {
 	var pgMonths []*Month
 	err := db.db.Model(&pgMonths).Where("year = ?", year).Order("month ASC").Select()
 	if err != nil {
 		return nil, err
 	}
 	if len(pgMonths) == 0 {
-		return nil, db_common.ErrYearNotExist
+		return nil, common.ErrYearNotExist
 	}
 
-	months := make([]*db_common.Month, 0, len(pgMonths))
+	months := make([]*common.Month, 0, len(pgMonths))
 	for i := range pgMonths {
 		months = append(months, pgMonths[i].ToCommon())
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -29,11 +29,11 @@ type Spend struct {
 
 // ToCommon converts Spend to common Spend structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (s *Spend) ToCommon(year int, month time.Month, day int) *db_common.Spend {
+func (s *Spend) ToCommon(year int, month time.Month, day int) *common.Spend {
 	if s == nil {
 		return nil
 	}
-	return &db_common.Spend{
+	return &common.Spend{
 		ID:    s.ID,
 		Year:  year,
 		Month: month,
@@ -46,9 +46,9 @@ func (s *Spend) ToCommon(year int, month time.Month, day int) *db_common.Spend {
 }
 
 // AddSpend adds a new Spend
-func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint, err error) {
+func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, err error) {
 	if !db.checkDay(args.DayID) {
-		return 0, db_common.ErrDayNotExist
+		return 0, common.ErrDayNotExist
 	}
 
 	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
@@ -79,9 +79,9 @@ func (db DB) AddSpend(ctx context.Context, args db_common.AddSpendArgs) (id uint
 }
 
 // EditSpend edits existeng Spend
-func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error {
+func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 	if !db.checkSpend(args.ID) {
-		return db_common.ErrSpendNotExist
+		return common.ErrSpendNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
@@ -122,7 +122,7 @@ func (db DB) EditSpend(ctx context.Context, args db_common.EditSpendArgs) error 
 // RemoveSpend removes Spend with passed id
 func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 	if !db.checkSpend(id) {
-		return db_common.ErrSpendNotExist
+		return common.ErrSpendNotExist
 	}
 
 	return db.db.RunInTransaction(func(tx *pg.Tx) error {
@@ -156,7 +156,7 @@ func (DB) selectMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (monthI
 	err = tx.Model((*Day)(nil)).Column("month_id").Where("id = ?", dayID).Select(&monthID)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			return 0, db_common.ErrDayNotExist
+			return 0, common.ErrDayNotExist
 		}
 		return 0, errors.Wrap(err, "couldn't get Month which contains Day with passed id")
 	}

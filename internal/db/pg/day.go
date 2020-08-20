@@ -7,7 +7,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/pkg/errors"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -28,18 +28,18 @@ type Day struct {
 
 // ToCommon converts Day to common Day structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (d *Day) ToCommon(year int, month time.Month) *db_common.Day {
+func (d *Day) ToCommon(year int, month time.Month) *common.Day {
 	if d == nil {
 		return nil
 	}
-	return &db_common.Day{
+	return &common.Day{
 		ID:    d.ID,
 		Year:  year,
 		Month: month,
 		Day:   d.Day,
 		Saldo: d.Saldo,
-		Spends: func() []*db_common.Spend {
-			spends := make([]*db_common.Spend, 0, len(d.Spends))
+		Spends: func() []*common.Spend {
+			spends := make([]*common.Spend, 0, len(d.Spends))
 			for i := range d.Spends {
 				spends = append(spends, d.Spends[i].ToCommon(year, month, d.Day))
 			}
@@ -48,7 +48,7 @@ func (d *Day) ToCommon(year int, month time.Month) *db_common.Day {
 	}
 }
 
-func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
+func (db DB) GetDay(_ context.Context, id uint) (*common.Day, error) {
 	var (
 		day   Day
 		year  int
@@ -60,7 +60,7 @@ func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
 			Relation("Spends.Type")
 		if err := query.Select(); err != nil {
 			if errors.Is(err, pg.ErrNoRows) {
-				return db_common.ErrDayNotExist
+				return common.ErrDayNotExist
 			}
 			return err
 		}
@@ -83,8 +83,8 @@ func (db DB) GetDay(_ context.Context, id uint) (*db_common.Day, error) {
 func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (id uint, err error) {
 	monthID, err := db.GetMonthID(ctx, year, month)
 	if err != nil {
-		if errors.Is(err, db_common.ErrMonthNotExist) {
-			return 0, db_common.ErrMonthNotExist
+		if errors.Is(err, common.ErrMonthNotExist) {
+			return 0, common.ErrMonthNotExist
 		}
 		return 0, errors.Wrap(err, "couldn't define month id with passed year and month")
 	}
@@ -92,7 +92,7 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 	query := db.db.Model((*Day)(nil)).Column("id").Where("month_id = ? AND day = ?", monthID, day)
 	if err = query.Select(&id); err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			return 0, db_common.ErrDayNotExist
+			return 0, common.ErrDayNotExist
 		}
 		return 0, err
 	}
