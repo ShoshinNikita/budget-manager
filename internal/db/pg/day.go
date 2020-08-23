@@ -13,7 +13,7 @@ import (
 
 // Day represents day entity in PostgreSQL db
 type Day struct {
-	tableName struct{} `pg:"days"` //nolint:structcheck,unused
+	tableName struct{} `pg:"days"`
 
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`
