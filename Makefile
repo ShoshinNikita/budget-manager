@@ -5,44 +5,38 @@ MODULE_PATH=github.com/ShoshinNikita/budget-manager
 
 default: build run
 
-# Build
-
 # build builds a binary file
 build: export-ldflags
 	@ echo "Build Budget Manager..."
 	@ go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
-
-# docker-build builds a Docker image
-docker-build: TAG?=budget-manager:latest
-docker-build: export-ldflags
-	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
-
-# Run
 
 # run runs built Budget Manager and PostgreSQL in container
 run: run-pg export-config
 	@ echo "Run Budget Manager..."
 	@ ./bin/budget-manager
 
+#
+# Docker
+#
+
+docker: docker-build docker-run
+
+# docker-build builds a Docker image
+docker-build: TAG?=budget-manager:latest
+docker-build: export-ldflags
+	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
+
 # docker-run runs both Budget Manager and PostgreSQL in containers
-docker-run: stop export-ldflags
-	docker-compose up \
-		--build \
-		--exit-code-from budget-manager
+docker-run:
+	@ docker-compose up --exit-code-from budget-manager
 
-# Clear
+# docker-clear downs containers and removes volumes
+docker-clear:
+	@ docker-compose down -v || true
 
-stop: docker-stop
-
-# docker-stop stops containers
-docker-stop:
-	docker-compose stop || true
-
-# docker-stop-force stops containers and removes volumes
-docker-stop-force:
-	docker-compose down -v || true
-
+#
 # Tests
+#
 
 test: test-integ
 
@@ -63,7 +57,9 @@ test-integ:
 
 	$(MAKE) stop-pg-test
 
+#
 # PostgreSQL
+#
 
 PG_ENV=-e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -e POSTGRES_HOST_AUTH_METHOD=trust
 PG_CONAINER_NAME=budget-manager_pg
@@ -93,7 +89,9 @@ run-pg-test: stop-pg-test
 stop-pg-test:
 	docker stop ${PG_CONAINER_NAME}-test || true
 
+#
 # Other
+#
 
 # export-ldflags exports LDFLAGS env variable. It is used during the build process to set version
 # and git hash. It can be used as a dependency target
