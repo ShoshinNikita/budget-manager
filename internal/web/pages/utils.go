@@ -16,6 +16,8 @@ import (
 )
 
 // processErrorWithPage is similar to 'processError', but it shows error page instead of returning json
+//
+// nolint:gofumpt
 func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
 	respMsg string, code int, internalErr error) {
 

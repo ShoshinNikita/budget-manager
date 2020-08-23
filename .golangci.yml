@@ -14,8 +14,11 @@ linters:
     - testpackage
     - whitespace
     - wsl
+    - nlreturn
 
 linters-settings:
+  gci:
+    local-prefixes: github.com/ShoshinNikita/budget-manager
   funlen:
     lines: 80
 

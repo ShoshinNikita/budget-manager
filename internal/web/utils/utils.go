@@ -78,6 +78,8 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, log logrus.FieldLogg
 
 // ProcessError logs error and writes models.Response. If internalErr is nil,
 // it just writes models.Response
+//
+// nolint:gofumpt
 func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
 	respMsg string, code int, internalErr error) {
 

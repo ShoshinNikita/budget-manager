@@ -57,7 +57,7 @@ func TestSearchSpends(t *testing.T) {
 
 		dayID uint
 	}{
-		//2019-12
+		// 2019-12
 		{
 			Spend: db_common.Spend{Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 			dayID: 1,
