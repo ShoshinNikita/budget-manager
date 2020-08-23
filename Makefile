@@ -40,22 +40,27 @@ docker-clear:
 
 test: test-integ
 
+TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
+	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
+	./cmd/... ./internal/... && \
+	go tool cover -func=cover.out && rm cover.out
+
 # test-unit runs only unit tests
 test-unit:
-	go test -mod vendor -count 1 -v ./...
+	${TEST_CMD}
 
 # test-integ runs PostgreSQL in test mode and runs all tests
+#
+# Disable parallel tests for packages (with '-p 1') to avoid DB errors.
+# Same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
+#
+test-integ: TEST_FLAGS = -tags=integration -p=1 -count=1
 test-integ:
-	$(MAKE) run-pg-test
+	@ $(MAKE) --no-print-directory run-pg-test
 
-	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
-	go test -mod=vendor -count=1 -p=1 --tags=integration -v \
-		-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/... \
-		./...
-	go tool cover -func=cover.out
-	rm cover.out
+	${TEST_CMD}
 
-	$(MAKE) stop-pg-test
+	@ $(MAKE) --no-print-directory stop-pg-test
 
 #
 # PostgreSQL
@@ -90,7 +95,7 @@ stop-pg-test:
 	docker stop ${PG_CONAINER_NAME}-test || true
 
 #
-# Other
+# Configuration
 #
 
 # export-ldflags exports LDFLAGS env variable. It is used during the build process to set version
@@ -129,6 +134,10 @@ define config
 	export SERVER_CREDENTIALS = user:\$$apr1\$$cpHMFyv.\$$BSB0aaF3bOrTC2f3V2VYG/ # user:qwerty
 	export SERVER_ENABLE_PROFILING = true
 endef
+
+#
+# Other
+#
 
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
