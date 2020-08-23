@@ -33,7 +33,8 @@ type SearchDB interface {
 // @Failure 500 {object} models.Response "Internal error"
 //
 func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
-	log := request_id.FromContextToLogger(r.Context(), h.log)
+	ctx := r.Context()
+	log := request_id.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.SearchSpendsReq{}
@@ -80,9 +81,9 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 		args.Order = db.OrderByAsc
 	}
 
-	spends, err := h.db.SearchSpends(r.Context(), args)
+	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
-		utils.ProcessError(r.Context(), log, w, "couldn't search for Spends", http.StatusInternalServerError, err)
+		utils.ProcessError(ctx, log, w, "couldn't search for Spends", http.StatusInternalServerError, err)
 		return
 	}
 	log.WithField("spend_number", len(spends)).Debug("finish Spend search")
@@ -90,7 +91,7 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	resp := models.SearchSpendsResp{
 		Response: models.Response{
-			RequestID: request_id.FromContext(r.Context()).ToString(),
+			RequestID: request_id.FromContext(ctx).ToString(),
 			Success:   true,
 		},
 		Spends: spends,
