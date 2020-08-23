@@ -19,9 +19,7 @@ docker-build: export-ldflags
 # Run
 
 # run runs Budget Manager with 'go run' command and PostgreSQL in container
-run: stop export-ldflags
-	# Run Postgres
-	./scripts/postgres.sh
+run: export-ldflags run-pg
 	# Run Budget Manager
 	./scripts/run.sh
 
@@ -52,9 +50,8 @@ test-unit:
 	go test -mod vendor -count 1 -v ./...
 
 # test-integ runs PostgreSQL in test mode and runs all tests
-test-integ: stop
-	# Run Postgres
-	./scripts/postgres.sh test
+test-integ:
+	$(MAKE) run-pg-test
 
 	# Run integration tests. We disable parallel tests for packages (with '-p 1') to avoid DB errors (same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
 	go test -mod=vendor -count=1 -p=1 --tags=integration -v \
@@ -63,8 +60,37 @@ test-integ: stop
 	go tool cover -func=cover.out
 	rm cover.out
 
-	# Stop and remove DB
-	docker stop budget-manager_postgres
+	$(MAKE) stop-pg-test
+
+# PostgreSQL
+
+PG_ENV=-e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -e POSTGRES_HOST_AUTH_METHOD=trust
+PG_CONAINER_NAME=budget-manager_pg
+
+# run-pg runs develop PostgreSQL instance with mounted '/var/pg_data' directory
+run-pg: stop-pg
+	docker run --rm -d \
+		--name ${PG_CONAINER_NAME} \
+		-p "5432:5432" \
+		-v $(shell pwd)/var/pg_data:/var/lib/postgresql/data \
+		${PG_ENV} \
+		postgres:12-alpine -c "log_statement=all"
+
+# stop-pg stops develop PostgreSQL instance
+stop-pg:
+	docker stop ${PG_CONAINER_NAME} || true
+
+# run-pg-test runs test PostgreSQL instance
+run-pg-test: stop-pg-test
+	docker run --rm -d \
+		--name ${PG_CONAINER_NAME}-test \
+		-p "5432:5432" \
+		${PG_ENV} \
+		postgres:12-alpine -c "log_statement=all"
+
+# stop-pg stops test PostgreSQL instance
+stop-pg-test:
+	docker stop ${PG_CONAINER_NAME}-test || true
 
 # Other
 
