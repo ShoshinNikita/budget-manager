@@ -1,7 +1,5 @@
-MODULE_PATH=github.com/ShoshinNikita/budget-manager
-
 # Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
-.PHONY: build check default docker-build docker-run docker-stop docker-stop-force export-ldflags generate-docs generate-mocks lint run stop test test-integ test-unit
+.PHONY: build check default docker docker-build docker-clear docker-run export-config export-ldflags generate-docs generate-mocks lint run run-pg run-pg-test stop-pg stop-pg-test test test-integ test-unit
 
 default: build run
 
@@ -24,10 +22,12 @@ docker: docker-build docker-run
 # docker-build builds a Docker image
 docker-build: TAG?=budget-manager:latest
 docker-build: export-ldflags
+	@ echo "Build Docker image for Budget Manager..."
 	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
 
 # docker-run runs both Budget Manager and PostgreSQL in containers
 docker-run:
+	@ echo "Run Budget Manager in Docker container..."
 	@ docker-compose up --exit-code-from budget-manager
 
 # docker-clear downs containers and removes volumes
@@ -47,6 +47,7 @@ TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
 
 # test-unit runs only unit tests
 test-unit:
+	@ echo "Run unit tests..."
 	${TEST_CMD}
 
 # test-integ runs PostgreSQL in test mode and runs all tests
@@ -56,10 +57,9 @@ test-unit:
 #
 test-integ: TEST_FLAGS = -tags=integration -p=1 -count=1
 test-integ:
+	@ echo "Run integration tests..."
 	@ $(MAKE) --no-print-directory run-pg-test
-
 	${TEST_CMD}
-
 	@ $(MAKE) --no-print-directory stop-pg-test
 
 #
@@ -71,7 +71,8 @@ PG_CONAINER_NAME=budget-manager_pg
 
 # run-pg runs develop PostgreSQL instance with mounted '/var/pg_data' directory
 run-pg: stop-pg
-	docker run --rm -d \
+	@ echo "Run develop PostgreSQL instance..."
+	@ docker run --rm -d \
 		--name ${PG_CONAINER_NAME} \
 		-p "5432:5432" \
 		-v $(shell pwd)/var/pg_data:/var/lib/postgresql/data \
@@ -80,23 +81,28 @@ run-pg: stop-pg
 
 # stop-pg stops develop PostgreSQL instance
 stop-pg:
-	docker stop ${PG_CONAINER_NAME} || true
+	@ echo "Stop develop PostgreSQL instance..."
+	@ docker stop ${PG_CONAINER_NAME} > /dev/null 2>&1 || true
 
 # run-pg-test runs test PostgreSQL instance
 run-pg-test: stop-pg-test
-	docker run --rm -d \
+	@ echo "Run test PostgreSQL instance..."
+	@ docker run --rm -d \
 		--name ${PG_CONAINER_NAME}-test \
 		-p "5432:5432" \
 		${PG_ENV} \
 		postgres:12-alpine -c "log_statement=all"
 
-# stop-pg stops test PostgreSQL instance
+# stop-pg-test stops test PostgreSQL instance
 stop-pg-test:
-	docker stop ${PG_CONAINER_NAME}-test || true
+	@ echo "Stop test PostgreSQL instance..."
+	@ docker stop ${PG_CONAINER_NAME}-test > /dev/null 2>&1 || true
 
 #
 # Configuration
 #
+
+MODULE_PATH=github.com/ShoshinNikita/budget-manager
 
 # export-ldflags exports LDFLAGS env variable. It is used during the build process to set version
 # and git hash. It can be used as a dependency target
@@ -139,12 +145,13 @@ endef
 # Other
 #
 
+# lint runs golangci-lint - https://github.com/golangci/golangci-lint
+#
+# Use go cache to speed up execution: https://github.com/golangci/golangci-lint/issues/1004
+#
 lint:
-	# golangci-lint - https://github.com/golangci/golangci-lint
-	#
-	# Use go cache to speed up execution: https://github.com/golangci/golangci-lint/issues/1004
-	#
-	docker run --rm -it --network=none \
+	@ echo "Run golangci-lint..."
+	@ docker run --rm -it --network=none \
 		-v $(shell go env GOCACHE):/cache/go \
 		-e GOCACHE=/cache/go \
 		-e GOLANGCI_LINT_CACHE=/cache/go \
@@ -155,13 +162,13 @@ lint:
 
 check: build lint test
 
+# generate-docs generates Swagger API documentation with swag - https://github.com/swaggo/swag
 generate-docs:
-	# swag - https://github.com/swaggo/swag
-	#
-	swag init --generalInfo cmd/budget-manager/main.go --output docs
-	rm ./docs/swagger.json ./docs/docs.go
+	@ echo "Clear Swagger API docs..."
+	@ swag init --generalInfo cmd/budget-manager/main.go --output docs
+	@ echo "Generate Swagger API docs..."
+	@ rm ./docs/swagger.json ./docs/docs.go
 
+# generate-mocks generates mocks with mockery - https://github.com/vektra/mockery
 generate-mocks:
-	# mockery - https://github.com/vektra/mockery
-	#
-	mockery -testonly -name=Database -dir=internal/web -inpkg -case=underscore
+	@ mockery -testonly -name=Database -dir=internal/web -inpkg -case=underscore
