@@ -13,7 +13,7 @@ import (
 
 // Spend represents spend entity in PostgreSQL db
 type Spend struct {
-	tableName struct{} `pg:"spends"` // nolint:structcheck,unused
+	tableName struct{} `pg:"spends"`
 
 	// DayID is a foreign key to 'days' table
 	DayID uint `pg:"day_id"`

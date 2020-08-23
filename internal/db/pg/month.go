@@ -14,7 +14,7 @@ import (
 
 // Month represents month entity in PostgreSQL db
 type Month struct {
-	tableName struct{} `pg:"months"` // nolint:structcheck,unused
+	tableName struct{} `pg:"months"`
 
 	ID uint `pg:"id,pk"`
 

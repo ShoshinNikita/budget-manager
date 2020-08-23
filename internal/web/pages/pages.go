@@ -25,7 +25,7 @@ const (
 	dbErrorMessagePrefix    = "DB error: "
 )
 
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals
 var (
 	overviewTemplatePath = templates.Template{
 		Path: "templates/overview.html",
@@ -265,7 +265,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 //   - sort - sort type: 'title', 'date' or 'cost'
 //   - order - sort order: 'asc' or 'desc'
 //
-// nolint:funlen
+//nolint:funlen
 func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := request_id.FromContextToLogger(ctx, h.log)

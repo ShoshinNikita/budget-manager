@@ -87,7 +87,7 @@ type searchSpendsModel struct {
 //
 //   ORDER BY month.year, month.month, day.day, spend.id;
 //
-// nolint:funlen
+//nolint:funlen
 func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Query {
 	query := tx.Model((*Spend)(nil)).
 		ColumnExpr("spend.id AS id").

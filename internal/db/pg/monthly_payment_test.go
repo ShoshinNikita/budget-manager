@@ -20,7 +20,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 	defer cleanUp(t, db)
 
 	// Prepare
-	var income = money.FromInt(50000)
+	income := money.FromInt(50000)
 	_, err := db.AddIncome(
 		context.Background(), db_common.AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
 	)
@@ -81,7 +81,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 	defer cleanUp(t, db)
 
 	// Prepare
-	var income = money.FromInt(50000)
+	income := money.FromInt(50000)
 	_, err := db.AddIncome(
 		context.Background(), db_common.AddIncomeArgs{MonthID: monthID, Title: "1", Income: income},
 	)

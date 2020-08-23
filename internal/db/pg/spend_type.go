@@ -11,7 +11,7 @@ import (
 
 // SpendType represents spend type entity in PostgreSQL db
 type SpendType struct {
-	tableName struct{} `pg:"spend_types"` // nolint:structcheck,unused
+	tableName struct{} `pg:"spend_types"`
 
 	ID   uint   `pg:"id,pk"`
 	Name string `pg:"name"`

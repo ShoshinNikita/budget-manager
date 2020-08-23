@@ -131,7 +131,7 @@ func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 // Ready to print colored log levels
 //
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals
 var (
 	coloredTraceLvl = []byte(color.HiMagentaString("[TRC]"))
 	coloredDebugLvl = []byte(color.HiMagentaString("[DBG]"))

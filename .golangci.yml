@@ -14,8 +14,11 @@ linters:
     - testpackage
     - whitespace
     - wsl
+    - nlreturn
 
 linters-settings:
+  gci:
+    local-prefixes: github.com/ShoshinNikita/budget-manager
   funlen:
     lines: 80
 
@@ -27,6 +30,8 @@ issues:
     - "use underscores in Go names; (?:func|type) (?:T|t)est"
     # Ignore long functions in tests
     - "Function '(?:T|t)est.*' is too long"
+    # Ignore warnings about 'github.com/go-pg/pg' specific field 'tableName'
+    - "`tableName` is unused"
 
   exclude-rules:
     - linters:
