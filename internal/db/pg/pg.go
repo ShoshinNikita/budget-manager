@@ -129,7 +129,7 @@ func (db *DB) Prepare() error {
 
 // checkCreatedTables checks tables and their descriptions
 //
-// nolint:funlen
+//nolint:funlen
 func (db *DB) checkCreatedTables() error {
 	const tableNumber = 7
 	var n int

@@ -14,10 +14,10 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals
 var queryDecoder = schema.NewDecoder()
 
-// nolint:gochecknoinits
+//nolint:gochecknoinits
 func init() {
 	queryDecoder.IgnoreUnknownKeys(true)
 	queryDecoder.SetAliasTag("json")
@@ -79,7 +79,7 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, log logrus.FieldLogg
 // ProcessError logs error and writes models.Response. If internalErr is nil,
 // it just writes models.Response
 //
-// nolint:gofumpt
+//nolint:gofumpt
 func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
 	respMsg string, code int, internalErr error) {
 
@@ -94,7 +94,7 @@ func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWr
 		Success:   false,
 		Error:     respMsg,
 	}
-	json.NewEncoder(w).Encode(resp) // nolint:errcheck
+	json.NewEncoder(w).Encode(resp) //nolint:errcheck
 }
 
 func LogInternalError(log logrus.FieldLogger, respMsg string, internalErr error) {

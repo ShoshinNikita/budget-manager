@@ -18,7 +18,7 @@ import (
 
 // Swagger General Info
 //
-// nolint:lll
+//nolint:lll
 //
 // @title Budget Manager API
 // @version v0.2

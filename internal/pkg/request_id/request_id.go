@@ -21,7 +21,7 @@ const requestIDLength = 8
 // New creates a new request id
 func New() RequestID {
 	data := make([]byte, requestIDLength/2)
-	rand.Read(data) // nolint:errcheck
+	rand.Read(data) //nolint:errcheck
 	return RequestID(hex.EncodeToString(data))
 }
 

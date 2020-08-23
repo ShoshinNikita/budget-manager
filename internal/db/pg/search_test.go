@@ -13,7 +13,7 @@ import (
 	. "github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-// nolint:lll
+//nolint:lll
 func TestSearchSpends(t *testing.T) {
 	globalRequire := require.New(t)
 

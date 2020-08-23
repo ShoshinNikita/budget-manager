@@ -190,7 +190,7 @@ func TestSearchSpends(t *testing.T) {
 	}
 }
 
-func prepareServer(t *testing.T) (*Server, *MockDatabase) { // nolint:unparam
+func prepareServer(t *testing.T) (*Server, *MockDatabase) { //nolint:unparam
 	// Logger
 	log := logrus.New()
 	log.SetLevel(logrus.ErrorLevel)

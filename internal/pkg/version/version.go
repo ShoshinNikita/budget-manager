@@ -2,7 +2,7 @@
 // For example, version and commit hash
 package version
 
-// nolint:gochecknoglobals
+//nolint:gochecknoglobals
 var (
 	// Version is a version of the app. It must be set during the build process with -ldflags flag
 	Version = "unknown"

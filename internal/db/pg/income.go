@@ -13,7 +13,7 @@ import (
 
 // Income represents income entity in PostgreSQL db
 type Income struct {
-	tableName struct{} `pg:"incomes"` // nolint:structcheck,unused
+	tableName struct{} `pg:"incomes"` //nolint:structcheck,unused
 
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`

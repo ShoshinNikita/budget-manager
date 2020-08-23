@@ -13,7 +13,7 @@ import (
 
 // MonthlyPayment represents monthly payment entity in PostgreSQL db
 type MonthlyPayment struct {
-	tableName struct{} `pg:"monthly_payments"` // nolint:structcheck,unused
+	tableName struct{} `pg:"monthly_payments"` //nolint:structcheck,unused
 
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`
