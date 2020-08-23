@@ -3,12 +3,13 @@ MODULE_PATH=github.com/ShoshinNikita/budget-manager
 # Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
 .PHONY: build check default docker-build docker-run docker-stop docker-stop-force export-ldflags generate-docs generate-mocks lint run stop test test-integ test-unit
 
-default: run
+default: build run
 
 # Build
 
 # build builds a binary file
 build: export-ldflags
+	@ echo "Build Budget Manager..."
 	@ go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 # docker-build builds a Docker image
@@ -18,10 +19,10 @@ docker-build: export-ldflags
 
 # Run
 
-# run runs Budget Manager with 'go run' command and PostgreSQL in container
-run: export-ldflags run-pg
-	# Run Budget Manager
-	./scripts/run.sh
+# run runs built Budget Manager and PostgreSQL in container
+run: run-pg export-config
+	@ echo "Run Budget Manager..."
+	@ ./bin/budget-manager
 
 # docker-run runs both Budget Manager and PostgreSQL in containers
 docker-run: stop export-ldflags
@@ -111,6 +112,25 @@ export-ldflags: VERSION?=unknown
 export-ldflags:
 	$(eval export LDFLAGS=-s -w -X '${MODULE_PATH}/internal/pkg/version.Version=${VERSION}' -X '${MODULE_PATH}/internal/pkg/version.GitHash=${GIT_HASH}')
 	@ echo Use this ldflags: ${LDFLAGS}
+
+# export-config exports configuration env variables
+export-config:
+	$(eval ${config})
+
+define config
+	export DEBUG = true
+	export LOGGER_MODE = develop
+	export DB_TYPE = postgres
+	export DB_PG_HOST = localhost
+	export DB_PG_PORT = 5432
+	export DB_PG_USER = postgres
+	export DB_PG_DATABASE = postgres
+	export SERVER_PORT = 8080
+	export SERVER_SKIP_AUTH = true
+	export SERVER_CACHE_TEMPLATES = false
+	export SERVER_CREDENTIALS = user:\$$apr1\$$cpHMFyv.\$$BSB0aaF3bOrTC2f3V2VYG/ # user:qwerty
+	export SERVER_ENABLE_PROFILING = true
+endef
 
 lint:
 	# golangci-lint - https://github.com/golangci/golangci-lint
