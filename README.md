@@ -124,10 +124,6 @@ The recommended version of `golangci-lint` is [v1.30.0](https://github.com/golan
 
 [swag](https://github.com/swaggo/swag) is used to generate API documentation. You can find more information about API endpoints in section [API](#api)
 
-#### Mocks
-
-Mocks are weakly used in tests. [mockery](https://github.com/vektra/mockery) was used to generate them. But it must be replaced with [gomock](https://github.com/golang/mock) due to the poor maintenance
-
 ### Endpoints
 
 #### Pages
