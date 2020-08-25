@@ -60,13 +60,9 @@ github.com/segmentio/encoding/json
 # github.com/sirupsen/logrus v1.6.0
 ## explicit
 github.com/sirupsen/logrus
-# github.com/stretchr/objx v0.1.1
-## explicit
-github.com/stretchr/objx
 # github.com/stretchr/testify v1.6.1
 ## explicit
 github.com/stretchr/testify/assert
-github.com/stretchr/testify/mock
 github.com/stretchr/testify/require
 # github.com/vmihailenco/bufpool v0.1.11
 github.com/vmihailenco/bufpool
