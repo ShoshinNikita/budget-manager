@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 # Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
 .PHONY: build check default docker docker-build docker-clear docker-run export-config export-ldflags generate-docs lint run run-pg run-pg-test stop-pg stop-pg-test test test-integ test-unit
 
