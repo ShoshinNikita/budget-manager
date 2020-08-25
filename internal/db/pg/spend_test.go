@@ -9,7 +9,7 @@ import (
 	"github.com/go-pg/pg/v9"
 	"github.com/stretchr/testify/require"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -27,7 +27,7 @@ func TestAddSpend(t *testing.T) {
 
 	// Add Spends
 	for i, sp := range spends {
-		args := db_common.AddSpendArgs{
+		args := common.AddSpendArgs{
 			DayID:  sp.DayID,
 			Title:  sp.Title,
 			TypeID: sp.TypeID,
@@ -101,7 +101,7 @@ func TestEditSpend(t *testing.T) {
 
 	// Add spends
 	for i, sp := range spends {
-		args := db_common.AddSpendArgs{
+		args := common.AddSpendArgs{
 			DayID:  sp.origin.DayID,
 			Title:  sp.origin.Title,
 			TypeID: sp.origin.TypeID,
@@ -129,7 +129,7 @@ func TestEditSpend(t *testing.T) {
 			continue
 		}
 
-		args := db_common.EditSpendArgs{
+		args := common.EditSpendArgs{
 			ID:    sp.edited.ID,
 			Title: &sp.edited.Title,
 			Notes: &sp.edited.Notes,
@@ -202,7 +202,7 @@ func TestDeleteSpend(t *testing.T) {
 
 	// Add spends
 	for i, sp := range spends {
-		args := db_common.AddSpendArgs{
+		args := common.AddSpendArgs{
 			DayID:  sp.DayID,
 			Title:  sp.Title,
 			TypeID: sp.TypeID,

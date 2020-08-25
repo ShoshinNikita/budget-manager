@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -28,7 +28,7 @@ func TestAddIncome(t *testing.T) {
 
 	// Add Incomes
 	for i, in := range incomes {
-		args := db_common.AddIncomeArgs{
+		args := common.AddIncomeArgs{
 			MonthID: in.MonthID,
 			Title:   in.Title,
 			Notes:   in.Notes,
@@ -81,7 +81,7 @@ func TestEditIncome(t *testing.T) {
 
 	// Add Incomes
 	for _, in := range incomes {
-		args := db_common.AddIncomeArgs{
+		args := common.AddIncomeArgs{
 			MonthID: in.MonthID, Title: in.Title, Notes: in.Notes, Income: in.Income,
 		}
 		_, err := db.AddIncome(context.Background(), args)
@@ -90,7 +90,7 @@ func TestEditIncome(t *testing.T) {
 
 	// Edit Incomes
 	for _, in := range editedIncomes {
-		args := db_common.EditIncomeArgs{
+		args := common.EditIncomeArgs{
 			ID:     in.ID,
 			Title:  &in.Title,
 			Notes:  &in.Notes,
@@ -138,7 +138,7 @@ func TestRemoveIncome(t *testing.T) {
 
 	// Add Incomes
 	for i, in := range incomes {
-		args := db_common.AddIncomeArgs{
+		args := common.AddIncomeArgs{
 			MonthID: in.MonthID,
 			Title:   in.Title,
 			Notes:   in.Notes,

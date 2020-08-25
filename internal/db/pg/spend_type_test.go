@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	db_common "github.com/ShoshinNikita/budget-manager/internal/db"
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
 func TestAddSpendType(t *testing.T) {
@@ -58,7 +58,7 @@ func TestAddSpendType(t *testing.T) {
 		require.Equal(t.SpendType.ToCommon(), spendType)
 	}
 
-	allSpendTypes := make([]*db_common.SpendType, 0, len(spendTypes))
+	allSpendTypes := make([]*common.SpendType, 0, len(spendTypes))
 	for _, t := range spendTypes {
 		if t.isError {
 			continue
