@@ -75,12 +75,13 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	log = log.WithField("name", req.Name)
+	log = log.WithFields(logrus.Fields{"name": req.Name, "parent_id": req.ParentID})
 
 	// Process
 	log.Debug("add Spend Type")
 	args := db.AddSpendTypeArgs{
-		Name: strings.TrimSpace(req.Name),
+		Name:     strings.TrimSpace(req.Name),
+		ParentID: req.ParentID,
 	}
 	id, err := h.db.AddSpendType(ctx, args)
 	if err != nil {
@@ -126,10 +127,11 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 
 	// Process
 	log.Debug("edit Spend Type")
-	newName := strings.TrimSpace(req.Name)
+
 	args := db.EditSpendTypeArgs{
-		ID:   req.ID,
-		Name: &newName,
+		ID:       req.ID,
+		Name:     trimSpacePointer(req.Name),
+		ParentID: req.ParentID,
 	}
 	err := h.db.EditSpendType(ctx, args)
 	if err != nil {

@@ -1018,6 +1018,9 @@ func testHandlers_Spend_RemoveSpend(t *testing.T, server *Server) {
 // -------------------------------------------------
 
 func TestHandlers_SpendType(t *testing.T) {
+	newName := func(s string) *string { return &s }
+	newParentID := func(u uint) *uint { return &u }
+
 	requireGlobal := require.New(t)
 	server := initServer(requireGlobal)
 	defer cleanUp(requireGlobal, server)
@@ -1158,8 +1161,9 @@ func TestHandlers_SpendType(t *testing.T) {
 			{
 				desc: "valid request (edit name)",
 				req: models.EditSpendTypeReq{
-					ID:   1,
-					Name: "updated name",
+					ID:       1,
+					Name:     newName("updated name"),
+					ParentID: newParentID(2),
 				},
 				statusCode: http.StatusOK,
 				resp: models.Response{
@@ -1172,7 +1176,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				desc: "invalid request (empty name)",
 				req: models.EditSpendTypeReq{
 					ID:   2,
-					Name: "",
+					Name: newName(""),
 				},
 				statusCode: http.StatusBadRequest,
 				resp: models.Response{
@@ -1220,7 +1224,7 @@ func TestHandlers_SpendType(t *testing.T) {
 
 	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
 		want := []*db.SpendType{
-			{ID: 1, Name: "updated name"},
+			{ID: 1, Name: "updated name", ParentID: 2},
 			{ID: 2, Name: "second type"},
 		}
 		// Prepare
