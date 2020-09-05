@@ -929,18 +929,13 @@
 
 		// Select day
 		window.addEventListener("load", () => {
-			const now = new Date();
-			const year = now.getFullYear();
-			const month = now.getMonth() + 1;
-			const day = now.getDate();
-
 			const urlRegexp = /overview\/(\d+)\/(\d+)(?:#(\d+))?/;
 			const match = window.location.href.match(urlRegexp);
 
 			// Check whether day is passed in URL
 			if (match[3] && Number(match[3])) {
 				const passedDay = Number(match[3]);
-				const daysInMonth = new Date(year, month, 0).getDate();
+				const daysInMonth = new Date(Year, MonthNumber, 0).getDate();
 				if (0 < passedDay && passedDay <= daysInMonth) {
 					// Select passed day
 					selectDay(passedDay);
@@ -949,9 +944,10 @@
 			}
 
 			// Check whether we display current month
-			if (match[1] == year && match[2] == month) {
+			const now = new Date();
+			if (match[1] == now.getFullYear() && match[2] == now.getMonth() + 1) {
 				// Select current day
-				selectDay(day);
+				selectDay(now.getDate());
 				return;
 			}
 
