@@ -28,7 +28,7 @@ func TestAddSpendType(t *testing.T) {
 			SpendType: SpendType{ID: 1, Name: "first type"},
 		},
 		{
-			SpendType: SpendType{ID: 2, Name: "второй тип"},
+			SpendType: SpendType{ID: 2, Name: "второй тип", ParentID: 1},
 		},
 		{
 			SpendType: SpendType{ID: 0, Name: ""},
@@ -38,7 +38,7 @@ func TestAddSpendType(t *testing.T) {
 
 	// Add Spend Types
 	for _, t := range spendTypes {
-		id, err := db.AddSpendType(context.Background(), t.Name)
+		id, err := db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: t.Name, ParentID: t.ParentID})
 		if t.isError {
 			require.NotNil(err)
 			continue
@@ -87,18 +87,31 @@ func TestEditSpendType(t *testing.T) {
 			origin: SpendType{ID: 1, Name: "first type"},
 			edited: SpendType{ID: 1, Name: "new name"},
 		},
+		{
+			origin: SpendType{ID: 2, Name: "second type"},
+			edited: SpendType{ID: 2, Name: "new name", ParentID: 1},
+		},
+		{
+			origin: SpendType{ID: 3, Name: "third type", ParentID: 1},
+			edited: SpendType{ID: 3, Name: "third type", ParentID: 2},
+		},
 	}
 
 	// Add Spend Types
 	for _, t := range spendTypes {
-		id, err := db.AddSpendType(context.Background(), t.origin.Name)
+		id, err := db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: t.origin.Name})
 		require.Nil(err)
 		require.Equal(t.origin.ID, id)
 	}
 
 	// Edit Spend Types
 	for _, t := range spendTypes {
-		err := db.EditSpendType(context.Background(), t.edited.ID, t.edited.Name)
+		args := common.EditSpendTypeArgs{ID: t.edited.ID, Name: &t.edited.Name}
+		if t.origin.ParentID != t.edited.ParentID {
+			args.ParentID = &t.edited.ParentID
+		}
+
+		err := db.EditSpendType(context.Background(), args)
 		require.Nil(err)
 	}
 
@@ -124,7 +137,7 @@ func TestDeleteSpendType(t *testing.T) {
 
 	// Add Spend Types
 	for _, t := range spendTypes {
-		id, err := db.AddSpendType(context.Background(), t.Name)
+		id, err := db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: t.Name})
 		require.Nil(err)
 		require.Equal(t.ID, id)
 	}

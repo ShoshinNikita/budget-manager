@@ -47,7 +47,7 @@ func TestSearchSpends(t *testing.T) {
 	firstSpendType := &common.SpendType{ID: 1, Name: "first type"}
 	secondSpendType := &common.SpendType{ID: 2, Name: "second type"}
 	for _, t := range []*common.SpendType{firstSpendType, secondSpendType} {
-		_, err := db.AddSpendType(context.Background(), t.Name)
+		_, err := db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: t.Name})
 		globalRequire.Nil(err)
 	}
 

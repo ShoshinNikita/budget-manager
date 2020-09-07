@@ -13,7 +13,8 @@ type GetSpendTypesResp struct {
 type AddSpendTypeReq struct {
 	Request
 
-	Name string `json:"name" validate:"required" example:"Food"`
+	Name     string `json:"name" validate:"required" example:"Food"`
+	ParentID uint   `json:"parent_id"`
 }
 
 func (req AddSpendTypeReq) Check() error {
@@ -32,15 +33,16 @@ type AddSpendTypeResp struct {
 type EditSpendTypeReq struct {
 	Request
 
-	ID   uint   `json:"id" validate:"required" example:"1"`
-	Name string `json:"name" validate:"required" example:"Vegetables"`
+	ID       uint    `json:"id" validate:"required" example:"1"`
+	Name     *string `json:"name" example:"Vegetables"`
+	ParentID *uint   `json:"parent_id" example:"1"`
 }
 
 func (req EditSpendTypeReq) Check() error {
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}
-	if req.Name == "" {
+	if req.Name != nil && *req.Name == "" {
 		return emptyFieldError("name")
 	}
 	return nil

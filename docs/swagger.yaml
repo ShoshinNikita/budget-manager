@@ -107,6 +107,8 @@ definitions:
         type: integer
       name:
         type: string
+      parent_id:
+        type: integer
     type: object
   models.AddIncomeReq:
     properties:
@@ -207,6 +209,8 @@ definitions:
       name:
         example: Food
         type: string
+      parent_id:
+        type: integer
     required:
     - name
     type: object
@@ -276,9 +280,11 @@ definitions:
       name:
         example: Vegetables
         type: string
+      parent_id:
+        example: 1
+        type: integer
     required:
     - id
-    - name
     type: object
   models.GetDayResp:
     properties:
