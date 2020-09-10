@@ -29,11 +29,8 @@ type Spend struct {
 
 // ToCommon converts Spend to common Spend structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (s *Spend) ToCommon(year int, month time.Month, day int) *common.Spend {
-	if s == nil {
-		return nil
-	}
-	return &common.Spend{
+func (s Spend) ToCommon(year int, month time.Month, day int) common.Spend {
+	return common.Spend{
 		ID:    s.ID,
 		Year:  year,
 		Month: month,

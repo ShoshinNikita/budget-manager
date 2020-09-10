@@ -44,5 +44,5 @@ type SearchSpendsReq struct {
 type SearchSpendsResp struct {
 	Response
 
-	Spends []*db.Spend `json:"spends"`
+	Spends []db.Spend `json:"spends"`
 }

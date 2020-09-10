@@ -11,8 +11,8 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]*common.Spend, error) {
-	var pgSpends []*searchSpendsModel
+func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]common.Spend, error) {
+	var pgSpends []searchSpendsModel
 	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
 		return db.buildSearchSpendsQuery(tx, args).Select(&pgSpends)
 	})
@@ -21,9 +21,9 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 	}
 
 	// Convert the internal model to the common one
-	spends := make([]*common.Spend, 0, len(pgSpends))
+	spends := make([]common.Spend, 0, len(pgSpends))
 	for i := range pgSpends {
-		s := &common.Spend{
+		s := common.Spend{
 			ID:    pgSpends[i].ID,
 			Year:  pgSpends[i].Year,
 			Month: pgSpends[i].Month,

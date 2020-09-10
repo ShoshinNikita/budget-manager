@@ -20,6 +20,8 @@ type SpendType struct {
 
 // ToCommon converts SpendType to common SpendType structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
+//
+// We return a pointer instead of a value unlike other 'ToCommon' methods because Spend Type can be optional
 func (s *SpendType) ToCommon() *common.SpendType {
 	if s == nil {
 		return nil
@@ -32,29 +34,29 @@ func (s *SpendType) ToCommon() *common.SpendType {
 }
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(_ context.Context, id uint) (*common.SpendType, error) {
+func (db DB) GetSpendType(_ context.Context, id uint) (common.SpendType, error) {
 	var spendType SpendType
 	if err := db.db.Model(&spendType).Where("id = ?", id).Select(); err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			err = common.ErrSpendTypeNotExist
 		}
-		return nil, err
+		return common.SpendType{}, err
 	}
 
-	return spendType.ToCommon(), nil
+	return *spendType.ToCommon(), nil
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(_ context.Context) ([]*common.SpendType, error) {
+func (db DB) GetSpendTypes(_ context.Context) ([]common.SpendType, error) {
 	var spendTypes []SpendType
 	err := db.db.Model(&spendTypes).Order("id ASC").Select()
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]*common.SpendType, 0, len(spendTypes))
+	res := make([]common.SpendType, 0, len(spendTypes))
 	for i := range spendTypes {
-		res = append(res, spendTypes[i].ToCommon())
+		res = append(res, *spendTypes[i].ToCommon())
 	}
 	return res, nil
 }

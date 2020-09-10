@@ -19,7 +19,7 @@ type SpendTypesHandlers struct {
 }
 
 type SpendTypesDB interface {
-	GetSpendTypes(ctx context.Context) ([]*db.SpendType, error)
+	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
 	AddSpendType(ctx context.Context, args db.AddSpendTypeArgs) (id uint, err error)
 	EditSpendType(ctx context.Context, args db.EditSpendTypeArgs) error
 	RemoveSpendType(ctx context.Context, id uint) error

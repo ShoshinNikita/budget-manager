@@ -27,11 +27,8 @@ type Income struct {
 
 // ToCommon converts Income to common Income structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (in *Income) ToCommon(year int, month time.Month) *common.Income {
-	if in == nil {
-		return nil
-	}
-	return &common.Income{
+func (in Income) ToCommon(year int, month time.Month) common.Income {
+	return common.Income{
 		ID:     in.ID,
 		Year:   year,
 		Month:  month,

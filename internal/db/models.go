@@ -12,12 +12,12 @@ type Month struct {
 	Year  int        `json:"year"`
 	Month time.Month `json:"month" swaggertype:"integer"`
 
-	Incomes         []*Income         `json:"incomes"`
-	MonthlyPayments []*MonthlyPayment `json:"monthly_payments"`
+	Incomes         []Income         `json:"incomes"`
+	MonthlyPayments []MonthlyPayment `json:"monthly_payments"`
 
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
 	DailyBudget money.Money `json:"daily_budget" swaggertype:"number"`
-	Days        []*Day      `json:"days"`
+	Days        []Day       `json:"days"`
 
 	TotalIncome money.Money `json:"total_income" swaggertype:"number"`
 	// TotalSpend is a cost of all Monthly Payments and Spends
@@ -35,7 +35,7 @@ type Day struct {
 	Day int `json:"day"`
 	// Saldo is DailyBudget - Cost of all Spends. It can be negative
 	Saldo  money.Money `json:"saldo" swaggertype:"number"`
-	Spends []*Spend    `json:"spends"`
+	Spends []Spend     `json:"spends"`
 }
 
 // Income contains information about incomes (salary, gifts and etc.)

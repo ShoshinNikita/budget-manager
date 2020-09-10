@@ -55,13 +55,13 @@ type Handlers struct {
 }
 
 type DB interface {
-	GetMonth(ctx context.Context, id uint) (*db.Month, error)
+	GetMonth(ctx context.Context, id uint) (db.Month, error)
 	GetMonthID(ctx context.Context, year, month int) (uint, error)
-	GetMonths(ctx context.Context, year int) ([]*db.Month, error)
+	GetMonths(ctx context.Context, year int) ([]db.Month, error)
 
-	GetSpendTypes(ctx context.Context) ([]*db.SpendType, error)
+	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
 
-	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]*db.Spend, error)
+	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]db.Spend, error)
 }
 
 type TemplateExecutor interface {
@@ -124,9 +124,9 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 
 	// Display all months. Months without data in DB have zero id
 
-	allMonths := make([]*db.Month, 12)
+	allMonths := make([]db.Month, 12)
 	for month := time.January; month <= time.December; month++ {
-		allMonths[month-1] = &db.Month{
+		allMonths[month-1] = db.Month{
 			ID:    0,
 			Year:  year,
 			Month: month,
@@ -158,7 +158,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 
 	resp := struct {
 		Year         int
-		Months       []*db.Month
+		Months       []db.Month
 		AnnualIncome money.Money
 		AnnualSpend  money.Money
 		Result       money.Money
@@ -229,10 +229,10 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := struct {
-		*db.Month
-		SpendTypes    []*db.SpendType
+		db.Month
+		SpendTypes    []db.SpendType
 		ToShortMonth  func(time.Month) string
-		SumSpendCosts func([]*db.Spend) money.Money
+		SumSpendCosts func([]db.Spend) money.Money
 		//
 		Footer FooterTemplateData
 	}{
@@ -406,8 +406,8 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 
 	// Execute the template
 	resp := struct {
-		Spends     []*db.Spend
-		SpendTypes []*db.SpendType
+		Spends     []db.Spend
+		SpendTypes []db.SpendType
 		TotalCost  money.Money
 		//
 		Footer FooterTemplateData

@@ -18,7 +18,7 @@ type MonthsHandlers struct {
 }
 
 type MonthsDB interface {
-	GetMonth(ctx context.Context, id uint) (*db.Month, error)
+	GetMonth(ctx context.Context, id uint) (db.Month, error)
 	GetMonthID(ctx context.Context, year, month int) (uint, error)
 }
 
@@ -64,7 +64,7 @@ func (h MonthsHandlers) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 			RequestID: request_id.FromContext(ctx).ToString(),
 			Success:   true,
 		},
-		Month: *month,
+		Month: month,
 	}
 	utils.EncodeResponse(w, r, log, resp)
 }
@@ -119,7 +119,7 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 			RequestID: request_id.FromContext(ctx).ToString(),
 			Success:   true,
 		},
-		Month: *month,
+		Month: month,
 	}
 	utils.EncodeResponse(w, r, log, resp)
 }

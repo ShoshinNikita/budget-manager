@@ -20,7 +20,7 @@ type SearchHandlers struct {
 }
 
 type SearchDB interface {
-	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]*db.Spend, error)
+	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]db.Spend, error)
 }
 
 // @Summary Search Spends

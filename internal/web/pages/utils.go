@@ -48,7 +48,7 @@ func toShortMonth(m time.Month) string {
 	return month
 }
 
-func sumSpendCosts(spends []*db.Spend) money.Money {
+func sumSpendCosts(spends []db.Spend) money.Money {
 	var m money.Money
 	for i := range spends {
 		m = m.Sub(spends[i].Cost)

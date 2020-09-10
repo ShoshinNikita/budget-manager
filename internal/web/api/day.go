@@ -18,7 +18,7 @@ type DaysHandlers struct {
 }
 
 type DaysDB interface {
-	GetDay(ctx context.Context, id uint) (*db.Day, error)
+	GetDay(ctx context.Context, id uint) (db.Day, error)
 	GetDayIDByDate(ctx context.Context, year, month, day int) (id uint, err error)
 }
 
@@ -64,7 +64,7 @@ func (h DaysHandlers) GetDayByID(w http.ResponseWriter, r *http.Request) {
 			RequestID: request_id.FromContext(ctx).ToString(),
 			Success:   true,
 		},
-		Day: *day,
+		Day: day,
 	}
 	utils.EncodeResponse(w, r, log, resp)
 }
@@ -119,7 +119,7 @@ func (h DaysHandlers) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 			RequestID: request_id.FromContext(ctx).ToString(),
 			Success:   true,
 		},
-		Day: *day,
+		Day: day,
 	}
 	utils.EncodeResponse(w, r, log, resp)
 }

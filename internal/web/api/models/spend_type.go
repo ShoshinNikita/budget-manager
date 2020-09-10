@@ -7,7 +7,7 @@ import (
 type GetSpendTypesResp struct {
 	Response
 
-	SpendTypes []*db.SpendType `json:"spend_types"`
+	SpendTypes []db.SpendType `json:"spend_types"`
 }
 
 type AddSpendTypeReq struct {

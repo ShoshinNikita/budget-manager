@@ -29,11 +29,8 @@ type MonthlyPayment struct {
 
 // ToCommon converts MonthlyPayment to common MonthlyPayment structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (mp *MonthlyPayment) ToCommon(year int, month time.Month) *common.MonthlyPayment {
-	if mp == nil {
-		return nil
-	}
-	return &common.MonthlyPayment{
+func (mp MonthlyPayment) ToCommon(year int, month time.Month) common.MonthlyPayment {
+	return common.MonthlyPayment{
 		ID:    mp.ID,
 		Year:  year,
 		Month: month,

@@ -55,16 +55,16 @@ func TestAddSpendType(t *testing.T) {
 			continue
 		}
 		require.Nil(err)
-		require.Equal(t.SpendType.ToCommon(), spendType)
+		require.Equal(*t.SpendType.ToCommon(), spendType)
 	}
 
-	allSpendTypes := make([]*common.SpendType, 0, len(spendTypes))
+	allSpendTypes := make([]common.SpendType, 0, len(spendTypes))
 	for _, t := range spendTypes {
 		if t.isError {
 			continue
 		}
 
-		allSpendTypes = append(allSpendTypes, t.SpendType.ToCommon())
+		allSpendTypes = append(allSpendTypes, *t.SpendType.ToCommon())
 	}
 
 	dbSpendTypes, err := db.GetSpendTypes(context.Background())
@@ -119,7 +119,7 @@ func TestEditSpendType(t *testing.T) {
 	for _, t := range spendTypes {
 		spendType, err := db.GetSpendType(context.Background(), t.origin.ID)
 		require.Nil(err)
-		require.Equal(t.edited.ToCommon(), spendType)
+		require.Equal(*t.edited.ToCommon(), spendType)
 	}
 }
 

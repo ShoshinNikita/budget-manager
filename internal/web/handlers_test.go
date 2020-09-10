@@ -1123,7 +1123,7 @@ func TestHandlers_SpendType(t *testing.T) {
 	}
 
 	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
-		want := []*db.SpendType{
+		want := []db.SpendType{
 			{ID: 1, Name: "first type"},
 			{ID: 2, Name: "second type"},
 		}
@@ -1223,7 +1223,7 @@ func TestHandlers_SpendType(t *testing.T) {
 	}
 
 	ok = t.Run("CheckSpendTypes", func(t *testing.T) {
-		want := []*db.SpendType{
+		want := []db.SpendType{
 			{ID: 1, Name: "updated name", ParentID: 2},
 			{ID: 2, Name: "second type"},
 		}

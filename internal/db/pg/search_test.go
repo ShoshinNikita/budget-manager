@@ -46,7 +46,7 @@ func TestSearchSpends(t *testing.T) {
 	// Prepare Spend Types
 	firstSpendType := &common.SpendType{ID: 1, Name: "first type"}
 	secondSpendType := &common.SpendType{ID: 2, Name: "second type"}
-	for _, t := range []*common.SpendType{firstSpendType, secondSpendType} {
+	for _, t := range []common.SpendType{*firstSpendType, *secondSpendType} {
 		_, err := db.AddSpendType(context.Background(), common.AddSpendTypeArgs{Name: t.Name})
 		globalRequire.Nil(err)
 	}
@@ -123,13 +123,13 @@ func TestSearchSpends(t *testing.T) {
 		desc string
 
 		args common.SearchSpendsArgs
-		want []*common.Spend
+		want []common.Spend
 	}{
 		// Tips: use this list of spends for creating future test cases
 		{
 			desc: "get all spends",
 			args: common.SearchSpendsArgs{},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
@@ -149,7 +149,7 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				Title: "first spend",
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
@@ -165,7 +165,7 @@ func TestSearchSpends(t *testing.T) {
 				Title:        "first spend",
 				TitleExactly: true,
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
@@ -179,7 +179,7 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				Notes: "2019-12-",
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
@@ -192,7 +192,7 @@ func TestSearchSpends(t *testing.T) {
 				After:  time.Date(2019, time.December, 6, 0, 0, 0, 0, time.UTC),
 				Before: time.Date(2020, time.January, 5, 0, 0, 0, 0, time.UTC),
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
 				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
 				{ID: 5, Year: 2020, Month: time.January, Day: 1, Title: "first spend", Notes: "2020-01-01", Cost: FromInt(189), Type: secondSpendType},
@@ -205,7 +205,7 @@ func TestSearchSpends(t *testing.T) {
 				MinCost: FromInt(13),
 				MaxCost: FromInt(100),
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
 				{ID: 8, Year: 2020, Month: time.January, Day: 30, Title: "second spend", Notes: "2020-01-30", Cost: FromInt(15)},
@@ -216,7 +216,7 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				TypeIDs: []uint{1},
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 			},
 		},
@@ -225,7 +225,7 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				TypeIDs: []uint{1, 2},
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 1, Year: 2019, Month: time.December, Day: 1, Title: "first spend", Notes: "2019-12-01", Cost: FromInt(100), Type: firstSpendType},
 				{ID: 5, Year: 2020, Month: time.January, Day: 1, Title: "first spend", Notes: "2020-01-01", Cost: FromInt(189), Type: secondSpendType},
 			},
@@ -240,7 +240,7 @@ func TestSearchSpends(t *testing.T) {
 				MinCost: FromInt(100),
 				MaxCost: FromInt(7000),
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},
 				{ID: 9, Year: 2020, Month: time.February, Day: 8, Title: "first spend", Notes: "2020-02-08", Cost: FromInt(189)},
 			},
@@ -250,7 +250,7 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				Title: "title",
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
 			},
 		},
@@ -259,14 +259,14 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				Title: "TITLE",
 			},
-			want: []*common.Spend{},
+			want: []common.Spend{},
 		},
 		{
 			desc: "search uppercase notes with lowerace",
 			args: common.SearchSpendsArgs{
 				Notes: "notes",
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 12, Year: 2020, Month: time.February, Day: 15, Title: "TITLE", Notes: "NOTES", Cost: FromInt(1)},
 			},
 		},
@@ -275,7 +275,7 @@ func TestSearchSpends(t *testing.T) {
 			args: common.SearchSpendsArgs{
 				Notes: "NOTES",
 			},
-			want: []*common.Spend{},
+			want: []common.Spend{},
 		},
 		{
 			desc: "sql injection",
@@ -283,14 +283,14 @@ func TestSearchSpends(t *testing.T) {
 				Title:        "first spend' OR 1=1--",
 				TitleExactly: true,
 			},
-			want: []*common.Spend{},
+			want: []common.Spend{},
 		},
 		{
 			desc: "search for spends without type",
 			args: common.SearchSpendsArgs{
 				WithoutType: true,
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
 				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
@@ -309,7 +309,7 @@ func TestSearchSpends(t *testing.T) {
 				WithoutType: true,
 				TypeIDs:     []uint{1, 2, 3},
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 2, Year: 2019, Month: time.December, Day: 5, Title: "first spend", Notes: "2019-12-05", Cost: FromInt(10)},
 				{ID: 3, Year: 2019, Month: time.December, Day: 8, Title: "first spend", Notes: "2019-12-08", Cost: FromInt(159)},
 				{ID: 4, Year: 2019, Month: time.December, Day: 8, Title: "second spend", Notes: "2019-12-08", Cost: FromInt(15)},
@@ -328,7 +328,7 @@ func TestSearchSpends(t *testing.T) {
 				Sort:  common.SortSpendsByCost,
 				Order: common.OrderByDesc,
 			},
-			want: []*common.Spend{
+			want: []common.Spend{
 				{ID: 6, Year: 2020, Month: time.January, Day: 1, Title: "second spend", Notes: "2020-01-01", Cost: FromInt(7821)},
 				{ID: 10, Year: 2020, Month: time.February, Day: 13, Title: "qwerty", Notes: "2020-02-13", Cost: FromInt(7821)},
 				{ID: 7, Year: 2020, Month: time.January, Day: 10, Title: "first spend", Notes: "2020-01-10", Cost: FromInt(555)},

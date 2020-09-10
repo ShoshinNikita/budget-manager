@@ -23,23 +23,20 @@ type Day struct {
 	Day int `pg:"day"`
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
 	Saldo  money.Money `pg:"saldo,use_zero"`
-	Spends []*Spend    `pg:"fk:day_id"`
+	Spends []Spend     `pg:"fk:day_id"`
 }
 
 // ToCommon converts Day to common Day structure from
 // "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (d *Day) ToCommon(year int, month time.Month) *common.Day {
-	if d == nil {
-		return nil
-	}
-	return &common.Day{
+func (d Day) ToCommon(year int, month time.Month) common.Day {
+	return common.Day{
 		ID:    d.ID,
 		Year:  year,
 		Month: month,
 		Day:   d.Day,
 		Saldo: d.Saldo,
-		Spends: func() []*common.Spend {
-			spends := make([]*common.Spend, 0, len(d.Spends))
+		Spends: func() []common.Spend {
+			spends := make([]common.Spend, 0, len(d.Spends))
 			for i := range d.Spends {
 				spends = append(spends, d.Spends[i].ToCommon(year, month, d.Day))
 			}
@@ -48,7 +45,7 @@ func (d *Day) ToCommon(year int, month time.Month) *common.Day {
 	}
 }
 
-func (db DB) GetDay(_ context.Context, id uint) (*common.Day, error) {
+func (db DB) GetDay(_ context.Context, id uint) (common.Day, error) {
 	var (
 		day   Day
 		year  int
@@ -74,7 +71,7 @@ func (db DB) GetDay(_ context.Context, id uint) (*common.Day, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return common.Day{}, err
 	}
 
 	return day.ToCommon(year, month), nil
