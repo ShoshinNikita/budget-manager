@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -223,6 +224,10 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sort.Slice(spendTypes, func(i, j int) bool {
+		return spendTypes[i].Name < spendTypes[j].Name
+	})
+
 	resp := struct {
 		db.Month
 		SpendTypes    []db.SpendType
@@ -350,7 +355,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sort
-	sort := func() db.SearchSpendsColumn {
+	sortType := func() db.SearchSpendsColumn {
 		switch r.FormValue("sort") {
 		case "title":
 			return db.SortSpendsByTitle
@@ -379,7 +384,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		MaxCost:     maxCost,
 		WithoutType: withoutType,
 		TypeIDs:     typeIDs,
-		Sort:        sort,
+		Sort:        sortType,
 		Order:       order,
 		// TODO
 		TitleExactly: false,
@@ -398,6 +403,10 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
+
+	sort.Slice(spendTypes, func(i, j int) bool {
+		return spendTypes[i].Name < spendTypes[j].Name
+	})
 
 	// Execute the template
 	resp := struct {
