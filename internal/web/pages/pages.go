@@ -218,19 +218,25 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.db.GetSpendTypes(ctx)
+	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
 	if err != nil {
-		h.processInternalErrorWithPage(ctx, log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types", err)
+		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
+		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
 
 	sort.Slice(spendTypes, func(i, j int) bool {
-		return spendTypes[i].Name < spendTypes[j].Name
+		return spendTypes[i].FullName < spendTypes[j].FullName
 	})
+
+	populateMonthlyPaymentsWithFullSpendTypeNames(spendTypes, month.MonthlyPayments)
+	for i := range month.Days {
+		populateSpendsWithFullSpendTypeNames(spendTypes, month.Days[i].Spends)
+	}
 
 	resp := struct {
 		db.Month
-		SpendTypes    []db.SpendType
+		SpendTypes    []SpendType
 		ToShortMonth  func(time.Month) string
 		SumSpendCosts func([]db.Spend) money.Money
 		//
@@ -397,7 +403,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.db.GetSpendTypes(ctx)
+	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
@@ -405,13 +411,15 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sort.Slice(spendTypes, func(i, j int) bool {
-		return spendTypes[i].Name < spendTypes[j].Name
+		return spendTypes[i].FullName < spendTypes[j].FullName
 	})
+
+	populateSpendsWithFullSpendTypeNames(spendTypes, spends)
 
 	// Execute the template
 	resp := struct {
 		Spends     []db.Spend
-		SpendTypes []db.SpendType
+		SpendTypes []SpendType
 		TotalCost  money.Money
 		//
 		Footer FooterTemplateData

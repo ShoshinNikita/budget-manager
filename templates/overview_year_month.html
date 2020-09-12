@@ -538,7 +538,7 @@
 										<select id="new-monthly-payment-type" autocomplete="off">
 											<option value="0">-</option>
 											{{ range $.SpendTypes }}
-											<option value="{{ .ID }}">{{ .Name }}</option>
+											<option value="{{ .ID }}">{{ .FullName }}</option>
 											{{ end }}
 										</select>
 									</td>
@@ -661,7 +661,7 @@
 											<select id="new-spend-type-{{ .ID }}" autocomplete="off">
 												<option value="0">-</option>
 												{{ range $.SpendTypes }}
-												<option value="{{ .ID }}">{{ .Name }}</option>
+												<option value="{{ .ID }}">{{ .FullName }}</option>
 												{{ end }}
 											</select>
 										</td>
@@ -754,7 +754,7 @@
 						<select id="modal-window__edit-monthly-payment__type">
 							<option value="0">-</option>
 							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .Name }}</option>
+							<option value="{{ .ID }}">{{ .FullName }}</option>
 							{{ end }}
 						</select>
 					</div>
@@ -789,7 +789,7 @@
 						<select id="modal-window__edit-spend__type">
 							<option value="0">-</option>
 							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .Name }}</option>
+							<option value="{{ .ID }}">{{ .FullName }}</option>
 							{{ end }}
 						</select>
 					</div>

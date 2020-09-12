@@ -311,7 +311,7 @@
 							{{ range .SpendTypes }}
 							<div class="search__options__types__type">
 								<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}" onclick="resetWithoutType()">
-								<label for="search__options__types__type-{{ .ID }}">{{ .Name }}</label>
+								<label for="search__options__types__type-{{ .ID }}">{{ .FullName }}</label>
 							</div>
 							{{ end }}
 						</div>
