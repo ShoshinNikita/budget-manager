@@ -94,7 +94,11 @@ func (db DB) EditSpendType(_ context.Context, args common.EditSpendTypeArgs) err
 			query = query.Set("name = ?", *args.Name)
 		}
 		if args.ParentID != nil {
-			query = query.Set("parent_id = ?", *args.ParentID)
+			if *args.ParentID == 0 {
+				query = query.Set("parent_id = NULL")
+			} else {
+				query = query.Set("parent_id = ?", *args.ParentID)
+			}
 		}
 
 		_, err := query.Update()
