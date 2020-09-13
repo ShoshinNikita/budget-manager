@@ -5,6 +5,7 @@
 	--border-color: #88888818;
 	--border-accent-color: #88888860;
 	--hover-color: #e4e4e438;
+	--disabled-color: #00000050;
 }
 
 /* | Common */
@@ -158,6 +159,13 @@ select {
 
 select:focus {
 	border-color: var(--border-accent-color);
+}
+
+select.reverse {
+	background-position: left;
+	padding-right: 0;
+	padding-left: 16px;
+	text-align: right;
 }
 
 select:active {

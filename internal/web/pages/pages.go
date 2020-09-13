@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"sort"
@@ -239,6 +240,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		SpendTypes    []SpendType
 		ToShortMonth  func(time.Month) string
 		SumSpendCosts func([]db.Spend) money.Money
+		ToHTMLAttr    func(string) template.HTMLAttr
 		//
 		Footer FooterTemplateData
 	}{
@@ -246,6 +248,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		SpendTypes:    spendTypes,
 		ToShortMonth:  toShortMonth,
 		SumSpendCosts: sumSpendCosts,
+		ToHTMLAttr:    func(s string) template.HTMLAttr { return template.HTMLAttr(s) }, //nolint:gosec
 		//
 		Footer: FooterTemplateData{
 			Version: version.Version,
