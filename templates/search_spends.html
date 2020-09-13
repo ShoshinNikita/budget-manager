@@ -108,7 +108,7 @@
 			padding: 0px;
 		}
 
-		.search__options__button>.feather-icon>svg {
+		.search__options__button>.feather-icon--btn>svg {
 			height: 25px;
 			width: 25px;
 		}
@@ -187,7 +187,7 @@
 			z-index: 1;
 		}
 
-		.search__results__table__link div.feather-icon>svg {
+		.search__results__table__link div.feather-icon--btn>svg {
 			height: 20px;
 			width: 20px;
 		}
@@ -325,14 +325,14 @@
 						<!-- Buttons -->
 						<div id="search__options__buttons">
 							<button type="reset" class="search__options__button" title="Reset">
-								<div class="feather-icon">
+								<div class="feather-icon--btn">
 									<svg>
 										<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" /> </svg>
 								</div>
 							</button>
 
 							<button type="submit" class="search__options__button" title="Search">
-								<div class="feather-icon">
+								<div class="feather-icon--btn">
 									<svg>
 										<use xlink:href="/static/feather/feather-sprite.svg#search" /> </svg>
 								</div>
@@ -342,7 +342,7 @@
 
 					<div id="search__options__home-page-link">
 						<a href="/">
-							<div class="feather-icon" title="Home">
+							<div class="feather-icon--btn" title="Home">
 								<svg>
 									<use xlink:href="/static/feather/feather-sprite.svg#home" />
 								</svg>
@@ -359,7 +359,7 @@
 							<tr>
 								<th class="search__results__table__date noselect" onclick="alert">
 									<span>Date</span>
-									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
+									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
 										<svg class="search__results__table__sort-icon--asc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
 										</svg>
@@ -370,7 +370,7 @@
 								</th>
 								<th class="search__results__table__title noselect">
 									<span>Title</span>
-									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
+									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
 										<svg class="search__results__table__sort-icon--asc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
 										</svg>
@@ -383,7 +383,7 @@
 								<th class="search__results__table__type noselect">Type</th>
 								<th class="search__results__table__cost noselect">
 									<span>Cost</span>
-									<div class="feather-icon search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
+									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
 										<svg class="search__results__table__sort-icon--asc">
 											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
 										</svg>
@@ -411,7 +411,7 @@
 								<td class="search__results__table__cost">{{ .Cost }}</td>
 								<td class="search__results__table__link">
 									<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
-										<div class="feather-icon" title="View Day">
+										<div class="feather-icon--btn" title="View Day">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#external-link" />
 											</svg>
