@@ -146,12 +146,18 @@ select {
 	appearance: none;
 	-moz-appearance: none;
 	-webkit-appearance: none;
+	background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>")
+		no-repeat right;
 	background-color: white;
-	border: 1px solid var(--border-accent-color);
+	border: none;
+	border-bottom: 1px solid var(--border-color);
 	cursor: pointer;
 	padding: 2px 16px 2px 0;
-	background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>")
-		no-repeat right;
+	scrollbar-width: unset;
+}
+
+select:focus {
+	border-color: var(--border-accent-color);
 }
 
 select:active {
