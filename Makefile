@@ -87,7 +87,7 @@ stop-pg:
 	@ docker stop ${PG_CONAINER_NAME} > /dev/null 2>&1 || true
 
 # run-pg-test runs test PostgreSQL instance
-run-pg-test: stop-pg-test
+run-pg-test: stop-pg stop-pg-test
 	@ echo "Run test PostgreSQL instance..."
 	@ docker run --rm -d \
 		--name ${PG_CONAINER_NAME}-test \
