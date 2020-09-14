@@ -309,6 +309,39 @@
 			width: 20px;
 		}
 
+		#modal-window__manage-types__saved-msg {
+			display: inline-flex;
+			font-size: 20px;
+			justify-content: center;
+			margin-top: 5px;
+			opacity: 0;
+			transition: opacity 0.25s;
+			width: 100%;
+		}
+
+		.modal-window__manage-types__saved-msg-animation {
+			opacity: 1 !important;
+		}
+
+		#modal-window__manage-types__saved-msg>div.feather-icon {
+			margin-right: 3px;
+			position: relative;
+			width: 20px;
+		}
+
+		#modal-window__manage-types__saved-msg>div.feather-icon>svg {
+			height: 20px;
+			position: absolute;
+			stroke: green;
+			top: 50%;
+			transform: translateY(-43%);
+			width: 20px;
+		}
+
+		#modal-window__manage-types__saved-msg span {
+			color: green;
+		}
+
 		/* | Layouts */
 
 		/* For large screens (> 1350px) */
@@ -881,6 +914,16 @@
 							</div>
 						</div>
 					</form>
+
+					<div id="modal-window__manage-types__saved-msg">
+						<div class="feather-icon">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#check" />
+							</svg>
+						</div>
+
+						<span>Saved</span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -1300,7 +1343,10 @@
 				"parent_id": Number(parentID),
 			}
 
-			const handler = () => { spendTypeChanged = true; }
+			const handler = () => {
+				spendTypeChanged = true;
+				showSpendTypeSavedMessage();
+			}
 			sendRequest("PUT", "/api/spend-types", fields, handler);
 		}
 
@@ -1467,6 +1513,28 @@
 			// Show Modal Window
 			showElement(editSpendModalWindowID);
 			showElement(modalWindowID);
+		}
+
+		var spendTypeSaveMessageAnimationTimeoutID = 0;
+
+		function showSpendTypeSavedMessage() {
+			const elemID = "modal-window__manage-types__saved-msg";
+			const animationClassName = elemID + "-animation";
+
+			const elem = document.getElementById(elemID);
+			if (!elem) return;
+
+			if (spendTypeSaveMessageAnimationTimeoutID) {
+				// Reset timeout
+				clearTimeout(spendTypeSaveMessageAnimationTimeoutID);
+			}
+
+			elem.classList.add(animationClassName);
+
+			spendTypeSaveMessageAnimationTimeoutID = setTimeout(() => {
+				elem.classList.remove(animationClassName);
+				spendTypeSaveMessageAnimationTimeoutID = 0;
+			}, 1000)
 		}
 
 		function showModalWindowToEditTypes() {
