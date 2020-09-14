@@ -826,7 +826,7 @@
 							{{ if eq $currentType.ParentID .ID }}
 							{{ $attributes = (printf "%s %s" $attributes "selected") }}
 							{{ end }}
-							{{ if eq $currentType.ID .ID }}
+							{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
 							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
 							{{ end }}
 

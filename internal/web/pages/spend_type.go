@@ -11,6 +11,9 @@ type SpendType struct {
 	db.SpendType
 	// FullName is a composite name that contains names of parent Spend Types
 	FullName string
+
+	// parentSpendTypeIDs is a set of ids of parent Spend Types
+	parentSpendTypeIDs map[uint]struct{}
 }
 
 func (h Handlers) getSpendTypesWithFullNames(ctx context.Context) ([]SpendType, error) {
@@ -26,16 +29,21 @@ func (h Handlers) getSpendTypesWithFullNames(ctx context.Context) ([]SpendType, 
 
 	res := make([]SpendType, 0, len(spendTypes))
 	for _, t := range spendTypes {
+		fullName, parentIDs := getSpendTypeFullName(spendTypesMap, t.ID)
 		res = append(res, SpendType{
 			SpendType: t,
-			FullName:  getSpendTypeFullName(spendTypesMap, t.ID),
+			//
+			FullName:           fullName,
+			parentSpendTypeIDs: parentIDs,
 		})
 	}
 	return res, nil
 }
 
-func getSpendTypeFullName(spendTypes map[uint]db.SpendType, typeID uint) string {
+func getSpendTypeFullName(spendTypes map[uint]db.SpendType, typeID uint) (name string, parentIDs map[uint]struct{}) {
 	const maxDepth = 15
+
+	parentIDs = make(map[uint]struct{})
 
 	var getFullName func(currentDepth int, currentType db.SpendType) string
 	getFullName = func(currentDepth int, currentType db.SpendType) string {
@@ -51,14 +59,16 @@ func getSpendTypeFullName(spendTypes map[uint]db.SpendType, typeID uint) string 
 			return currentType.Name
 		}
 
+		parentIDs[currentType.ParentID] = struct{}{}
+
 		// Use thin spaces ' ' to separate names
 		return fmt.Sprintf("%s / %s", getFullName(currentDepth+1, nextType), currentType.Name)
 	}
 
 	if spendType, ok := spendTypes[typeID]; ok {
-		return getFullName(0, spendType)
+		return getFullName(0, spendType), parentIDs
 	}
-	return ""
+	return "", nil
 }
 
 // populateMonthlyPaymentsWithFullSpendTypeNames replaces Spend Type names to full ones

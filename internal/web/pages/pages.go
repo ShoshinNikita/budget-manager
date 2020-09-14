@@ -183,6 +183,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 
 // GET /overview/{year:[0-9]+}/{month:[0-9]+}
 //
+//nolint:funlen
 func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
@@ -237,22 +238,36 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 
 	resp := struct {
 		db.Month
-		SpendTypes    []SpendType
-		ToShortMonth  func(time.Month) string
-		SumSpendCosts func([]db.Spend) money.Money
-		ToHTMLAttr    func(string) template.HTMLAttr
+		SpendTypes []SpendType
 		//
 		Footer FooterTemplateData
+		//
+		ToShortMonth           func(time.Month) string
+		SumSpendCosts          func([]db.Spend) money.Money
+		ToHTMLAttr             func(string) template.HTMLAttr
+		ShouldSuggestSpendType func(spendType, option SpendType) bool
 	}{
-		Month:         month,
-		SpendTypes:    spendTypes,
-		ToShortMonth:  toShortMonth,
-		SumSpendCosts: sumSpendCosts,
-		ToHTMLAttr:    func(s string) template.HTMLAttr { return template.HTMLAttr(s) }, //nolint:gosec
+		Month:      month,
+		SpendTypes: spendTypes,
 		//
 		Footer: FooterTemplateData{
 			Version: version.Version,
 			GitHash: version.GitHash,
+		},
+		//
+		ToShortMonth:  toShortMonth,
+		SumSpendCosts: sumSpendCosts,
+		ToHTMLAttr: func(s string) template.HTMLAttr {
+			return template.HTMLAttr(s) //nolint:gosec
+		},
+		ShouldSuggestSpendType: func(origin, suggestion SpendType) bool {
+			if origin.ID == suggestion.ID {
+				return false
+			}
+			if _, ok := suggestion.parentSpendTypeIDs[origin.ID]; ok {
+				return false
+			}
+			return true
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, monthTemplatePath, w, resp); err != nil {

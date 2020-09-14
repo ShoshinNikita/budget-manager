@@ -34,22 +34,65 @@ func TestGetSpendTypeFullName(t *testing.T) {
 
 	tests := []struct {
 		typeID uint
-		want   string
+		//
+		wantFullName  string
+		wantParentIDs map[uint]struct{}
 	}{
-		{typeID: 1, want: joinFullName("1")},
-		{typeID: 2, want: joinFullName("1", "2")},
-		{typeID: 3, want: joinFullName("1", "3")},
-		{typeID: 4, want: joinFullName("1", "2", "4")},
-		{typeID: 5, want: joinFullName("...", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5")},
-		{typeID: 6, want: joinFullName("...", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6")},
-		{typeID: 7, want: joinFullName("...", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7")},
-		{typeID: 8, want: joinFullName("9", "8")},
+		{
+			typeID: 1,
+			//
+			wantFullName:  joinFullName("1"),
+			wantParentIDs: map[uint]struct{}{},
+		},
+		{
+			typeID: 2,
+			//
+			wantFullName:  joinFullName("1", "2"),
+			wantParentIDs: map[uint]struct{}{1: {}},
+		},
+		{
+			typeID: 3,
+			//
+			wantFullName:  joinFullName("1", "3"),
+			wantParentIDs: map[uint]struct{}{1: {}},
+		},
+		{
+			typeID: 4,
+			//
+			wantFullName:  joinFullName("1", "2", "4"),
+			wantParentIDs: map[uint]struct{}{1: {}, 2: {}},
+		},
+		{
+			typeID: 5,
+			//
+			wantFullName:  joinFullName("...", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"),
+			wantParentIDs: map[uint]struct{}{5: {}},
+		},
+		{
+			typeID: 6,
+			//
+			wantFullName:  joinFullName("...", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6"),
+			wantParentIDs: map[uint]struct{}{6: {}, 7: {}},
+		},
+		{
+			typeID: 7,
+			//
+			wantFullName:  joinFullName("...", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7", "6", "7"),
+			wantParentIDs: map[uint]struct{}{6: {}, 7: {}},
+		},
+		{
+			typeID: 8,
+			//
+			wantFullName:  joinFullName("9", "8"),
+			wantParentIDs: map[uint]struct{}{9: {}},
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run("", func(t *testing.T) {
-			got := getSpendTypeFullName(spendTypes, tt.typeID)
-			require.Equal(t, tt.want, got)
+			gotFullName, gotParentIDs := getSpendTypeFullName(spendTypes, tt.typeID)
+			require.Equal(t, tt.wantFullName, gotFullName)
+			require.Equal(t, tt.wantParentIDs, gotParentIDs)
 		})
 	}
 }
