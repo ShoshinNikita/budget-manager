@@ -71,13 +71,13 @@ test-integ:
 PG_ENV=-e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -e POSTGRES_HOST_AUTH_METHOD=trust
 PG_CONAINER_NAME=budget-manager_pg
 
-# run-pg runs develop PostgreSQL instance with mounted '/var/pg_data' directory
+# run-pg runs develop PostgreSQL instance with mounted '_var/pg_data' directory
 run-pg: stop-pg
 	@ echo "Run develop PostgreSQL instance..."
 	@ docker run --rm -d \
 		--name ${PG_CONAINER_NAME} \
 		-p "5432:5432" \
-		-v $(shell pwd)/var/pg_data:/var/lib/postgresql/data \
+		-v $(shell pwd)/_var/pg_data:/var/lib/postgresql/data \
 		${PG_ENV} \
 		postgres:12-alpine -c "log_statement=all"
 
