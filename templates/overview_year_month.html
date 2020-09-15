@@ -26,7 +26,7 @@
 			display: flex;
 		}
 
-		.actions-horizontal-list>.feather-icon>svg {
+		.actions-horizontal-list>.feather-icon--btn>svg {
 			width: 18px;
 			height: 18px;
 		}
@@ -303,10 +303,43 @@
 			opacity: 0.5;
 		}
 
-		.modal-window__manage-types__spend-type>.feather-icon>svg {
+		.modal-window__manage-types__spend-type>.feather-icon--btn>svg {
 			height: 20px;
 			vertical-align: middle;
 			width: 20px;
+		}
+
+		#modal-window__manage-types__saved-msg {
+			display: inline-flex;
+			font-size: 20px;
+			justify-content: center;
+			margin-top: 5px;
+			opacity: 0;
+			transition: opacity 0.25s;
+			width: 100%;
+		}
+
+		.modal-window__manage-types__saved-msg-animation {
+			opacity: 1 !important;
+		}
+
+		#modal-window__manage-types__saved-msg>div.feather-icon {
+			margin-right: 3px;
+			position: relative;
+			width: 20px;
+		}
+
+		#modal-window__manage-types__saved-msg>div.feather-icon>svg {
+			height: 20px;
+			position: absolute;
+			stroke: green;
+			top: 50%;
+			transform: translateY(-43%);
+			width: 20px;
+		}
+
+		#modal-window__manage-types__saved-msg span {
+			color: green;
 		}
 
 		/* | Layouts */
@@ -396,7 +429,7 @@
 				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
 				{{ $before := printf `%d-%02d-%d` .Year .Month.Month (len .Month.Days) }}
 				<a href="/search/spends?after={{ $after }}&before={{ $before }}">
-					<div class="feather-icon" title="Search for Spends">
+					<div class="feather-icon--btn" title="Search for Spends">
 						<svg>
 							<use xlink:href="/static/feather/feather-sprite.svg#search" />
 						</svg>
@@ -404,7 +437,7 @@
 				</a>
 
 				<!-- Manage Spend Types -->
-				<div class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
+				<div class="feather-icon--btn" title="Manage Types" onclick="showModalWindowToEditTypes()">
 					<svg>
 						<use xlink:href="/static/feather/feather-sprite.svg#tag" />
 					</svg>
@@ -434,13 +467,13 @@
 								<td class="detailed-info__block__table__money">{{ .Income }}</td>
 								<td class="detailed-info__block__table__actions">
 									<div class="actions-horizontal-list">
-										<div class="feather-icon" title="Edit"
+										<div class="feather-icon--btn" title="Edit"
 											onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 											</svg>
 										</div>
-										<div class="feather-icon" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
+										<div class="feather-icon--btn" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 											</svg>
@@ -465,7 +498,7 @@
 									</td>
 									<td class="detailed-info__block__table__actions">
 										<button type="submit" class="actions-horizontal-list">
-											<div class="feather-icon" title="Add">
+											<div class="feather-icon--btn" title="Add">
 												<svg class="svg-icon-plus">
 													<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 												</svg>
@@ -512,14 +545,14 @@
 								<td class="detailed-info__block__table__money">{{ .Cost }}</td>
 								<td class="detailed-info__block__table__actions">
 									<div class="actions-horizontal-list">
-										<div class="feather-icon" title="Edit"
+										<div class="feather-icon--btn" title="Edit"
 											onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
 											'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 											</svg>
 										</div>
-										<div class="feather-icon" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
+										<div class="feather-icon--btn" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
 											<svg>
 												<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 											</svg>
@@ -553,7 +586,7 @@
 									</td>
 									<td class="detailed-info__block__table__actions">
 										<button type="submit" class="actions-horizontal-list">
-											<div class="feather-icon" title="Add">
+											<div class="feather-icon--btn" title="Add">
 												<svg class="svg-icon-plus">
 													<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 												</svg>
@@ -629,14 +662,14 @@
 									<td class="detailed-info__block__table__money">{{ .Cost }}</td>
 									<td class="detailed-info__block__table__actions">
 										<div class="actions-horizontal-list">
-											<div class="feather-icon" title="Edit"
+											<div class="feather-icon--btn" title="Edit"
 												onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
 												'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 												<svg>
 													<use xlink:href="/static/feather/feather-sprite.svg#edit-2" />
 												</svg>
 											</div>
-											<div class="feather-icon" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
+											<div class="feather-icon--btn" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
 												<svg>
 													<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 												</svg>
@@ -676,7 +709,7 @@
 										</td>
 										<td class="detailed-info__block__table__actions">
 											<button type="submit" class="actions-horizontal-list">
-												<div class="feather-icon" title="Add">
+												<div class="feather-icon--btn" title="Add">
 													<svg class="svg-icon-plus">
 														<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 													</svg>
@@ -840,12 +873,12 @@
 							placeholder="{{ .Name }}">
 
 						<div class="actions-horizontal-list">
-							<div class="feather-icon" title="Save" onclick="editSpendType('{{ .ID }}')">
+							<div class="feather-icon--btn" title="Save" onclick="editSpendType('{{ .ID }}')">
 								<svg>
 									<use xlink:href="/static/feather/feather-sprite.svg#check" />
 								</svg>
 							</div>
-							<div class="feather-icon" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
+							<div class="feather-icon--btn" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
 								<svg>
 									<use xlink:href="/static/feather/feather-sprite.svg#trash" />
 								</svg>
@@ -868,19 +901,29 @@
 						<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
 
 						<div class="actions-horizontal-list">
-							<button type="submit" class="feather-icon" title="Add">
+							<button type="submit" class="feather-icon--btn" title="Add">
 								<svg>
 									<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 								</svg>
 							</button>
 							<!-- Use this disabled and hidden element to align 'Add' button -->
-							<div class="feather-icon" style="opacity: 0; pointer-events: none;">
+							<div class="feather-icon--btn" style="opacity: 0; pointer-events: none;">
 								<svg>
 									<use xlink:href="/static/feather/feather-sprite.svg#plus" />
 								</svg>
 							</div>
 						</div>
 					</form>
+
+					<div id="modal-window__manage-types__saved-msg">
+						<div class="feather-icon">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#check" />
+							</svg>
+						</div>
+
+						<span>Saved</span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -1300,7 +1343,10 @@
 				"parent_id": Number(parentID),
 			}
 
-			const handler = () => { spendTypeChanged = true; }
+			const handler = () => {
+				spendTypeChanged = true;
+				showSpendTypeSavedMessage();
+			}
 			sendRequest("PUT", "/api/spend-types", fields, handler);
 		}
 
@@ -1467,6 +1513,28 @@
 			// Show Modal Window
 			showElement(editSpendModalWindowID);
 			showElement(modalWindowID);
+		}
+
+		var spendTypeSaveMessageAnimationTimeoutID = 0;
+
+		function showSpendTypeSavedMessage() {
+			const elemID = "modal-window__manage-types__saved-msg";
+			const animationClassName = elemID + "-animation";
+
+			const elem = document.getElementById(elemID);
+			if (!elem) return;
+
+			if (spendTypeSaveMessageAnimationTimeoutID) {
+				// Reset timeout
+				clearTimeout(spendTypeSaveMessageAnimationTimeoutID);
+			}
+
+			elem.classList.add(animationClassName);
+
+			spendTypeSaveMessageAnimationTimeoutID = setTimeout(() => {
+				elem.classList.remove(animationClassName);
+				spendTypeSaveMessageAnimationTimeoutID = 0;
+			}, 1000)
 		}
 
 		function showModalWindowToEditTypes() {

@@ -75,21 +75,25 @@ body {
 
 /* | Icons */
 
-.feather-icon {
+.feather-icon--btn {
 	cursor: pointer;
 	padding: 3px;
 }
 
-.feather-icon > svg {
+.feather-icon > svg,
+.feather-icon--btn > svg {
 	fill: none;
-	opacity: 0.64;
 	stroke: #888888;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	stroke-width: 2;
 }
 
-.feather-icon:hover > svg {
+.feather-icon--btn > svg {
+	opacity: 0.64;
+}
+
+.feather-icon--btn:hover > svg {
 	opacity: 1;
 	stroke: #666666;
 }
