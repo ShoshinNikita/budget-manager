@@ -83,7 +83,7 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 
 	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
-		utils.ProcessError(ctx, log, w, "couldn't search for Spends", http.StatusInternalServerError, err)
+		utils.ProcessInternalError(ctx, log, w, "couldn't search for Spends", err)
 		return
 	}
 	log.WithField("spend_number", len(spends)).Debug("finish Spend search")

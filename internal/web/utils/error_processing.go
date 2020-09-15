@@ -11,17 +11,8 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
-// ProcessError logs error and writes models.Response. If internalErr is nil,
-// it just writes models.Response
-//
-//nolint:gofumpt
-func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
-	respMsg string, code int, internalErr error) {
-
-	if internalErr != nil {
-		LogInternalError(log, respMsg, internalErr)
-	}
-
+// ProcessError writes 'models.Response' with passed message and status code
+func ProcessError(ctx context.Context, w http.ResponseWriter, respMsg string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	resp := models.Response{
@@ -30,6 +21,18 @@ func ProcessError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWr
 		Error:     respMsg,
 	}
 	json.NewEncoder(w).Encode(resp) //nolint:errcheck
+}
+
+// ProcessError logs internal error with 'LogInternalError' and calls 'ProcessError'
+// with 'http.StatusInternalServerError' status code
+//
+//nolint:gofumpt
+func ProcessInternalError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
+	respMsg string, err error) {
+
+	LogInternalError(log, respMsg, err)
+
+	ProcessError(ctx, w, respMsg, http.StatusInternalServerError)
 }
 
 func LogInternalError(log logrus.FieldLogger, respMsg string, internalErr error) {

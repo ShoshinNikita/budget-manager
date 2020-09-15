@@ -28,7 +28,7 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogge
 	ctx := r.Context()
 
 	if err := r.ParseForm(); err != nil {
-		ProcessError(ctx, log, w, "couldn't parse form: "+err.Error(), http.StatusBadRequest, nil)
+		ProcessError(ctx, w, "couldn't parse form: "+err.Error(), http.StatusBadRequest)
 		return false
 	}
 
@@ -40,12 +40,12 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogge
 		err = decodeJSONRequest(r.Body, req)
 	}
 	if err != nil {
-		ProcessError(ctx, log, w, "couldn't decode request: "+err.Error(), http.StatusBadRequest, nil)
+		ProcessError(ctx, w, "couldn't decode request: "+err.Error(), http.StatusBadRequest)
 		return false
 	}
 
 	if err := req.Check(); err != nil {
-		ProcessError(ctx, log, w, err.Error(), http.StatusBadRequest, nil)
+		ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 		return false
 	}
 

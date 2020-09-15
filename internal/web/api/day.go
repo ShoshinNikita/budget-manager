@@ -50,10 +50,10 @@ func (h DaysHandlers) GetDayByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrDayNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, nil)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get Day with passed id"
-			utils.ProcessError(ctx, log, w, msg, http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, msg, err)
 		}
 		return
 	}
@@ -97,10 +97,10 @@ func (h DaysHandlers) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrDayNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, nil)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get such Day"
-			utils.ProcessError(ctx, log, w, msg, http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, msg, err)
 		}
 		return
 	}
@@ -109,7 +109,7 @@ func (h DaysHandlers) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 	day, err := h.db.GetDay(ctx, dayID)
 	if err != nil {
 		msg := "couldn't get Day with passed id"
-		utils.ProcessError(ctx, log, w, msg, http.StatusInternalServerError, err)
+		utils.ProcessInternalError(ctx, log, w, msg, err)
 		return
 	}
 

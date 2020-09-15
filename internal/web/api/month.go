@@ -50,10 +50,10 @@ func (h MonthsHandlers) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, nil)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get Month with passed id"
-			utils.ProcessError(ctx, log, w, msg, http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, msg, err)
 		}
 		return
 	}
@@ -97,10 +97,10 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, nil)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get month with passed year and month"
-			utils.ProcessError(ctx, log, w, msg, http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, msg, err)
 		}
 		return
 	}
@@ -109,7 +109,7 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	month, err := h.db.GetMonth(ctx, monthID)
 	if err != nil {
 		msg := "couldn't get Month with passed id"
-		utils.ProcessError(ctx, log, w, msg, http.StatusInternalServerError, err)
+		utils.ProcessInternalError(ctx, log, w, msg, err)
 		return
 	}
 
