@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
@@ -125,6 +126,18 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 
 	log = log.WithFields(logrus.Fields{"id": req.ID, "name": req.Name})
 
+	if req.ParentID != nil && *req.ParentID != 0 {
+		hasCycle, err := h.checkSpendTypeForCycle(ctx, req.ID, *req.ParentID)
+		if err != nil {
+			utils.ProcessInternalError(ctx, log, w, "couldn't check Spend Type for a cycle", err)
+			return
+		}
+		if hasCycle {
+			utils.ProcessError(ctx, w, "Spend Type with new parent type will have a cycle", http.StatusBadRequest)
+			return
+		}
+	}
+
 	// Process
 	log.Debug("edit Spend Type")
 
@@ -151,6 +164,43 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 		Success:   true,
 	}
 	utils.EncodeResponse(w, r, log, resp)
+}
+
+func (h SpendTypesHandlers) checkSpendTypeForCycle(ctx context.Context, originalID, newParentID uint) (bool, error) {
+	spendTypes, err := h.db.GetSpendTypes(ctx)
+	if err != nil {
+		return false, errors.Wrap(err, "couldn't get Spend Types")
+	}
+
+	return checkSpendTypeForCycle(spendTypes, originalID, newParentID)
+}
+
+func checkSpendTypeForCycle(spendTypesSlice []db.SpendType, originalID, newParentID uint) (hasCycle bool, _ error) {
+	spendTypes := make(map[uint]db.SpendType, len(spendTypesSlice))
+	for _, t := range spendTypesSlice {
+		spendTypes[t.ID] = t
+	}
+
+	parentType := spendTypes[newParentID]
+	// Max depth is 15
+	for i := 0; i < 15; i++ {
+		if parentType.ID == 0 {
+			// Unexpected error
+			return false, errors.New("invalid Spend Type")
+		}
+		if parentType.ID == originalID {
+			// Has cycle
+			return true, nil
+		}
+		if parentType.ParentID == 0 {
+			// No more parents
+			return false, nil
+		}
+
+		parentType = spendTypes[parentType.ParentID]
+	}
+
+	return false, errors.New("Spend Type has too many parents or already has a cycle")
 }
 
 // @Summary Remove Spend Type
