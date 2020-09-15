@@ -8,6 +8,8 @@ import (
 )
 
 func TestToShortMonth(t *testing.T) {
+	t.Parallel()
+
 	require := require.New(t)
 
 	tests := []struct {

@@ -258,9 +258,11 @@
 			box-shadow: 0px 0px 10px 10px #00000020;
 			display: none;
 			margin: 9vh auto 5vh;
-			max-width: 700px;
+			max-width: 80%;
+			min-width: 700px;
+			overflow-x: auto;
 			padding: 20px;
-			width: 80%;
+			width: max-content;
 		}
 
 		.modal-window__header {
@@ -286,15 +288,19 @@
 		}
 
 		.modal-window__manage-types__spend-type {
-			column-gap: 20px;
+			column-gap: 10px;
 			display: grid;
-			grid-template-columns: 200px 30px;
+			grid-template-columns: max-content 5px 200px auto;
 			width: min-content;
 			margin: 0 auto 5px;
 		}
 
 		.modal-window__manage-types__spend-type:last-child {
 			margin-bottom: 20px;
+		}
+
+		.modal-window__manage-types__spend-type>span {
+			opacity: 0.5;
 		}
 
 		.modal-window__manage-types__spend-type>.feather-icon>svg {
@@ -538,7 +544,7 @@
 										<select id="new-monthly-payment-type" autocomplete="off">
 											<option value="0">-</option>
 											{{ range $.SpendTypes }}
-											<option value="{{ .ID }}">{{ .Name }}</option>
+											<option value="{{ .ID }}">{{ .FullName }}</option>
 											{{ end }}
 										</select>
 									</td>
@@ -661,7 +667,7 @@
 											<select id="new-spend-type-{{ .ID }}" autocomplete="off">
 												<option value="0">-</option>
 												{{ range $.SpendTypes }}
-												<option value="{{ .ID }}">{{ .Name }}</option>
+												<option value="{{ .ID }}">{{ .FullName }}</option>
 												{{ end }}
 											</select>
 										</td>
@@ -754,7 +760,7 @@
 						<select id="modal-window__edit-monthly-payment__type">
 							<option value="0">-</option>
 							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .Name }}</option>
+							<option value="{{ .ID }}">{{ .FullName }}</option>
 							{{ end }}
 						</select>
 					</div>
@@ -789,7 +795,7 @@
 						<select id="modal-window__edit-spend__type">
 							<option value="0">-</option>
 							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .Name }}</option>
+							<option value="{{ .ID }}">{{ .FullName }}</option>
 							{{ end }}
 						</select>
 					</div>
@@ -811,11 +817,30 @@
 
 					{{ range .SpendTypes }}
 					<div id="modal-window__manage-types__spend-type-{{ .ID }}" class="modal-window__manage-types__spend-type">
+						{{ $currentType := . }}
+						<select id="edit-spend-type-parent-id-{{ .ID }}" class="reverse" autocomplete="off" title="Parent Spend Type">
+							<option value="0"></option>
+							{{ range $.SpendTypes }}
+
+							{{ $attributes := "" }}
+							{{ if eq $currentType.ParentID .ID }}
+							{{ $attributes = (printf "%s %s" $attributes "selected") }}
+							{{ end }}
+							{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
+							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
+							{{ end }}
+
+							<option value="{{ .ID }}" {{ call $.ToHTMLAttr $attributes }}>{{ .FullName }}</option>
+							{{ end }}
+						</select>
+
+						<span class="noselect">/</span>
+
 						<input type="text" id="edit-spend-type-name-{{ .ID }}" value="{{ .Name }}" autocomplete="off"
 							placeholder="{{ .Name }}">
 
 						<div class="actions-horizontal-list">
-							<div class="feather-icon" title="Save" onclick="editSpendType('{{ .ID }}', '{{ .Name }}')">
+							<div class="feather-icon" title="Save" onclick="editSpendType('{{ .ID }}')">
 								<svg>
 									<use xlink:href="/static/feather/feather-sprite.svg#check" />
 								</svg>
@@ -831,13 +856,30 @@
 
 					<!-- New Spend Type -->
 					<form class="modal-window__manage-types__spend-type" onsubmit="addSpendType()">
+						<select id="new-spend-type-parent-id" class="reverse" autocomplete="off" title="Parent Spend Type">
+							<option value="0"></option>
+							{{ range $.SpendTypes }}
+							<option value="{{ .ID }}">{{ .FullName }}</option>
+							{{ end }}
+						</select>
+
+						<span class="noselect">/</span>
+
 						<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
 
-						<button type="submit" class="feather-icon" title="Add">
-							<svg>
-								<use xlink:href="/static/feather/feather-sprite.svg#plus" />
-							</svg>
-						</button>
+						<div class="actions-horizontal-list">
+							<button type="submit" class="feather-icon" title="Add">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+								</svg>
+							</button>
+							<!-- Use this disabled and hidden element to align 'Add' button -->
+							<div class="feather-icon" style="opacity: 0; pointer-events: none;">
+								<svg>
+									<use xlink:href="/static/feather/feather-sprite.svg#plus" />
+								</svg>
+							</div>
+						</div>
 					</form>
 				</div>
 			</div>
@@ -1228,30 +1270,34 @@
 				return;
 			}
 
+			// Skip check because user can't specify parent id as not a number
+			const parentID = getValue("new-spend-type-parent-id");
+
 			const fields = {
-				"name": name
+				"name": name,
+				"parent_id": Number(parentID)
 			}
 
 			// Reload on success
 			sendRequest("POST", "/api/spend-types", fields);
 		}
 
-		function editSpendType(id, oldName) {
+		function editSpendType(id) {
 			preventDefault(this);
 
-			const newName = getValue(`edit-spend-type-name-${id}`);
-			if (newName === oldName) {
-				// Do nothing
-				return;
-			}
-			if (newName === "") {
+			const name = getValue(`edit-spend-type-name-${id}`);
+			if (name === "") {
 				processError("Name of Spend Type can't be empty");
 				return;
 			}
 
+			// Skip check because user can't specify parent id as not a number
+			const parentID = getValue(`edit-spend-type-parent-id-${id}`);
+
 			const fields = {
 				"id": Number(id),
-				"name": newName,
+				"name": name,
+				"parent_id": Number(parentID),
 			}
 
 			const handler = () => { spendTypeChanged = true; }

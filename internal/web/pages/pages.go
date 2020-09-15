@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -181,6 +183,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 
 // GET /overview/{year:[0-9]+}/{month:[0-9]+}
 //
+//nolint:funlen
 func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
@@ -217,28 +220,54 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.db.GetSpendTypes(ctx)
+	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
 	if err != nil {
-		h.processInternalErrorWithPage(ctx, log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types", err)
+		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
+		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
+	}
+
+	sort.Slice(spendTypes, func(i, j int) bool {
+		return spendTypes[i].FullName < spendTypes[j].FullName
+	})
+
+	populateMonthlyPaymentsWithFullSpendTypeNames(spendTypes, month.MonthlyPayments)
+	for i := range month.Days {
+		populateSpendsWithFullSpendTypeNames(spendTypes, month.Days[i].Spends)
 	}
 
 	resp := struct {
 		db.Month
-		SpendTypes    []db.SpendType
-		ToShortMonth  func(time.Month) string
-		SumSpendCosts func([]db.Spend) money.Money
+		SpendTypes []SpendType
 		//
 		Footer FooterTemplateData
+		//
+		ToShortMonth           func(time.Month) string
+		SumSpendCosts          func([]db.Spend) money.Money
+		ToHTMLAttr             func(string) template.HTMLAttr
+		ShouldSuggestSpendType func(spendType, option SpendType) bool
 	}{
-		Month:         month,
-		SpendTypes:    spendTypes,
-		ToShortMonth:  toShortMonth,
-		SumSpendCosts: sumSpendCosts,
+		Month:      month,
+		SpendTypes: spendTypes,
 		//
 		Footer: FooterTemplateData{
 			Version: version.Version,
 			GitHash: version.GitHash,
+		},
+		//
+		ToShortMonth:  toShortMonth,
+		SumSpendCosts: sumSpendCosts,
+		ToHTMLAttr: func(s string) template.HTMLAttr {
+			return template.HTMLAttr(s) //nolint:gosec
+		},
+		ShouldSuggestSpendType: func(origin, suggestion SpendType) bool {
+			if origin.ID == suggestion.ID {
+				return false
+			}
+			if _, ok := suggestion.parentSpendTypeIDs[origin.ID]; ok {
+				return false
+			}
+			return true
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, monthTemplatePath, w, resp); err != nil {
@@ -350,7 +379,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sort
-	sort := func() db.SearchSpendsColumn {
+	sortType := func() db.SearchSpendsColumn {
 		switch r.FormValue("sort") {
 		case "title":
 			return db.SortSpendsByTitle
@@ -379,7 +408,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		MaxCost:     maxCost,
 		WithoutType: withoutType,
 		TypeIDs:     typeIDs,
-		Sort:        sort,
+		Sort:        sortType,
 		Order:       order,
 		// TODO
 		TitleExactly: false,
@@ -392,17 +421,23 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.db.GetSpendTypes(ctx)
+	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
 
+	sort.Slice(spendTypes, func(i, j int) bool {
+		return spendTypes[i].FullName < spendTypes[j].FullName
+	})
+
+	populateSpendsWithFullSpendTypeNames(spendTypes, spends)
+
 	// Execute the template
 	resp := struct {
 		Spends     []db.Spend
-		SpendTypes []db.SpendType
+		SpendTypes []SpendType
 		TotalCost  money.Money
 		//
 		Footer FooterTemplateData
