@@ -8,7 +8,7 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // basicAuthMiddleware checks whether user is authorized
@@ -23,7 +23,7 @@ func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
 	})
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := request_id.FromContextToLogger(r.Context(), s.log)
+		log := reqid.FromContextToLogger(r.Context(), s.log)
 		log = log.WithFields(logrus.Fields{"ip": r.RemoteAddr, "url": r.URL})
 
 		if username := basicAuthenticator.CheckAuth(r); username == "" {
@@ -57,12 +57,12 @@ const requestIDHeader = "X-Request-ID"
 // requestIDMeddleware generates a new request id and inserts it into the request context
 func (Server) requestIDMeddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		reqID := request_id.New()
+		reqID := reqid.New()
 		if headerValue := r.Header.Get(requestIDHeader); headerValue != "" {
-			reqID = request_id.RequestID(headerValue)
+			reqID = reqid.RequestID(headerValue)
 		}
 
-		ctx := request_id.ToContext(r.Context(), reqID)
+		ctx := reqid.ToContext(r.Context(), reqID)
 		r = r.WithContext(ctx)
 
 		h.ServeHTTP(w, r)
@@ -72,7 +72,7 @@ func (Server) requestIDMeddleware(h http.Handler) http.Handler {
 // loggingMiddleware logs all HTTP requests. It also logs execution time, content length and status code
 func (s Server) loggingMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := request_id.FromContextToLogger(r.Context(), s.log)
+		log := reqid.FromContextToLogger(r.Context(), s.log)
 		log = log.WithFields(logrus.Fields{"method": r.Method, "url": r.URL.Path})
 
 		log.Debug("start request")

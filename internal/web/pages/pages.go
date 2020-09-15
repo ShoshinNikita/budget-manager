@@ -14,7 +14,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages/templates"
 )
@@ -81,7 +81,7 @@ func NewHandlers(db DB, tplExecutor TemplateExecutor, log logrus.FieldLogger) *H
 func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
 	year, month, _ := time.Now().Date()
 
-	request_id.FromContextToLogger(r.Context(), h.log).
+	reqid.FromContextToLogger(r.Context(), h.log).
 		WithFields(logrus.Fields{"year": year, "month": int(month)}).
 		Debug("redirect to the current month")
 
@@ -93,7 +93,7 @@ func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
 //
 func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	if err := h.tplExecutor.Execute(ctx, overviewTemplatePath, w, nil); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
@@ -104,7 +104,7 @@ func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
 //
 func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	year, ok := getYear(r)
 	if !ok {
@@ -183,7 +183,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 //
 func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	year, ok := getYear(r)
 	if !ok {
@@ -263,7 +263,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 //nolint:funlen
 func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Parse the query
 

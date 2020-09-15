@@ -7,7 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
@@ -16,7 +16,7 @@ func ProcessError(ctx context.Context, w http.ResponseWriter, respMsg string, co
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	resp := models.Response{
-		RequestID: request_id.FromContext(ctx).ToString(),
+		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   false,
 		Error:     respMsg,
 	}

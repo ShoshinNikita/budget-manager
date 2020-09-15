@@ -7,7 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // TemplateDiskExecutor reads templates from disk every execution
@@ -22,7 +22,7 @@ func NewTemplateDiskExecutor(log logrus.FieldLogger) *TemplateDiskExecutor {
 }
 
 func (ex *TemplateDiskExecutor) Get(ctx context.Context, template Template) *htmlTemplate.Template {
-	log := request_id.FromContextToLogger(ctx, ex.log)
+	log := reqid.FromContextToLogger(ctx, ex.log)
 	log = log.WithField("path", template.Path)
 
 	log.Debug("load template from disk")

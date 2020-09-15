@@ -9,7 +9,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
@@ -34,7 +34,7 @@ type SearchDB interface {
 //
 func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.SearchSpendsReq{}
@@ -91,7 +91,7 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	resp := models.SearchSpendsResp{
 		Response: models.Response{
-			RequestID: request_id.FromContext(ctx).ToString(),
+			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
 		Spends: spends,

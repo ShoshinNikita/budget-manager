@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
@@ -34,7 +34,7 @@ type SpendTypesDB interface {
 //
 func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Process
 	log.Debug("return all Spend Types")
@@ -47,7 +47,7 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 	// Encode
 	resp := models.GetSpendTypesResp{
 		Response: models.Response{
-			RequestID: request_id.FromContext(ctx).ToString(),
+			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
 		SpendTypes: types,
@@ -67,7 +67,7 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 //
 func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.AddSpendTypeReq{}
@@ -94,7 +94,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	// Encode
 	resp := models.AddSpendTypeResp{
 		Response: models.Response{
-			RequestID: request_id.FromContext(ctx).ToString(),
+			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
 		ID: id,
@@ -115,7 +115,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 //
 func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.EditSpendTypeReq{}
@@ -147,7 +147,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 
 	// Encode
 	resp := models.Response{
-		RequestID: request_id.FromContext(ctx).ToString(),
+		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
 	utils.EncodeResponse(w, r, log, resp)
@@ -166,7 +166,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 //
 func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.RemoveSpendTypeReq{}
@@ -192,7 +192,7 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 
 	// Encode
 	resp := models.Response{
-		RequestID: request_id.FromContext(ctx).ToString(),
+		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
 	utils.EncodeResponse(w, r, log, resp)

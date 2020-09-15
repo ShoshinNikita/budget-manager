@@ -8,7 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 )
 
 // TemplateCacheExecutor caches templates after reading them from the disk
@@ -28,7 +28,7 @@ func NewTemplateCacheExecutor(log logrus.FieldLogger) *TemplateCacheExecutor {
 }
 
 func (ex *TemplateCacheExecutor) Get(ctx context.Context, template Template) *htmlTemplate.Template {
-	log := request_id.FromContextToLogger(ctx, ex.log)
+	log := reqid.FromContextToLogger(ctx, ex.log)
 	log = log.WithField("path", template.Path)
 
 	ex.mu.RLock()

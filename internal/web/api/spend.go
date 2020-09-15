@@ -9,7 +9,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
@@ -38,7 +38,7 @@ type SpendsDB interface {
 //
 func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.AddSpendReq{}
@@ -76,7 +76,7 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	resp := models.AddSpendResp{
 		Response: models.Response{
-			RequestID: request_id.FromContext(ctx).ToString(),
+			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
 		ID: id,
@@ -97,7 +97,7 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 //
 func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.EditSpendReq{}
@@ -135,7 +135,7 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	resp := models.Response{
-		RequestID: request_id.FromContext(ctx).ToString(),
+		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
 	utils.EncodeResponse(w, r, log, resp)
@@ -154,7 +154,7 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 //
 func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	log := request_id.FromContextToLogger(ctx, h.log)
+	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Decode
 	req := &models.RemoveSpendReq{}
@@ -180,7 +180,7 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	resp := models.Response{
-		RequestID: request_id.FromContext(ctx).ToString(),
+		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
 	utils.EncodeResponse(w, r, log, resp)

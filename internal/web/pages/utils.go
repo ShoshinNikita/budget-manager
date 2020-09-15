@@ -11,7 +11,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
 
@@ -23,11 +23,11 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 
 	data := struct {
 		Code      int
-		RequestID request_id.RequestID
+		RequestID reqid.RequestID
 		Message   string
 	}{
 		Code:      code,
-		RequestID: request_id.FromContext(ctx),
+		RequestID: reqid.FromContext(ctx),
 		Message:   respMsg,
 	}
 	if err := h.tplExecutor.Execute(ctx, errorPageTemplatePath, w, data); err != nil {
