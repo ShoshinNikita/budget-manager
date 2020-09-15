@@ -46,6 +46,14 @@ COPY static ./static
 RUN minify --html-keep-default-attrvals -o templates/ templates && \
 	minify -o static/css/ static/css
 
+# Minify has poor support of Go template syntax. For example, it converts all attributes to lower case.
+# It causes template execution errors. For example, <html lang="{{ .Lang }}"> is converted to <html lang="{{ .lang }}">
+#
+# There's an issue (https://github.com/tdewolff/minify/issues/35) for this problem opened in 2015, but it is still opened.
+# So, we have to find a workaround. For example, we can manually fix Go templates in attributes (they can be found with
+# this regexp: \{\{ .*? \}\}>
+#
+RUN sed -i "s/$.tohtmlattr/$.ToHTMLAttr/g" templates/overview_year_month.html
 
 #
 # Build the final image
