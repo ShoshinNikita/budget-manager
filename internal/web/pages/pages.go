@@ -96,7 +96,7 @@ func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
 	log := request_id.FromContextToLogger(ctx, h.log)
 
 	if err := h.tplExecutor.Execute(ctx, overviewTemplatePath, w, nil); err != nil {
-		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
 
@@ -108,9 +108,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 
 	year, ok := getYear(r)
 	if !ok {
-		h.processErrorWithPage(
-			ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
-		)
+		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest)
 		return
 	}
 
@@ -118,7 +116,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 	// Render the page even theare no months for passed year
 	if err != nil && !errors.Is(err, db.ErrYearNotExist) {
 		msg := dbErrorMessagePrefix + "couldn't get months"
-		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
 
@@ -177,7 +175,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, yearTemplatePath, w, resp); err != nil {
-		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
 
@@ -189,14 +187,12 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 
 	year, ok := getYear(r)
 	if !ok {
-		h.processErrorWithPage(
-			ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest, nil,
-		)
+		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest)
 		return
 	}
 	monthNumber, ok := getMonth(r)
 	if !ok {
-		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest, nil)
+		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest)
 		return
 	}
 
@@ -204,10 +200,10 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			h.processErrorWithPage(ctx, log, w, err.Error(), http.StatusNotFound, nil)
+			h.processErrorWithPage(ctx, log, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := dbErrorMessagePrefix + "couldn't get month"
-			h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
+			h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		}
 		return
 	}
@@ -217,14 +213,13 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Month must exist
 		msg := dbErrorMessagePrefix + "couldn't get Month info"
-		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
 
 	spendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
-		h.processErrorWithPage(ctx, log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types",
-			http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, dbErrorMessagePrefix+"couldn't get list of Spend Types", err)
 		return
 	}
 
@@ -247,7 +242,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, monthTemplatePath, w, resp); err != nil {
-		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
 
@@ -393,14 +388,14 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't complete Spend search"
-		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
 
 	spendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
-		h.processErrorWithPage(ctx, log, w, msg, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
 
@@ -422,7 +417,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, searchSpendsTemplatePath, w, resp); err != nil {
-		h.processErrorWithPage(ctx, log, w, executeErrorMessage, http.StatusInternalServerError, err)
+		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
 

@@ -15,15 +15,11 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
 
-// processErrorWithPage is similar to 'processError', but it shows error page instead of returning json
+// processErrorWithPage is similar to 'utils.ProcessError' but shows the error page instead of returning json
 //
 //nolint:gofumpt
 func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
-	respMsg string, code int, internalErr error) {
-
-	if internalErr != nil {
-		utils.LogInternalError(log, respMsg, internalErr)
-	}
+	respMsg string, code int) {
 
 	data := struct {
 		Code      int
@@ -37,6 +33,18 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 	if err := h.tplExecutor.Execute(ctx, errorPageTemplatePath, w, data); err != nil {
 		utils.ProcessInternalError(ctx, log, w, executeErrorMessage, err)
 	}
+}
+
+// processInternalErrorWithPage is similar to 'utils.ProcessInternalError' but shows the error page
+// instead of returning json
+//
+//nolint:gofumpt
+func (h Handlers) processInternalErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
+	respMsg string, err error) {
+
+	utils.LogInternalError(log, respMsg, err)
+
+	h.processErrorWithPage(ctx, log, w, respMsg, http.StatusInternalServerError)
 }
 
 func toShortMonth(m time.Month) string {
