@@ -64,9 +64,9 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrDayNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't add Spend", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't add Spend", err)
 		}
 		return
 	}
@@ -125,9 +125,9 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrSpendNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't edit Spend", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend", err)
 		}
 		return
 	}
@@ -170,9 +170,9 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrSpendNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't remove Spend", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't remove Spend", err)
 		}
 		return
 	}

@@ -62,9 +62,9 @@ func (h IncomesHandlers) AddIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrMonthNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't add Income", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't add Income", err)
 		}
 		return
 	}
@@ -122,9 +122,9 @@ func (h IncomesHandlers) EditIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrIncomeNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't edit Income", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't edit Income", err)
 		}
 		return
 	}
@@ -167,9 +167,9 @@ func (h IncomesHandlers) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case db.ErrIncomeNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't remove Income", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't remove Income", err)
 		}
 		return
 	}

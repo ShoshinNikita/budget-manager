@@ -40,7 +40,7 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 	log.Debug("return all Spend Types")
 	types, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
-		utils.ProcessError(ctx, log, w, "couldn't get Spend Types", http.StatusInternalServerError, err)
+		utils.ProcessInternalError(ctx, log, w, "couldn't get Spend Types", err)
 		return
 	}
 
@@ -85,7 +85,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	}
 	id, err := h.db.AddSpendType(ctx, args)
 	if err != nil {
-		utils.ProcessError(ctx, log, w, "couldn't add Spend Type", http.StatusInternalServerError, err)
+		utils.ProcessInternalError(ctx, log, w, "couldn't add Spend Type", err)
 		return
 	}
 	log = log.WithField("id", id)
@@ -137,9 +137,9 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		switch err {
 		case db.ErrSpendTypeNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't edit Spend Type", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend Type", err)
 		}
 		return
 	}
@@ -182,9 +182,9 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		switch err {
 		case db.ErrSpendTypeNotExist:
-			utils.ProcessError(ctx, log, w, err.Error(), http.StatusNotFound, err)
+			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
-			utils.ProcessError(ctx, log, w, "couldn't remove Spend Type", http.StatusInternalServerError, err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't remove Spend Type", err)
 		}
 		return
 	}
