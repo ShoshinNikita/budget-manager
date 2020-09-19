@@ -15,15 +15,15 @@ import (
 type Day struct {
 	tableName struct{} `pg:"days"`
 
+	ID uint `pg:"id,pk"`
+
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`
-
-	ID uint `pg:"id,pk"`
 
 	Day int `pg:"day"`
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
 	Saldo  money.Money `pg:"saldo,use_zero"`
-	Spends []Spend     `pg:"fk:day_id"`
+	Spends []Spend     `pg:"rel:has-many,join_fk:day_id"`
 }
 
 // ToCommon converts Day to common Day structure from

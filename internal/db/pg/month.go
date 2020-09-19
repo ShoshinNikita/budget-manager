@@ -21,12 +21,12 @@ type Month struct {
 	Year  int        `pg:"year"`
 	Month time.Month `pg:"month"`
 
-	Incomes         []Income         `pg:"fk:month_id"`
-	MonthlyPayments []MonthlyPayment `pg:"fk:month_id"`
+	Incomes         []Income         `pg:"rel:has-many,join_fk:month_id"`
+	MonthlyPayments []MonthlyPayment `pg:"rel:has-many,join_fk:month_id"`
 
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
 	DailyBudget money.Money `pg:"daily_budget,use_zero"`
-	Days        []Day       `pg:"fk:month_id"`
+	Days        []Day       `pg:"rel:has-many,join_fk:month_id"`
 
 	TotalIncome money.Money `pg:"total_income,use_zero"`
 	// TotalSpend is a cost of all Monthly Payments and Spends

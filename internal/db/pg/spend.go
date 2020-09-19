@@ -22,7 +22,7 @@ type Spend struct {
 
 	Title  string      `pg:"title"`
 	TypeID uint        `pg:"type_id"`
-	Type   *SpendType  `pg:"fk:type_id"`
+	Type   *SpendType  `pg:"rel:has-one,fk:type_id"`
 	Notes  string      `pg:"notes"`
 	Cost   money.Money `pg:"cost"`
 }

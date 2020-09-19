@@ -15,10 +15,10 @@ import (
 type Income struct {
 	tableName struct{} `pg:"incomes"`
 
+	ID uint `pg:"id,pk"`
+
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`
-
-	ID uint `pg:"id,pk"`
 
 	Title  string      `pg:"title"`
 	Notes  string      `pg:"notes"`

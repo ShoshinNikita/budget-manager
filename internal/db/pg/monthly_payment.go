@@ -15,14 +15,14 @@ import (
 type MonthlyPayment struct {
 	tableName struct{} `pg:"monthly_payments"`
 
+	ID uint `pg:"id,pk"`
+
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`
 
-	ID uint `pg:"id,pk"`
-
 	Title  string      `pg:"title"`
 	TypeID uint        `pg:"type_id"`
-	Type   *SpendType  `pg:"fk:type_id"`
+	Type   *SpendType  `pg:"rel:has-one,fk:type_id"`
 	Notes  string      `pg:"notes"`
 	Cost   money.Money `pg:"cost"`
 }
