@@ -5,19 +5,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/sirupsen/logrus"
 )
 
 // --------------------------------------------------
 // DB
 // --------------------------------------------------
-
-// ping checks the connection to the database
-func ping(db *pg.DB) (ok bool) {
-	_, err := db.Exec("SELECT 1")
-	return err == nil
-}
 
 // checkMonth checks if a Month with passed id exists
 func (db DB) checkMonth(id uint) (ok bool) {
