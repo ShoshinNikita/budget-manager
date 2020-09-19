@@ -87,8 +87,9 @@ func (db DB) GetMonth(ctx context.Context, id uint) (common.Month, error) {
 	return pgMonth.ToCommon(), nil
 }
 
-func (db DB) GetMonthID(_ context.Context, year, month int) (id uint, err error) {
-	err = db.db.Model((*Month)(nil)).Column("id").Where("year = ? AND month = ?", year, month).Select(&id)
+func (db DB) GetMonthID(ctx context.Context, year, month int) (id uint, err error) {
+	query := db.db.ModelContext(ctx, (*Month)(nil)).Column("id").Where("year = ? AND month = ?", year, month)
+	err = query.Select(&id)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			return 0, common.ErrMonthNotExist
@@ -101,9 +102,10 @@ func (db DB) GetMonthID(_ context.Context, year, month int) (id uint, err error)
 
 // GetMonths returns months of passed year. Months doesn't contains
 // relations (Incomes, Days and etc.)
-func (db DB) GetMonths(_ context.Context, year int) ([]common.Month, error) {
+func (db DB) GetMonths(ctx context.Context, year int) ([]common.Month, error) {
 	var pgMonths []Month
-	err := db.db.Model(&pgMonths).Where("year = ?", year).Order("month ASC").Select()
+	query := db.db.ModelContext(ctx, &pgMonths).Where("year = ?", year).Order("month ASC")
+	err := query.Select()
 	if err != nil {
 		return nil, err
 	}
@@ -123,12 +125,13 @@ func (db DB) GetMonths(_ context.Context, year int) ([]common.Month, error) {
 // initCurrentMonth inits month for current year and month
 func (db *DB) initCurrentMonth() error {
 	year, month, _ := time.Now().Date()
-	return db.initMonth(year, month)
+	return db.initMonth(context.Background(), year, month)
 }
 
 // initMonth inits month and days for passed date
-func (db *DB) initMonth(year int, month time.Month) error {
-	count, err := db.db.Model((*Month)(nil)).Where("year = ? AND month = ?", year, month).Count()
+func (db *DB) initMonth(ctx context.Context, year int, month time.Month) error {
+	query := db.db.ModelContext(ctx, (*Month)(nil)).Where("year = ? AND month = ?", year, month)
+	count, err := query.Count()
 	if err != nil {
 		return errors.Wrap(err, "couldn't check if the current month exists")
 	}
@@ -145,7 +148,7 @@ func (db *DB) initMonth(year int, month time.Month) error {
 	log.Debug("init the current month")
 
 	currentMonth := &Month{Year: year, Month: month}
-	if _, err = db.db.Model(currentMonth).Returning("id").Insert(); err != nil {
+	if _, err = db.db.ModelContext(ctx, currentMonth).Returning("id").Insert(); err != nil {
 		return errors.Wrap(err, "couldn't init the current month")
 	}
 
@@ -162,7 +165,7 @@ func (db *DB) initMonth(year int, month time.Month) error {
 		days[i] = Day{MonthID: monthID, Day: i + 1, Saldo: 0}
 	}
 
-	if _, err = db.db.Model(&days).Insert(); err != nil {
+	if _, err = db.db.ModelContext(ctx, &days).Insert(); err != nil {
 		return errors.Wrap(err, "couldn't insert days for the current month")
 	}
 	log.Debug("days of the current month was successfully inited")
@@ -177,6 +180,8 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 		}
 	}()
 
+	ctx := tx.Context()
+
 	m, err := db.getMonth(tx, monthID)
 	if err != nil {
 		return errors.Wrap(err, "couldn't select month")
@@ -185,7 +190,7 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 	m = recomputeMonth(m)
 
 	// Update Month
-	query := tx.Model((*Month)(nil)).Where("id = ?", m.ID)
+	query := tx.ModelContext(ctx, (*Month)(nil)).Where("id = ?", m.ID)
 	query = query.Set("daily_budget = ?", m.DailyBudget)
 	query = query.Set("total_income = ?", m.TotalIncome)
 	query = query.Set("total_spend = ?", m.TotalSpend)
@@ -196,7 +201,7 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 
 	// Update Days
 	for _, day := range m.Days {
-		query := tx.Model((*Day)(nil)).Where("id = ?", day.ID).Set("saldo = ?", day.Saldo)
+		query := tx.ModelContext(ctx, (*Day)(nil)).Where("id = ?", day.ID).Set("saldo = ?", day.Saldo)
 		if _, err := query.Update(); err != nil {
 			return errors.Wrap(err, "couldn't update days")
 		}
@@ -248,7 +253,7 @@ func recomputeMonth(m Month) Month {
 }
 
 func (DB) getMonth(tx *pg.Tx, id uint) (m Month, err error) {
-	err = tx.Model(&m).
+	err = tx.ModelContext(tx.Context(), &m).
 		Relation("Incomes", orderByID).
 		Relation("MonthlyPayments", orderByID).
 		Relation("MonthlyPayments.Type").

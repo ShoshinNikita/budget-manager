@@ -40,7 +40,7 @@ func (in Income) ToCommon(year int, month time.Month) common.Income {
 
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(ctx context.Context, args common.AddIncomeArgs) (id uint, err error) {
-	if !db.checkMonth(args.MonthID) {
+	if !db.checkMonth(ctx, args.MonthID) {
 		return 0, common.ErrMonthNotExist
 	}
 
@@ -52,7 +52,7 @@ func (db DB) AddIncome(ctx context.Context, args common.AddIncomeArgs) (id uint,
 			Notes:  args.Notes,
 			Income: args.Income,
 		}
-		if _, err = tx.Model(income).Returning("id").Insert(); err != nil {
+		if _, err = tx.ModelContext(ctx, income).Returning("id").Insert(); err != nil {
 			return err
 		}
 		id = income.ID
@@ -68,7 +68,7 @@ func (db DB) AddIncome(ctx context.Context, args common.AddIncomeArgs) (id uint,
 
 // EditIncome edits income with passed id, nil args are ignored
 func (db DB) EditIncome(ctx context.Context, args common.EditIncomeArgs) error {
-	if !db.checkIncome(args.ID) {
+	if !db.checkIncome(ctx, args.ID) {
 		return common.ErrIncomeNotExist
 	}
 
@@ -78,7 +78,7 @@ func (db DB) EditIncome(ctx context.Context, args common.EditIncomeArgs) error {
 			return err
 		}
 
-		query := tx.Model((*Income)(nil)).Where("id = ?", args.ID)
+		query := tx.ModelContext(ctx, (*Income)(nil)).Where("id = ?", args.ID)
 		if args.Title != nil {
 			query = query.Set("title = ?", *args.Title)
 		}
@@ -102,7 +102,7 @@ func (db DB) EditIncome(ctx context.Context, args common.EditIncomeArgs) error {
 
 // RemoveIncome removes income with passed id
 func (db DB) RemoveIncome(ctx context.Context, id uint) error {
-	if !db.checkIncome(id) {
+	if !db.checkIncome(ctx, id) {
 		return common.ErrIncomeNotExist
 	}
 
@@ -112,7 +112,7 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 			return err
 		}
 
-		_, err = tx.Model((*Income)(nil)).Where("id = ?", id).Delete()
+		_, err = tx.ModelContext(ctx, (*Income)(nil)).Where("id = ?", id).Delete()
 		if err != nil {
 			return err
 		}
@@ -122,7 +122,8 @@ func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 }
 
 func (DB) selectIncomeMonthID(tx *pg.Tx, id uint) (monthID uint, err error) {
-	err = tx.Model((*Income)(nil)).Column("month_id").Where("id = ?", id).Select(&monthID)
+	ctx := tx.Context()
+	err = tx.ModelContext(ctx, (*Income)(nil)).Column("month_id").Where("id = ?", id).Select(&monthID)
 	if err != nil {
 		return 0, errors.Wrap(err, "couldn't select month id of Income")
 	}

@@ -43,7 +43,7 @@ func (mp MonthlyPayment) ToCommon(year int, month time.Month) common.MonthlyPaym
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
-	if !db.checkMonth(args.MonthID) {
+	if !db.checkMonth(ctx, args.MonthID) {
 		return 0, common.ErrMonthNotExist
 	}
 
@@ -55,7 +55,7 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymen
 			TypeID:  args.TypeID,
 			Cost:    args.Cost,
 		}
-		if _, err := tx.Model(mp).Returning("id").Insert(); err != nil {
+		if _, err := tx.ModelContext(ctx, mp).Returning("id").Insert(); err != nil {
 			return err
 		}
 		id = mp.ID
@@ -71,7 +71,7 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymen
 
 // EditMonthlyPayment modifies existing Monthly Payment
 func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaymentArgs) error {
-	if !db.checkMonthlyPayment(args.ID) {
+	if !db.checkMonthlyPayment(ctx, args.ID) {
 		return common.ErrMonthlyPaymentNotExist
 	}
 
@@ -81,7 +81,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaym
 			return err
 		}
 
-		query := tx.Model((*MonthlyPayment)(nil)).Where("id = ?", args.ID)
+		query := tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Where("id = ?", args.ID)
 		if args.Title != nil {
 			query = query.Set("title = ?", *args.Title)
 		}
@@ -112,7 +112,7 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaym
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
 func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
-	if !db.checkMonthlyPayment(id) {
+	if !db.checkMonthlyPayment(ctx, id) {
 		return common.ErrMonthlyPaymentNotExist
 	}
 
@@ -122,7 +122,7 @@ func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
 			return err
 		}
 
-		_, err = tx.Model((*MonthlyPayment)(nil)).Where("id = ?", id).Delete()
+		_, err = tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Where("id = ?", id).Delete()
 		if err != nil {
 			return err
 		}
@@ -132,7 +132,8 @@ func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
 }
 
 func (DB) selectMonthlyPaymentMonthID(tx *pg.Tx, id uint) (monthID uint, err error) {
-	err = tx.Model((*MonthlyPayment)(nil)).Column("month_id").Where("id = ?", id).Select(&monthID)
+	ctx := tx.Context()
+	err = tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Column("month_id").Where("id = ?", id).Select(&monthID)
 	if err != nil {
 		return 0, errors.Wrap(err, "couldn't select month id of Monthly Payment")
 	}

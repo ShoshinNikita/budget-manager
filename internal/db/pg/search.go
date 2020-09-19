@@ -83,7 +83,7 @@ type searchSpendsModel struct {
 //
 //nolint:funlen
 func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Query {
-	query := tx.Model((*Spend)(nil)).
+	query := tx.ModelContext(tx.Context(), (*Spend)(nil)).
 		ColumnExpr("spend.id AS id").
 		ColumnExpr("month.year AS year").
 		ColumnExpr("month.month AS month").
