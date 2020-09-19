@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 	"github.com/stretchr/testify/require"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -26,7 +26,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 			       spend.title AS title, spend.notes AS notes, spend.cost AS cost,
 			       spend_type.id AS type__id, spend_type.name AS type__name, spend_type.parent_id AS type__parent_id
 
-			 FROM spends AS "spend"
+			 FROM "spends" AS "spend"
 			      INNER JOIN days AS day
 			      ON day.id = spend.day_id
 

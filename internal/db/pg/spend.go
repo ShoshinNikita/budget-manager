@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -22,7 +22,7 @@ type Spend struct {
 
 	Title  string      `pg:"title"`
 	TypeID uint        `pg:"type_id"`
-	Type   *SpendType  `pg:"fk:type_id"`
+	Type   *SpendType  `pg:"rel:has-one,fk:type_id"`
 	Notes  string      `pg:"notes"`
 	Cost   money.Money `pg:"cost"`
 }
@@ -44,11 +44,11 @@ func (s Spend) ToCommon(year int, month time.Month, day int) common.Spend {
 
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, err error) {
-	if !db.checkDay(args.DayID) {
+	if !db.checkDay(ctx, args.DayID) {
 		return 0, common.ErrDayNotExist
 	}
 
-	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
 		spend := &Spend{
 			DayID:  args.DayID,
 			Title:  args.Title,
@@ -56,7 +56,7 @@ func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, e
 			TypeID: args.TypeID,
 			Cost:   args.Cost,
 		}
-		if _, err := tx.Model(spend).Returning("id").Insert(); err != nil {
+		if _, err := tx.ModelContext(ctx, spend).Returning("id").Insert(); err != nil {
 			return err
 		}
 		id = spend.ID
@@ -77,17 +77,17 @@ func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, e
 
 // EditSpend edits existeng Spend
 func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
-	if !db.checkSpend(args.ID) {
+	if !db.checkSpend(ctx, args.ID) {
 		return common.ErrSpendNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		dayID, err := db.selectSpendDayID(tx, args.ID)
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		dayID, err := db.selectSpendDayID(ctx, tx, args.ID)
 		if err != nil {
 			return err
 		}
 
-		query := tx.Model((*Spend)(nil)).Where("id = ?", args.ID)
+		query := tx.ModelContext(ctx, (*Spend)(nil)).Where("id = ?", args.ID)
 		if args.Title != nil {
 			query = query.Set("title = ?", *args.Title)
 		}
@@ -122,17 +122,17 @@ func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 
 // RemoveSpend removes Spend with passed id
 func (db DB) RemoveSpend(ctx context.Context, id uint) error {
-	if !db.checkSpend(id) {
+	if !db.checkSpend(ctx, id) {
 		return common.ErrSpendNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		dayID, err := db.selectSpendDayID(tx, id)
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		dayID, err := db.selectSpendDayID(ctx, tx, id)
 		if err != nil {
 			return err
 		}
 
-		_, err = tx.Model((*Spend)(nil)).Where("id = ?", id).Delete()
+		_, err = tx.ModelContext(ctx, (*Spend)(nil)).Where("id = ?", id).Delete()
 		if err != nil {
 			return err
 		}
@@ -145,16 +145,18 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 	})
 }
 
-func (DB) selectSpendDayID(tx *pg.Tx, id uint) (dayID uint, err error) {
-	err = tx.Model((*Spend)(nil)).Column("day_id").Where("id = ?", id).Select(&dayID)
+func (DB) selectSpendDayID(ctx context.Context, tx *pg.Tx, id uint) (dayID uint, err error) {
+	query := tx.ModelContext(ctx, (*Spend)(nil)).Column("day_id").Where("id = ?", id)
+	err = query.Select(&dayID)
 	if err != nil {
 		return 0, errors.Wrap(err, "couldn't select day id of Spend")
 	}
 	return dayID, nil
 }
 
-func (DB) selectMonthIDByDayID(_ context.Context, tx *pg.Tx, dayID uint) (monthID uint, err error) {
-	err = tx.Model((*Day)(nil)).Column("month_id").Where("id = ?", dayID).Select(&monthID)
+func (DB) selectMonthIDByDayID(ctx context.Context, tx *pg.Tx, dayID uint) (monthID uint, err error) {
+	query := tx.ModelContext(ctx, (*Day)(nil)).Column("month_id").Where("id = ?", dayID)
+	err = query.Select(&monthID)
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			return 0, common.ErrDayNotExist

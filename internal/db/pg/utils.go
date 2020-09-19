@@ -1,11 +1,11 @@
 package pg
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v9"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,45 +13,40 @@ import (
 // DB
 // --------------------------------------------------
 
-// ping checks the connection to the database
-func ping(db *pg.DB) (ok bool) {
-	_, err := db.Exec("SELECT 1")
-	return err == nil
-}
-
 // checkMonth checks if a Month with passed id exists
-func (db DB) checkMonth(id uint) (ok bool) {
-	return db.checkModel((*Month)(nil), id)
+func (db DB) checkMonth(ctx context.Context, id uint) (ok bool) {
+	return db.checkModel(ctx, (*Month)(nil), id)
 }
 
 // checkDay checks if a Day with passed id exists
-func (db DB) checkDay(id uint) (ok bool) {
-	return db.checkModel((*Day)(nil), id)
+func (db DB) checkDay(ctx context.Context, id uint) (ok bool) {
+	return db.checkModel(ctx, (*Day)(nil), id)
 }
 
 // checkIncome checks if an Income with passed id exists
-func (db DB) checkIncome(id uint) (ok bool) {
-	return db.checkModel((*Income)(nil), id)
+func (db DB) checkIncome(ctx context.Context, id uint) (ok bool) {
+	return db.checkModel(ctx, (*Income)(nil), id)
 }
 
 // checkMonthlyPayment checks if a Monthly Payment with passed id exists
-func (db DB) checkMonthlyPayment(id uint) (ok bool) {
-	return db.checkModel((*MonthlyPayment)(nil), id)
+func (db DB) checkMonthlyPayment(ctx context.Context, id uint) (ok bool) {
+	return db.checkModel(ctx, (*MonthlyPayment)(nil), id)
 }
 
 // checkSpend checks if a Spend with passed id exists
-func (db DB) checkSpend(id uint) (ok bool) {
-	return db.checkModel((*Spend)(nil), id)
+func (db DB) checkSpend(ctx context.Context, id uint) (ok bool) {
+	return db.checkModel(ctx, (*Spend)(nil), id)
 }
 
 // checkSpendType checks if a Spend Type with passed id exists
-func (db DB) checkSpendType(id uint) (ok bool) {
-	return db.checkModel((*SpendType)(nil), id)
+func (db DB) checkSpendType(ctx context.Context, id uint) (ok bool) {
+	return db.checkModel(ctx, (*SpendType)(nil), id)
 }
 
 // checkModel checks if a model with passed id exists
-func (db DB) checkModel(model interface{}, id uint) (ok bool) {
-	c, err := db.db.Model(model).Where("id = ?", id).Count()
+func (db DB) checkModel(ctx context.Context, model interface{}, id uint) (ok bool) {
+	query := db.db.ModelContext(ctx, model).Where("id = ?", id)
+	c, err := query.Count()
 	if err != nil || c == 0 {
 		return false
 	}

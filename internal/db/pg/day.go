@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -15,15 +15,15 @@ import (
 type Day struct {
 	tableName struct{} `pg:"days"`
 
+	ID uint `pg:"id,pk"`
+
 	// MonthID is a foreign key to 'months' table
 	MonthID uint `pg:"month_id"`
-
-	ID uint `pg:"id,pk"`
 
 	Day int `pg:"day"`
 	// Saldo is a DailyBudget - Cost of all Spends multiplied by 100 (can be negative)
 	Saldo  money.Money `pg:"saldo,use_zero"`
-	Spends []Spend     `pg:"fk:day_id"`
+	Spends []Spend     `pg:"rel:has-many,join_fk:day_id"`
 }
 
 // ToCommon converts Day to common Day structure from
@@ -45,14 +45,14 @@ func (d Day) ToCommon(year int, month time.Month) common.Day {
 	}
 }
 
-func (db DB) GetDay(_ context.Context, id uint) (common.Day, error) {
+func (db DB) GetDay(ctx context.Context, id uint) (common.Day, error) {
 	var (
 		day   Day
 		year  int
 		month time.Month
 	)
-	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
-		query := tx.Model(&day).Where("id = ?", id).
+	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		query := tx.ModelContext(ctx, &day).Where("id = ?", id).
 			Relation("Spends", orderByID).
 			Relation("Spends.Type")
 		if err := query.Select(); err != nil {
@@ -63,7 +63,7 @@ func (db DB) GetDay(_ context.Context, id uint) (common.Day, error) {
 		}
 
 		// Get year and month
-		query = tx.Model((*Month)(nil)).Column("year", "month").Where("id = ?", day.MonthID)
+		query = tx.ModelContext(ctx, (*Month)(nil)).Column("year", "month").Where("id = ?", day.MonthID)
 		if err := query.Select(&year, &month); err != nil {
 			return errors.Wrap(err, "couldn't get year and month for Day")
 		}
@@ -86,8 +86,9 @@ func (db DB) GetDayIDByDate(ctx context.Context, year int, month int, day int) (
 		return 0, errors.Wrap(err, "couldn't define month id with passed year and month")
 	}
 
-	query := db.db.Model((*Day)(nil)).Column("id").Where("month_id = ? AND day = ?", monthID, day)
-	if err = query.Select(&id); err != nil {
+	query := db.db.ModelContext(ctx, (*Day)(nil)).Column("id").Where("month_id = ? AND day = ?", monthID, day)
+	err = query.Select(&id)
+	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			return 0, common.ErrDayNotExist
 		}

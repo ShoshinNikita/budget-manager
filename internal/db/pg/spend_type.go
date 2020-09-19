@@ -3,7 +3,7 @@ package pg
 import (
 	"context"
 
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -34,9 +34,11 @@ func (s *SpendType) ToCommon() *common.SpendType {
 }
 
 // GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(_ context.Context, id uint) (common.SpendType, error) {
+func (db DB) GetSpendType(ctx context.Context, id uint) (common.SpendType, error) {
 	var spendType SpendType
-	if err := db.db.Model(&spendType).Where("id = ?", id).Select(); err != nil {
+	query := db.db.ModelContext(ctx, &spendType).Where("id = ?", id)
+	err := query.Select()
+	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
 			err = common.ErrSpendTypeNotExist
 		}
@@ -47,9 +49,10 @@ func (db DB) GetSpendType(_ context.Context, id uint) (common.SpendType, error) 
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(_ context.Context) ([]common.SpendType, error) {
+func (db DB) GetSpendTypes(ctx context.Context) ([]common.SpendType, error) {
 	var spendTypes []SpendType
-	err := db.db.Model(&spendTypes).Order("id ASC").Select()
+	query := db.db.ModelContext(ctx, &spendTypes).Order("id ASC")
+	err := query.Select()
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +65,13 @@ func (db DB) GetSpendTypes(_ context.Context) ([]common.SpendType, error) {
 }
 
 // AddSpendType adds new Spend Type
-func (db DB) AddSpendType(_ context.Context, args common.AddSpendTypeArgs) (id uint, err error) {
-	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
+func (db DB) AddSpendType(ctx context.Context, args common.AddSpendTypeArgs) (id uint, err error) {
+	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		spendType := &SpendType{
 			Name:     args.Name,
 			ParentID: args.ParentID,
 		}
-		if _, err := tx.Model(spendType).Returning("id").Insert(); err != nil {
+		if _, err := tx.ModelContext(ctx, spendType).Returning("id").Insert(); err != nil {
 			return err
 		}
 		id = spendType.ID
@@ -83,13 +86,13 @@ func (db DB) AddSpendType(_ context.Context, args common.AddSpendTypeArgs) (id u
 }
 
 // EditSpendType modifies existing Spend Type
-func (db DB) EditSpendType(_ context.Context, args common.EditSpendTypeArgs) error {
-	if !db.checkSpendType(args.ID) {
+func (db DB) EditSpendType(ctx context.Context, args common.EditSpendTypeArgs) error {
+	if !db.checkSpendType(ctx, args.ID) {
 		return common.ErrSpendTypeNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		query := tx.Model((*SpendType)(nil)).Where("id = ?", args.ID)
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		query := tx.ModelContext(ctx, (*SpendType)(nil)).Where("id = ?", args.ID)
 		if args.Name != nil {
 			query = query.Set("name = ?", *args.Name)
 		}
@@ -107,25 +110,25 @@ func (db DB) EditSpendType(_ context.Context, args common.EditSpendTypeArgs) err
 }
 
 // RemoveSpendType removes Spend Type with passed id
-func (db DB) RemoveSpendType(_ context.Context, id uint) error {
-	if !db.checkSpendType(id) {
+func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
+	if !db.checkSpendType(ctx, id) {
 		return common.ErrSpendTypeNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
-		_, err := tx.Model((*SpendType)(nil)).Where("id = ?", id).Delete()
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		_, err := tx.ModelContext(ctx, (*SpendType)(nil)).Where("id = ?", id).Delete()
 		if err != nil {
 			return err
 		}
 
 		// Reset Type IDs
 
-		_, err = tx.Model((*MonthlyPayment)(nil)).Set("type_id = 0").Where("type_id = ?", id).Update()
+		_, err = tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Set("type_id = 0").Where("type_id = ?", id).Update()
 		if err != nil {
 			return errors.Wrap(err, "couldn't reset Type ID of Monthly Payments")
 		}
 
-		_, err = tx.Model((*Spend)(nil)).Set("type_id = 0").Where("type_id = ?", id).Update()
+		_, err = tx.ModelContext(ctx, (*Spend)(nil)).Set("type_id = 0").Where("type_id = ?", id).Update()
 		if err != nil {
 			return errors.Wrap(err, "couldn't reset Type ID of Spends")
 		}

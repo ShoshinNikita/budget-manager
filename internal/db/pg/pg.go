@@ -2,10 +2,11 @@
 package pg
 
 import (
+	"context"
 	"strconv"
 	"time"
 
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
@@ -54,10 +55,11 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 			log.Debug("ping DB")
 		}
 
-		if ping(db.db) {
+		err := db.db.Ping(context.Background())
+		if err == nil {
 			break
 		}
-		log.Debug("couldn't ping DB")
+		log.WithError(err).Debug("couldn't ping DB")
 		if i+1 == connectRetries {
 			// Don't sleep extra time
 			return nil, errors.New("database is down")

@@ -39,7 +39,7 @@ func TestSearchSpends(t *testing.T) {
 		{year: 2020, month: time.February}, // 29 days (63 - 91 ids)
 	}
 	for _, m := range months {
-		err := db.initMonth(m.year, m.month)
+		err := db.initMonth(context.Background(), m.year, m.month)
 		globalRequire.Nil(err)
 	}
 

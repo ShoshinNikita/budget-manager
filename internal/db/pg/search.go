@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
+	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
@@ -13,7 +13,7 @@ import (
 
 func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]common.Spend, error) {
 	var pgSpends []searchSpendsModel
-	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
+	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		return db.buildSearchSpendsQuery(tx, args).Select(&pgSpends)
 	})
 	if err != nil {
@@ -83,7 +83,7 @@ type searchSpendsModel struct {
 //
 //nolint:funlen
 func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Query {
-	query := tx.Model((*Spend)(nil)).
+	query := tx.ModelContext(tx.Context(), (*Spend)(nil)).
 		ColumnExpr("spend.id AS id").
 		ColumnExpr("month.year AS year").
 		ColumnExpr("month.month AS month").
