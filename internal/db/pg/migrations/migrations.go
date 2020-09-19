@@ -1,6 +1,6 @@
 package migrations
 
-import "github.com/go-pg/migrations/v7"
+import "github.com/go-pg/migrations/v8"
 
 const migrationTable = "migrations"
 
