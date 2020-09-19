@@ -772,17 +772,12 @@ paths:
         in: query
         name: title_exactly
         type: boolean
-      - description: TypeIDs is a list of Spend Type ids to search for
+      - description: TypeIDs is a list of Spend Type ids to search for. Use id '0' to search for Spends without type
         in: query
         items:
           type: integer
         name: type_ids
         type: array
-      - default: false
-        description: WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
-        in: query
-        name: without_type
-        type: boolean
       produces:
       - application/json
       responses:
