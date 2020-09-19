@@ -305,12 +305,12 @@
 							<div id="search__options__types__header" class="noselect">Spend Types</div>
 							<!-- Without Type option -->
 							<div class="search__options__types__type">
-								<input id="search__options__types__without-type" type="checkbox" name="without_type" value="true" onclick="resetChosenTypes()">
-								<label for="search__options__types__without-type" title="Use this option to search for Spends without type">Without Type</label>
+								<input id="search__options__types__type-0" type="checkbox" name="type_id" value="0">
+								<label for="search__options__types__type-0" title="Use this option to search for Spends without type">Without Type</label>
 							</div>
 							{{ range .SpendTypes }}
 							<div class="search__options__types__type">
-								<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}" onclick="resetWithoutType()">
+								<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}">
 								<label for="search__options__types__type-{{ .ID }}">{{ .FullName }}</label>
 							</div>
 							{{ end }}
@@ -515,17 +515,6 @@
 
 			// Don't set sort and order in form. It allows to 'reset' sort/order by clicking 'Search' button
 
-			// Without Type
-			const withoutType = query.get("without_type");
-			if (withoutType == "true") {
-				const checkbox = document.getElementById("search__options__types__without-type");
-				if (!checkbox) {
-					console.error(`element '${elemID}' doesn't exist`);
-				} else {
-					checkbox.checked = true;
-				}
-			}
-
 			// Spend Types
 			const typeIDs = query.getAll("type_id");
 			for (let i = 0; i < typeIDs.length; i++) {
@@ -584,31 +573,6 @@
 				dates[i].title = date;
 			}
 		})
-
-		/**
-		 * Set all Spend Types to false
-		 */
-		function resetChosenTypes() {
-			const inputs = document.getElementsByTagName("input");
-			for (let i = 0; i < inputs.length; i++) {
-				if (inputs[i].id.indexOf("search__options__types__type-") == 0) {
-					inputs[i].checked = false;
-				}
-			}
-		}
-
-		/**
-		 * Set Without Type option to false
-		 */
-		function resetWithoutType() {
-			const elemID = "search__options__types__without-type";
-			const input = document.getElementById(elemID);
-			if (!input) {
-				console.error(`element '${elemID}' doesn't exist`);
-				return;
-			}
-			input.checked = false;
-		}
 
 		/**
 		 * Change Sort and Order and submit form

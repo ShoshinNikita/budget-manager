@@ -61,10 +61,7 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 		Before:       req.Before,
 		MinCost:      money.FromFloat(req.MinCost),
 		MaxCost:      money.FromFloat(req.MaxCost),
-		WithoutType:  req.WithoutType,
-	}
-	if !args.WithoutType {
-		args.TypeIDs = req.TypeIDs
+		TypeIDs:      req.TypeIDs,
 	}
 	switch req.Sort {
 	case "title":

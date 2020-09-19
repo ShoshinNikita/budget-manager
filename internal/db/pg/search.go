@@ -134,12 +134,22 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Q
 		query = query.Where("spend.cost <= ?", args.MaxCost)
 	}
 
-	switch {
-	case args.WithoutType:
-		query = query.Where("spend.type_id IS NULL")
-	case len(args.TypeIDs) != 0:
-		query = query.WhereIn("spend.type_id IN (?)", args.TypeIDs)
-	}
+	query = query.WhereGroup(func(query *orm.Query) (*orm.Query, error) {
+		typeIDs := args.TypeIDs
+		for i, id := range typeIDs {
+			if id == 0 {
+				// Search for spends without type
+				query = query.Where("spend.type_id IS NULL")
+				typeIDs = append(typeIDs[:i], typeIDs[i+1:]...)
+				break
+			}
+		}
+
+		if len(typeIDs) != 0 {
+			query = query.WhereOr("spend.type_id IN (?)", pg.In(typeIDs))
+		}
+		return query, nil
+	})
 
 	var orders []string
 	switch args.Sort {

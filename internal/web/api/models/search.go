@@ -30,9 +30,7 @@ type SearchSpendsReq struct {
 	MinCost float64 `json:"min_cost"`
 	MaxCost float64 `json:"max_cost"`
 
-	// WithoutType is used to search for Spends without Spend Type. TypeIDs are ignored when it is true
-	WithoutType bool `json:"without_type" default:"false"`
-	// TypeIDs is a list of Spend Type ids to search for
+	// TypeIDs is a list of Spend Type ids to search for. Use id '0' to search for Spends without type
 	TypeIDs []uint `json:"type_ids"`
 
 	// Sort specify field to sort by
