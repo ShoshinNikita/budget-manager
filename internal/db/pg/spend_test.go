@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/go-pg/pg/v9"
+	"github.com/go-pg/pg/v10"
 	"github.com/stretchr/testify/require"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
