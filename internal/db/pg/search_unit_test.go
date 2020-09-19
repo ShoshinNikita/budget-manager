@@ -154,24 +154,23 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		},
 		{
 			desc:     "specify type ids",
-			reqQuery: buildWhereQuery(`WHERE (spend.type_id IN (1,2,5,25,3))`, defaultOrderByQuery),
+			reqQuery: buildWhereQuery(`WHERE ((spend.type_id IN (1,2,5,25,3)))`, defaultOrderByQuery),
 			args: common.SearchSpendsArgs{
 				TypeIDs: []uint{1, 2, 5, 25, 3},
 			},
 		},
 		{
 			desc:     "without type",
-			reqQuery: buildWhereQuery(`WHERE (spend.type_id IS NULL)`, defaultOrderByQuery),
+			reqQuery: buildWhereQuery(`WHERE ((spend.type_id IS NULL))`, defaultOrderByQuery),
 			args: common.SearchSpendsArgs{
-				WithoutType: true,
+				TypeIDs: []uint{0},
 			},
 		},
 		{
-			desc:     "without type (pass type ids)",
-			reqQuery: buildWhereQuery(`WHERE (spend.type_id IS NULL)`, defaultOrderByQuery),
+			desc:     "with and without type",
+			reqQuery: buildWhereQuery(`WHERE ((spend.type_id IS NULL) OR (spend.type_id IN (5,3)))`, defaultOrderByQuery),
 			args: common.SearchSpendsArgs{
-				WithoutType: true,
-				TypeIDs:     []uint{1, 2, 5, 25, 3},
+				TypeIDs: []uint{5, 3, 0},
 			},
 		},
 		{
@@ -182,7 +181,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				      AND (make_date(month.year::int, month.month::int, day.day::int)
 				          BETWEEN '2020-01-01 00:00:00+00:00:00' AND '2020-02-01 00:00:00+00:00:00')
 				      AND (spend.cost BETWEEN 20000 AND 500000)
-				      AND (spend.type_id IN (1,7))
+				      AND ((spend.type_id IS NULL) OR (spend.type_id IN (1,7)))
 			`, defaultOrderByQuery),
 			args: common.SearchSpendsArgs{
 				Title:        "123",
@@ -192,7 +191,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				Before:       time.Date(2020, time.February, 1, 0, 0, 0, 0, time.UTC),
 				MinCost:      money.FromFloat(200),
 				MaxCost:      money.FromFloat(5000),
-				TypeIDs:      []uint{1, 7},
+				TypeIDs:      []uint{0, 1, 7},
 			},
 		},
 		{
