@@ -41,10 +41,10 @@ func TestAddIncome(t *testing.T) {
 
 	// Check Incomes
 	for _, in := range incomes {
-		income := &Income{ID: in.ID}
-		err := db.db.Select(income)
+		var income Income
+		err := db.db.Model(&income).Where("id = ?", in.ID).Select()
 		require.Nil(err)
-		require.Equal(in, *income)
+		require.Equal(in, income)
 	}
 
 	// Check daily budget
@@ -102,10 +102,10 @@ func TestEditIncome(t *testing.T) {
 
 	// Check Incomes
 	for _, in := range editedIncomes {
-		income := &Income{ID: in.ID}
-		err := db.db.Select(income)
+		var income Income
+		err := db.db.Model(&income).Where("id = ?", in.ID).Select()
 		require.Nil(err)
-		require.Equal(in, *income)
+		require.Equal(in, income)
 	}
 
 	// Check daily budget

@@ -45,13 +45,13 @@ func (d Day) ToCommon(year int, month time.Month) common.Day {
 	}
 }
 
-func (db DB) GetDay(_ context.Context, id uint) (common.Day, error) {
+func (db DB) GetDay(ctx context.Context, id uint) (common.Day, error) {
 	var (
 		day   Day
 		year  int
 		month time.Month
 	)
-	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
+	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		query := tx.Model(&day).Where("id = ?", id).
 			Relation("Spends", orderByID).
 			Relation("Spends.Type")

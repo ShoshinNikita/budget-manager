@@ -62,8 +62,8 @@ func (db DB) GetSpendTypes(_ context.Context) ([]common.SpendType, error) {
 }
 
 // AddSpendType adds new Spend Type
-func (db DB) AddSpendType(_ context.Context, args common.AddSpendTypeArgs) (id uint, err error) {
-	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
+func (db DB) AddSpendType(ctx context.Context, args common.AddSpendTypeArgs) (id uint, err error) {
+	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		spendType := &SpendType{
 			Name:     args.Name,
 			ParentID: args.ParentID,
@@ -83,12 +83,12 @@ func (db DB) AddSpendType(_ context.Context, args common.AddSpendTypeArgs) (id u
 }
 
 // EditSpendType modifies existing Spend Type
-func (db DB) EditSpendType(_ context.Context, args common.EditSpendTypeArgs) error {
+func (db DB) EditSpendType(ctx context.Context, args common.EditSpendTypeArgs) error {
 	if !db.checkSpendType(args.ID) {
 		return common.ErrSpendTypeNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		query := tx.Model((*SpendType)(nil)).Where("id = ?", args.ID)
 		if args.Name != nil {
 			query = query.Set("name = ?", *args.Name)
@@ -107,12 +107,12 @@ func (db DB) EditSpendType(_ context.Context, args common.EditSpendTypeArgs) err
 }
 
 // RemoveSpendType removes Spend Type with passed id
-func (db DB) RemoveSpendType(_ context.Context, id uint) error {
+func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 	if !db.checkSpendType(id) {
 		return common.ErrSpendTypeNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		_, err := tx.Model((*SpendType)(nil)).Where("id = ?", id).Delete()
 		if err != nil {
 			return err

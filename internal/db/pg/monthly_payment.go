@@ -42,12 +42,12 @@ func (mp MonthlyPayment) ToCommon(year int, month time.Month) common.MonthlyPaym
 }
 
 // AddMonthlyPayment adds new Monthly Payment
-func (db DB) AddMonthlyPayment(_ context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
+func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
 		return 0, common.ErrMonthNotExist
 	}
 
-	err = db.db.RunInTransaction(func(tx *pg.Tx) error {
+	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		mp := &MonthlyPayment{
 			MonthID: args.MonthID,
 			Title:   args.Title,
@@ -70,12 +70,12 @@ func (db DB) AddMonthlyPayment(_ context.Context, args common.AddMonthlyPaymentA
 }
 
 // EditMonthlyPayment modifies existing Monthly Payment
-func (db DB) EditMonthlyPayment(_ context.Context, args common.EditMonthlyPaymentArgs) error {
+func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(args.ID) {
 		return common.ErrMonthlyPaymentNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		monthID, err := db.selectMonthlyPaymentMonthID(tx, args.ID)
 		if err != nil {
 			return err
@@ -111,12 +111,12 @@ func (db DB) EditMonthlyPayment(_ context.Context, args common.EditMonthlyPaymen
 }
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
-func (db DB) RemoveMonthlyPayment(_ context.Context, id uint) error {
+func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
 	if !db.checkMonthlyPayment(id) {
 		return common.ErrMonthlyPaymentNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		monthID, err := db.selectMonthlyPaymentMonthID(tx, id)
 		if err != nil {
 			return err

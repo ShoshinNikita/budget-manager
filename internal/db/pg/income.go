@@ -39,12 +39,12 @@ func (in Income) ToCommon(year int, month time.Month) common.Income {
 }
 
 // AddIncome adds a new income with passed params
-func (db DB) AddIncome(_ context.Context, args common.AddIncomeArgs) (id uint, err error) {
+func (db DB) AddIncome(ctx context.Context, args common.AddIncomeArgs) (id uint, err error) {
 	if !db.checkMonth(args.MonthID) {
 		return 0, common.ErrMonthNotExist
 	}
 
-	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
 		income := &Income{
 			MonthID: args.MonthID,
 			//
@@ -67,12 +67,12 @@ func (db DB) AddIncome(_ context.Context, args common.AddIncomeArgs) (id uint, e
 }
 
 // EditIncome edits income with passed id, nil args are ignored
-func (db DB) EditIncome(_ context.Context, args common.EditIncomeArgs) error {
+func (db DB) EditIncome(ctx context.Context, args common.EditIncomeArgs) error {
 	if !db.checkIncome(args.ID) {
 		return common.ErrIncomeNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		monthID, err := db.selectIncomeMonthID(tx, args.ID)
 		if err != nil {
 			return err
@@ -101,12 +101,12 @@ func (db DB) EditIncome(_ context.Context, args common.EditIncomeArgs) error {
 }
 
 // RemoveIncome removes income with passed id
-func (db DB) RemoveIncome(_ context.Context, id uint) error {
+func (db DB) RemoveIncome(ctx context.Context, id uint) error {
 	if !db.checkIncome(id) {
 		return common.ErrIncomeNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		monthID, err := db.selectIncomeMonthID(tx, id)
 		if err != nil {
 			return err

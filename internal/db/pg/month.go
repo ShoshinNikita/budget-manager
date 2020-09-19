@@ -71,9 +71,9 @@ func (m Month) ToCommon() common.Month {
 	}
 }
 
-func (db DB) GetMonth(_ context.Context, id uint) (common.Month, error) {
+func (db DB) GetMonth(ctx context.Context, id uint) (common.Month, error) {
 	var pgMonth Month
-	err := db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
 		pgMonth, err = db.getMonth(tx, id)
 		return err
 	})
@@ -162,7 +162,7 @@ func (db *DB) initMonth(year int, month time.Month) error {
 		days[i] = Day{MonthID: monthID, Day: i + 1, Saldo: 0}
 	}
 
-	if err = db.db.Insert(&days); err != nil {
+	if _, err = db.db.Model(&days).Insert(); err != nil {
 		return errors.Wrap(err, "couldn't insert days for the current month")
 	}
 	log.Debug("days of the current month was successfully inited")

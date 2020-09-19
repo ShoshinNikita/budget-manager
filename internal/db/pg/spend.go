@@ -48,7 +48,7 @@ func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, e
 		return 0, common.ErrDayNotExist
 	}
 
-	err = db.db.RunInTransaction(func(tx *pg.Tx) (err error) {
+	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
 		spend := &Spend{
 			DayID:  args.DayID,
 			Title:  args.Title,
@@ -81,7 +81,7 @@ func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 		return common.ErrSpendNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		dayID, err := db.selectSpendDayID(tx, args.ID)
 		if err != nil {
 			return err
@@ -126,7 +126,7 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 		return common.ErrSpendNotExist
 	}
 
-	return db.db.RunInTransaction(func(tx *pg.Tx) error {
+	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		dayID, err := db.selectSpendDayID(tx, id)
 		if err != nil {
 			return err

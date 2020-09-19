@@ -53,10 +53,10 @@ func TestAddMonthlyPayment(t *testing.T) {
 
 	// Check Monthly Payments
 	for _, p := range payments {
-		mp := &MonthlyPayment{ID: p.ID}
-		err := db.db.Select(mp)
+		var mp MonthlyPayment
+		err := db.db.Model(&mp).Where("id = ?", p.ID).Select()
 		require.Nil(err)
-		require.Equal(p, *mp)
+		require.Equal(p, mp)
 	}
 
 	// Check daily budget
@@ -149,14 +149,14 @@ func TestEditMonthlyPayment(t *testing.T) {
 
 	// Check Monthly Payments
 	for _, p := range payments {
-		mp := &MonthlyPayment{ID: p.origin.ID}
-		err = db.db.Select(mp)
+		var mp MonthlyPayment
+		err = db.db.Model(&mp).Where("id = ?", p.origin.ID).Select()
 		require.Nil(err)
 		if p.edited == nil {
-			require.Equal(p.origin, *mp)
+			require.Equal(p.origin, mp)
 			continue
 		}
-		require.Equal(*p.edited, *mp)
+		require.Equal(*p.edited, mp)
 	}
 
 	// Check daily budget

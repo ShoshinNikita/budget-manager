@@ -13,7 +13,7 @@ import (
 
 func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]common.Spend, error) {
 	var pgSpends []searchSpendsModel
-	err := db.db.RunInTransaction(func(tx *pg.Tx) error {
+	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		return db.buildSearchSpendsQuery(tx, args).Select(&pgSpends)
 	})
 	if err != nil {

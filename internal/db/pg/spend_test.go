@@ -41,10 +41,10 @@ func TestAddSpend(t *testing.T) {
 
 	// Check Spends
 	for _, sp := range spends {
-		spend := &Spend{ID: sp.ID}
-		err := db.db.Select(spend)
+		var spend Spend
+		err := db.db.Model(&spend).Where("id = ?", sp.ID).Select()
 		require.Nil(err)
-		require.Equal(sp, *spend)
+		require.Equal(sp, spend)
 	}
 
 	// Check Total Spend
@@ -144,15 +144,15 @@ func TestEditSpend(t *testing.T) {
 
 	// Check spends
 	for _, sp := range spends {
-		spend := &Spend{ID: sp.origin.ID}
-		err := db.db.Select(spend)
+		var spend Spend
+		err := db.db.Model(&spend).Where("id = ?", sp.origin.ID).Select()
 		require.Nil(err)
 
 		if sp.edited == nil {
-			require.Equal(sp.origin, *spend)
+			require.Equal(sp.origin, spend)
 			continue
 		}
-		require.Equal(*sp.edited, *spend)
+		require.Equal(*sp.edited, spend)
 	}
 
 	// Check Total Spend
@@ -239,8 +239,8 @@ func TestDeleteSpend(t *testing.T) {
 
 	// Check spends
 	for _, sp := range spends {
-		spend := &Spend{ID: sp.ID}
-		err := db.db.Select(spend)
+		var spend Spend
+		err := db.db.Model(&spend).Where("id = ?", sp.ID).Select()
 		if sp.shouldDelete && !sp.isError {
 			require.Equal(pg.ErrNoRows, err)
 		}
