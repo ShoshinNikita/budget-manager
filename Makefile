@@ -139,7 +139,8 @@ define config
 	export SERVER_PORT = 8080
 	export SERVER_SKIP_AUTH = true
 	export SERVER_CACHE_TEMPLATES = false
-	export SERVER_CREDENTIALS = user:\$$apr1\$$cpHMFyv.\$$BSB0aaF3bOrTC2f3V2VYG/ # user:qwerty
+	# user:qwerty
+	export SERVER_CREDENTIALS = user:$$$$apr1$$$$cpHMFyv.$$$$BSB0aaF3bOrTC2f3V2VYG/
 	export SERVER_ENABLE_PROFILING = true
 endef
 

@@ -16,15 +16,12 @@ func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
 	const realm = "Budget Manager"
 
 	basicAuthenticator := auth.NewBasicAuthenticator(realm, func(user, _ string) string {
-		if pass, ok := s.config.Credentials[user]; ok {
-			return pass
-		}
-		return ""
+		return s.config.Credentials[user]
 	})
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := reqid.FromContextToLogger(r.Context(), s.log)
-		log = log.WithFields(logrus.Fields{"ip": r.RemoteAddr, "url": r.URL})
+		log = log.WithFields(logrus.Fields{"ip": r.RemoteAddr})
 
 		if username := basicAuthenticator.CheckAuth(r); username == "" {
 			// Auth has failed
