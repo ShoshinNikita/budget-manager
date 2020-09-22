@@ -116,21 +116,20 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 	}
 
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		_, err := tx.ModelContext(ctx, (*SpendType)(nil)).Where("id = ?", id).Delete()
+		// Reset Spend Type
+		_, err := tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Set("type_id = NULL").Where("type_id = ?", id).Update()
+		if err != nil {
+			return errors.Wrap(err, "couldn't reset Spend Type for Monthly Payments")
+		}
+		_, err = tx.ModelContext(ctx, (*Spend)(nil)).Set("type_id = NULL").Where("type_id = ?", id).Update()
+		if err != nil {
+			return errors.Wrap(err, "couldn't reset Spend Type for Spends")
+		}
+
+		// Remove Spend Type
+		_, err = tx.ModelContext(ctx, (*SpendType)(nil)).Where("id = ?", id).Delete()
 		if err != nil {
 			return err
-		}
-
-		// Reset Type IDs
-
-		_, err = tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Set("type_id = 0").Where("type_id = ?", id).Update()
-		if err != nil {
-			return errors.Wrap(err, "couldn't reset Type ID of Monthly Payments")
-		}
-
-		_, err = tx.ModelContext(ctx, (*Spend)(nil)).Set("type_id = 0").Where("type_id = ?", id).Update()
-		if err != nil {
-			return errors.Wrap(err, "couldn't reset Type ID of Spends")
 		}
 
 		return nil
