@@ -1351,6 +1351,10 @@
 		}
 
 		function removeSpendType(id) {
+			if (!confirm("Do you really want to delete the Spend Type?")) {
+				return;
+			}
+
 			const fields = {
 				"id": Number(id),
 			}
