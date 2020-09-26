@@ -233,11 +233,8 @@ func recomputeMonth(m Month) Month {
 		}
 	}
 
-	date := time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
-	daysNumber := daysInMonth(date.Year(), date.Month())
-
 	// Use "Add" because monthlyPaymentCost and TotalSpend are negative
-	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentsCost).Divide(int64(daysNumber))
+	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentsCost).Divide(int64(len(m.Days)))
 	m.TotalSpend = monthlyPaymentsCost.Add(spendsCost)
 	m.Result = m.TotalIncome.Add(m.TotalSpend)
 
