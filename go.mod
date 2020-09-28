@@ -1,6 +1,6 @@
 module github.com/ShoshinNikita/budget-manager
 
-go 1.14
+go 1.15
 
 require (
 	github.com/abbot/go-http-auth v0.4.0
