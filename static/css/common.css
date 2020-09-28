@@ -41,6 +41,7 @@ body {
 	display: grid;
 	grid-template-rows: 40px calc(100% - 70px - 20px) 30px;
 	height: 100%;
+	margin: auto;
 	max-width: 2000px;
 	min-width: 900px;
 	padding: 10px 20px;
