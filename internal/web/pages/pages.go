@@ -157,7 +157,10 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 	result := annualIncome.Add(annualSpend)
 
 	resp := struct {
-		Year         int
+		Year     int
+		NextYear int
+		PrevYear int
+		//
 		Months       []db.Month
 		AnnualIncome money.Money
 		AnnualSpend  money.Money
@@ -165,7 +168,10 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 		//
 		Footer FooterTemplateData
 	}{
-		Year:         year,
+		Year:     year,
+		NextYear: year + 1,
+		PrevYear: year - 1,
+		//
 		Months:       allMonths,
 		AnnualIncome: annualIncome,
 		AnnualSpend:  annualSpend,
