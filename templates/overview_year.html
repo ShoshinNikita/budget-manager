@@ -22,6 +22,30 @@
 
 		/* || Months */
 
+		#year {
+			display: grid;
+			grid-template-columns: min-content auto min-content;
+		}
+
+		.switch-year-btn {
+			transform: translateX(-10px);
+			width: 45px;
+		}
+
+		#next-year-btn {
+			rotate: 180deg;
+		}
+
+		.switch-year-btn .feather-icon--btn {
+			height: 100%;
+			padding: 0;
+		}
+
+		.switch-year-btn .feather-icon--btn>svg {
+			height: 100%;
+			width: 100%;
+		}
+
 		#months-list {
 			display: grid;
 			grid-template-columns: repeat(6, 1fr);
@@ -85,7 +109,7 @@
 			text-align: center;
 		}
 
-		.year-overview__results__result {
+		#year-overview__results__result {
 			column-gap: 10px;
 			display: grid;
 			grid-template-columns: 130px max-content;
@@ -110,6 +134,12 @@
 		/* | Layouts */
 
 		@media (max-width: 1350px) {
+
+			.switch-year-btn {
+				transform: translateX(-5px);
+				width: 35px;
+			}
+
 			#months-list {
 				grid-template-columns: repeat(4, 1fr);
 			}
@@ -118,12 +148,21 @@
 				font-size: 18px;
 			}
 
-			.year-overview__results__result {
+			#year-overview__results__result {
 				font-size: 16px;
 			}
 		}
 
 		@media (max-width: 1100px) {
+
+			#year {
+				display: block;
+			}
+
+			.switch-year-btn {
+				display: none;
+			}
+
 			#content {
 				row-gap: 30px;
 			}
@@ -147,46 +186,68 @@
 		</div>
 
 		<div id="content">
-			<div id="months-list">
-				{{range .Months}}
+			<div id="year">
+				<div id="prev-year-btn" class="switch-year-btn">
+					<a href="/overview/{{ .PrevYear }}">
+						<div class="feather-icon--btn">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#chevron-left" />
+							</svg>
+						</div>
+					</a>
+				</div>
 
-				{{if ne .ID 0}}
-				<!-- Show month overview -->
+				<div id="months-list">
+					{{range .Months}}
 
-				<!-- Use the number of a month instead of the name -->
-				<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
-					<div class="month" title="Go to the month">
-						<div class="month__header">{{.Month}} {{.Year}}</div>
-						<div class="month__results">
-							<div>Income:</div>
-							<div class="month__results__value money--gain">{{.TotalIncome}}</div>
-							<div>Spend:</div>
-							<div class="month__results__value money--lose">{{.TotalSpend}}</div>
-							<div>Result:</div>
-							<div class="month__results__value">
-								{{if ge .Result 0}}
-								<span class="money--gain">{{.Result}}</span>
-								{{else}}
-								<span class="money--lose">{{.Result}}</span>
-								{{end}}
+					{{if ne .ID 0}}
+					<!-- Show month overview -->
+
+					<!-- Use the number of a month instead of the name -->
+					<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
+						<div class="month" title="Go to the month">
+							<div class="month__header">{{.Month}} {{.Year}}</div>
+							<div class="month__results">
+								<div>Income:</div>
+								<div class="month__results__value money--gain">{{.TotalIncome}}</div>
+								<div>Spend:</div>
+								<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+								<div>Result:</div>
+								<div class="month__results__value">
+									{{if ge .Result 0}}
+									<span class="money--gain">{{.Result}}</span>
+									{{else}}
+									<span class="money--lose">{{.Result}}</span>
+									{{end}}
+								</div>
 							</div>
 						</div>
+					</a>
+					{{else}}
+					<!-- Just show a stub -->
+					<div class="month--not-exist" title="No data for the month">
+						<div class="month__header">{{.Month}} {{.Year}}</div>
 					</div>
-				</a>
-				{{else}}
-				<!-- Just show a stub -->
-				<div class="month--not-exist" title="No data for the month">
-					<div class="month__header">{{.Month}} {{.Year}}</div>
+					{{end}}
+					{{end}}
 				</div>
-				{{end}}
-				{{end}}
+
+				<div id="next-year-btn" class="switch-year-btn">
+					<a href="/overview/{{ .NextYear }}">
+						<div class="feather-icon--btn">
+							<svg>
+								<use xlink:href="/static/feather/feather-sprite.svg#chevron-left" />
+							</svg>
+						</div>
+					</a>
+				</div>
 			</div>
 
 			<div id="year-overview">
 				<div id="year-overview__results">
 					<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
 
-					<div class="year-overview__results__result">
+					<div id="year-overview__results__result">
 						<div>Annual Income:</div>
 						<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
 
