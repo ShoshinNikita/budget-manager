@@ -8,7 +8,6 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
-	"github.com/ShoshinNikita/budget-manager/internal/web/pages/templates"
 )
 
 type route struct {
@@ -18,12 +17,7 @@ type route struct {
 }
 
 func (s Server) addRoutes(router *mux.Router) {
-	executorLog := s.log.WithField("component", "template_executor")
-	var tplExecutor pages.TemplateExecutor = templates.NewTemplateDiskExecutor(executorLog)
-	if s.config.CacheTemplates {
-		tplExecutor = templates.NewTemplateCacheExecutor(executorLog)
-	}
-	pageHandlers := pages.NewHandlers(s.db, tplExecutor, s.log)
+	pageHandlers := pages.NewHandlers(s.db, s.log, s.config.CacheTemplates)
 
 	apiHandlers := api.NewHandlers(s.db, s.log)
 

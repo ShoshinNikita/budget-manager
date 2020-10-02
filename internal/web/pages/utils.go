@@ -30,7 +30,7 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 		RequestID: reqid.FromContext(ctx),
 		Message:   respMsg,
 	}
-	if err := h.tplExecutor.Execute(ctx, errorPageTemplatePath, w, data); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, errorPageTemplateName, data); err != nil {
 		utils.ProcessInternalError(ctx, log, w, executeErrorMessage, err)
 	}
 }
