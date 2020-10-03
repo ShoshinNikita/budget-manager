@@ -5,6 +5,8 @@ import (
 	"context"
 	"html/template"
 	"io"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -49,7 +51,7 @@ func (e *templateExecutor) Execute(ctx context.Context, w io.Writer, name string
 	return nil
 }
 
-const templatesPattern = "./templates/*"
+const templatesDir = "./templates"
 
 // loadTemplates loads all templates from file or returns them from cache according to 'cacheTemplates'
 func (e *templateExecutor) loadTemplates() (_ *template.Template, err error) {
@@ -60,7 +62,23 @@ func (e *templateExecutor) loadTemplates() (_ *template.Template, err error) {
 		return e.tpl, nil
 	}
 
-	if e.tpl, err = template.ParseGlob(templatesPattern); err != nil {
+	var templates []string
+	err = filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		templates = append(templates, path)
+		return nil
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "couldn't get template filenames")
+	}
+
+	if e.tpl, err = template.ParseFiles(templates...); err != nil {
 		return nil, err
 	}
 
