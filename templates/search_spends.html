@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Search | Budget Manager</title>
 
-	<link rel="stylesheet" href="/static/css/common.css">
+	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
 		/* | Global */
@@ -327,14 +327,14 @@
 							<button type="reset" class="search__options__button" title="Reset">
 								<div class="feather-icon--btn">
 									<svg>
-										<use xlink:href="/static/feather/feather-sprite.svg#rotate-ccw" /> </svg>
+										<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
 								</div>
 							</button>
 
 							<button type="submit" class="search__options__button" title="Search">
 								<div class="feather-icon--btn">
 									<svg>
-										<use xlink:href="/static/feather/feather-sprite.svg#search" /> </svg>
+										<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#search` }}" /> </svg>
 								</div>
 							</button>
 						</div>
@@ -344,7 +344,7 @@
 						<a href="/">
 							<div class="feather-icon--btn" title="Home">
 								<svg>
-									<use xlink:href="/static/feather/feather-sprite.svg#home" />
+									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#home` }}" />
 								</svg>
 							</div>
 						</a>
@@ -361,10 +361,10 @@
 									<span>Date</span>
 									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
 										<svg class="search__results__table__sort-icon--asc">
-											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
 										</svg>
 										<svg class="search__results__table__sort-icon--desc">
-											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
 										</svg>
 									</div>
 								</th>
@@ -372,10 +372,10 @@
 									<span>Title</span>
 									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
 										<svg class="search__results__table__sort-icon--asc">
-											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
 										</svg>
 										<svg class="search__results__table__sort-icon--desc">
-											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
 										</svg>
 									</div>
 								</th>
@@ -385,10 +385,10 @@
 									<span>Cost</span>
 									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
 										<svg class="search__results__table__sort-icon--asc">
-											<use xlink:href="/static/feather/feather-sprite.svg#chevron-up" />
+											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
 										</svg>
 										<svg class="search__results__table__sort-icon--desc">
-											<use xlink:href="/static/feather/feather-sprite.svg#chevron-down" />
+											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
 										</svg>
 									</div>
 								</th>
@@ -413,7 +413,7 @@
 									<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
 										<div class="feather-icon--btn" title="View Day">
 											<svg>
-												<use xlink:href="/static/feather/feather-sprite.svg#external-link" />
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#external-link` }}" />
 											</svg>
 										</div>
 									</a>
@@ -615,7 +615,7 @@
 	</script>
 
 	<!-- Link Formatter -->
-	<script src="/static/js/link-formatter.js"></script>
+	<script src="{{ asStaticURL `/static/js/link-formatter.js` }}"></script>
 	<script>
 		window.addEventListener("load", () => {
 			formatLinks(".search__results__table__notes");

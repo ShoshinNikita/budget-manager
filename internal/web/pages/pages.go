@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -52,8 +53,25 @@ type DB interface {
 func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool) *Handlers {
 	return &Handlers{
 		db:          db,
-		tplExecutor: newTemplateExecutor(log, cacheTemplates),
+		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs()),
 		log:         log,
+	}
+}
+
+func commonTemplateFuncs() template.FuncMap {
+	return template.FuncMap{
+		"asStaticURL": func(rawURL string) (string, error) {
+			url, err := url.Parse(rawURL)
+			if err != nil {
+				return "", err
+			}
+
+			query := url.Query()
+			query.Add("hash", version.GitHash)
+			url.RawQuery = query.Encode()
+
+			return url.String(), nil
+		},
 	}
 }
 

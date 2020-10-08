@@ -19,15 +19,17 @@ import (
 type templateExecutor struct {
 	cacheTemplates bool
 	log            logrus.FieldLogger
+	commonFuncs    template.FuncMap
 
 	mu  sync.Mutex
 	tpl *template.Template
 }
 
-func newTemplateExecutor(log logrus.FieldLogger, cacheTemplates bool) *templateExecutor {
+func newTemplateExecutor(log logrus.FieldLogger, cacheTemplates bool, commonFuncs template.FuncMap) *templateExecutor {
 	return &templateExecutor{
 		log:            log,
 		cacheTemplates: cacheTemplates,
+		commonFuncs:    commonFuncs,
 	}
 }
 
@@ -78,11 +80,20 @@ func (e *templateExecutor) loadTemplates() (_ *template.Template, err error) {
 		return nil, errors.Wrap(err, "couldn't get template filenames")
 	}
 
-	if e.tpl, err = template.ParseFiles(templates...); err != nil {
+	e.tpl, err = template.New("base").Funcs(e.getCommonFuncs()).ParseFiles(templates...)
+	if err != nil {
 		return nil, err
 	}
 
 	return e.tpl, nil
+}
+
+func (e *templateExecutor) getCommonFuncs() template.FuncMap {
+	res := make(template.FuncMap, len(e.commonFuncs))
+	for k, v := range e.commonFuncs {
+		res[k] = v
+	}
+	return res
 }
 
 // executeTemplate executes passed template. It checks for errors before writing into w: it executes
