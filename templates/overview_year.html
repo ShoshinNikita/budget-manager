@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>{{.Year}} | Budget Manager</title>
-	<link rel="stylesheet" href="/static/css/common.css">
+	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
 		a:link.no-decoration {
@@ -191,7 +191,7 @@
 					<a href="/overview/{{ .PrevYear }}">
 						<div class="feather-icon--btn">
 							<svg>
-								<use xlink:href="/static/feather/feather-sprite.svg#chevron-left" />
+								<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-left` }}" />
 							</svg>
 						</div>
 					</a>
@@ -236,7 +236,7 @@
 					<a href="/overview/{{ .NextYear }}">
 						<div class="feather-icon--btn">
 							<svg>
-								<use xlink:href="/static/feather/feather-sprite.svg#chevron-left" />
+								<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-left` }}" />
 							</svg>
 						</div>
 					</a>
@@ -274,7 +274,7 @@
 		{{template "components/footer.html" .Footer}}
 	</div>
 
-	<script src="/static/chart.js/chart.min.js"></script>
+	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
 
 	<script>
 		const monthsResults = JSON.parse(`{{.Months}}`);

@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Error | Budget Manager</title>
 
-	<link rel="stylesheet" href="/static/css/common.css">
+	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
 		#error {
@@ -110,7 +110,7 @@
 		<div id="error__oops">
 			<div id="error__oops__icon" class="feather-icon--btn">
 				<svg>
-					<use xlink:href="/static/feather/feather-sprite.svg#alert-circle" />
+					<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#alert-circle` }}" />
 				</svg>
 			</div>
 			<div id="error__oops__message" class="noselect">Oops! Something went wrong</div>

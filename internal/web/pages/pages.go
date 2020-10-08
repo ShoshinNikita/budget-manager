@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -58,7 +59,20 @@ func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool) *Handlers {
 }
 
 func commonTemplateFuncs() template.FuncMap {
-	return template.FuncMap{}
+	return template.FuncMap{
+		"asStaticURL": func(rawURL string) (string, error) {
+			url, err := url.Parse(rawURL)
+			if err != nil {
+				return "", err
+			}
+
+			query := url.Query()
+			query.Add("hash", version.GitHash)
+			url.RawQuery = query.Encode()
+
+			return url.String(), nil
+		},
+	}
 }
 
 // GET / - redirects to the current month page
