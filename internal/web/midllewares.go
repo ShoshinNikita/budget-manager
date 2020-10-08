@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	auth "github.com/abbot/go-http-auth"
@@ -66,9 +67,18 @@ func (Server) requestIDMeddleware(h http.Handler) http.Handler {
 	})
 }
 
-// loggingMiddleware logs all HTTP requests. It also logs execution time, content length and status code
+// loggingMiddleware logs HTTP requests. Logs include execution time, content length and status code
 func (s Server) loggingMiddleware(h http.Handler) http.Handler {
+	shouldSkip := func(r *http.Request) bool {
+		return strings.HasPrefix(r.URL.Path, "/static/")
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if shouldSkip(r) {
+			h.ServeHTTP(w, r)
+			return
+		}
+
 		log := reqid.FromContextToLogger(r.Context(), s.log)
 		log = log.WithFields(logrus.Fields{"method": r.Method, "url": r.URL.Path})
 
