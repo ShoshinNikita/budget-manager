@@ -52,9 +52,13 @@ type DB interface {
 func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool) *Handlers {
 	return &Handlers{
 		db:          db,
-		tplExecutor: newTemplateExecutor(log, cacheTemplates),
+		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs()),
 		log:         log,
 	}
+}
+
+func commonTemplateFuncs() template.FuncMap {
+	return template.FuncMap{}
 }
 
 // GET / - redirects to the current month page
