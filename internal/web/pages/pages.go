@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"io"
 	"net/http"
 	"sort"
 	"strconv"
@@ -18,7 +17,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
-	"github.com/ShoshinNikita/budget-manager/internal/web/pages/templates"
 )
 
 const (
@@ -27,32 +25,17 @@ const (
 	dbErrorMessagePrefix    = "DB error: "
 )
 
-//nolint:gochecknoglobals
-var (
-	overviewTemplatePath = templates.Template{
-		Path: "templates/overview.html",
-		Deps: []string{"templates/footer.html"},
-	}
-	yearTemplatePath = templates.Template{
-		Path: "templates/overview_year.html",
-		Deps: []string{"templates/footer.html"},
-	}
-	monthTemplatePath = templates.Template{
-		Path: "templates/overview_year_month.html",
-		Deps: []string{"templates/footer.html"},
-	}
-	//
-	searchSpendsTemplatePath = templates.Template{
-		Path: "templates/search_spends.html",
-		Deps: []string{"templates/footer.html"},
-	}
-	//
-	errorPageTemplatePath = templates.Template{Path: "./templates/error_page.html"}
+const (
+	overviewTemplateName     = "overview.html"
+	yearTemplateName         = "overview_year.html"
+	monthTemplateName        = "overview_year_month.html"
+	searchSpendsTemplateName = "search_spends.html"
+	errorPageTemplateName    = "error_page.html"
 )
 
 type Handlers struct {
 	db          DB
-	tplExecutor TemplateExecutor
+	tplExecutor *templateExecutor
 	log         logrus.FieldLogger
 }
 
@@ -66,14 +49,10 @@ type DB interface {
 	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]db.Spend, error)
 }
 
-type TemplateExecutor interface {
-	Execute(ctx context.Context, t templates.Template, w io.Writer, data interface{}) error
-}
-
-func NewHandlers(db DB, tplExecutor TemplateExecutor, log logrus.FieldLogger) *Handlers {
+func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool) *Handlers {
 	return &Handlers{
 		db:          db,
-		tplExecutor: tplExecutor,
+		tplExecutor: newTemplateExecutor(log, cacheTemplates),
 		log:         log,
 	}
 }
@@ -97,7 +76,7 @@ func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
 
-	if err := h.tplExecutor.Execute(ctx, overviewTemplatePath, w, nil); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, overviewTemplateName, nil); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
@@ -182,7 +161,7 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 			GitHash: version.GitHash,
 		},
 	}
-	if err := h.tplExecutor.Execute(ctx, yearTemplatePath, w, resp); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, yearTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
@@ -276,7 +255,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 			return true
 		},
 	}
-	if err := h.tplExecutor.Execute(ctx, monthTemplatePath, w, resp); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, monthTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
@@ -454,7 +433,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 			GitHash: version.GitHash,
 		},
 	}
-	if err := h.tplExecutor.Execute(ctx, searchSpendsTemplatePath, w, resp); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, searchSpendsTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }

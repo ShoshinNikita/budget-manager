@@ -1,5 +1,6 @@
+{{ define "components/footer.html" }}
 <style>
-	#app-info {
+	#footer__app-info {
 		column-gap: 5px;
 		display: flex;
 		justify-content: center;
@@ -7,8 +8,8 @@
 </style>
 
 <div id="footer">
-	<div id="app-info">
-		<div title="Commit {{.GitHash}}">Budget Manager {{.Version}}</div>
+	<div id="footer__app-info">
+		<div title="Commit {{ .GitHash }}">Budget Manager {{ .Version }}</div>
 		<div class="noselect">|</div>
 		<div>
 			<a href="https://github.com/ShoshinNikita/budget-manager" target="_blank" title="GitHub repo">
@@ -21,3 +22,4 @@
 		</div>
 	</div>
 </div>
+{{ end }}
