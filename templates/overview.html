@@ -4,11 +4,61 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Budget Manager</title>
+	<title>Overview | Budget Manager</title>
+	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
+
+	<style>
+		#wip {
+			font-size: 25px;
+			height: min-content;
+			left: 50%;
+			position: absolute;
+			top: 40%;
+			transform: translate(-50%, -50%);
+			width: min-content;
+		}
+
+		#wip>#wip-msg {
+			white-space: nowrap;
+		}
+
+		#wip>#current-month-link {
+			text-align: center;
+		}
+
+		#wip>#current-month-link>.feather-icon--btn>svg {
+			height: 30px;
+			width: 30px;
+		}
+	</style>
 </head>
 
 <body>
-	<h1>TODO (overview)</h1>
+	<div id="app">
+		<div id="header">
+			<div id="header__path">
+				<span>Overview</span>
+			</div>
+		</div>
+
+		<div id="content">
+			<div id="wip">
+				<span id="wip-msg">
+					Work In Progress - <a href="https://github.com/ShoshinNikita/budget-manager/issues/80">#80</a>
+				</span>
+				<br> <br>
+				<a id="current-month-link" href="/">
+					<div class="feather-icon--btn" title="Go to the current Month">
+						<svg>
+							<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#home` }}" />
+						</svg>
+					</div>
+				</a>
+			</div>
+		</div>
+
+		{{template "components/footer.html" .Footer}}
+	</div>
 </body>
 
 </html>

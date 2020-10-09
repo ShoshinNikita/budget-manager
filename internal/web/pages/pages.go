@@ -94,7 +94,15 @@ func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
 
-	if err := h.tplExecutor.Execute(ctx, w, overviewTemplateName, nil); err != nil {
+	resp := struct {
+		Footer FooterTemplateData
+	}{
+		Footer: FooterTemplateData{
+			Version: version.Version,
+			GitHash: version.GitHash,
+		},
+	}
+	if err := h.tplExecutor.Execute(ctx, w, overviewTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
