@@ -6,42 +6,59 @@ import (
 	"strconv"
 )
 
-const precision = 100
+const precisionMul = 100
 
-// Money is a sum of money multiplied by precision (100). It can be negative
-// Money is marshalled without multiplication:
+// Money is an amount with precision 2
+//
 //   - FromInt(15) -> 15
 //   - FromFloat(15.07) -> 15.07
-//   - FromFloat(15.073) -> 15.07
+//   - FromFloat(-15.073) -> -15.07
 //   - FromFloat(15.078) -> 15.07
 //
 type Money int64
 
 // FromInt converts int64 to Money
 func FromInt(m int64) Money {
-	return Money(m * precision)
+	return Money(m * precisionMul)
 }
 
 // FromFloat converts float64 to Money
 func FromFloat(m float64) Money {
-	// Multiply 'm' by 'precision' 2 times to avoid some strange results caused by
-	// Floating Point Math - https://0.30000000000000004.com/
+	// We can't convert float64 to int64 with precision 2 by multiplying it by 100 because we can get something
+	// like this: 17.83 * 100 = 1782.9999999999998
 	//
-	// For example, 69.99 * 100 = 6998.99999 -> int64(6998.99999) = 6998
+	// We can use package 'github.com/shopspring/decimal', but it requires major refactoring.
+	// So, as a temporary solution, we use this algorithm:
+	//
+	// 1. Convert float64 to string with fixed precision
+	// 2. Remove decimal separator '.'
+	// 3. Parse this strings as int64
+	//
 
-	m *= precision * precision
-	m /= precision
-	return Money(int64(m))
+	// Use precision 3 instead of 2 because 'AppendFloat' rounds float64
+	s := strconv.AppendFloat(nil, m, 'f', 3, 64)
+	// Replace decimal separator with the first digit and first digit with the second one: 17.830 -> 178830 -> 178330
+	s[len(s)-4], s[len(s)-3] = s[len(s)-3], s[len(s)-2]
+	// Trim last 2 digits
+	s = s[:len(s)-2]
+
+	res, err := strconv.ParseInt(string(s), 10, 64)
+	if err != nil {
+		// Just in case
+		panic(err)
+	}
+
+	return Money(res)
 }
 
 // Int converts Money to int64
 func (m Money) Int() int64 {
-	return int64(m) / precision
+	return int64(m) / precisionMul
 }
 
 // Float converts Money to float64
 func (m Money) Float() float64 {
-	return float64(m) / precision
+	return float64(m) / precisionMul
 }
 
 // String converts Money to string. Money is always formatted as a number with 2 digits
