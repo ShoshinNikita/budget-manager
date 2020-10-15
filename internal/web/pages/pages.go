@@ -300,128 +300,11 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 //   - sort - sort type: 'title', 'date' or 'cost'
 //   - order - sort order: 'asc' or 'desc'
 //
-//nolint:funlen
 func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
 
-	// Parse the query
-
-	// Parse Title and Notes
-	title := strings.TrimSpace(r.FormValue("title"))
-	notes := strings.TrimSpace(r.FormValue("notes"))
-
-	// Parse Min and Max Costs
-	minCost := func() money.Money {
-		minCostParam := r.FormValue("min_cost")
-		if minCostParam == "" {
-			return 0
-		}
-
-		minCost, err := strconv.ParseFloat(minCostParam, 64)
-		if err != nil {
-			// Just log this error
-			log.WithError(err).WithField("min_cost", minCostParam).Warn("couldn't parse 'min_cost' param")
-			return 0
-		}
-		return money.FromFloat(minCost)
-	}()
-	maxCost := func() money.Money {
-		maxCostParam := r.FormValue("max_cost")
-		if maxCostParam == "" {
-			return 0
-		}
-
-		maxCost, err := strconv.ParseFloat(maxCostParam, 64)
-		if err != nil {
-			// Just log this error
-			log.WithError(err).WithField("max_cost", maxCostParam).Warn("couldn't parse 'max_cost' param")
-			return 0
-		}
-		return money.FromFloat(maxCost)
-	}()
-
-	// Parse After and Before
-	const timeLayout = "2006-01-02"
-	after := func() time.Time {
-		after := r.FormValue("after")
-		if after == "" {
-			return time.Time{}
-		}
-
-		t, err := time.Parse(timeLayout, after)
-		if err != nil {
-			// Just log this error
-			log.WithError(err).WithField("after", after).Warn("couldn't parse 'after' param")
-			t = time.Time{}
-		}
-		return t
-	}()
-	before := func() time.Time {
-		before := r.FormValue("before")
-		if before == "" {
-			return time.Time{}
-		}
-
-		t, err := time.Parse(timeLayout, before)
-		if err != nil {
-			// Just log this error
-			log.WithError(err).WithField("before", before).Warn("couldn't parse 'before' param")
-			t = time.Time{}
-		}
-		return t
-	}()
-
-	// Parse Spend Types
-	var typeIDs []uint
-	if ids := r.Form["type_id"]; len(ids) != 0 {
-		typeIDs = make([]uint, 0, len(ids))
-		for i := range ids {
-			id, err := strconv.ParseUint(ids[i], 10, 0)
-			if err != nil {
-				// Just log the error
-				log.WithError(err).WithField("type_id", ids[i]).Warn("couldn't convert Spend Type id")
-				continue
-			}
-			typeIDs = append(typeIDs, uint(id))
-		}
-	}
-
-	// Sort
-	sortType := func() db.SearchSpendsColumn {
-		switch r.FormValue("sort") {
-		case "title":
-			return db.SortSpendsByTitle
-		case "cost":
-			return db.SortSpendsByCost
-		default:
-			return db.SortSpendsByDate
-		}
-	}()
-	order := func() db.SearchOrder {
-		switch r.FormValue("order") {
-		case "desc":
-			return db.OrderByDesc
-		default:
-			return db.OrderByAsc
-		}
-	}()
-
-	// Process
-	args := db.SearchSpendsArgs{
-		Title:   strings.ToLower(title),
-		Notes:   strings.ToLower(notes),
-		After:   after,
-		Before:  before,
-		MinCost: minCost,
-		MaxCost: maxCost,
-		TypeIDs: typeIDs,
-		Sort:    sortType,
-		Order:   order,
-		// TODO
-		TitleExactly: false,
-		NotesExactly: false,
-	}
+	args := parseSearchSpendsArgs(r, log)
 	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't complete Spend search"
@@ -435,7 +318,6 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
-
 	sort.Slice(spendTypes, func(i, j int) bool {
 		return spendTypes[i].FullName < spendTypes[j].FullName
 	})
@@ -461,6 +343,93 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.tplExecutor.Execute(ctx, w, searchSpendsTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
+	}
+}
+
+//nolint:funlen
+func parseSearchSpendsArgs(r *http.Request, log logrus.FieldLogger) db.SearchSpendsArgs {
+	// Title and Notes
+	title := strings.ToLower(strings.TrimSpace(r.FormValue("title")))
+	notes := strings.ToLower(strings.TrimSpace(r.FormValue("notes")))
+
+	// Min and Max Costs
+	parseCost := func(paramName string) money.Money {
+		costParam := r.FormValue(paramName)
+		if costParam == "" {
+			return 0
+		}
+
+		cost, err := strconv.ParseFloat(costParam, 64)
+		if err != nil {
+			log.WithError(err).WithField(paramName, costParam).Warnf("couldn't parse '%s' param", paramName)
+			cost = 0
+		}
+		return money.FromFloat(cost)
+	}
+	minCost := parseCost("min_cost")
+	maxCost := parseCost("max_cost")
+
+	// After and Before
+	parseTime := func(paramName string) time.Time {
+		const timeLayout = "2006-01-02"
+
+		timeParam := r.FormValue(paramName)
+		if timeParam == "" {
+			return time.Time{}
+		}
+
+		t, err := time.Parse(timeLayout, timeParam)
+		if err != nil {
+			log.WithError(err).WithField(paramName, timeParam).Warnf("couldn't parse '%s' param", paramName)
+			t = time.Time{}
+		}
+		return t
+	}
+	after := parseTime("after")
+	before := parseTime("before")
+
+	// Spend Types
+	var typeIDs []uint
+	if ids := r.Form["type_id"]; len(ids) != 0 {
+		typeIDs = make([]uint, 0, len(ids))
+		for i := range ids {
+			id, err := strconv.ParseUint(ids[i], 10, 0)
+			if err != nil {
+				log.WithError(err).WithField("type_id", ids[i]).Warn("couldn't convert Spend Type id")
+				continue
+			}
+			typeIDs = append(typeIDs, uint(id))
+		}
+	}
+
+	// Sort
+	sortType := db.SortSpendsByDate
+	switch r.FormValue("sort") {
+	case "title":
+		sortType = db.SortSpendsByTitle
+	case "cost":
+		sortType = db.SortSpendsByCost
+	}
+
+	// Order
+	order := db.OrderByAsc
+	if r.FormValue("order") == "desc" {
+		order = db.OrderByDesc
+	}
+
+	return db.SearchSpendsArgs{
+		Title:   title,
+		Notes:   notes,
+		After:   after,
+		Before:  before,
+		MinCost: minCost,
+		MaxCost: maxCost,
+		TypeIDs: typeIDs,
+		Sort:    sortType,
+		Order:   order,
+		//
+		TitleExactly: false,
+		NotesExactly: false,
 	}
 }
 
