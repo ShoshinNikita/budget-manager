@@ -234,7 +234,7 @@ func recomputeMonth(m Month) Month {
 	}
 
 	// Use "Add" because monthlyPaymentCost and TotalSpend are negative
-	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentsCost).Divide(int64(len(m.Days)))
+	m.DailyBudget = m.TotalIncome.Add(monthlyPaymentsCost).Div(int64(len(m.Days)))
 	m.TotalSpend = monthlyPaymentsCost.Add(spendsCost)
 	m.Result = m.TotalIncome.Add(m.TotalSpend)
 

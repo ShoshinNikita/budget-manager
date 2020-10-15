@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+const precision = 100
+
 // Money is a sum of money multiplied by precision (100). It can be negative
 // Money is marshalled without multiplication:
 //   - FromInt(15) -> 15
@@ -14,12 +16,6 @@ import (
 //   - FromFloat(15.078) -> 15.07
 //
 type Money int64
-
-// -------------------------------------------------
-// Convert functions
-// -------------------------------------------------
-
-const precision = 100
 
 // FromInt converts int64 to Money
 func FromInt(m int64) Money {
@@ -38,20 +34,20 @@ func FromFloat(m float64) Money {
 	return Money(int64(m))
 }
 
-// ToInt converts Money to int64
-func (m Money) ToInt() int64 {
+// Int converts Money to int64
+func (m Money) Int() int64 {
 	return int64(m) / precision
 }
 
-// ToInt converts Money to float64
-func (m Money) ToFloat() float64 {
+// Float converts Money to float64
+func (m Money) Float() float64 {
 	return float64(m) / precision
 }
 
-// ToString converts Money to string. Money is always formatted as a number with 2 digits
+// String converts Money to string. Money is always formatted as a number with 2 digits
 // after decimal point (123.45, 123.00 and etc.)
-func (m Money) ToString() string {
-	return fmt.Sprintf("%.2f", m.ToFloat())
+func (m Money) String() string {
+	return fmt.Sprintf("%.2f", m.Float())
 }
 
 // Arithmetic operations
@@ -66,8 +62,8 @@ func (m Money) Sub(sub Money) Money {
 	return m - sub
 }
 
-// Divide divides Money by n (if n <= 0, it panics)
-func (m Money) Divide(n int64) Money {
+// Div divides Money by n (if n <= 0, it panics)
+func (m Money) Div(n int64) Money {
 	if n <= 0 {
 		panic("n must be greater than zero")
 	}
@@ -86,7 +82,7 @@ var (
 
 func (m Money) MarshalJSON() ([]byte, error) {
 	// Always format with 2 digits after decimal point (123.45, 123.00 and etc.)
-	return []byte(m.ToString()), nil
+	return []byte(m.String()), nil
 }
 
 func (m *Money) UnmarshalJSON(data []byte) error {
@@ -105,7 +101,7 @@ var _ fmt.Formatter = (*Money)(nil)
 func (m Money) Format(f fmt.State, c rune) {
 	const thinSpace = " "
 
-	str := m.ToString()
+	str := m.String()
 
 	switch c {
 	case 'd':

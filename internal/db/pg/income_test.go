@@ -51,7 +51,7 @@ func TestAddIncome(t *testing.T) {
 	dailyBudget := func() int64 {
 		var b int64
 		for _, in := range incomes {
-			b += in.Income.ToInt()
+			b += in.Income.Int()
 		}
 		now := time.Now()
 		return b / int64(daysInMonth(now.Year(), now.Month()))
@@ -59,7 +59,7 @@ func TestAddIncome(t *testing.T) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget.ToInt())
+	require.Equal(dailyBudget, m.DailyBudget.Int())
 }
 
 func TestEditIncome(t *testing.T) {
@@ -112,7 +112,7 @@ func TestEditIncome(t *testing.T) {
 	dailyBudget := func() int64 {
 		var b int64
 		for _, in := range editedIncomes {
-			b += in.Income.ToInt()
+			b += in.Income.Int()
 		}
 		now := time.Now()
 		return b / int64(daysInMonth(now.Year(), now.Month()))
@@ -120,7 +120,7 @@ func TestEditIncome(t *testing.T) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget.ToInt())
+	require.Equal(dailyBudget, m.DailyBudget.Int())
 }
 
 func TestRemoveIncome(t *testing.T) {
@@ -160,7 +160,7 @@ func TestRemoveIncome(t *testing.T) {
 			if in.ID == 1 {
 				continue
 			}
-			b += in.Income.ToInt()
+			b += in.Income.Int()
 		}
 
 		now := time.Now()
@@ -169,7 +169,7 @@ func TestRemoveIncome(t *testing.T) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget.ToInt())
+	require.Equal(dailyBudget, m.DailyBudget.Int())
 
 	// Try to remove Income with invalid id
 	err = db.RemoveIncome(context.Background(), 100)
