@@ -121,38 +121,12 @@ func TestAdd(t *testing.T) {
 
 		add Money
 		res Money
-
-		addInt int64
-		resInt Money
-
-		addFloat float64
-		resFloat Money
 	}{
-		{
-			origin: -150,
-			add:    Money(2000), res: Money(-13000),
-			addInt: 50, resInt: Money(-10000),
-			addFloat: 15.53, resFloat: Money(-13447),
-		},
-		{
-			origin: 0,
-			add:    Money(2000), res: Money(2000),
-			addInt: 53, resInt: Money(5300),
-			addFloat: 15.53, resFloat: Money(1553),
-		},
-		{
-			origin: 150,
-			add:    Money(2000), res: Money(17000),
-			addInt: 50, resInt: Money(20000),
-			addFloat: 15.53, resFloat: Money(16553),
-		},
+		{origin: -150, add: Money(2000), res: Money(-13000)},
+		{origin: 0, add: Money(2000), res: Money(2000)},
+		{origin: 150, add: Money(2000), res: Money(17000)},
 		// Add negative
-		{
-			origin: 150,
-			add:    Money(-2000), res: Money(13000),
-			addInt: -50, resInt: Money(10000),
-			addFloat: -15.53, resFloat: Money(13447),
-		},
+		{origin: 150, add: Money(-2000), res: Money(13000)},
 	}
 
 	for _, tt := range tests {
@@ -160,12 +134,6 @@ func TestAdd(t *testing.T) {
 
 		res := origin.Add(tt.add)
 		require.Equal(tt.res, res)
-
-		resInt := origin.AddInt(tt.addInt)
-		require.Equal(tt.resInt, resInt)
-
-		resFloat := origin.AddFloat(tt.addFloat)
-		require.Equal(tt.resFloat, resFloat)
 	}
 }
 
@@ -179,38 +147,12 @@ func TestSub(t *testing.T) {
 
 		sub Money
 		res Money
-
-		subInt int64
-		resInt Money
-
-		subFloat float64
-		resFloat Money
 	}{
-		{
-			origin: -150,
-			sub:    Money(2000), res: Money(-17000),
-			subInt: 50, resInt: Money(-20000),
-			subFloat: 15.53, resFloat: Money(-16553),
-		},
-		{
-			origin: 0,
-			sub:    Money(2000), res: Money(-2000),
-			subInt: 53, resInt: Money(-5300),
-			subFloat: 15.53, resFloat: Money(-1553),
-		},
-		{
-			origin: 150,
-			sub:    Money(2000), res: Money(13000),
-			subInt: 50, resInt: Money(10000),
-			subFloat: 15.53, resFloat: Money(13447),
-		},
+		{origin: -150, sub: Money(2000), res: Money(-17000)},
+		{origin: 0, sub: Money(2000), res: Money(-2000)},
+		{origin: 150, sub: Money(2000), res: Money(13000)},
 		// Sub negative
-		{
-			origin: 150,
-			sub:    Money(-2000), res: Money(17000),
-			subInt: -50, resInt: Money(20000),
-			subFloat: -15.53, resFloat: Money(16553),
-		},
+		{origin: 150, sub: Money(-2000), res: Money(17000)},
 	}
 
 	for _, tt := range tests {
@@ -218,12 +160,6 @@ func TestSub(t *testing.T) {
 
 		res := origin.Sub(tt.sub)
 		require.Equal(tt.res, res)
-
-		resInt := origin.SubInt(tt.subInt)
-		require.Equal(tt.resInt, resInt)
-
-		resFloat := origin.SubFloat(tt.subFloat)
-		require.Equal(tt.resFloat, resFloat)
 	}
 }
 

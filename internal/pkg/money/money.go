@@ -6,14 +6,6 @@ import (
 	"strconv"
 )
 
-var (
-	// For text/templates and html/templates
-	_ fmt.Formatter = (*Money)(nil)
-	// For json
-	_ json.Marshaler   = (*Money)(nil)
-	_ json.Unmarshaler = (*Money)(nil)
-)
-
 // Money is a sum of money multiplied by precision (100). It can be negative
 // Money is marshalled without multiplication:
 //   - FromInt(15) -> 15
@@ -56,42 +48,22 @@ func (m Money) ToFloat() float64 {
 	return float64(m) / precision
 }
 
-// -------------------------------------------------
-// Add functions
-// -------------------------------------------------
+// ToString converts Money to string. Money is always formatted as a number with 2 digits
+// after decimal point (123.45, 123.00 and etc.)
+func (m Money) ToString() string {
+	return fmt.Sprintf("%.2f", m.ToFloat())
+}
+
+// Arithmetic operations
 
 // Add returns sum of original and passed Moneys
 func (m Money) Add(add Money) Money {
 	return m + add
 }
 
-// AddInt returns sum of original money and passed int64
-func (m Money) AddInt(add int64) Money {
-	return m + FromInt(add)
-}
-
-// AddFloat returns sum of original money and passed float64
-func (m Money) AddFloat(add float64) Money {
-	return m + FromFloat(add)
-}
-
-// -------------------------------------------------
-// Sub functions
-// -------------------------------------------------
-
 // Sub returns remainder after subtraction
 func (m Money) Sub(sub Money) Money {
 	return m - sub
-}
-
-// SubInt returns remainder after subtraction
-func (m Money) SubInt(sub int64) Money {
-	return m - FromInt(sub)
-}
-
-// SubFloat returns remainder after subtraction
-func (m Money) SubFloat(sub float64) Money {
-	return m - FromFloat(sub)
 }
 
 // Divide divides Money by n (if n <= 0, it panics)
@@ -105,9 +77,12 @@ func (m Money) Divide(n int64) Money {
 	return Money(money / n)
 }
 
-// -------------------------------------------------
-// Marshalling and Unmarshalling
-// -------------------------------------------------
+// Encoding and Decoding
+
+var (
+	_ json.Marshaler   = (*Money)(nil)
+	_ json.Unmarshaler = (*Money)(nil)
+)
 
 func (m Money) MarshalJSON() ([]byte, error) {
 	// Always format with 2 digits after decimal point (123.45, 123.00 and etc.)
@@ -122,6 +97,8 @@ func (m *Money) UnmarshalJSON(data []byte) error {
 	*m = FromFloat(f)
 	return nil
 }
+
+var _ fmt.Formatter = (*Money)(nil)
 
 // Format implements 'fmt.Formatter' interface. It divides a number in groups of three didits
 // separated by thin space
@@ -173,10 +150,4 @@ func (m Money) Format(f fmt.State, c rune) {
 	}
 
 	f.Write([]byte(str))
-}
-
-// ToString converts Money to string. Money is always formatted as a number with 2 digits
-// after decimal point (123.45, 123.00 and etc.)
-func (m Money) ToString() string {
-	return fmt.Sprintf("%.2f", m.ToFloat())
 }
