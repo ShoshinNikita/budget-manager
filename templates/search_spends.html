@@ -20,14 +20,6 @@
 
 		/* | Layout */
 
-		#app {
-			grid-template-rows: calc(100% - 30px - 10px) 30px;
-		}
-
-		#header {
-			display: none;
-		}
-
 		#content {
 			column-gap: 20px;
 			display: grid;
@@ -234,9 +226,6 @@
 
 		/* For medium screens (<= 1350px) */
 		@media (max-width: 1350px) {
-			#app {
-				grid-template-rows: 100%;
-			}
 
 			#filters__cost,
 			#filters__time {
@@ -259,7 +248,14 @@
 
 <body>
 	<div id="app">
-		<div id="header"></div>
+		<div id="header">
+			<div>
+				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
+				<span class="header__path__element">Search</span>
+				<span class="header__path__element">Spends</span>
+			</div>
+		</div>
+
 		<div id="content">
 			<!-- Filters -->
 			<div id="filters">
