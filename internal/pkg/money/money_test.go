@@ -36,7 +36,7 @@ func testConvertMoney_IntToInt(t *testing.T) {
 	for _, tt := range tests {
 		res := FromInt(tt.in)
 		require.Equal(tt.res, res)
-		require.Equal(tt.converted, res.ToInt())
+		require.Equal(tt.converted, res.Int())
 	}
 }
 
@@ -56,12 +56,13 @@ func testConvertMoney_FloatToFloat(t *testing.T) {
 		{in: 15.30, res: Money(1530), converted: 15.30},
 		{in: 1000000.87, res: Money(100000087), converted: 1000000.87},
 		{in: 69.99, res: Money(6999), converted: 69.99},
+		{in: 17.83, res: Money(1783), converted: 17.83},
 	}
 
 	for _, tt := range tests {
 		res := FromFloat(tt.in)
 		require.Equal(tt.res, res)
-		require.Equal(tt.converted, res.ToFloat())
+		require.Equal(tt.converted, res.Float())
 	}
 }
 
@@ -84,7 +85,7 @@ func testConvertMoney_IntToFloat(t *testing.T) {
 	for _, tt := range tests {
 		res := FromInt(tt.in)
 		require.Equal(tt.res, res)
-		require.Equal(tt.converted, res.ToFloat())
+		require.Equal(tt.converted, res.Float())
 	}
 }
 
@@ -107,7 +108,7 @@ func testConvertMoney_FloatToInt(t *testing.T) {
 	for _, tt := range tests {
 		res := FromFloat(tt.in)
 		require.Equal(tt.res, res)
-		require.Equal(tt.converted, res.ToInt())
+		require.Equal(tt.converted, res.Int())
 	}
 }
 
@@ -121,38 +122,12 @@ func TestAdd(t *testing.T) {
 
 		add Money
 		res Money
-
-		addInt int64
-		resInt Money
-
-		addFloat float64
-		resFloat Money
 	}{
-		{
-			origin: -150,
-			add:    Money(2000), res: Money(-13000),
-			addInt: 50, resInt: Money(-10000),
-			addFloat: 15.53, resFloat: Money(-13447),
-		},
-		{
-			origin: 0,
-			add:    Money(2000), res: Money(2000),
-			addInt: 53, resInt: Money(5300),
-			addFloat: 15.53, resFloat: Money(1553),
-		},
-		{
-			origin: 150,
-			add:    Money(2000), res: Money(17000),
-			addInt: 50, resInt: Money(20000),
-			addFloat: 15.53, resFloat: Money(16553),
-		},
+		{origin: -150, add: Money(2000), res: Money(-13000)},
+		{origin: 0, add: Money(2000), res: Money(2000)},
+		{origin: 150, add: Money(2000), res: Money(17000)},
 		// Add negative
-		{
-			origin: 150,
-			add:    Money(-2000), res: Money(13000),
-			addInt: -50, resInt: Money(10000),
-			addFloat: -15.53, resFloat: Money(13447),
-		},
+		{origin: 150, add: Money(-2000), res: Money(13000)},
 	}
 
 	for _, tt := range tests {
@@ -160,12 +135,6 @@ func TestAdd(t *testing.T) {
 
 		res := origin.Add(tt.add)
 		require.Equal(tt.res, res)
-
-		resInt := origin.AddInt(tt.addInt)
-		require.Equal(tt.resInt, resInt)
-
-		resFloat := origin.AddFloat(tt.addFloat)
-		require.Equal(tt.resFloat, resFloat)
 	}
 }
 
@@ -179,38 +148,12 @@ func TestSub(t *testing.T) {
 
 		sub Money
 		res Money
-
-		subInt int64
-		resInt Money
-
-		subFloat float64
-		resFloat Money
 	}{
-		{
-			origin: -150,
-			sub:    Money(2000), res: Money(-17000),
-			subInt: 50, resInt: Money(-20000),
-			subFloat: 15.53, resFloat: Money(-16553),
-		},
-		{
-			origin: 0,
-			sub:    Money(2000), res: Money(-2000),
-			subInt: 53, resInt: Money(-5300),
-			subFloat: 15.53, resFloat: Money(-1553),
-		},
-		{
-			origin: 150,
-			sub:    Money(2000), res: Money(13000),
-			subInt: 50, resInt: Money(10000),
-			subFloat: 15.53, resFloat: Money(13447),
-		},
+		{origin: -150, sub: Money(2000), res: Money(-17000)},
+		{origin: 0, sub: Money(2000), res: Money(-2000)},
+		{origin: 150, sub: Money(2000), res: Money(13000)},
 		// Sub negative
-		{
-			origin: 150,
-			sub:    Money(-2000), res: Money(17000),
-			subInt: -50, resInt: Money(20000),
-			subFloat: -15.53, resFloat: Money(16553),
-		},
+		{origin: 150, sub: Money(-2000), res: Money(17000)},
 	}
 
 	for _, tt := range tests {
@@ -218,12 +161,6 @@ func TestSub(t *testing.T) {
 
 		res := origin.Sub(tt.sub)
 		require.Equal(tt.res, res)
-
-		resInt := origin.SubInt(tt.subInt)
-		require.Equal(tt.resInt, resInt)
-
-		resFloat := origin.SubFloat(tt.subFloat)
-		require.Equal(tt.resFloat, resFloat)
 	}
 }
 
@@ -246,10 +183,10 @@ func TestDivide(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			res := tt.origin.Divide(tt.n)
+			res := tt.origin.Div(tt.n)
 			require.Equal(tt.res, res)
-			require.Equal(tt.resInt, res.ToInt())
-			require.Equal(tt.resFloat, res.ToFloat())
+			require.Equal(tt.resInt, res.Int())
+			require.Equal(tt.resFloat, res.Float())
 		}
 	})
 
@@ -262,7 +199,7 @@ func TestDivide(t *testing.T) {
 			require.NotNil(r)
 		}()
 
-		FromFloat(120.5).Divide(0)
+		FromFloat(120.5).Div(0)
 	})
 }
 

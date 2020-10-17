@@ -61,9 +61,9 @@ func TestAddMonthlyPayment(t *testing.T) {
 
 	// Check daily budget
 	dailyBudget := func() int64 {
-		var b int64 = income.ToInt()
+		var b int64 = income.Int()
 		for _, p := range payments {
-			b -= p.Cost.ToInt()
+			b -= p.Cost.Int()
 		}
 		now := time.Now()
 		return b / int64(daysInMonth(now.Year(), now.Month()))
@@ -71,7 +71,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget.ToInt())
+	require.Equal(dailyBudget, m.DailyBudget.Int())
 }
 
 func TestEditMonthlyPayment(t *testing.T) {
@@ -161,12 +161,12 @@ func TestEditMonthlyPayment(t *testing.T) {
 
 	// Check daily budget
 	dailyBudget := func() int64 {
-		var b int64 = income.ToInt()
+		var b int64 = income.Int()
 		for _, p := range payments {
 			if p.edited == nil {
-				b -= p.origin.Cost.ToInt()
+				b -= p.origin.Cost.Int()
 			} else {
-				b -= p.edited.Cost.ToInt()
+				b -= p.edited.Cost.Int()
 			}
 		}
 		now := time.Now()
@@ -175,7 +175,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget.ToInt())
+	require.Equal(dailyBudget, m.DailyBudget.Int())
 
 	// Try to edit Monthly Payment with invalid id
 	title := "title"
@@ -253,7 +253,7 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 		var b int64
 		for _, p := range payments {
 			if !p.shouldDelete {
-				b -= p.Cost.ToInt()
+				b -= p.Cost.Int()
 			}
 		}
 		now := time.Now()
@@ -262,5 +262,5 @@ func TestRemoveMonthlyPayment(t *testing.T) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(dailyBudget, m.DailyBudget.ToInt())
+	require.Equal(dailyBudget, m.DailyBudget.Int())
 }

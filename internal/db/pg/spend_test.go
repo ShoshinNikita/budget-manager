@@ -51,7 +51,7 @@ func TestAddSpend(t *testing.T) {
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			totalSpend -= sp.Cost.ToInt()
+			totalSpend -= sp.Cost.Int()
 		}
 		return totalSpend
 	})
@@ -118,7 +118,7 @@ func TestEditSpend(t *testing.T) {
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			totalSpend -= sp.origin.Cost.ToInt()
+			totalSpend -= sp.origin.Cost.Int()
 		}
 		return totalSpend
 	})
@@ -161,10 +161,10 @@ func TestEditSpend(t *testing.T) {
 		var totalSpend int64
 		for _, sp := range spends {
 			if sp.edited == nil {
-				totalSpend -= sp.origin.Cost.ToInt()
+				totalSpend -= sp.origin.Cost.Int()
 				continue
 			}
-			totalSpend -= sp.edited.Cost.ToInt()
+			totalSpend -= sp.edited.Cost.Int()
 		}
 		return totalSpend
 	})
@@ -218,7 +218,7 @@ func TestDeleteSpend(t *testing.T) {
 	checkTotalSpend(db, require, func() int64 {
 		var totalSpend int64
 		for _, sp := range spends {
-			totalSpend -= sp.Cost.ToInt()
+			totalSpend -= sp.Cost.Int()
 		}
 		return totalSpend
 	})
@@ -251,7 +251,7 @@ func TestDeleteSpend(t *testing.T) {
 		var totalSpend int64
 		for _, sp := range spends {
 			if !sp.shouldDelete || sp.isError {
-				totalSpend -= sp.Cost.ToInt()
+				totalSpend -= sp.Cost.Int()
 			}
 		}
 		return totalSpend
@@ -266,5 +266,5 @@ func checkTotalSpend(db *DB, require *require.Assertions, f func() int64) {
 
 	m, err := db.GetMonth(context.Background(), monthID)
 	require.Nil(err)
-	require.Equal(totalSpend, m.TotalSpend.ToInt())
+	require.Equal(totalSpend, m.TotalSpend.Int())
 }
