@@ -14,6 +14,7 @@
 		input[type=date] {
 			border: none;
 			border-bottom: 1px solid var(--border-accent-color);
+			min-width: 120px;
 			width: 100%;
 		}
 
@@ -30,7 +31,7 @@
 		#content {
 			column-gap: 20px;
 			display: grid;
-			grid-template-columns: 1fr 4fr;
+			grid-template-columns: 1fr 5fr;
 			height: 100%;
 		}
 
@@ -129,6 +130,7 @@
 		#spends {
 			height: 100%;
 			overflow-y: auto;
+			position: relative;
 		}
 
 		#spends__table {
@@ -220,9 +222,12 @@
 		}
 
 		#spends__no-spends {
-			font-size: 20px;
-			margin-top: 25px;
+			font-size: 25px;
+			left: 50%;
+			position: absolute;
 			text-align: center;
+			top: 30%;
+			transform: translateX(-50%);
 		}
 
 		/* | Layouts */
@@ -350,7 +355,9 @@
 
 			<!-- Spends -->
 			<div id="spends">
-				{{ if .Spends }}
+				{{ if not .Spends }}
+				<div id="spends__no-spends" class="noselect">No Spends found</div>
+				{{ else }}
 				<table id="spends__table">
 					<thead>
 						<tr>
@@ -436,10 +443,6 @@
 						</tr>
 					</tbody>
 				</table>
-				{{ else }}
-				<div id="spends__no-spends" class="noselect">
-					<span>No Spends found!</span>
-				</div>
 				{{ end }}
 			</div>
 		</div>
