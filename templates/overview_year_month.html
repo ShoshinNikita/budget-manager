@@ -392,13 +392,10 @@
 <body>
 	<div id="app">
 		<div id="header">
-			<!-- Path like "Overview / 2019 / November" -->
-			<div id="header__path">
-				<span> <a href="/overview">Overview<a> </span>
-				<span class="noselect"> / </span>
-				<span> <a href="/overview/{{ .Year }}">{{ .Year }}</a> </span>
-				<span class="noselect"> / </span>
-				<span> {{ .Month.Month }} </span>
+			<div>
+				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
+				<span class="header__path__element"> <a href="/overview/{{ .Year }}">{{ .Year }}</a> </span>
+				<span class="header__path__element"> {{ .Month.Month }} </span>
 			</div>
 
 			<!-- Stats: Total Income and Spend, Result -->

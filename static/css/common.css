@@ -59,6 +59,14 @@ body {
 	width: 100%;
 }
 
+.header__path__element::after {
+	content: ' /';
+}
+
+.header__path__element:last-child::after {
+	content: '';
+}
+
 @media (max-width: 1350px) {
 	#app {
 		grid-template-rows: 40px calc(100% - 40px - 10px);
