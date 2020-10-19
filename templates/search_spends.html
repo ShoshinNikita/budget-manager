@@ -258,13 +258,6 @@
 			stroke: #888888;
 		}
 
-		#spends__table__result-row .money--lose::after,
-		#spends__table__result-row .money--gain::after {
-			/* Hide coin icon */
-			content: "";
-			margin-left: 0;
-		}
-
 		/* | Layouts */
 
 		/* For medium screens (<= 1350px) */
@@ -475,23 +468,6 @@
 									</td>
 								</tr>
 								{{ end }}
-								<tr id="spends__table__result-row">
-									<!--
-										We can't use colspan="4" because we hide notes with 'display: none' for small and
-										medium screens. With colspan="4" there will be some bugs
-									 -->
-									<td colspan="3"></td>
-									<td class="spends__table__notes"></td>
-									<td class="spends__table__cost" title="Total Cost">
-										<!-- Total Cost must be always <= 0 -->
-										{{ if eq .TotalCost 0 }}
-										<span class="money--gain">{{ .TotalCost }}</span>
-										{{ else }}
-										<span class="money--lose">{{ .TotalCost }}</span>
-										{{ end }}
-									</td>
-									<td></td>
-								</tr>
 							</tbody>
 						</table>
 					</div>
