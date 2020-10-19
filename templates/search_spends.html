@@ -161,8 +161,12 @@
 			overflow-y: auto;
 		}
 
-		.result__tab--hidden {
+		.result__tab {
 			display: none;
+		}
+
+		.result__tab--chosen {
+			display: block;
 		}
 
 		/* ||| Spends */
@@ -378,7 +382,7 @@
 							</div>
 						</button>
 
-						<button type="submit" class="filters__button" title="Search">
+						<button type="submit" class="filters__button" title="Search" onclick="updateFormActionHash(this.form)">
 							<div class="feather-icon--btn">
 								<svg>
 									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#search` }}" /> </svg>
@@ -394,8 +398,12 @@
 				<div id="result__no-spends" class="noselect">No Spends found</div>
 				{{ else }}
 				<div id="result__tab-titles">
-					<div class="noselect result__tab-title result__tab-title--chosen">Spends</div>
-					<div class="noselect result__tab-title">Statistics</div>
+					<div class="noselect result__tab-title" data-title-for-tab="spends" onclick="switchTab('spends')">
+						<span>Spends</span>
+					</div>
+					<div class="noselect result__tab-title" data-title-for-tab="statistics" onclick="switchTab('statistics')">
+						<span>Statistics</span>
+					</div>
 				</div>
 
 				<div id="result__tabs">
@@ -404,7 +412,7 @@
 						<table id="spends__table">
 							<thead>
 								<tr>
-									<th class="spends__table__date noselect" onclick="alert">
+									<th class="spends__table__date noselect">
 										<span>Date</span>
 										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
 											<svg class="spends__table__sort-icon--asc">
@@ -489,7 +497,7 @@
 					</div>
 
 					<!-- Statistics -->
-					<div id="statistics" class="result__tab result__tab--hidden">TODO</div>
+					<div id="statistics" class="result__tab">TODO</div>
 				</div>
 				{{ end }}
 			</div>
@@ -658,6 +666,61 @@
 				return;
 			}
 			form.submit();
+		}
+
+		// Switch tab according to url hash
+		window.addEventListener("load", () => {
+			// Get hash without '#'
+			let tabID = window.location.hash.slice(1);
+			if (tabID != "spends" && tabID != "statistics") {
+				tabID = "spends";
+			}
+			switchTab(tabID);
+		})
+
+		/**
+		* @param {HTMLFormElement} form
+		*/
+		function updateFormActionHash(form) {
+			const action = form.action;
+			if (action.includes(window.location.hash)) {
+				return;
+			}
+			form.action = action + window.location.hash;
+		}
+
+		/**
+		* @param {string} tabID - tab id to display
+		*/
+		function switchTab(tabID) {
+			// Switch tab title
+			const chosenTabTitleClass = "result__tab-title--chosen";
+			const attrWithTabID = "data-title-for-tab";
+
+			const tabTitles = document.querySelectorAll("#result__tab-titles .result__tab-title");
+			for (let i = 0; i < tabTitles.length; i++) {
+				tabTitles[i].classList.remove(chosenTabTitleClass);
+
+				const attr = tabTitles[i].attributes.getNamedItem(attrWithTabID);
+				if (attr && attr.value === tabID) {
+					tabTitles[i].classList.add(chosenTabTitleClass);
+				}
+			}
+
+			// Switch tab
+			const chosenTabClass = "result__tab--chosen";
+
+			const tabs = document.querySelectorAll("#result__tabs .result__tab");
+			for (let i = 0; i < tabs.length; i++) {
+				tabs[i].classList.remove(chosenTabClass);
+
+				if (tabs[i].id == tabID) {
+					tabs[i].classList.add(chosenTabClass);
+				}
+			}
+
+			// Update url hash
+			window.location.hash = tabID;
 		}
 	</script>
 
