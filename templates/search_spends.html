@@ -274,6 +274,15 @@
 			text-align: center;
 		}
 
+		#spent-by-spend-type__total-cost {
+			font-size: 18px;
+			left: 50%;
+			position: absolute;
+			text-align: center;
+			top: 50%;
+			transform: translate(-50%, -50%);
+		}
+
 		/* | Layouts */
 
 		/* For medium screens (<= 1350px) */
@@ -507,9 +516,16 @@
 					<!-- Statistics -->
 					<div id="statistics" class="result__tab">
 						<div id="statistics__charts">
-							<div>
+							<!-- Total cost is not centered vertically without 'height: min-content' for some reason -->
+							<div style="height: min-content;">
 								<div class="statistics__chart-title noselect">Spent by Type</div>
 								<div id="spent-by-spend-type" class="statistics__chart">
+									<div id="spent-by-spend-type__total-cost">
+										<span class="noselect">Total:</span>
+										<br>
+										<span class="money--lose">{{ .TotalCost }}</span>
+									</div>
+
 									<canvas id="spent-by-spend-type__chart"></canvas>
 								</div>
 							</div>
