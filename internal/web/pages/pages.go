@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -231,16 +230,13 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
+	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
-
-	sort.Slice(spendTypes, func(i, j int) bool {
-		return spendTypes[i].FullName < spendTypes[j].FullName
-	})
+	spendTypes := getSpendTypesWithFullNames(dbSpendTypes)
 
 	populateMonthlyPaymentsWithFullSpendTypeNames(spendTypes, month.MonthlyPayments)
 	for i := range month.Days {
@@ -312,15 +308,13 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
+	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
-	sort.Slice(spendTypes, func(i, j int) bool {
-		return spendTypes[i].FullName < spendTypes[j].FullName
-	})
+	spendTypes := getSpendTypesWithFullNames(dbSpendTypes)
 
 	populateSpendsWithFullSpendTypeNames(spendTypes, spends)
 
