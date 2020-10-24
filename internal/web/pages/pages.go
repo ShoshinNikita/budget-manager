@@ -320,6 +320,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	populateSpendsWithFullSpendTypeNames(spendTypes, spends)
 
 	spentBySpendTypeDatasets := statistics.CalculateSpentBySpendType(dbSpendTypes, spends)
+	spentByDayDataset := statistics.CalculateSpentByDay(spends, args.After, args.Before)
 
 	// Execute the template
 	resp := struct {
@@ -327,6 +328,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		Spends []db.Spend
 		// Statistics
 		SpentBySpendTypeDatasets []statistics.SpentBySpendTypeDataset
+		SpentByDayDataset        statistics.SpentByDayDataset
 		TotalCost                money.Money
 		//
 		SpendTypes []SpendType
@@ -335,6 +337,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		Spends: spends,
 		//
 		SpentBySpendTypeDatasets: spentBySpendTypeDatasets,
+		SpentByDayDataset:        spentByDayDataset,
 		TotalCost:                sumSpendCosts(spends),
 		//
 		SpendTypes: spendTypes,

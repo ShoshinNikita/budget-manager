@@ -258,6 +258,15 @@
 			stroke: #888888;
 		}
 
+		/* ||| Statistics */
+
+		#statistics__charts {
+			column-gap: 50px;
+			display: grid;
+			grid-template-columns: 2fr 3fr;
+			width: 100%;
+		}
+
 		/* | Layouts */
 
 		/* For medium screens (<= 1350px) */
@@ -474,8 +483,14 @@
 
 					<!-- Statistics -->
 					<div id="statistics" class="result__tab">
-						<div id="spent-by-spend-type" style="width: 50%">
-							<canvas id="spent-by-spend-type__chart"></canvas>
+						<div id="statistics__charts">
+							<div id="spent-by-spend-type">
+								<canvas id="spent-by-spend-type__chart"></canvas>
+							</div>
+
+							<div id="spent-by-day">
+								<canvas id="spent-by-day__chart"></canvas>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -592,22 +607,27 @@
 
 		// Set date titles
 		window.addEventListener("load", () => {
-			let cache = {};
-
-			const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
 			const dates = document.querySelectorAll("td.spends__table__date");
 			for (let i = 0; i < dates.length; i++) {
-				const originalDate = dates[i].textContent;
-				let date = cache[originalDate];
-				if (!date) {
-					// Format like 'Friday, November 1, 2019'
-					date = new Date(originalDate).toLocaleDateString("en-US", dateFormatOptions);
-					cache[originalDate] = date;
-				}
-
-				dates[i].title = date;
+				const date = dates[i].textContent;
+				dates[i].title = convertDateToHumanReadableFormat(date);
 			}
 		})
+
+		let humanReadableDateCache = {};
+		/**
+		 * Format date '2019-11-01' as 'Friday, November 1, 2019'
+		 */
+		function convertDateToHumanReadableFormat(dateStr) {
+			const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+
+			let date = humanReadableDateCache[dateStr];
+			if (!date) {
+				date = new Date(dateStr).toLocaleDateString("en-US", dateFormatOptions);
+				humanReadableDateCache[dateStr] = date;
+			}
+			return date;
+		}
 
 		/**
 		 * Change Sort and Order and submit form
@@ -708,7 +728,11 @@
 	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
 	<script src="{{ asStaticURL `/static/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
 	<script>
+		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
+		const labelSeparator = " – ";
 		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+
+		// Spent by Spend Type chart
 
 		const spentBySpendTypeStatistics = JSON.parse(`{{ .SpentBySpendTypeDatasets }}`);
 		let spendBySpendTypeDatasets = [];
@@ -722,7 +746,6 @@
 			});
 		}
 
-		// Spent by Spend Type chart
 		const spentBySpendTypeCtx = document.getElementById("spent-by-spend-type__chart").getContext("2d");
 		new Chart(spentBySpendTypeCtx, {
 			type: "doughnut",
@@ -753,7 +776,7 @@
 						label: function (tooltipItem, data) {
 							var dataset = data.datasets[tooltipItem.datasetIndex];
 							var index = tooltipItem.index;
-							return dataset.labels[index] + " - " + dataset.data[index];
+							return dataset.labels[index] + labelSeparator + dataset.data[index];
 						},
 					}
 				},
@@ -776,6 +799,66 @@
 
 							const label = dataset.labels[context.dataIndex];
 							if (!label) return false;
+
+							return "auto";
+						}
+					}
+				}
+			}
+		});
+
+		// Spent by Day chart
+
+		const spentByDayStatistics = JSON.parse(`{{ .SpentByDayDataset }}`);
+		let spentByDayLabels = [];
+		let spentByDayDataset = { data: [] };
+		for (const data of spentByDayStatistics) {
+			const month = data.month < 10 ? "0" + data.month : data.month;
+			const day = data.day < 10 ? "0" + data.day : data.day;
+			spentByDayLabels.push(`${data.year}-${month}-${day}`)
+
+			spentByDayDataset.data.push(data.spent);
+		}
+
+		const spentByDayCtx = document.getElementById("spent-by-day__chart").getContext("2d");
+		new Chart(spentByDayCtx, {
+			type: "bar",
+			data: {
+				labels: spentByDayLabels,
+				datasets: [spentByDayDataset],
+			},
+			options: {
+				maintainAspectRatio: false,
+				// Hide legend
+				legend: { display: false },
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+					displayColors: false,
+					callbacks: {
+						title: function (tooltipItem, data) { return "" },
+						label: function (tooltipItem, data) {
+							const date = convertDateToHumanReadableFormat(tooltipItem.label)
+							return date + labelSeparator + tooltipItem.value;
+						},
+					}
+				},
+				// Plugins
+				plugins: {
+					datalabels: {
+						display: function (context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset) return false;
+
+							const value = dataset.data[context.dataIndex];
+							if (!value) return false;
 
 							return "auto";
 						}
