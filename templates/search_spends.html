@@ -473,7 +473,11 @@
 					</div>
 
 					<!-- Statistics -->
-					<div id="statistics" class="result__tab">TODO</div>
+					<div id="statistics" class="result__tab">
+						<div id="spent-by-spend-type" style="width: 50%">
+							<canvas id="spent-by-spend-type__chart"></canvas>
+						</div>
+					</div>
 				</div>
 				{{ end }}
 			</div>
@@ -698,6 +702,62 @@
 			// Update url hash
 			window.location.hash = tabID;
 		}
+	</script>
+
+	<!-- Statistics Charts -->
+	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
+	<script>
+		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+
+		const spentBySpendTypeStatistics = JSON.parse(`{{ .SpentBySpendTypeDatasets }}`);
+		let spendBySpendTypeDatasets = [];
+		for (const data of spentBySpendTypeStatistics) {
+			spendBySpendTypeDatasets.push({
+				data: data.map(v => v["spent"]),
+				labels: data.map(v => v["spend_type_name"]),
+				backgroundColor: data.map(v => v["spend_type_name"] ? "#66666638" : "#00000000"),
+				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? "#66666648" : "#00000000"),
+				hoverBorderColor: data.map(v => "#00000000"), // Hide hover border colors
+			});
+		}
+
+		// Spent by Spend Type chart
+		const spentBySpendTypeCtx = document.getElementById("spent-by-spend-type__chart").getContext("2d");
+		new Chart(spentBySpendTypeCtx, {
+			type: "doughnut",
+			data: {
+				datasets: spendBySpendTypeDatasets,
+			},
+			options: {
+				aspectRatio: 1,
+				// Tune doughnut
+				cutoutPercentage: 30,
+				rotation: -5 / 4 * Math.PI,
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+					displayColors: false,
+					filter: function (tooltipItem, data) {
+						const labels = data.datasets[tooltipItem.datasetIndex].labels;
+						return labels ? labels[tooltipItem.index] !== "" : true;
+					},
+					callbacks: {
+						label: function (tooltipItem, data) {
+							var dataset = data.datasets[tooltipItem.datasetIndex];
+							var index = tooltipItem.index;
+							return dataset.labels[index] + " - " + dataset.data[index];
+						},
+					}
+				},
+			}
+		});
 	</script>
 
 	<!-- Link Formatter -->
