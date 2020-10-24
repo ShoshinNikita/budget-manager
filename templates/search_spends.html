@@ -706,6 +706,7 @@
 
 	<!-- Statistics Charts -->
 	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
+	<script src="{{ asStaticURL `/static/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
 	<script>
 		const totalSpent = Math.abs(`{{ .TotalCost }}`);
 
@@ -756,6 +757,30 @@
 						},
 					}
 				},
+				// Plugins
+				plugins: {
+					datalabels: {
+						textAlign: "center",
+						formatter: function (value, context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset || !dataset.labels) return "";
+
+							const label = dataset.labels[context.dataIndex];
+							if (!label) return "";
+
+							return `${label}\n${(value / totalSpent * 100).toFixed(2)}%`;
+						},
+						display: function (context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset || !dataset.labels) return false;
+
+							const label = dataset.labels[context.dataIndex];
+							if (!label) return false;
+
+							return "auto";
+						}
+					}
+				}
 			}
 		});
 	</script>
