@@ -163,6 +163,7 @@
 
 		.result__tab {
 			display: none;
+			height: 100%;
 		}
 
 		.result__tab--chosen {
@@ -170,12 +171,6 @@
 		}
 
 		/* ||| Spends */
-
-		#spends {
-			height: 100%;
-			overflow-y: auto;
-			position: relative;
-		}
 
 		#spends__table {
 			/*
@@ -264,7 +259,19 @@
 			column-gap: 50px;
 			display: grid;
 			grid-template-columns: 2fr 3fr;
+			height: 100%;
 			width: 100%;
+		}
+
+		.statistics__chart {
+			height: 80%;
+			position: relative;
+		}
+
+		.statistics__chart-title {
+			font-size: 18px;
+			margin-bottom: 15px;
+			text-align: center;
 		}
 
 		/* | Layouts */
@@ -286,6 +293,22 @@
 			/* Hide notes */
 			.spends__table__notes {
 				display: none;
+			}
+
+			#statistics__charts {
+				row-gap: 50px;
+				grid-template-columns: 1fr;
+				grid-template-rows: 1fr 1fr;
+				height: unset;
+			}
+
+			.statistics__chart {
+				margin: auto;
+				width: 90%;
+			}
+
+			#spent-by-spend-type {
+				max-width: 500px;
 			}
 		}
 	</style>
@@ -484,12 +507,18 @@
 					<!-- Statistics -->
 					<div id="statistics" class="result__tab">
 						<div id="statistics__charts">
-							<div id="spent-by-spend-type">
-								<canvas id="spent-by-spend-type__chart"></canvas>
+							<div>
+								<div class="statistics__chart-title noselect">Spent by Type</div>
+								<div id="spent-by-spend-type" class="statistics__chart">
+									<canvas id="spent-by-spend-type__chart"></canvas>
+								</div>
 							</div>
 
-							<div id="spent-by-day">
-								<canvas id="spent-by-day__chart"></canvas>
+							<div>
+								<div class="statistics__chart-title noselect">Spent by Day</div>
+								<div id="spent-by-day" class="statistics__chart">
+									<canvas id="spent-by-day__chart"></canvas>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -701,8 +730,8 @@
 			for (let i = 0; i < tabTitles.length; i++) {
 				tabTitles[i].classList.remove(chosenTabTitleClass);
 
-				const attr = tabTitles[i].attributes.getNamedItem(attrWithTabID);
-				if (attr && attr.value === tabID) {
+				const attr = tabTitles[i].getAttribute(attrWithTabID);
+				if (attr === tabID) {
 					tabTitles[i].classList.add(chosenTabTitleClass);
 				}
 			}
