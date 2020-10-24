@@ -9,9 +9,9 @@ import (
 
 type SpendType struct {
 	db.SpendType
+
 	// FullName is a composite name that contains names of parent Spend Types
 	FullName string
-
 	// parentSpendTypeIDs is a set of ids of parent Spend Types
 	parentSpendTypeIDs map[uint]struct{}
 }
