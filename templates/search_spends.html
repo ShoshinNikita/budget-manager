@@ -674,6 +674,32 @@
 			return date;
 		}
 
+		// Group Spends by date with accent color
+		window.addEventListener("load", () => {
+			let lastDate = "";
+			const rows = document.querySelectorAll("#spends__table tbody tr");
+			for (const row of rows) {
+				const dateColumn = row.querySelector("td.spends__table__date");
+				if (!dateColumn) continue;
+
+				const date = dateColumn.innerText;
+				if (lastDate === "") {
+					lastDate = date;
+					continue;
+				}
+				if (lastDate === date) {
+					continue;
+				}
+
+				lastDate = date;
+
+				const columns = row.querySelectorAll("td");
+				for (const column of columns) {
+					column.style.borderTop = "1px solid var(--border-accent-color)";
+				}
+			}
+		})
+
 		/**
 		 * Change Sort and Order and submit form
 		 */
