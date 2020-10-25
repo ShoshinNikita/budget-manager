@@ -770,6 +770,7 @@
 	</script>
 
 	<!-- Statistics Charts -->
+	{{ if .Spends }}
 	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
 	<script src="{{ asStaticURL `/static/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
 	<script>
@@ -912,14 +913,17 @@
 			}
 		});
 	</script>
+	{{ end }}
 
 	<!-- Link Formatter -->
+	{{ if .Spends }}
 	<script src="{{ asStaticURL `/static/js/link-formatter.js` }}"></script>
 	<script>
 		window.addEventListener("load", () => {
 			formatLinks(".spends__table__notes");
 		})
 	</script>
+	{{ end }}
 </body>
 
 </html>
