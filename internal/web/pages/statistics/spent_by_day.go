@@ -20,18 +20,31 @@ type SpentByDayData struct {
 
 func CalculateSpentByDay(spends []db.Spend, startDate, endDate time.Time) SpentByDayDataset {
 	spentByDay := make(map[time.Time]money.Money)
+	var (
+		minDate = time.Date(40000, 0, 0, 0, 0, 0, 0, time.UTC)
+		maxDate = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
+	)
 	for _, spend := range spends {
 		t := time.Date(spend.Year, spend.Month, spend.Day, 0, 0, 0, 0, time.UTC)
+		if t.Before(minDate) {
+			minDate = t
+		}
+		if t.After(maxDate) {
+			maxDate = t
+		}
 
 		spent := spentByDay[t]
 		spent = spent.Add(spend.Cost)
 		spentByDay[t] = spent
 	}
 
-	startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
-	endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 0, 0, 0, 0, time.UTC)
-
-	for t := startDate; t.Before(endDate) || t.Equal(endDate); t = t.Add(24 * time.Hour) {
+	if !startDate.IsZero() {
+		minDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
+	}
+	if !endDate.IsZero() {
+		maxDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 0, 0, 0, 0, time.UTC)
+	}
+	for t := minDate; t.Before(maxDate) || t.Equal(maxDate); t = t.Add(24 * time.Hour) {
 		if _, ok := spentByDay[t]; !ok {
 			spentByDay[t] = 0
 		}
