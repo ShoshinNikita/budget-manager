@@ -25,8 +25,8 @@ type spendType struct {
 
 	// Spent is an amount of money spent by this type or its children
 	Spent money.Money
-	// childrenIDs is a set of ids of child Spend Types
-	childrenIDs map[uint]struct{}
+	// childrenIDs is a list with ids of child Spend Types sorted in descending order by field 'Spent'
+	childrenIDs []uint
 }
 
 //nolint:gofumpt
@@ -36,14 +36,10 @@ func prepareSpendTypesForDatasets(spendTypes []db.SpendType,
 	// Init Spend Types. Use Spend Type with id 0 for Spends without a type
 	types = make(map[uint]spendType, len(spendTypes)+1)
 	types[0] = spendType{
-		SpendType:   db.SpendType{ID: 0, Name: "No Type"},
-		childrenIDs: make(map[uint]struct{}),
+		SpendType: db.SpendType{ID: 0, Name: "No Type"},
 	}
 	for _, t := range spendTypes {
-		types[t.ID] = spendType{
-			SpendType:   t,
-			childrenIDs: make(map[uint]struct{}),
-		}
+		types[t.ID] = spendType{SpendType: t}
 	}
 
 	// Sum spend costs by Spend Type. If Spend Type has a parent, it also will be updated
@@ -82,7 +78,16 @@ func prepareSpendTypesForDatasets(spendTypes []db.SpendType,
 			depth++
 
 			parentType := types[parentID]
-			parentType.childrenIDs[childID] = struct{}{}
+			var found bool
+			for _, id := range parentType.childrenIDs {
+				if childID == id {
+					found = true
+					break
+				}
+			}
+			if !found {
+				parentType.childrenIDs = append(parentType.childrenIDs, childID)
+			}
 			types[parentID] = parentType
 
 			parentID = parentType.ParentID
@@ -92,6 +97,12 @@ func prepareSpendTypesForDatasets(spendTypes []db.SpendType,
 		if maxChildDepth < depth {
 			maxChildDepth = depth
 		}
+	}
+	for id := range types {
+		t := types[id]
+		sort.Slice(t.childrenIDs, func(i, j int) bool {
+			return types[t.childrenIDs[i]].Spent > types[t.childrenIDs[j]].Spent
+		})
 	}
 
 	return types, maxChildDepth
@@ -130,9 +141,9 @@ func addSpendTypeToDatasets(spendTypes map[uint]spendType, datasets []SpentBySpe
 		Spent:         spendType.Spent,
 	})
 
-	// Fill next dataset level with child Spend Types
+	// Fill next dataset level with child Spend Types (they are sorted in descending order)
 	left := spendType.Spent
-	for childID := range spendType.childrenIDs {
+	for _, childID := range spendType.childrenIDs {
 		child := spendTypes[childID]
 		left = left.Sub(child.Spent)
 
