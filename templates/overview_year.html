@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{.Year}} | Budget Manager</title>
+	<title>{{ .Year }} | Budget Manager</title>
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -183,7 +183,7 @@
 		<div id="header">
 			<div>
 				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
-				<span class="header__path__element">{{.Year}}</span>
+				<span class="header__path__element">{{ .Year }}</span>
 			</div>
 		</div>
 
@@ -200,38 +200,38 @@
 				</div>
 
 				<div id="months-list">
-					{{range .Months}}
+					{{ range .Months }}
 
-					{{if ne .ID 0}}
+					{{ if ne .ID 0 }}
 					<!-- Show month overview -->
 
 					<!-- Use the number of a month instead of the name -->
-					<a class="no-decoration" href="/overview/{{.Year}}/{{printf `%d` .Month}}">
+					<a class="no-decoration" href="/overview/{{ .Year }}/{{ printf `%d` .Month }}">
 						<div class="month" title="Go to the month">
-							<div class="month__header">{{.Month}} {{.Year}}</div>
+							<div class="month__header">{{ .Month }} {{ .Year }}</div>
 							<div class="month__results">
 								<div>Income:</div>
-								<div class="month__results__value money--gain">{{.TotalIncome}}</div>
+								<div class="month__results__value money--gain">{{ .TotalIncome }}</div>
 								<div>Spend:</div>
-								<div class="month__results__value money--lose">{{.TotalSpend}}</div>
+								<div class="month__results__value money--lose">{{ .TotalSpend }}</div>
 								<div>Result:</div>
 								<div class="month__results__value">
-									{{if ge .Result 0}}
-									<span class="money--gain">{{.Result}}</span>
-									{{else}}
-									<span class="money--lose">{{.Result}}</span>
-									{{end}}
+									{{ if ge .Result 0 }}
+									<span class="money--gain">{{ .Result }}</span>
+									{{ else }}
+									<span class="money--lose">{{ .Result }}</span>
+									{{ end }}
 								</div>
 							</div>
 						</div>
 					</a>
-					{{else}}
+					{{ else }}
 					<!-- Just show a stub -->
 					<div class="month--not-exist" title="No data for the month">
-						<div class="month__header">{{.Month}} {{.Year}}</div>
+						<div class="month__header">{{ .Month }} {{ .Year }}</div>
 					</div>
-					{{end}}
-					{{end}}
+					{{ end }}
+					{{ end }}
 				</div>
 
 				<div id="next-year-btn" class="switch-year-btn">
@@ -247,22 +247,22 @@
 
 			<div id="year-overview">
 				<div id="year-overview__results">
-					<div id="year-overview__results__header" class="noselect">{{.Year}} Year Results</div>
+					<div id="year-overview__results__header" class="noselect">{{ .Year }} Year Results</div>
 
 					<div id="year-overview__results__result">
 						<div>Annual Income:</div>
-						<div class="year-overview__results__result__value money--gain">{{.AnnualIncome}}</div>
+						<div class="year-overview__results__result__value money--gain">{{ .AnnualIncome }}</div>
 
 						<div>Annual Spend:</div>
-						<div class="year-overview__results__result__value money--lose">{{.AnnualSpend}}</div>
+						<div class="year-overview__results__result__value money--lose">{{ .AnnualSpend }}</div>
 
 						<div>Result:</div>
 						<div class="year-overview__results__result__value">
-							{{if ge .Result 0}}
-							<span class="money--gain">{{.Result}}</span>
-							{{else}}
-							<span class="money--lose">{{.Result}}</span>
-							{{end}}
+							{{ if ge .Result 0 }}
+							<span class="money--gain">{{ .Result }}</span>
+							{{ else }}
+							<span class="money--lose">{{ .Result }}</span>
+							{{ end }}
 						</div>
 					</div>
 				</div>
@@ -273,13 +273,13 @@
 			</div>
 		</div>
 
-		{{template "components/footer.html" .Footer}}
+		{{ template "components/footer.html" .Footer }}
 	</div>
 
 	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
 
 	<script>
-		const monthsResults = JSON.parse(`{{.Months}}`);
+		const monthsResults = JSON.parse(`{{ .Months }}`);
 		const monthsNames = ["January", "February", "March", "April", "May", "June",
 			"July", "August", "September", "October", "November", "December"];
 
