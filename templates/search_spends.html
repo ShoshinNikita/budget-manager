@@ -409,7 +409,7 @@
 
 					<!-- Buttons -->
 					<div id="filters__buttons">
-						<button type="reset" class="filters__button" title="Reset">
+						<button type="button" class="filters__button" title="Reset" onclick="resetForm(this.form)">
 							<div class="feather-icon--btn">
 								<svg>
 									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
@@ -674,6 +674,32 @@
 			return date;
 		}
 
+		// Group Spends by date with accent color
+		window.addEventListener("load", () => {
+			let lastDate = "";
+			const rows = document.querySelectorAll("#spends__table tbody tr");
+			for (const row of rows) {
+				const dateColumn = row.querySelector("td.spends__table__date");
+				if (!dateColumn) continue;
+
+				const date = dateColumn.innerText;
+				if (lastDate === "") {
+					lastDate = date;
+					continue;
+				}
+				if (lastDate === date) {
+					continue;
+				}
+
+				lastDate = date;
+
+				const columns = row.querySelectorAll("td");
+				for (const column of columns) {
+					column.style.borderTop = "1px solid var(--border-accent-color)";
+				}
+			}
+		})
+
 		/**
 		 * Change Sort and Order and submit form
 		 */
@@ -732,6 +758,29 @@
 				return;
 			}
 			form.action = action + window.location.hash;
+		}
+
+		/**
+		* Reset form exclude date inputs
+		*
+		* @param {HTMLFormElement} form
+		*/
+		function resetForm(form) {
+			const dateInputs = form.querySelectorAll("input[type='date']");
+
+			// Store date input values
+			const values = {};
+			for (const input of dateInputs) {
+				values[input.name] = input.value;
+			}
+
+			// Reset form
+			form.reset();
+
+			// Restore date inputs
+			for (const input of dateInputs) {
+				input.value = values[input.name];
+			}
 		}
 
 		/**
