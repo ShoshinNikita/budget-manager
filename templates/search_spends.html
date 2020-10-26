@@ -547,6 +547,7 @@
 	</div>
 
 	<script>
+		// Sort and order must be set in the first 'load' event listener
 		let CurrentSort = "";
 		let CurrentOrder = "";
 
@@ -676,6 +677,11 @@
 
 		// Group Spends by date with accent color
 		window.addEventListener("load", () => {
+			if (CurrentSort !== "date") {
+				// Group Spends only when they are sorted by date
+				return;
+			}
+
 			let lastDate = "";
 			const rows = document.querySelectorAll("#spends__table tbody tr");
 			for (const row of rows) {
