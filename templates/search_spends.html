@@ -9,79 +9,83 @@
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
-		/* | Global */
-
 		input[type=date] {
 			border: none;
 			border-bottom: 1px solid var(--border-accent-color);
+			min-width: 120px;
 			width: 100%;
 		}
 
-		/* | Layout */
-
-		#app {
-			grid-template-rows: calc(100% - 30px - 10px) 30px;
-		}
+		/* | Header */
 
 		#header {
-			display: none;
+			position: relative;
+		}
+
+		#header__current-month-link {
+			position: absolute;
+			right: 0px;
+			top: 0;
+		}
+
+		#header__current-month-link svg {
+			height: 30px;
+			width: 30px;
 		}
 
 		/* | Search */
 
-		#search {
+		#content {
 			column-gap: 20px;
 			display: grid;
-			grid-template-columns: 1fr 4fr;
+			grid-template-columns: 1fr 5fr;
 			height: 100%;
 		}
 
+		/* || Filters */
 
-		/* || Search Options */
-
-		#search__options {
+		#filters {
 			border: 1px solid var(--border-color);
 			border-radius: 2px;
 			height: 100%;
 			padding: 10px;
-			position: relative;
 		}
 
-		#search__options__header {
+		#filters__header {
 			border-bottom: 1px solid var(--border-accent-color);
 			font-size: 18px;
 			margin-bottom: 20px;
 			text-align: center;
 		}
 
-		.search__option {
+		.filter {
 			margin-bottom: 15px;
 		}
 
-		.search__option:last-child {
+		.filter:last-child {
 			margin-bottom: 0;
 		}
 
-		#search__options__cost,
-		#search__options__time {
+		#filters__cost,
+		#filters__time {
 			column-gap: 5px;
 			display: grid;
 			grid-template-columns: 1fr auto 1fr;
 		}
 
-		.search__options__separator::before {
+		.filters__separator::before {
 			content: "–";
 			color: #4d4d4d;
 		}
 
-		#search__options__types {
+		#filters__types {
 			margin-left: auto;
 			margin-right: auto;
 			min-width: 60%;
 			width: min-content;
 		}
 
-		#search__options__types__header {
+		#filters__types__header {
 			border-bottom: 1px solid var(--border-color);
 			margin: 0 auto 7px;
 			padding: 0 10px;
@@ -90,50 +94,85 @@
 			white-space: nowrap;
 		}
 
-		.search__options__types__type {
+		.filters__types__type {
 			white-space: nowrap;
 		}
 
-		#search__options__buttons {
+		#filters__buttons {
 			column-gap: 20px;
 			display: grid;
 			grid-template-columns: repeat(2, min-content);
 			justify-content: center;
 		}
 
-		.search__options__button {
+		.filters__button {
 			background-color: white;
 			border: none;
 			margin: 0px;
 			padding: 0px;
 		}
 
-		.search__options__button>.feather-icon--btn>svg {
+		.filters__button>.feather-icon--btn>svg {
 			height: 25px;
 			width: 25px;
 		}
 
-		#search__options__home-page-link {
-			bottom: 5px;
-			left: 50%;
-			position: absolute;
-			transform: translateX(-50%);
-		}
+		/* || Result */
 
-		#search__options__home-page-link svg {
-			height: 25px;
-			width: 25px;
-		}
-
-
-		/* || Search Results */
-
-		#search__results {
-			height: 100%;
+		#result {
+			display: grid;
+			grid-template-rows: min-content auto;
+			position: relative;
+			row-gap: 10px;
 			overflow-y: auto;
 		}
 
-		#search__results__table {
+		#result__no-spends {
+			font-size: 25px;
+			left: 50%;
+			position: absolute;
+			text-align: center;
+			top: 30%;
+			transform: translateX(-50%);
+		}
+
+		#result__tab-titles {
+			border-bottom: 1px solid var(--border-color);
+			column-gap: 20px;
+			display: grid;
+			font-size: 19px;
+			grid-template-columns: repeat(2, min-content);
+			justify-content: center;
+		}
+
+		.result__tab-title {
+			cursor: pointer;
+			margin-bottom: 2px;
+			padding: 2px 5px;
+		}
+
+		.result__tab-title:hover,
+		.result__tab-title--chosen {
+			border-bottom: 2px solid var(--border-accent-color);
+			margin-bottom: 0;
+		}
+
+		#result__tabs {
+			overflow-y: auto;
+		}
+
+		.result__tab {
+			display: none;
+			height: 100%;
+		}
+
+		.result__tab--chosen {
+			display: block;
+		}
+
+		/* ||| Spends */
+
+		#spends__table {
 			/*
 				We have to overwrite property 'border-collapse' because it doesn't work properly with 'position: sticky':
 				https://stackoverflow.com/a/53559396/7752659
@@ -142,7 +181,7 @@
 			border-spacing: 0;
 		}
 
-		#search__results__table th {
+		#spends__table th {
 			background-color: white;
 			border-bottom: 1px solid var(--border-accent-color);
 			font-size: 18px;
@@ -150,105 +189,135 @@
 			top: 0;
 		}
 
-		#search__results__table th,
-		#search__results__table td {
+		#spends__table th,
+		#spends__table td {
 			padding-right: 15px;
 			padding-left: 15px;
 		}
 
-		#search__results__table th:first-child,
-		#search__results__table td:first-child {
+		#spends__table th:first-child,
+		#spends__table td:first-child {
 			padding-left: 5px;
 		}
 
-		#search__results__table th:last-child,
-		#search__results__table td:last-child {
+		#spends__table th:last-child,
+		#spends__table td:last-child {
 			padding-right: 5px;
 		}
 
-		.search__results__table__date,
-		.search__results__table__type,
-		.search__results__table__cost,
-		.search__results__table__link {
+		.spends__table__date,
+		.spends__table__type,
+		.spends__table__cost,
+		.spends__table__link {
 			width: 1px;
 			white-space: nowrap;
 		}
 
-		#search__results__table .search__results__table__cost {
+		#spends__table .spends__table__cost {
 			padding-right: 20px;
 		}
 
-		.search__results__table__cost {
+		.spends__table__cost {
 			text-align: right;
 		}
 
-		.search__results__table__link {
+		.spends__table__link {
 			text-align: center;
 			z-index: 1;
 		}
 
-		.search__results__table__link div.feather-icon--btn>svg {
+		.spends__table__link div.feather-icon--btn>svg {
 			height: 20px;
 			width: 20px;
 		}
 
-		.search__results__table__sort-icon__wrapper {
+		.spends__table__sort-icon__wrapper {
 			display: inline-grid;
 			grid-template-rows: 1fr 1fr;
 			vertical-align: middle;
 		}
 
-		.search__results__table__sort-icon__wrapper svg.search__results__table__sort-icon,
-		.search__results__table__sort-icon__wrapper svg.search__results__table__sort-icon--asc,
-		.search__results__table__sort-icon__wrapper svg.search__results__table__sort-icon--desc {
+		.spends__table__sort-icon__wrapper svg.spends__table__sort-icon,
+		.spends__table__sort-icon__wrapper svg.spends__table__sort-icon--asc,
+		.spends__table__sort-icon__wrapper svg.spends__table__sort-icon--desc {
 			height: 12px;
 			stroke-width: 4;
 			width: 12px;
 		}
 
-		.search__results__table__sort-icon__wrapper:hover svg.search__results__table__sort-icon,
-		.search__results__table__sort-icon__wrapper:hover svg.search__results__table__sort-icon--asc,
-		.search__results__table__sort-icon__wrapper:hover svg.search__results__table__sort-icon--desc {
+		.spends__table__sort-icon__wrapper:hover svg.spends__table__sort-icon,
+		.spends__table__sort-icon__wrapper:hover svg.spends__table__sort-icon--asc,
+		.spends__table__sort-icon__wrapper:hover svg.spends__table__sort-icon--desc {
 			/* Reset to default */
 			opacity: 0.64;
 			stroke: #888888;
 		}
 
-		#search__results__table__result-row .money--lose::after,
-		#search__results__table__result-row .money--gain::after {
-			/* Hide coin icon */
-			content: "";
-			margin-left: 0;
+		/* ||| Statistics */
+
+		#statistics__charts {
+			column-gap: 50px;
+			display: grid;
+			grid-template-columns: 2fr 3fr;
+			height: 100%;
+			width: 100%;
 		}
 
-		#search__results__no-spends {
-			font-size: 20px;
-			margin-top: 25px;
+		.statistics__chart {
+			height: 80%;
+			position: relative;
+		}
+
+		.statistics__chart-title {
+			font-size: 18px;
+			margin-bottom: 15px;
 			text-align: center;
+		}
+
+		#spent-by-spend-type__total-cost {
+			font-size: 18px;
+			left: 50%;
+			position: absolute;
+			text-align: center;
+			top: 50%;
+			transform: translate(-50%, -50%);
 		}
 
 		/* | Layouts */
 
 		/* For medium screens (<= 1350px) */
 		@media (max-width: 1350px) {
-			#app {
-				grid-template-rows: 100%;
-			}
 
-			#search__options__cost,
-			#search__options__time {
+			#filters__cost,
+			#filters__time {
 				grid-template-columns: 1fr;
 				grid-template-rows: 1fr 1fr;
 				row-gap: 10px;
 			}
 
-			.search__options__separator {
+			.filters__separator {
 				display: none;
 			}
 
 			/* Hide notes */
-			.search__results__table__notes {
+			.spends__table__notes {
 				display: none;
+			}
+
+			#statistics__charts {
+				row-gap: 50px;
+				grid-template-columns: 1fr;
+				grid-template-rows: 1fr 1fr;
+				height: unset;
+			}
+
+			.statistics__chart {
+				margin: auto;
+				width: 90%;
+			}
+
+			#spent-by-spend-type {
+				max-width: 500px;
 			}
 		}
 	</style>
@@ -256,195 +325,221 @@
 
 <body>
 	<div id="app">
-		<div id="header"></div>
+		<div id="header">
+			<div>
+				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
+				<span class="header__path__element">Search</span>
+				<span class="header__path__element">Spends</span>
+			</div>
+
+			<div id="header__current-month-link">
+				<a href="/">
+					<div class="feather-icon--btn" title="Go to the Current Month">
+						<svg>
+							<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#home` }}" />
+						</svg>
+					</div>
+				</a>
+			</div>
+		</div>
+
 		<div id="content">
-			<div id="search">
-				<!-- Search Options -->
-				<div id="search__options">
-					<div id="search__options__header" class="noselect">Spend Search</div>
+			<!-- Filters -->
+			<div id="filters">
+				<div id="filters__header" class="noselect">Filters</div>
 
-					<form action="/search/spends">
-						<!-- Title -->
-						<div id="search__options__title" class="search__option">
-							<input type="text" name="title" placeholder="Title" title="Title">
+				<form action="/search/spends">
+					<!-- Title -->
+					<div id="filters__title" class="filter">
+						<input type="text" name="title" placeholder="Title" title="Title">
+					</div>
+
+					<!-- Notes -->
+					<div id="filters__notes" class="filter">
+						<input type="text" name="notes" placeholder="Notes" title="Notes">
+					</div>
+
+					<!-- Cost -->
+					<div id="filters__cost" class="filter">
+						<div id="filters__cost__min">
+							<input type="text" name="min_cost" placeholder="Min Cost" title="Minimal Cost">
 						</div>
 
-						<!-- Notes -->
-						<div id="search__options__notes" class="search__option">
-							<input type="text" name="notes" placeholder="Notes" title="Notes">
+						<div class="filters__separator"></div>
+
+						<div id="filters__cost__max">
+							<input type="text" name="max_cost" placeholder="Max Cost" title="Maximal Cost">
+						</div>
+					</div>
+
+					<!-- Time -->
+					<div id="filters__time" class="filter">
+						<div id="filters__time__after">
+							<input type="date" name="after" title="After">
 						</div>
 
-						<!-- Cost -->
-						<div id="search__options__cost" class="search__option">
-							<div id="search__options__cost__min">
-								<input type="text" name="min_cost" placeholder="Min Cost" title="Minimal Cost">
-							</div>
+						<div class="filters__separator"></div>
 
-							<div class="search__options__separator"></div>
-
-							<div id="search__options__cost__max">
-								<input type="text" name="max_cost" placeholder="Max Cost" title="Maximal Cost">
-							</div>
+						<div id="filters__time__before">
+							<input type="date" name="before" title="Before">
 						</div>
+					</div>
 
-						<!-- Time -->
-						<div id="search__options__time" class="search__option">
-							<div id="search__options__time__after">
-								<input type="date" name="after" title="After">
-							</div>
-
-							<div class="search__options__separator"></div>
-
-							<div id="search__options__time__before">
-								<input type="date" name="before" title="Before">
-							</div>
+					<!-- Spend Types -->
+					<div id="filters__types" class="filter">
+						<div id="filters__types__header" class="noselect">Spend Types</div>
+						<!-- Without Type option -->
+						<div class="filters__types__type">
+							<input id="filters__types__type-0" type="checkbox" name="type_id" value="0">
+							<label for="filters__types__type-0" title="Use this option to search for Spends without type">Without Type</label>
 						</div>
-
-						<!-- Spend Types -->
-						<div id="search__options__types" class="search__option">
-							<div id="search__options__types__header" class="noselect">Spend Types</div>
-							<!-- Without Type option -->
-							<div class="search__options__types__type">
-								<input id="search__options__types__type-0" type="checkbox" name="type_id" value="0">
-								<label for="search__options__types__type-0" title="Use this option to search for Spends without type">Without Type</label>
-							</div>
-							{{ range .SpendTypes }}
-							<div class="search__options__types__type">
-								<input id="search__options__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}">
-								<label for="search__options__types__type-{{ .ID }}">{{ .FullName }}</label>
-							</div>
-							{{ end }}
+						{{ range .SpendTypes }}
+						<div class="filters__types__type">
+							<input id="filters__types__type-{{ .ID }}" type="checkbox" name="type_id" value="{{ .ID }}">
+							<label for="filters__types__type-{{ .ID }}">{{ .FullName }}</label>
 						</div>
+						{{ end }}
+					</div>
 
-						<!-- Hidden fields -->
-						<div style="display: none;">
-							<input id="search__options__types__hidden__sort" type="text" name="sort" value="">
-							<input id="search__options__types__hidden__order" type="text" name="order" value="">
-						</div>
+					<!-- Hidden fields -->
+					<div style="display: none;">
+						<input id="filters__types__hidden__sort" type="text" name="sort" value="">
+						<input id="filters__types__hidden__order" type="text" name="order" value="">
+					</div>
 
-						<!-- Buttons -->
-						<div id="search__options__buttons">
-							<button type="reset" class="search__options__button" title="Reset">
-								<div class="feather-icon--btn">
-									<svg>
-										<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
-								</div>
-							</button>
-
-							<button type="submit" class="search__options__button" title="Search">
-								<div class="feather-icon--btn">
-									<svg>
-										<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#search` }}" /> </svg>
-								</div>
-							</button>
-						</div>
-					</form>
-
-					<div id="search__options__home-page-link">
-						<a href="/">
-							<div class="feather-icon--btn" title="Home">
+					<!-- Buttons -->
+					<div id="filters__buttons">
+						<button type="reset" class="filters__button" title="Reset">
+							<div class="feather-icon--btn">
 								<svg>
-									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#home` }}" />
-								</svg>
+									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
 							</div>
-						</a>
+						</button>
+
+						<button type="submit" class="filters__button" title="Search" onclick="updateFormActionHash(this.form)">
+							<div class="feather-icon--btn">
+								<svg>
+									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#search` }}" /> </svg>
+							</div>
+						</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- Result -->
+			<div id="result">
+				{{ if not .Spends }}
+				<div id="result__no-spends" class="noselect">No Spends found</div>
+				{{ else }}
+				<div id="result__tab-titles">
+					<div class="noselect result__tab-title" data-title-for-tab="spends" onclick="switchTab('spends')">
+						<span>Spends</span>
+					</div>
+					<div class="noselect result__tab-title" data-title-for-tab="statistics" onclick="switchTab('statistics')">
+						<span>Statistics</span>
 					</div>
 				</div>
 
-				<!-- Search Results -->
-				<div id="search__results">
-					{{ if .Spends }}
-					<table id="search__results__table">
-						<thead>
-							<tr>
-								<th class="search__results__table__date noselect" onclick="alert">
-									<span>Date</span>
-									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
-										<svg class="search__results__table__sort-icon--asc">
-											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
-										</svg>
-										<svg class="search__results__table__sort-icon--desc">
-											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
-										</svg>
-									</div>
-								</th>
-								<th class="search__results__table__title noselect">
-									<span>Title</span>
-									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
-										<svg class="search__results__table__sort-icon--asc">
-											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
-										</svg>
-										<svg class="search__results__table__sort-icon--desc">
-											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
-										</svg>
-									</div>
-								</th>
-								<th class="search__results__table__notes noselect">Notes</th>
-								<th class="search__results__table__type noselect">Type</th>
-								<th class="search__results__table__cost noselect">
-									<span>Cost</span>
-									<div class="feather-icon--btn search__results__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
-										<svg class="search__results__table__sort-icon--asc">
-											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
-										</svg>
-										<svg class="search__results__table__sort-icon--desc">
-											<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
-										</svg>
-									</div>
-								</th>
-								<th class="search__results__table__link noselect">Link</th>
-							</tr>
-						</thead>
-						<tbody>
-							{{ range .Spends }}
-							<tr>
-								<td class="search__results__table__date">{{ .Year }}-{{ printf "%02d" .Month }}-{{ printf "%02d" .Day }}</td>
-								<td class="search__results__table__title">{{ .Title }}</td>
-								<td class="search__results__table__notes">{{ .Notes }}</td>
-								<td class="search__results__table__type">
-									{{ if .Type }}
-									<span>{{ .Type.Name }}</span>
-									{{ else }}
-									<span>-</span>
-									{{ end }}
-								</td>
-								<td class="search__results__table__cost">{{ .Cost }}</td>
-								<td class="search__results__table__link">
-									<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
-										<div class="feather-icon--btn" title="View Day">
-											<svg>
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#external-link` }}" />
+				<div id="result__tabs">
+					<!-- Spends -->
+					<div id="spends" class="result__tab">
+						<table id="spends__table">
+							<thead>
+								<tr>
+									<th class="spends__table__date noselect">
+										<span>Date</span>
+										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
+											<svg class="spends__table__sort-icon--asc">
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
+											</svg>
+											<svg class="spends__table__sort-icon--desc">
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
 											</svg>
 										</div>
-									</a>
-								</td>
-							</tr>
-							{{ end }}
-							<tr id="search__results__table__result-row">
-								<!--
-								We can't use colspan="4" because we hide notes with 'display: none' for small and
-								medium screens. With colspan="4" there will be some bugs
-							 -->
-								<td colspan="3"></td>
-								<td class="search__results__table__notes"></td>
-								<td class="search__results__table__cost" title="Total Cost">
-									<!-- Total Cost must be always <= 0 -->
-									{{ if eq .TotalCost 0 }}
-									<span class="money--gain">{{ .TotalCost }}</span>
-									{{ else }}
-									<span class="money--lose">{{ .TotalCost }}</span>
-									{{ end }}
-								</td>
-								<td></td>
-							</tr>
-						</tbody>
-					</table>
-					{{ else }}
-					<div id="search__results__no-spends" class="noselect">
-						<span>No Spends found!</span>
+									</th>
+									<th class="spends__table__title noselect">
+										<span>Title</span>
+										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
+											<svg class="spends__table__sort-icon--asc">
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
+											</svg>
+											<svg class="spends__table__sort-icon--desc">
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
+											</svg>
+										</div>
+									</th>
+									<th class="spends__table__notes noselect">Notes</th>
+									<th class="spends__table__type noselect">Type</th>
+									<th class="spends__table__cost noselect">
+										<span>Cost</span>
+										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
+											<svg class="spends__table__sort-icon--asc">
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
+											</svg>
+											<svg class="spends__table__sort-icon--desc">
+												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
+											</svg>
+										</div>
+									</th>
+									<th class="spends__table__link noselect">Link</th>
+								</tr>
+							</thead>
+							<tbody>
+								{{ range .Spends }}
+								<tr>
+									<td class="spends__table__date">{{ .Year }}-{{ printf "%02d" .Month }}-{{ printf "%02d" .Day }}</td>
+									<td class="spends__table__title">{{ .Title }}</td>
+									<td class="spends__table__notes">{{ .Notes }}</td>
+									<td class="spends__table__type">
+										{{ if .Type }}
+										<span>{{ .Type.Name }}</span>
+										{{ else }}
+										<span>-</span>
+										{{ end }}
+									</td>
+									<td class="spends__table__cost">{{ .Cost }}</td>
+									<td class="spends__table__link">
+										<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
+											<div class="feather-icon--btn" title="View Day">
+												<svg>
+													<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#external-link` }}" />
+												</svg>
+											</div>
+										</a>
+									</td>
+								</tr>
+								{{ end }}
+							</tbody>
+						</table>
 					</div>
-					{{ end }}
+
+					<!-- Statistics -->
+					<div id="statistics" class="result__tab">
+						<div id="statistics__charts">
+							<!-- Total cost is not centered vertically without 'height: min-content' for some reason -->
+							<div style="height: min-content;">
+								<div class="statistics__chart-title noselect">Spent by Type</div>
+								<div id="spent-by-spend-type" class="statistics__chart">
+									<div id="spent-by-spend-type__total-cost">
+										<span class="noselect">Total:</span>
+										<br>
+										<span class="money--lose">{{ .TotalCost }}</span>
+									</div>
+
+									<canvas id="spent-by-spend-type__chart"></canvas>
+								</div>
+							</div>
+
+							<div>
+								<div class="statistics__chart-title noselect">Spent by Day</div>
+								<div id="spent-by-day" class="statistics__chart">
+									<canvas id="spent-by-day__chart"></canvas>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
+				{{ end }}
 			</div>
 		</div>
 
@@ -461,50 +556,50 @@
 
 			// Title
 			const title = query.get("title");
-			setOptionValue("search__options__title", title);
+			setOptionValue("filters__title", title);
 
 			// Notes
 			const notes = query.get("notes");
-			setOptionValue("search__options__notes", notes);
+			setOptionValue("filters__notes", notes);
 
 			// Min Cost
 			const minCost = query.get("min_cost");
-			setOptionValue("search__options__cost__min", minCost);
+			setOptionValue("filters__cost__min", minCost);
 
 			// Max cost
 			const maxCost = query.get("max_cost");
-			setOptionValue("search__options__cost__max", maxCost);
+			setOptionValue("filters__cost__max", maxCost);
 
 			// After
 			const after = query.get("after");
-			setOptionValue("search__options__time__after", after);
+			setOptionValue("filters__time__after", after);
 
 			// Before
 			const before = query.get("before");
-			setOptionValue("search__options__time__before", before);
+			setOptionValue("filters__time__before", before);
 
 			// Sort and Order
 
 			CurrentSort = query.get("sort");
 			let sortSelector = ""
 			if (CurrentSort === "title") {
-				sortSelector = ".search__results__table__title"
+				sortSelector = ".spends__table__title"
 			} else if (CurrentSort === "cost") {
-				sortSelector = ".search__results__table__cost"
+				sortSelector = ".spends__table__cost"
 			} else {
 				// Default sort is by date
 				CurrentSort = "date";
-				sortSelector = ".search__results__table__date"
+				sortSelector = ".spends__table__date"
 			}
 
 			CurrentOrder = query.get("order");
 			let orderSelector = "";
 			if (CurrentOrder === "desc") {
-				orderSelector = ".search__results__table__sort-icon--desc";
+				orderSelector = ".spends__table__sort-icon--desc";
 			} else {
 				// Default order is asc
 				CurrentOrder = "asc";
-				orderSelector = ".search__results__table__sort-icon--asc";
+				orderSelector = ".spends__table__sort-icon--asc";
 			}
 
 			const selector = sortSelector + " " + orderSelector;
@@ -518,7 +613,7 @@
 			// Spend Types
 			const typeIDs = query.getAll("type_id");
 			for (let i = 0; i < typeIDs.length; i++) {
-				const elemID = "search__options__types__type-" + typeIDs[i];
+				const elemID = "filters__types__type-" + typeIDs[i];
 				const checkbox = document.getElementById(elemID);
 				if (!checkbox) {
 					console.error(`element '${elemID}' doesn't exist`);
@@ -557,22 +652,27 @@
 
 		// Set date titles
 		window.addEventListener("load", () => {
-			let cache = {};
-
-			const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-			const dates = document.querySelectorAll("td.search__results__table__date");
+			const dates = document.querySelectorAll("td.spends__table__date");
 			for (let i = 0; i < dates.length; i++) {
-				const originalDate = dates[i].textContent;
-				let date = cache[originalDate];
-				if (!date) {
-					// Format like 'Friday, November 1, 2019'
-					date = new Date(originalDate).toLocaleDateString("en-US", dateFormatOptions);
-					cache[originalDate] = date;
-				}
-
-				dates[i].title = date;
+				const date = dates[i].textContent;
+				dates[i].title = convertDateToHumanReadableFormat(date);
 			}
 		})
+
+		let humanReadableDateCache = {};
+		/**
+		 * Format date '2019-11-01' as 'Friday, November 1, 2019'
+		 */
+		function convertDateToHumanReadableFormat(dateStr) {
+			const dateFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+
+			let date = humanReadableDateCache[dateStr];
+			if (!date) {
+				date = new Date(dateStr).toLocaleDateString("en-US", dateFormatOptions);
+				humanReadableDateCache[dateStr] = date;
+			}
+			return date;
+		}
 
 		/**
 		 * Change Sort and Order and submit form
@@ -599,28 +699,231 @@
 				sortValue = CurrentSort;
 			}
 
-			const sortInput = document.getElementById("search__options__types__hidden__sort");
+			const sortInput = document.getElementById("filters__types__hidden__sort");
 			sortInput.value = sortValue;
-			const orderInput = document.getElementById("search__options__types__hidden__order");
+			const orderInput = document.getElementById("filters__types__hidden__order");
 			orderInput.value = orderValue;
 
 			// Submit form
-			const form = document.querySelector("#search__options form");
+			const form = document.querySelector("#filters form");
 			if (form === null) {
 				console.error("couldn't get form")
 				return;
 			}
 			form.submit();
 		}
+
+		// Switch tab according to url hash
+		window.addEventListener("load", () => {
+			// Get hash without '#'
+			let tabID = window.location.hash.slice(1);
+			if (tabID != "spends" && tabID != "statistics") {
+				tabID = "spends";
+			}
+			switchTab(tabID);
+		})
+
+		/**
+		* @param {HTMLFormElement} form
+		*/
+		function updateFormActionHash(form) {
+			const action = form.action;
+			if (action.includes(window.location.hash)) {
+				return;
+			}
+			form.action = action + window.location.hash;
+		}
+
+		/**
+		* @param {string} tabID - tab id to display
+		*/
+		function switchTab(tabID) {
+			// Switch tab title
+			const chosenTabTitleClass = "result__tab-title--chosen";
+			const attrWithTabID = "data-title-for-tab";
+
+			const tabTitles = document.querySelectorAll("#result__tab-titles .result__tab-title");
+			for (let i = 0; i < tabTitles.length; i++) {
+				tabTitles[i].classList.remove(chosenTabTitleClass);
+
+				const attr = tabTitles[i].getAttribute(attrWithTabID);
+				if (attr === tabID) {
+					tabTitles[i].classList.add(chosenTabTitleClass);
+				}
+			}
+
+			// Switch tab
+			const chosenTabClass = "result__tab--chosen";
+
+			const tabs = document.querySelectorAll("#result__tabs .result__tab");
+			for (let i = 0; i < tabs.length; i++) {
+				tabs[i].classList.remove(chosenTabClass);
+
+				if (tabs[i].id == tabID) {
+					tabs[i].classList.add(chosenTabClass);
+				}
+			}
+
+			// Update url hash
+			window.location.hash = tabID;
+		}
 	</script>
 
+	<!-- Statistics Charts -->
+	{{ if .Spends }}
+	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
+	<script src="{{ asStaticURL `/static/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
+	<script>
+		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
+		const labelSeparator = " – ";
+		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+
+		// Spent by Spend Type chart
+
+		const spentBySpendTypeStatistics = JSON.parse(`{{ .SpentBySpendTypeDatasets }}`);
+		let spendBySpendTypeDatasets = [];
+		for (const data of spentBySpendTypeStatistics) {
+			spendBySpendTypeDatasets.push({
+				data: data.map(v => v["spent"]),
+				labels: data.map(v => v["spend_type_name"]),
+				backgroundColor: data.map(v => v["spend_type_name"] ? "#66666638" : "#00000000"),
+				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? "#66666648" : "#00000000"),
+				hoverBorderColor: data.map(v => "#00000000"), // Hide hover border colors
+			});
+		}
+
+		const spentBySpendTypeCtx = document.getElementById("spent-by-spend-type__chart").getContext("2d");
+		new Chart(spentBySpendTypeCtx, {
+			type: "doughnut",
+			data: {
+				datasets: spendBySpendTypeDatasets,
+			},
+			options: {
+				aspectRatio: 1,
+				// Tune doughnut
+				cutoutPercentage: 30,
+				rotation: -5 / 4 * Math.PI,
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+					displayColors: false,
+					filter: function (tooltipItem, data) {
+						const labels = data.datasets[tooltipItem.datasetIndex].labels;
+						return labels ? labels[tooltipItem.index] !== "" : true;
+					},
+					callbacks: {
+						label: function (tooltipItem, data) {
+							var dataset = data.datasets[tooltipItem.datasetIndex];
+							var index = tooltipItem.index;
+							return dataset.labels[index] + labelSeparator + dataset.data[index];
+						},
+					}
+				},
+				// Plugins
+				plugins: {
+					datalabels: {
+						textAlign: "center",
+						formatter: function (value, context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset || !dataset.labels) return "";
+
+							const label = dataset.labels[context.dataIndex];
+							if (!label) return "";
+
+							return `${label}\n${(value / totalSpent * 100).toFixed(2)}%`;
+						},
+						display: function (context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset || !dataset.labels) return false;
+
+							const label = dataset.labels[context.dataIndex];
+							if (!label) return false;
+
+							return "auto";
+						}
+					}
+				}
+			}
+		});
+
+		// Spent by Day chart
+
+		const spentByDayStatistics = JSON.parse(`{{ .SpentByDayDataset }}`);
+		let spentByDayLabels = [];
+		let spentByDayDataset = { data: [] };
+		for (const data of spentByDayStatistics) {
+			const month = data.month < 10 ? "0" + data.month : data.month;
+			const day = data.day < 10 ? "0" + data.day : data.day;
+			spentByDayLabels.push(`${data.year}-${month}-${day}`)
+
+			spentByDayDataset.data.push(data.spent);
+		}
+
+		const spentByDayCtx = document.getElementById("spent-by-day__chart").getContext("2d");
+		new Chart(spentByDayCtx, {
+			type: "bar",
+			data: {
+				labels: spentByDayLabels,
+				datasets: [spentByDayDataset],
+			},
+			options: {
+				maintainAspectRatio: false,
+				// Hide legend
+				legend: { display: false },
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+					displayColors: false,
+					callbacks: {
+						title: function (tooltipItem, data) { return "" },
+						label: function (tooltipItem, data) {
+							const date = convertDateToHumanReadableFormat(tooltipItem.label)
+							return date + labelSeparator + tooltipItem.value;
+						},
+					}
+				},
+				// Plugins
+				plugins: {
+					datalabels: {
+						display: function (context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset) return false;
+
+							const value = dataset.data[context.dataIndex];
+							if (!value) return false;
+
+							return "auto";
+						}
+					}
+				}
+			}
+		});
+	</script>
+	{{ end }}
+
 	<!-- Link Formatter -->
+	{{ if .Spends }}
 	<script src="{{ asStaticURL `/static/js/link-formatter.js` }}"></script>
 	<script>
 		window.addEventListener("load", () => {
-			formatLinks(".search__results__table__notes");
+			formatLinks(".spends__table__notes");
 		})
 	</script>
+	{{ end }}
 </body>
 
 </html>

@@ -426,9 +426,9 @@
 				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
 				{{ $before := printf `%d-%02d-%d` .Year .Month.Month (len .Month.Days) }}
 				<a href="/search/spends?after={{ $after }}&before={{ $before }}">
-					<div class="feather-icon--btn" title="Search for Spends">
+					<div class="feather-icon--btn" title="Search & Statistics">
 						<svg>
-							<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#search` }}" />
+							<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#bar-chart-2` }}" />
 						</svg>
 					</div>
 				</a>

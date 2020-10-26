@@ -1,27 +1,23 @@
 package pages
 
 import (
-	"context"
 	"fmt"
+	"sort"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
 type SpendType struct {
 	db.SpendType
+
 	// FullName is a composite name that contains names of parent Spend Types
 	FullName string
-
 	// parentSpendTypeIDs is a set of ids of parent Spend Types
 	parentSpendTypeIDs map[uint]struct{}
 }
 
-func (h Handlers) getSpendTypesWithFullNames(ctx context.Context) ([]SpendType, error) {
-	spendTypes, err := h.db.GetSpendTypes(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+// getSpendTypesWithFullNames returns sorted Spend Types with full name
+func getSpendTypesWithFullNames(spendTypes []db.SpendType) []SpendType {
 	spendTypesMap := make(map[uint]db.SpendType, len(spendTypes))
 	for _, t := range spendTypes {
 		spendTypesMap[t.ID] = t
@@ -37,7 +33,12 @@ func (h Handlers) getSpendTypesWithFullNames(ctx context.Context) ([]SpendType, 
 			parentSpendTypeIDs: parentIDs,
 		})
 	}
-	return res, nil
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].FullName < res[j].FullName
+	})
+
+	return res
 }
 
 func getSpendTypeFullName(spendTypes map[uint]db.SpendType, typeID uint) (name string, parentIDs map[uint]struct{}) {

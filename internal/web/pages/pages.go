@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +17,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
+	"github.com/ShoshinNikita/budget-manager/internal/web/pages/statistics"
 )
 
 const (
@@ -231,16 +231,13 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
+	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
-
-	sort.Slice(spendTypes, func(i, j int) bool {
-		return spendTypes[i].FullName < spendTypes[j].FullName
-	})
+	spendTypes := getSpendTypesWithFullNames(dbSpendTypes)
 
 	populateMonthlyPaymentsWithFullSpendTypeNames(spendTypes, month.MonthlyPayments)
 	for i := range month.Days {
@@ -312,30 +309,38 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spendTypes, err := h.getSpendTypesWithFullNames(ctx)
+	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
 		h.processInternalErrorWithPage(ctx, log, w, msg, err)
 		return
 	}
-	sort.Slice(spendTypes, func(i, j int) bool {
-		return spendTypes[i].FullName < spendTypes[j].FullName
-	})
+	spendTypes := getSpendTypesWithFullNames(dbSpendTypes)
 
 	populateSpendsWithFullSpendTypeNames(spendTypes, spends)
 
+	spentBySpendTypeDatasets := statistics.CalculateSpentBySpendType(dbSpendTypes, spends)
+	spentByDayDataset := statistics.CalculateSpentByDay(spends, args.After, args.Before)
+
 	// Execute the template
 	resp := struct {
-		Spends     []db.Spend
+		// Spends
+		Spends []db.Spend
+		// Statistics
+		SpentBySpendTypeDatasets []statistics.SpentBySpendTypeDataset
+		SpentByDayDataset        statistics.SpentByDayDataset
+		TotalCost                money.Money
+		//
 		SpendTypes []SpendType
-		TotalCost  money.Money
-		//
-		Footer FooterTemplateData
+		Footer     FooterTemplateData
 	}{
-		Spends:     spends,
-		SpendTypes: spendTypes,
-		TotalCost:  sumSpendCosts(spends),
+		Spends: spends,
 		//
+		SpentBySpendTypeDatasets: spentBySpendTypeDatasets,
+		SpentByDayDataset:        spentByDayDataset,
+		TotalCost:                sumSpendCosts(spends),
+		//
+		SpendTypes: spendTypes,
 		Footer: FooterTemplateData{
 			Version: version.Version,
 			GitHash: version.GitHash,
