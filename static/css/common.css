@@ -258,6 +258,10 @@ td {
 	word-break: break-word;
 }
 
+table tbody tr:hover {
+	background-color: var(--hover-color);
+}
+
 table tr:last-child td {
 	border-bottom: none;
 }
