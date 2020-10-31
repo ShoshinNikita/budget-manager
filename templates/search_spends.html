@@ -337,7 +337,7 @@
 				<a href="/">
 					<div class="feather-icon--btn" title="Go to the Current Month">
 						<svg>
-							<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#home` }}" />
+							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#home` }}" />
 						</svg>
 					</div>
 				</a>
@@ -413,14 +413,14 @@
 						<button type="button" class="filters__button" title="Reset" onclick="resetForm(this.form)">
 							<div class="feather-icon--btn">
 								<svg>
-									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
+									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
 							</div>
 						</button>
 
 						<button type="submit" class="filters__button" title="Search" onclick="updateFormActionHash(this.form)">
 							<div class="feather-icon--btn">
 								<svg>
-									<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#search` }}" /> </svg>
+									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#search` }}" /> </svg>
 							</div>
 						</button>
 					</div>
@@ -451,10 +451,10 @@
 										<span>Date</span>
 										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
 											<svg class="spends__table__sort-icon--asc">
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-up` }}" />
 											</svg>
 											<svg class="spends__table__sort-icon--desc">
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-down` }}" />
 											</svg>
 										</div>
 									</th>
@@ -462,10 +462,10 @@
 										<span>Title</span>
 										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
 											<svg class="spends__table__sort-icon--asc">
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-up` }}" />
 											</svg>
 											<svg class="spends__table__sort-icon--desc">
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-down` }}" />
 											</svg>
 										</div>
 									</th>
@@ -475,10 +475,10 @@
 										<span>Cost</span>
 										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
 											<svg class="spends__table__sort-icon--asc">
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-up` }}" />
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-up` }}" />
 											</svg>
 											<svg class="spends__table__sort-icon--desc">
-												<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#chevron-down` }}" />
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-down` }}" />
 											</svg>
 										</div>
 									</th>
@@ -503,7 +503,7 @@
 										<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
 											<div class="feather-icon--btn" title="View Day">
 												<svg>
-													<use xlink:href="{{ asStaticURL `/static/feather/feather-sprite.svg#external-link` }}" />
+													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#external-link` }}" />
 												</svg>
 											</div>
 										</a>
@@ -827,8 +827,8 @@
 
 	<!-- Statistics Charts -->
 	{{ if .Spends }}
-	<script src="{{ asStaticURL `/static/chart.js/chart.min.js` }}"></script>
-	<script src="{{ asStaticURL `/static/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
+	<script src="{{ asStaticURL `/static/vendor/chart.js/chart.min.js` }}"></script>
+	<script src="{{ asStaticURL `/static/vendor/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
 	<script>
 		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
 		const labelSeparator = " – ";
