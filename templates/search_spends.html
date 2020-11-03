@@ -554,7 +554,7 @@
 							<div id="cost-intervals">
 								<div class="statistics__chart-title noselect">Cost Intervals</div>
 								<div class="statistics__chart">
-									{{ .CostIntervals }}
+									<canvas id="cost-intervals__chart"></canvas>
 								</div>
 							</div>
 
@@ -939,6 +939,107 @@
 				}
 			}
 		});
+
+		// Cost Intervals chart
+
+		const costIntervals = JSON.parse(`{{ .CostIntervals }}`);
+		let costIntervalLabels = [];
+		let costIntervalData = [];
+		for (const data of costIntervals) {
+			costIntervalLabels.push(data.from);
+			costIntervalData.push(data.total);
+		}
+		costIntervalLabels.push(costIntervals[costIntervals.length - 1].to);
+
+		const costIntervalsCtx = document.getElementById("cost-intervals__chart").getContext("2d");
+		new Chart(costIntervalsCtx, {
+			type: "bar",
+			data: {
+				labels: new Array(costIntervalLabels.length - 1).fill(""),
+				datasets: [{
+					data: costIntervalData,
+					backgroundColor: backgroundColor,
+					hoverBackgroundColor: hoverBackgroundColor,
+				}],
+			},
+			plugins: [
+				{
+					// Update right padding to be able to display last interval
+					afterInit: chart => {
+						const longestLabel = costIntervalLabels[costIntervalLabels.length - 1];
+						const textWidth = chart.ctx.measureText(longestLabel).width;
+
+						// Add additional 5px
+						chart.options.layout.padding.right = textWidth / 2 + 5;
+						chart.update();
+					},
+					// Draw intervals
+					afterDraw: chart => {
+						const axis = chart.scales["x-axis-0"];
+						const tickDistance = axis.width / (costIntervalLabels.length - 1);
+
+						const y = chart.height - 10;
+						const offset = axis.left;
+
+						// Sometimes canvas font can be bold (for example, on hover). Change it to normal while drawing intervals
+						const ctxFont = chart.ctx.font.replace("bold", "");
+						const normalFont = chart.ctx.font.replace("bold", "");
+						chart.ctx.font = normalFont;
+
+						for (let i = 0; i < costIntervalLabels.length; i++) {
+							const text = costIntervalLabels[i];
+							const textWidth = chart.ctx.measureText(text).width;
+							const x = offset + tickDistance * i - textWidth / 2;
+
+							chart.ctx.save();
+							chart.ctx.fillText(text, x, y);
+							chart.ctx.restore();
+						}
+
+						// Revert canvas font
+						chart.ctx.font = ctxFont;
+					}
+				}
+			],
+			options: {
+				maintainAspectRatio: false,
+				// Hide legend
+				legend: { display: false },
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+					displayColors: false,
+					callbacks: {
+						label: function (tooltipItem, data) {
+							const interval = costIntervals[tooltipItem.index];
+							return `${tooltipItem.value} – ${interval.count} Spends`;
+						},
+					}
+				},
+				// Plugins
+				plugins: {
+					datalabels: {
+						display: function (context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset) return false;
+
+							const value = dataset.data[context.dataIndex];
+							if (!value) return false;
+
+							return "auto";
+						}
+					}
+				}
+			}
+		});
+
 
 		// Spent by Day chart
 
