@@ -258,20 +258,18 @@
 		#statistics__charts {
 			column-gap: 50px;
 			display: grid;
-			grid-template-columns: 2fr 3fr;
-			height: 100%;
+			grid-template-columns: 1fr 2fr;
+			grid-template-rows: 1fr 1fr;
+			grid-template-areas:
+				"spent-by-spend-type cost-intervals"
+				"spent-by-day spent-by-day";
+			row-gap: 30px;
+			overflow-y: auto;
 			width: 100%;
 		}
 
-		.statistics__chart {
-			height: 80%;
-			position: relative;
-		}
-
-		.statistics__chart-title {
-			font-size: 18px;
-			margin-bottom: 15px;
-			text-align: center;
+		#spent-by-spend-type {
+			grid-area: spent-by-spend-type;
 		}
 
 		#spent-by-spend-type__total-cost {
@@ -282,6 +280,25 @@
 			top: 50%;
 			transform: translate(-50%, -50%);
 			z-index: -1;
+		}
+
+		#cost-intervals {
+			grid-area: cost-intervals;
+		}
+
+		#spent-by-day {
+			grid-area: spent-by-day;
+		}
+
+		.statistics__chart-title {
+			font-size: 18px;
+			margin-bottom: 15px;
+			text-align: center;
+		}
+
+		.statistics__chart {
+			height: 80%;
+			position: relative;
 		}
 
 		/* | Layouts */
@@ -306,19 +323,22 @@
 			}
 
 			#statistics__charts {
-				row-gap: 50px;
 				grid-template-columns: 1fr;
-				grid-template-rows: 1fr 1fr;
+				grid-template-rows: 1fr 1fr 1fr;
+				grid-template-areas:
+					"spent-by-spend-type"
+					"cost-intervals"
+					"spent-by-day";
 				height: unset;
+			}
+
+			#spent-by-spend-type {
+				max-width: 500px;
 			}
 
 			.statistics__chart {
 				margin: auto;
 				width: 90%;
-			}
-
-			#spent-by-spend-type {
-				max-width: 500px;
 			}
 		}
 	</style>
@@ -518,9 +538,9 @@
 					<div id="statistics" class="result__tab">
 						<div id="statistics__charts">
 							<!-- Total cost is not centered vertically without 'height: min-content' for some reason -->
-							<div style="height: min-content;">
+							<div id="spent-by-spend-type" style="height: min-content;">
 								<div class="statistics__chart-title noselect">Spent by Type</div>
-								<div id="spent-by-spend-type" class="statistics__chart">
+								<div class="statistics__chart">
 									<div id="spent-by-spend-type__total-cost">
 										<span class="money--lose">{{ .TotalCost }}</span>
 										<br>
@@ -531,9 +551,16 @@
 								</div>
 							</div>
 
-							<div>
+							<div id="cost-intervals">
+								<div class="statistics__chart-title noselect">Cost Intervals</div>
+								<div class="statistics__chart">
+									{{ .CostIntervals }}
+								</div>
+							</div>
+
+							<div id="spent-by-day">
 								<div class="statistics__chart-title noselect">Spent by Day</div>
-								<div id="spent-by-day" class="statistics__chart">
+								<div class="statistics__chart">
 									<canvas id="spent-by-day__chart"></canvas>
 								</div>
 							</div>
