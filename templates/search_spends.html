@@ -522,9 +522,9 @@
 								<div class="statistics__chart-title noselect">Spent by Type</div>
 								<div id="spent-by-spend-type" class="statistics__chart">
 									<div id="spent-by-spend-type__total-cost">
-										<span class="noselect">Total:</span>
-										<br>
 										<span class="money--lose">{{ .TotalCost }}</span>
+										<br>
+										<span>({{ len .Spends }})</span>
 									</div>
 
 									<canvas id="spent-by-spend-type__chart"></canvas>
@@ -847,6 +847,7 @@
 				labels: data.map(v => v["spend_type_name"]),
 				backgroundColor: data.map(v => v["spend_type_name"] ? backgroundColor : "#00000000"),
 				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? hoverBackgroundColor : "#00000000"),
+				borderColor: data.map(v => v["spend_type_name"] ? undefined : "#00000000"), // Use 'undefined' for default border color
 				hoverBorderColor: data.map(v => "#00000000"), // Hide hover border colors
 			});
 		}
