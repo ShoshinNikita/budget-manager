@@ -258,6 +258,10 @@ td {
 	word-break: break-word;
 }
 
+table th {
+	border-bottom: 1px solid var(--border-accent-color);
+}
+
 table tbody tr:hover {
 	background-color: var(--hover-color);
 }
