@@ -50,35 +50,25 @@ func extractSortedCosts(spends []db.Spend) []money.Money {
 	return res
 }
 
-// prepareIntervals prepares cost intervals. It use delta between of 95th and 5th percentile values to calculate
-// intervals
+// prepareIntervals prepares cost intervals excluding costs less than p5 and greater than p95 (p - percentile)
 func prepareIntervals(costs []money.Money, intervalNumber int) []CostInterval {
-	min := getPercentileValue(costs, 5)
-	max := getPercentileValue(costs, 95)
+	min := getPercentileValue(costs, 5).Floor()
+	max := getPercentileValue(costs, 95).Ceil()
 
-	delta := max.Sub(min).Float()
-	// Divide by intervalNumber-2 because there are 2 additional intervals: [min, p5Min), [p95Max, max]
-	interval := int64(math.Ceil(delta / float64(intervalNumber-2)))
+	delta := max.Sub(min)
+	interval := delta.Div(int64(intervalNumber)).Round()
 
-	intervals := make([]CostInterval, intervalNumber)
-	// Set the first interval - [0, 5pMin)
-	intervals[0] = CostInterval{
-		From: costs[0], To: biggestValueBefore(min),
-	}
+	intervals := make([]CostInterval, 0, intervalNumber)
 	next := min
-	for i := 1; i < intervalNumber-1; i++ {
+	for i := 0; i < intervalNumber; i++ {
 		from := next
-		next = next.Add(money.FromInt(interval))
-		to := next
-
-		intervals[i] = CostInterval{
-			From: from,
-			To:   biggestValueBefore(to),
+		next = next.Add(interval)
+		to := biggestValueBefore(next)
+		if i+1 == intervalNumber {
+			to = max
 		}
-	}
-	// Set the last interval - [95pMax, max]
-	intervals[intervalNumber-1] = CostInterval{
-		From: next, To: costs[len(costs)-1],
+
+		intervals = append(intervals, CostInterval{From: from, To: to})
 	}
 
 	return intervals
