@@ -1,11 +1,11 @@
 /* | Variables */
 
 :root {
-	--font-color: #000000dd;
-	--border-color: #88888818;
-	--border-accent-color: #88888860;
-	--hover-color: #e4e4e438;
-	--disabled-color: #00000050;
+	--font-color: #212121;
+	--border-color: #f4f4f4;
+	--border-accent-color: #d2d2d2;
+	--hover-color: #f9f9f9;
+	--disabled-color: #b0b0b0;
 }
 
 /* | Common */
@@ -224,7 +224,6 @@ a:link:hover {
 /* || Firefox */
 
 * {
-	scrollbar-color: #88888840 #88888840;
 	scrollbar-width: thin;
 }
 
@@ -239,7 +238,7 @@ a:link:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: #88888840;
+	background-color: #e1e1e1;
 }
 
 /* | Table */
