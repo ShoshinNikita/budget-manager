@@ -16,6 +16,47 @@
 			width: 100%;
 		}
 
+		/* TODO: move 'static/css/common.css'? */
+
+		.tooltip {
+			position: relative;
+		}
+
+		.tooltip .tooltip__text {
+			border: 2px solid var(--border-accent-color);
+			border-radius: 5px;
+			font-size: 14px;
+			padding: 3px 10px;
+			position: absolute;
+			top: 0;
+			visibility: hidden;
+			white-space: nowrap;
+		}
+
+		.tooltip:hover .tooltip__text {
+			visibility: visible;
+		}
+
+		/* Inspired by https://stackoverflow.com/a/23429132/7752659 */
+
+		.tooltip .tooltip__text::after,
+		.tooltip .tooltip__text::before {
+			border: 7px solid;
+			border-color: transparent var(--border-accent-color) transparent transparent;
+			content: "";
+			position: absolute;
+			right: 100%;
+			top: 1px;
+			z-index: 1;
+		}
+
+		.tooltip .tooltip__text::before {
+			border-width: 5px;
+			border-color: transparent white transparent transparent;
+			top: 3px;
+			z-index: 2;
+		}
+
 		/* | Header */
 
 		#header {
@@ -552,7 +593,16 @@
 							</div>
 
 							<div id="cost-intervals">
-								<div class="statistics__chart-title noselect">Cost Intervals</div>
+								<div class="statistics__chart-title">
+									<span class="noselect">Cost Intervals</span>
+									<span class="feather-icon tooltip" style="vertical-align: middle;">
+										<svg style="width: 18px; height: 18px">
+											<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#help-circle` }}" />
+										</svg>
+
+										<span class="tooltip__text">Without 5% of the smallest and largest Spends</span>
+									</span>
+								</div>
 								<div class="statistics__chart">
 									<canvas id="cost-intervals__chart"></canvas>
 								</div>
