@@ -76,9 +76,9 @@ func prepareIntervals(costs []money.Money, intervalNumber int) []CostInterval {
 
 // getPercentileValue returns a value at the nth percentile. It uses the nearest rank method to
 // find the percentile rank - https://en.wikipedia.org/wiki/Percentile#The_nearest-rank_method
-func getPercentileValue(costs []money.Money, n float64) money.Money {
-	i := n / 100 * float64(len(costs))
-	index := int(math.Ceil(i))
+func getPercentileValue(costs []money.Money, n int) money.Money {
+	i := float64(n) / 100 * float64(len(costs))
+	index := int(math.Ceil(i)) - 1
 	switch {
 	case index < 0:
 		index = 0
