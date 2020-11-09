@@ -37,6 +37,11 @@ func CalculateCostIntervals(spends []db.Spend, maxIntervalNumber int) (intervals
 		}
 	}
 
+	// Round interval totals for more beautiful view
+	for i := range intervals {
+		intervals[i].Total = intervals[i].Total.Round()
+	}
+
 	return intervals
 }
 
