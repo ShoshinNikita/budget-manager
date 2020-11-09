@@ -16,22 +16,24 @@ type CostInterval struct {
 	Total money.Money `json:"total"`
 }
 
-func CalculateCostIntervals(spends []db.Spend, intervalNumber int) []CostInterval {
+func CalculateCostIntervals(spends []db.Spend, maxIntervalNumber int) (intervals []CostInterval) {
 	if len(spends) == 0 {
 		return nil
 	}
 
 	costs := extractSortedCosts(spends)
-	intervals := prepareIntervals(costs, intervalNumber)
+	for intervalNumber := maxIntervalNumber; intervalNumber > 0; intervalNumber-- {
+		intervals = prepareIntervals(costs, intervalNumber)
+		intervals = fillIntervals(costs, intervals)
 
-	// Fill intervals
-	for _, s := range spends {
+		var c int
 		for i := range intervals {
-			if intervals[i].From <= s.Cost && s.Cost <= intervals[i].To {
-				intervals[i].Count++
-				intervals[i].Total = intervals[i].Total.Add(s.Cost)
-				break
+			if intervals[i].Total != 0 {
+				c++
 			}
+		}
+		if c > len(intervals)/2 {
+			break
 		}
 	}
 
@@ -93,4 +95,17 @@ func getPercentileValue(costs []money.Money, n int) money.Money {
 // For example, if max money precision is 2, it will return 'm-0.01'. If precision is 3 - 'm-0.001' and so one
 func biggestValueBefore(m money.Money) money.Money {
 	return m - 1
+}
+
+func fillIntervals(costs []money.Money, intervals []CostInterval) []CostInterval {
+	for _, cost := range costs {
+		for i := range intervals {
+			if intervals[i].From <= cost && cost <= intervals[i].To {
+				intervals[i].Count++
+				intervals[i].Total = intervals[i].Total.Add(cost)
+				break
+			}
+		}
+	}
+	return intervals
 }
