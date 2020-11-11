@@ -302,7 +302,7 @@
 			grid-template-columns: 1fr 2fr;
 			grid-template-rows: 1fr 1fr;
 			grid-template-areas:
-				"spent-by-spend-type cost-intervals"
+				"spent-by-spend-type cost-distribution"
 				"spent-by-day spent-by-day";
 			row-gap: 30px;
 			overflow-y: auto;
@@ -323,8 +323,8 @@
 			z-index: -1;
 		}
 
-		#cost-intervals {
-			grid-area: cost-intervals;
+		#cost-distribution {
+			grid-area: cost-distribution;
 		}
 
 		#spent-by-day {
@@ -368,7 +368,7 @@
 				grid-template-rows: 1fr 1fr 1fr;
 				grid-template-areas:
 					"spent-by-spend-type"
-					"cost-intervals"
+					"cost-distribution"
 					"spent-by-day";
 				height: unset;
 			}
@@ -592,9 +592,9 @@
 								</div>
 							</div>
 
-							<div id="cost-intervals">
+							<div id="cost-distribution">
 								<div class="statistics__chart-title">
-									<span class="noselect">Cost Intervals</span>
+									<span class="noselect">Cost Distribution</span>
 									<span class="feather-icon tooltip" style="vertical-align: middle;">
 										<svg style="width: 18px; height: 18px">
 											<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#help-circle` }}" />
@@ -604,7 +604,7 @@
 									</span>
 								</div>
 								<div class="statistics__chart">
-									<canvas id="cost-intervals__chart"></canvas>
+									<canvas id="cost-distribution__chart"></canvas>
 								</div>
 							</div>
 
@@ -990,7 +990,7 @@
 			}
 		});
 
-		// Cost Intervals chart
+		// Cost Distribution chart
 
 		const costIntervals = JSON.parse(`{{ .CostIntervals }}`);
 		let costIntervalLabels = [];
@@ -1001,7 +1001,7 @@
 		}
 		costIntervalLabels.push(costIntervals[costIntervals.length - 1].to);
 
-		const costIntervalsCtx = document.getElementById("cost-intervals__chart").getContext("2d");
+		const costIntervalsCtx = document.getElementById("cost-distribution__chart").getContext("2d");
 		new Chart(costIntervalsCtx, {
 			type: "bar",
 			data: {
