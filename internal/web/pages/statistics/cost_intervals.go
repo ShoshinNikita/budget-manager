@@ -26,6 +26,12 @@ func CalculateCostIntervals(spends []db.Spend, maxIntervalNumber int) (intervals
 		intervals = prepareIntervals(costs, intervalNumber)
 		intervals = fillIntervals(costs, intervals)
 
+		if last := intervals[len(intervals)-1]; last.From >= last.To {
+			// Sometimes there can be a situation when 'from' >= 'to' because we round the interval. Just try
+			// we the lower interval
+			continue
+		}
+
 		var c int
 		for i := range intervals {
 			if intervals[i].Total != 0 {
