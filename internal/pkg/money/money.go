@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-const precisionMul = 100
+const precision = 100
 
 // Money is an amount with precision 2
 //
@@ -19,7 +19,7 @@ type Money int64
 
 // FromInt converts int64 to Money
 func FromInt(m int64) Money {
-	return Money(m * precisionMul)
+	return Money(m * precision)
 }
 
 // FromFloat converts float64 to Money
@@ -53,12 +53,12 @@ func FromFloat(m float64) Money {
 
 // Int converts Money to int64
 func (m Money) Int() int64 {
-	return int64(m) / precisionMul
+	return int64(m) / precision
 }
 
 // Float converts Money to float64
 func (m Money) Float() float64 {
-	return float64(m) / precisionMul
+	return float64(m) / precision
 }
 
 // String converts Money to string. Money is always formatted as a number with 2 digits
@@ -88,6 +88,66 @@ func (m Money) Div(n int64) Money {
 	// Don't use Money.ToInt for better precision
 	money := int64(m)
 	return Money(money / n)
+}
+
+// Other
+
+// Round is like 'math.Round'
+func (m Money) Round() Money {
+	if m == 0 {
+		return m
+	}
+
+	mod := m % precision
+	if mod == 0 {
+		return m
+	}
+
+	m -= mod
+	switch {
+	case mod >= 50:
+		m += precision
+	case mod <= -50:
+		m -= precision
+	}
+
+	return m
+}
+
+// Ceil is like 'math.Ceil'
+func (m Money) Ceil() Money {
+	if m == 0 {
+		return m
+	}
+
+	mod := m % precision
+	if mod == 0 {
+		return m
+	}
+
+	m -= mod
+	if m > 0 {
+		m += precision
+	}
+	return m
+}
+
+// Floor is like 'math.Floor'
+func (m Money) Floor() Money {
+	if m == 0 {
+		return m
+	}
+
+	mod := m % precision
+	if mod == 0 {
+		return m
+	}
+
+	m -= mod
+	if m < 0 {
+		m -= precision
+	}
+	return m
 }
 
 // Encoding and Decoding

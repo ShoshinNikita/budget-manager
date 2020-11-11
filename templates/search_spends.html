@@ -16,6 +16,47 @@
 			width: 100%;
 		}
 
+		/* TODO: move 'static/css/common.css'? */
+
+		.tooltip {
+			position: relative;
+		}
+
+		.tooltip .tooltip__text {
+			border: 2px solid var(--border-accent-color);
+			border-radius: 5px;
+			font-size: 14px;
+			padding: 3px 10px;
+			position: absolute;
+			top: 0;
+			visibility: hidden;
+			white-space: nowrap;
+		}
+
+		.tooltip:hover .tooltip__text {
+			visibility: visible;
+		}
+
+		/* Inspired by https://stackoverflow.com/a/23429132/7752659 */
+
+		.tooltip .tooltip__text::after,
+		.tooltip .tooltip__text::before {
+			border: 7px solid;
+			border-color: transparent var(--border-accent-color) transparent transparent;
+			content: "";
+			position: absolute;
+			right: 100%;
+			top: 1px;
+			z-index: 1;
+		}
+
+		.tooltip .tooltip__text::before {
+			border-width: 5px;
+			border-color: transparent white transparent transparent;
+			top: 3px;
+			z-index: 2;
+		}
+
 		/* | Header */
 
 		#header {
@@ -258,20 +299,18 @@
 		#statistics__charts {
 			column-gap: 50px;
 			display: grid;
-			grid-template-columns: 2fr 3fr;
-			height: 100%;
+			grid-template-columns: 1fr 2fr;
+			grid-template-rows: 1fr 1fr;
+			grid-template-areas:
+				"spent-by-spend-type cost-distribution"
+				"spent-by-day spent-by-day";
+			row-gap: 30px;
+			overflow-y: auto;
 			width: 100%;
 		}
 
-		.statistics__chart {
-			height: 80%;
-			position: relative;
-		}
-
-		.statistics__chart-title {
-			font-size: 18px;
-			margin-bottom: 15px;
-			text-align: center;
+		#spent-by-spend-type {
+			grid-area: spent-by-spend-type;
 		}
 
 		#spent-by-spend-type__total-cost {
@@ -282,6 +321,25 @@
 			top: 50%;
 			transform: translate(-50%, -50%);
 			z-index: -1;
+		}
+
+		#cost-distribution {
+			grid-area: cost-distribution;
+		}
+
+		#spent-by-day {
+			grid-area: spent-by-day;
+		}
+
+		.statistics__chart-title {
+			font-size: 18px;
+			margin-bottom: 15px;
+			text-align: center;
+		}
+
+		.statistics__chart {
+			height: 80%;
+			position: relative;
 		}
 
 		/* | Layouts */
@@ -306,19 +364,22 @@
 			}
 
 			#statistics__charts {
-				row-gap: 50px;
 				grid-template-columns: 1fr;
-				grid-template-rows: 1fr 1fr;
+				grid-template-rows: 1fr 1fr 1fr;
+				grid-template-areas:
+					"spent-by-spend-type"
+					"cost-distribution"
+					"spent-by-day";
 				height: unset;
+			}
+
+			#spent-by-spend-type {
+				max-width: 500px;
 			}
 
 			.statistics__chart {
 				margin: auto;
 				width: 90%;
-			}
-
-			#spent-by-spend-type {
-				max-width: 500px;
 			}
 		}
 	</style>
@@ -518,9 +579,9 @@
 					<div id="statistics" class="result__tab">
 						<div id="statistics__charts">
 							<!-- Total cost is not centered vertically without 'height: min-content' for some reason -->
-							<div style="height: min-content;">
+							<div id="spent-by-spend-type" style="height: min-content;">
 								<div class="statistics__chart-title noselect">Spent by Type</div>
-								<div id="spent-by-spend-type" class="statistics__chart">
+								<div class="statistics__chart">
 									<div id="spent-by-spend-type__total-cost">
 										<span class="money--lose">{{ .TotalCost }}</span>
 										<br>
@@ -531,9 +592,25 @@
 								</div>
 							</div>
 
-							<div>
+							<div id="cost-distribution">
+								<div class="statistics__chart-title">
+									<span class="noselect">Cost Distribution</span>
+									<span class="feather-icon tooltip" style="vertical-align: middle;">
+										<svg style="width: 18px; height: 18px">
+											<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#help-circle` }}" />
+										</svg>
+
+										<span class="tooltip__text">Without 5% of the smallest and largest Spends</span>
+									</span>
+								</div>
+								<div class="statistics__chart">
+									<canvas id="cost-distribution__chart"></canvas>
+								</div>
+							</div>
+
+							<div id="spent-by-day">
 								<div class="statistics__chart-title noselect">Spent by Day</div>
-								<div id="spent-by-day" class="statistics__chart">
+								<div class="statistics__chart">
 									<canvas id="spent-by-day__chart"></canvas>
 								</div>
 							</div>
@@ -912,6 +989,107 @@
 				}
 			}
 		});
+
+		// Cost Distribution chart
+
+		const costIntervals = JSON.parse(`{{ .CostIntervals }}`);
+		let costIntervalLabels = [];
+		let costIntervalData = [];
+		for (const data of costIntervals) {
+			costIntervalLabels.push(data.from);
+			costIntervalData.push(data.total);
+		}
+		costIntervalLabels.push(costIntervals[costIntervals.length - 1].to);
+
+		const costIntervalsCtx = document.getElementById("cost-distribution__chart").getContext("2d");
+		new Chart(costIntervalsCtx, {
+			type: "bar",
+			data: {
+				labels: new Array(costIntervalLabels.length - 1).fill(""),
+				datasets: [{
+					data: costIntervalData,
+					backgroundColor: backgroundColor,
+					hoverBackgroundColor: hoverBackgroundColor,
+				}],
+			},
+			plugins: [
+				{
+					// Update right padding to be able to display last interval
+					afterInit: chart => {
+						const longestLabel = costIntervalLabels[costIntervalLabels.length - 1];
+						const textWidth = chart.ctx.measureText(longestLabel).width;
+
+						// Add additional 5px
+						chart.options.layout.padding.right = textWidth / 2 + 5;
+						chart.update();
+					},
+					// Draw intervals
+					afterDraw: chart => {
+						const axis = chart.scales["x-axis-0"];
+						const tickDistance = axis.width / (costIntervalLabels.length - 1);
+
+						const y = chart.height - 10;
+						const offset = axis.left;
+
+						// Sometimes canvas font can be bold (for example, on hover). Change it to normal while drawing intervals
+						const ctxFont = chart.ctx.font.replace("bold", "");
+						const normalFont = chart.ctx.font.replace("bold", "");
+						chart.ctx.font = normalFont;
+
+						for (let i = 0; i < costIntervalLabels.length; i++) {
+							const text = costIntervalLabels[i];
+							const textWidth = chart.ctx.measureText(text).width;
+							const x = offset + tickDistance * i - textWidth / 2;
+
+							chart.ctx.save();
+							chart.ctx.fillText(text, x, y);
+							chart.ctx.restore();
+						}
+
+						// Revert canvas font
+						chart.ctx.font = ctxFont;
+					}
+				}
+			],
+			options: {
+				maintainAspectRatio: false,
+				// Hide legend
+				legend: { display: false },
+				// Disable animations
+				animation: { duration: 0 },
+				hover: { animationDuration: 0 },
+				responsiveAnimationDuration: 0,
+				// Tune tooltips
+				tooltips: {
+					titleFontSize: 15,
+					bodyFontSize: 14,
+					backgroundColor: "#000000d0",
+					cornerRadius: 5,
+					displayColors: false,
+					callbacks: {
+						label: function (tooltipItem, data) {
+							const interval = costIntervals[tooltipItem.index];
+							return `${tooltipItem.value} – ${interval.count} Spends`;
+						},
+					}
+				},
+				// Plugins
+				plugins: {
+					datalabels: {
+						display: function (context) {
+							const dataset = context.chart.data.datasets[context.datasetIndex];
+							if (!dataset) return false;
+
+							const value = dataset.data[context.dataIndex];
+							if (!value) return false;
+
+							return "auto";
+						}
+					}
+				}
+			}
+		});
+
 
 		// Spent by Day chart
 

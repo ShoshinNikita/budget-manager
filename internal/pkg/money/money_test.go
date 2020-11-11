@@ -3,8 +3,10 @@ package money_test
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	. "github.com/ShoshinNikita/budget-manager/internal/pkg/money"
@@ -201,6 +203,32 @@ func TestDivide(t *testing.T) {
 
 		FromFloat(120.5).Div(0)
 	})
+}
+
+func TestRound(t *testing.T) {
+	t.Parallel()
+
+	tests := []float64{
+		1, 1.4, 1.5, 1.6,
+		0,
+		-1, -1.4, -1.5, -1.6,
+	}
+	for _, tt := range tests {
+		wantRound := int64(math.Round(tt))
+		gotRound := FromFloat(tt).Round().Int()
+
+		assert.Equalf(t, wantRound, gotRound, "test: round %f", tt)
+
+		wantCeil := int64(math.Ceil(tt))
+		gotCeil := FromFloat(tt).Ceil().Int()
+
+		assert.Equalf(t, wantCeil, gotCeil, "test: ceil %f", tt)
+
+		wantFloor := int64(math.Floor(tt))
+		gotFloor := FromFloat(tt).Floor().Int()
+
+		assert.Equalf(t, wantFloor, gotFloor, "test: floor %f", tt)
+	}
 }
 
 func TestJSON(t *testing.T) {

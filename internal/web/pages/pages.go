@@ -321,6 +321,9 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 
 	spentBySpendTypeDatasets := statistics.CalculateSpentBySpendType(dbSpendTypes, spends)
 	spentByDayDataset := statistics.CalculateSpentByDay(spends, args.After, args.Before)
+	// TODO: support custom interval number?
+	const costIntervalNumber = 15
+	costIntervals := statistics.CalculateCostIntervals(spends, costIntervalNumber)
 
 	// Execute the template
 	resp := struct {
@@ -329,6 +332,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		// Statistics
 		SpentBySpendTypeDatasets []statistics.SpentBySpendTypeDataset
 		SpentByDayDataset        statistics.SpentByDayDataset
+		CostIntervals            []statistics.CostInterval
 		TotalCost                money.Money
 		//
 		SpendTypes []SpendType
@@ -338,6 +342,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		//
 		SpentBySpendTypeDatasets: spentBySpendTypeDatasets,
 		SpentByDayDataset:        spentByDayDataset,
+		CostIntervals:            costIntervals,
 		TotalCost:                sumSpendCosts(spends),
 		//
 		SpendTypes: spendTypes,
