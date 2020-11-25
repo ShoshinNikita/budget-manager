@@ -35,7 +35,7 @@ jobs:
       TAG: docker.pkg.github.com/${{ github.repository }}/budget-manager:master
     steps:
       - name: Convert tag to lower case
-        run: echo "::set-env name=TAG::${TAG,,}"
+        run: echo "TAG=${TAG,,}" >> $GITHUB_ENV
 
       - name: Login to Package Registry
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.repository_owner }} --password-stdin docker.pkg.github.com
