@@ -20,8 +20,8 @@ func (req AddSpendReq) Check() error {
 	}
 	// Skip Type
 	// Skip Notes
-	if req.Cost <= 0 {
-		return notPositiveFieldError("cost")
+	if req.Cost < 0 {
+		return negativeFieldError("cost")
 	}
 	return nil
 }
@@ -51,8 +51,8 @@ func (req EditSpendReq) Check() error {
 	}
 	// Skip Type
 	// Skip Notes
-	if req.Cost != nil && *req.Cost <= 0 {
-		return notPositiveFieldError("cost")
+	if req.Cost != nil && *req.Cost < 0 {
+		return negativeFieldError("cost")
 	}
 	return nil
 }

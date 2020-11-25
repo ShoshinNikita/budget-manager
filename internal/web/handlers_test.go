@@ -744,6 +744,17 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 				ID:       2,
 			},
 		},
+		{
+			desc: "valid request (zero cost)",
+			req: models.AddSpendReq{
+				DayID: 12, Title: "title", Notes: "some notes", Cost: 0,
+			},
+			statusCode: http.StatusOK,
+			resp: models.Response{
+				RequestID: requestID.ToString(),
+				Success:   true,
+			},
+		},
 		// Invalid requests
 		{
 			desc: "invalid request (empty title)",
@@ -754,18 +765,6 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "title can't be empty",
-				Success:   false,
-			},
-		},
-		{
-			desc: "invalid request (zero cost)",
-			req: models.AddSpendReq{
-				DayID: 12, Title: "title", Notes: "some notes", Cost: 0,
-			},
-			statusCode: http.StatusBadRequest,
-			resp: models.Response{
-				RequestID: requestID.ToString(),
-				Error:     "cost must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -863,6 +862,20 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 				Success:   true,
 			},
 		},
+		{
+			desc: "valid request (zero cost)",
+			req: models.EditSpendReq{
+				ID:    2,
+				Title: newTitle("edited title"),
+				Notes: newNotes("updated notes"),
+				Cost:  newCost(0),
+			},
+			statusCode: http.StatusOK,
+			resp: models.Response{
+				RequestID: requestID.ToString(),
+				Success:   true,
+			},
+		},
 		// Invalid requests
 		{
 			desc: "invalid request (empty title)",
@@ -891,21 +904,6 @@ func testHandlers_Spend_EditSpend(t *testing.T, server *Server) {
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Error:     "such Spend doesn't exist",
-				Success:   false,
-			},
-		},
-		{
-			desc: "invalid request (zero cost)",
-			req: models.EditSpendReq{
-				ID:    2,
-				Title: newTitle("edited title"),
-				Notes: newNotes("updated notes"),
-				Cost:  newCost(0),
-			},
-			statusCode: http.StatusBadRequest,
-			resp: models.Response{
-				RequestID: requestID.ToString(),
-				Error:     "cost must be greater than zero",
 				Success:   false,
 			},
 		},
@@ -973,7 +971,7 @@ func testHandlers_Spend_RemoveSpend(t *testing.T, server *Server) {
 		{
 			desc: "invalid request (non-existing Spend)",
 			req: models.RemoveSpendReq{
-				ID: 3,
+				ID: 4,
 			},
 			statusCode: http.StatusNotFound,
 			resp: models.Response{

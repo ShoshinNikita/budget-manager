@@ -24,7 +24,7 @@ type Spend struct {
 	TypeID uint        `pg:"type_id"`
 	Type   *SpendType  `pg:"rel:has-one,fk:type_id"`
 	Notes  string      `pg:"notes"`
-	Cost   money.Money `pg:"cost"`
+	Cost   money.Money `pg:"cost,use_zero"`
 }
 
 // ToCommon converts Spend to common Spend structure from
