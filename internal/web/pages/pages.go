@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -243,6 +244,14 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	for i := range month.Days {
 		populateSpendsWithFullSpendTypeNames(spendTypes, month.Days[i].Spends)
 	}
+
+	// Sort Incomes and Monthly Payments
+	sort.Slice(month.Incomes, func(i, j int) bool {
+		return month.Incomes[i].Income > month.Incomes[j].Income
+	})
+	sort.Slice(month.MonthlyPayments, func(i, j int) bool {
+		return month.MonthlyPayments[i].Cost > month.MonthlyPayments[j].Cost
+	})
 
 	resp := struct {
 		db.Month
