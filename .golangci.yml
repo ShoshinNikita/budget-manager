@@ -8,13 +8,17 @@ linters:
   enable-all: true
   disable:
     - dupl
+    - exhaustivestruct
     - godot
     - godox
     - gomnd
+    - nlreturn
+    - paralleltest
+    - tparallel
     - testpackage
     - whitespace
+    - wrapcheck
     - wsl
-    - nlreturn
 
 linters-settings:
   gci:
