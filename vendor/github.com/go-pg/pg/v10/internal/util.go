@@ -5,12 +5,14 @@ import (
 	"reflect"
 	"time"
 
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
+var tracer = otel.Tracer("github.com/go-pg/pg")
+
 func Sleep(ctx context.Context, dur time.Duration) error {
-	return WithSpan(ctx, "sleep", func(ctx context.Context, span trace.Span) error {
+	return WithSpan(ctx, "time.Sleep", func(ctx context.Context, span trace.Span) error {
 		t := time.NewTimer(dur)
 		defer t.Stop()
 
@@ -84,7 +86,7 @@ func WithSpan(
 		return fn(ctx, span)
 	}
 
-	ctx, span := global.Tracer("github.com/go-pg/pg").Start(ctx, name)
+	ctx, span := tracer.Start(ctx, name)
 	defer span.End()
 
 	return fn(ctx, span)

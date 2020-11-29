@@ -360,7 +360,9 @@ func (t *Table) newField(f reflect.StructField, index []int) *Field {
 		return nil
 	}
 
-	if isKnownFieldOption(pgTag.Name) {
+	sqlName := internal.Underscore(f.Name)
+
+	if pgTag.Name != sqlName && isKnownFieldOption(pgTag.Name) {
 		internal.Warn.Printf(
 			"%s.%s tag name %q is also an option name; is it a mistake?",
 			t.TypeName, f.Name, pgTag.Name,
@@ -374,12 +376,12 @@ func (t *Table) newField(f reflect.StructField, index []int) *Field {
 	}
 
 	skip := pgTag.Name == "-"
-	if skip || pgTag.Name == "" {
-		pgTag.Name = internal.Underscore(f.Name)
+	if !skip && pgTag.Name != "" {
+		sqlName = pgTag.Name
 	}
 
 	index = append(index, f.Index...)
-	if field := t.getField(pgTag.Name); field != nil {
+	if field := t.getField(sqlName); field != nil {
 		if indexEqual(field.Index, index) {
 			return field
 		}
@@ -391,8 +393,8 @@ func (t *Table) newField(f reflect.StructField, index []int) *Field {
 		Type:  indirectType(f.Type),
 
 		GoName:  f.Name,
-		SQLName: pgTag.Name,
-		Column:  quoteIdent(pgTag.Name),
+		SQLName: sqlName,
+		Column:  quoteIdent(sqlName),
 
 		Index: index,
 	}
@@ -637,6 +639,11 @@ func (t *Table) mustHasOneRelation(field *Field, pgTag *tagparser.Tag) bool {
 			continue
 		}
 
+		if fk := t.getField(joinPK.SQLName); fk != nil {
+			fks = append(fks, fk)
+			continue
+		}
+
 		panic(fmt.Errorf(
 			"pg: %s has-one %s: %s must have column %s "+
 				"(use fk:custom_column tag on %s field to specify custom column)",
@@ -689,6 +696,11 @@ func (t *Table) mustBelongsToRelation(field *Field, pgTag *tagparser.Tag) bool {
 	for _, pk := range t.PKs {
 		fkName := fkPrefix + pk.SQLName
 		if fk := joinTable.getField(fkName); fk != nil {
+			fks = append(fks, fk)
+			continue
+		}
+
+		if fk := joinTable.getField(pk.SQLName); fk != nil {
 			fks = append(fks, fk)
 			continue
 		}
@@ -757,6 +769,11 @@ func (t *Table) mustHasManyRelation(field *Field, pgTag *tagparser.Tag) bool {
 			continue
 		}
 
+		if fk := joinTable.getField(pk.SQLName); fk != nil {
+			fks = append(fks, fk)
+			continue
+		}
+
 		panic(fmt.Errorf(
 			"pg: %s has-many %s: %s must have column %s "+
 				"(use join_fk:custom_column tag on %s field to specify custom column)",
@@ -765,6 +782,7 @@ func (t *Table) mustHasManyRelation(field *Field, pgTag *tagparser.Tag) bool {
 	}
 
 	var typeField *Field
+
 	if polymorphic {
 		typeFieldName := fkPrefix + "type"
 		typeField = joinTable.getField(typeFieldName)
@@ -1514,7 +1532,8 @@ func isKnownTableOption(name string) bool {
 
 func isKnownFieldOption(name string) bool {
 	switch name {
-	case "type",
+	case "alias",
+		"type",
 		"array",
 		"hstore",
 		"composite",
