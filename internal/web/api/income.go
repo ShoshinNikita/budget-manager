@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -60,8 +61,8 @@ func (h IncomesHandlers) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.db.AddIncome(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrMonthNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't add Income", err)
@@ -120,8 +121,8 @@ func (h IncomesHandlers) EditIncome(w http.ResponseWriter, r *http.Request) {
 	}
 	err := h.db.EditIncome(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrIncomeNotExist:
+		switch {
+		case errors.Is(err, db.ErrIncomeNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't edit Income", err)
@@ -165,8 +166,8 @@ func (h IncomesHandlers) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("remove Income")
 	err := h.db.RemoveIncome(ctx, req.ID)
 	if err != nil {
-		switch err {
-		case db.ErrIncomeNotExist:
+		switch {
+		case errors.Is(err, db.ErrIncomeNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't remove Income", err)

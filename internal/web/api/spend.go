@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -62,8 +63,8 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := h.db.AddSpend(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrDayNotExist:
+		switch {
+		case errors.Is(err, db.ErrDayNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't add Spend", err)
@@ -123,8 +124,8 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	}
 	err := h.db.EditSpend(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrSpendNotExist:
+		switch {
+		case errors.Is(err, db.ErrSpendNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend", err)
@@ -168,8 +169,8 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("remove Spend")
 	err := h.db.RemoveSpend(ctx, req.ID)
 	if err != nil {
-		switch err {
-		case db.ErrSpendNotExist:
+		switch {
+		case errors.Is(err, db.ErrSpendNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't remove Spend", err)

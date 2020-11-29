@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -48,8 +49,8 @@ func (h DaysHandlers) GetDayByID(w http.ResponseWriter, r *http.Request) {
 	log.Debug("get day from the database")
 	day, err := h.db.GetDay(ctx, req.ID)
 	if err != nil {
-		switch err {
-		case db.ErrDayNotExist:
+		switch {
+		case errors.Is(err, db.ErrDayNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get Day with passed id"
@@ -95,8 +96,8 @@ func (h DaysHandlers) GetDayByDate(w http.ResponseWriter, r *http.Request) {
 	log.Debug("try to get day id")
 	dayID, err := h.db.GetDayIDByDate(ctx, req.Year, req.Month, req.Day)
 	if err != nil {
-		switch err {
-		case db.ErrDayNotExist:
+		switch {
+		case errors.Is(err, db.ErrDayNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get such Day"
