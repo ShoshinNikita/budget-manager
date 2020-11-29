@@ -22,12 +22,6 @@ import (
 )
 
 const (
-	executeErrorMessage     = "Can't execute template"
-	invalidURLMessagePrefix = "Invalid URL: "
-	dbErrorMessagePrefix    = "DB error: "
-)
-
-const (
 	overviewTemplateName     = "overview.html"
 	yearTemplateName         = "overview_year.html"
 	monthTemplateName        = "overview_year_month.html"
@@ -116,15 +110,14 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 
 	year, ok := getYear(r)
 	if !ok {
-		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest)
+		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid year"), http.StatusBadRequest)
 		return
 	}
 
 	months, err := h.db.GetMonths(ctx, year)
 	// Render the page even theare no months for passed year
 	if err != nil && !errors.Is(err, db.ErrYearNotExist) {
-		msg := dbErrorMessagePrefix + "couldn't get months"
-		h.processInternalErrorWithPage(ctx, log, w, msg, err)
+		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get months"), err)
 		return
 	}
 
@@ -202,12 +195,12 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 
 	year, ok := getYear(r)
 	if !ok {
-		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid year", http.StatusBadRequest)
+		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid year"), http.StatusBadRequest)
 		return
 	}
 	monthNumber, ok := getMonth(r)
 	if !ok {
-		h.processErrorWithPage(ctx, log, w, invalidURLMessagePrefix+"invalid month", http.StatusBadRequest)
+		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid month"), http.StatusBadRequest)
 		return
 	}
 
@@ -217,8 +210,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		case db.ErrMonthNotExist:
 			h.processErrorWithPage(ctx, log, w, err.Error(), http.StatusNotFound)
 		default:
-			msg := dbErrorMessagePrefix + "couldn't get month"
-			h.processInternalErrorWithPage(ctx, log, w, msg, err)
+			h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get month"), err)
 		}
 		return
 	}
@@ -227,15 +219,13 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	month, err := h.db.GetMonth(ctx, monthID)
 	if err != nil {
 		// Month must exist
-		msg := dbErrorMessagePrefix + "couldn't get Month info"
-		h.processInternalErrorWithPage(ctx, log, w, msg, err)
+		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Month info"), err)
 		return
 	}
 
 	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
-		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
-		h.processInternalErrorWithPage(ctx, log, w, msg, err)
+		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Spend Types"), err)
 		return
 	}
 	spendTypes := getSpendTypesWithFullNames(dbSpendTypes)
@@ -313,15 +303,13 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 	args := parseSearchSpendsArgs(r, log)
 	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
-		msg := dbErrorMessagePrefix + "couldn't complete Spend search"
-		h.processInternalErrorWithPage(ctx, log, w, msg, err)
+		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't complete Spend search"), err)
 		return
 	}
 
 	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
-		msg := dbErrorMessagePrefix + "couldn't get Spend Types"
-		h.processInternalErrorWithPage(ctx, log, w, msg, err)
+		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Spend Types"), err)
 		return
 	}
 	spendTypes := getSpendTypesWithFullNames(dbSpendTypes)
@@ -455,4 +443,16 @@ func parseSearchSpendsArgs(r *http.Request, log logrus.FieldLogger) db.SearchSpe
 type FooterTemplateData struct {
 	Version string
 	GitHash string
+}
+
+const (
+	executeErrorMessage = "Can't execute template"
+)
+
+func newInvalidURLMessage(err string) string {
+	return "Invalid URL: " + err
+}
+
+func newDBErrorMessage(err string) string {
+	return "DB error: " + err
 }
