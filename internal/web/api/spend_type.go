@@ -148,8 +148,8 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	}
 	err := h.db.EditSpendType(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrSpendTypeNotExist:
+		switch {
+		case errors.Is(err, db.ErrSpendTypeNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend Type", err)
@@ -230,8 +230,8 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 	log.Debug("remove Spend Type")
 	err := h.db.RemoveSpendType(ctx, req.ID)
 	if err != nil {
-		switch err {
-		case db.ErrSpendTypeNotExist:
+		switch {
+		case errors.Is(err, db.ErrSpendTypeNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't remove Spend Type", err)

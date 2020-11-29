@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/sirupsen/logrus"
@@ -48,8 +49,8 @@ func (h MonthsHandlers) GetMonthByID(w http.ResponseWriter, r *http.Request) {
 	log.Debug("get month from the database")
 	month, err := h.db.GetMonth(ctx, req.ID)
 	if err != nil {
-		switch err {
-		case db.ErrMonthNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get Month with passed id"
@@ -95,8 +96,8 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	log.Debug("try to get month id")
 	monthID, err := h.db.GetMonthID(ctx, req.Year, req.Month)
 	if err != nil {
-		switch err {
-		case db.ErrMonthNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			msg := "couldn't get month with passed year and month"

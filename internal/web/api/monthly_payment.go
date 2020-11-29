@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -62,8 +63,8 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 	}
 	id, err := h.db.AddMonthlyPayment(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrMonthNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't add Monthly Payment", err)
@@ -123,8 +124,8 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 	}
 	err := h.db.EditMonthlyPayment(ctx, args)
 	if err != nil {
-		switch err {
-		case db.ErrMonthlyPaymentNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthlyPaymentNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't edit Monthly Payment", err)
@@ -168,8 +169,8 @@ func (h MonthlyPaymentsHandlers) RemoveMonthlyPayment(w http.ResponseWriter, r *
 	log.Debug("remove Monthly Payment")
 	err := h.db.RemoveMonthlyPayment(ctx, req.ID)
 	if err != nil {
-		switch err {
-		case db.ErrMonthlyPaymentNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthlyPaymentNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't remove Monthly Payment", err)

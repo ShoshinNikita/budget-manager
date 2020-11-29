@@ -206,8 +206,8 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 
 	monthID, err := h.db.GetMonthID(ctx, year, int(monthNumber))
 	if err != nil {
-		switch err {
-		case db.ErrMonthNotExist:
+		switch {
+		case errors.Is(err, db.ErrMonthNotExist):
 			h.processErrorWithPage(ctx, log, w, err.Error(), http.StatusNotFound)
 		default:
 			h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get month"), err)
