@@ -1756,6 +1756,7 @@
 				this.titleInput = document.getElementById("new-spend-title-" + dayID);
 				this.titleInput.addEventListener("input", this.oninputListener.bind(this));
 
+				this.notesInput = document.getElementById("new-spend-notes-" + dayID);
 				this.typeSelector = document.getElementById("new-spend-type-" + dayID);
 				this.costInput = document.getElementById("new-spend-cost-" + dayID);
 
@@ -1872,6 +1873,7 @@
 					if (spend.title != title) continue;
 
 					this.typeSelector.value = spend.type ? spend.type.id : 0;
+					this.notesInput.value = spend.notes;
 					this.costInput.value = spend.cost;
 					break;
 				}
