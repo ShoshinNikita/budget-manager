@@ -1873,7 +1873,7 @@
 					if (spend.title != title) continue;
 
 					this.typeSelector.value = spend.type ? spend.type.id : 0;
-					this.notesInput.value = spend.notes;
+					this.notesInput.value = spend.notes || "";
 					this.costInput.value = spend.cost;
 					break;
 				}
