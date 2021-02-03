@@ -104,8 +104,6 @@ stop-pg-test:
 # Configuration
 #
 
-MODULE_PATH=github.com/ShoshinNikita/budget-manager
-
 # export-ldflags exports LDFLAGS env variable. It is used during the build process to set version
 # and git hash. It can be used as a dependency target
 #
@@ -116,12 +114,12 @@ MODULE_PATH=github.com/ShoshinNikita/budget-manager
 #
 # We can use it as 'make build VERSION=v1.0.0'. Then, next command will be executed:
 #
-#  go build -ldflags "-s -w -X 'main.Version=v1.0.0' -X 'main.GitHash=some_hash'" main.go
+#  go build -ldflags "-s -w -X 'main.version=v1.0.0' -X 'main.gitHash=some_hash'" main.go
 #
 export-ldflags: GIT_HASH=$(shell git log -1 --pretty="format:%h")
 export-ldflags: VERSION?=unknown
 export-ldflags:
-	$(eval export LDFLAGS=-s -w -X '${MODULE_PATH}/internal/pkg/version.Version=${VERSION}' -X '${MODULE_PATH}/internal/pkg/version.GitHash=${GIT_HASH}')
+	$(eval export LDFLAGS=-s -w -X 'main.version=${VERSION}' -X 'main.gitHash=${GIT_HASH}')
 	@ echo Use this ldflags: ${LDFLAGS}
 
 # export-config exports configuration env variables

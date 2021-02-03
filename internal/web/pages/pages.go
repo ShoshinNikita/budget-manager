@@ -17,7 +17,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages/statistics"
 )
 
@@ -33,6 +32,9 @@ type Handlers struct {
 	db          DB
 	tplExecutor *templateExecutor
 	log         logrus.FieldLogger
+
+	version string
+	gitHash string
 }
 
 type DB interface {
@@ -45,15 +47,18 @@ type DB interface {
 	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]db.Spend, error)
 }
 
-func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool) *Handlers {
+func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool, version, gitHash string) *Handlers {
 	return &Handlers{
 		db:          db,
-		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs()),
+		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs(gitHash)),
 		log:         log,
+		//
+		version: version,
+		gitHash: gitHash,
 	}
 }
 
-func commonTemplateFuncs() template.FuncMap {
+func commonTemplateFuncs(gitHash string) template.FuncMap {
 	return template.FuncMap{
 		"asStaticURL": func(rawURL string) (string, error) {
 			url, err := url.Parse(rawURL)
@@ -62,7 +67,7 @@ func commonTemplateFuncs() template.FuncMap {
 			}
 
 			query := url.Query()
-			query.Add("hash", version.GitHash)
+			query.Add("hash", gitHash)
 			url.RawQuery = query.Encode()
 
 			return url.String(), nil
@@ -93,8 +98,8 @@ func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
 		Footer FooterTemplateData
 	}{
 		Footer: FooterTemplateData{
-			Version: version.Version,
-			GitHash: version.GitHash,
+			Version: h.version,
+			GitHash: h.gitHash,
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, w, overviewTemplateName, resp); err != nil {
@@ -177,8 +182,8 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 		Result:       result,
 		//
 		Footer: FooterTemplateData{
-			Version: version.Version,
-			GitHash: version.GitHash,
+			Version: h.version,
+			GitHash: h.gitHash,
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, w, yearTemplateName, resp); err != nil {
@@ -258,8 +263,8 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		SpendTypes: spendTypes,
 		//
 		Footer: FooterTemplateData{
-			Version: version.Version,
-			GitHash: version.GitHash,
+			Version: h.version,
+			GitHash: h.gitHash,
 		},
 		//
 		ToShortMonth:  toShortMonth,
@@ -344,8 +349,8 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		//
 		SpendTypes: spendTypes,
 		Footer: FooterTemplateData{
-			Version: version.Version,
-			GitHash: version.GitHash,
+			Version: h.version,
+			GitHash: h.gitHash,
 		},
 	}
 	if err := h.tplExecutor.Execute(ctx, w, searchSpendsTemplateName, resp); err != nil {
