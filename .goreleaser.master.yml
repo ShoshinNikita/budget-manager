@@ -16,7 +16,7 @@ dockers:
       - "ghcr.io/shoshinnikita/{{ .ProjectName }}:master"
       - "ghcr.io/shoshinnikita/{{ .ProjectName }}:{{ .ShortCommit }}"
     build_flag_templates:
-      - "--build-arg=LDFLAGS=-s -w -X '$main.version=master' -X 'main.gitHash={{ .ShortCommit }}'"
+      - "--build-arg=LDFLAGS=-s -w -X 'main.version=master' -X 'main.gitHash={{ .ShortCommit }}'"
     extra_files:
       # Dirs
       - cmd/

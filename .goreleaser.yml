@@ -20,7 +20,7 @@ dockers:
       - "ghcr.io/shoshinnikita/{{ .ProjectName }}:{{ .Tag }}"
       - "ghcr.io/shoshinnikita/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}"
     build_flag_templates:
-      - "--build-arg=LDFLAGS=-s -w -X '$main.version={{ .Tag }}' -X 'main.gitHash={{ .ShortCommit }}'"
+      - "--build-arg=LDFLAGS=-s -w -X 'main.version={{ .Tag }}' -X 'main.gitHash={{ .ShortCommit }}'"
     extra_files:
       # Dirs
       - cmd/
