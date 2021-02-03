@@ -36,7 +36,7 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 
     services:
       budget-manager:
-        image: docker.pkg.github.com/shoshinnikita/budget-manager/budget-manager:latest
+        image: ghcr.io/shoshinnikita/budget-manager:latest
         container_name: budget-manager
         environment:
           DB_TYPE: postgres
