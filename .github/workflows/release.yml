@@ -18,6 +18,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      # GoReleaser forces snapshot mode if a tag is dirty. So, tag the last commit to bypass this behavior
+      # https://github.com/goreleaser/goreleaser-action/blob/master/src/main.ts#L34
+      - name: Bypass GoReleaser check
+        if: ${{ contains(github.ref, 'refs/heads/') }}
+        run: git tag v0.0.0-bypass-snapshot-mode
+
+      - name: Update GoReleaser config
+        if: ${{ contains(github.ref, 'refs/tags/') }}
+        run: echo "GORELEASER_CONFIG=.goreleaser.yml" >> $GITHUB_ENV
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
@@ -25,14 +35,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - name: Update GoReleaser config
-        if: ${{ contains(github.ref, 'refs/tags/') }}
-        run: echo "GORELEASER_CONFIG=.goreleaser.yml" >> $GITHUB_ENV
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
-          version: latest
+          version: v0.155.0
           args: release --rm-dist --config=${{ env.GORELEASER_CONFIG }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
