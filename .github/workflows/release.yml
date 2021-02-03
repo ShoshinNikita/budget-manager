@@ -26,7 +26,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Update GoReleaser config
-        if: ${{ contains(github.ref, "refs/tags/") }}
+        if: ${{ contains(github.ref, 'refs/tags/') }}
         run: echo "GORELEASER_CONFIG=.goreleaser.yml" >> $GITHUB_ENV
 
       - name: Run GoReleaser
