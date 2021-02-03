@@ -1,0 +1,33 @@
+# This config is used to build code and publish Docker images on new tag
+project_name: budget-manager
+
+release:
+  github:
+    owner: ShoshinNikita
+    name: budget-manager
+  prerelease: auto
+
+changelog:
+  skip: true
+
+builds:
+  - skip: true
+
+dockers:
+  - dockerfile: Dockerfile
+    image_templates:
+      - "ghcr.io/shoshinnikita/{{ .ProjectName }}:latest"
+      - "ghcr.io/shoshinnikita/{{ .ProjectName }}:{{ .Tag }}"
+      - "ghcr.io/shoshinnikita/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}"
+    build_flag_templates:
+      - --build-arg LDFLAGS="-s -w -X '$main.version={{ .Tag }}' -X 'main.gitHash={{ .ShortCommit }}'"
+    extra_files:
+      # Dirs
+      - cmd/
+      - internal/
+      - static/
+      - templates/
+      - vendor/
+      # Files
+      - go.mod
+      - go.sum
