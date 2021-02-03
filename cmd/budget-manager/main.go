@@ -12,8 +12,15 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/version"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
+)
+
+//nolint:gochecknoglobals
+var (
+	// version is a version of the app. It must be set during the build process with -ldflags flag
+	version = "unknown"
+	// gitHash is the last commit hash. It must be set during the build process with -ldflags flag
+	gitHash = "unknown"
 )
 
 // Swagger General Info
@@ -146,7 +153,7 @@ func (app *App) prepareDB() (err error) {
 
 func (app *App) prepareWebServer() {
 	app.server = web.NewServer(
-		app.config.Server, app.db, app.log.WithField("component", "server"),
+		app.config.Server, app.db, app.log.WithField("component", "server"), version, gitHash,
 	)
 	app.server.Prepare()
 }
@@ -154,8 +161,8 @@ func (app *App) prepareWebServer() {
 // Run runs web server and waits for a server error or an interrupt signal
 func (app *App) Run() (appErr error) {
 	app.log.WithFields(logrus.Fields{
-		"version":  version.Version,
-		"git_hash": version.GitHash,
+		"version":  version,
+		"git_hash": gitHash,
 	}).Info("start app")
 
 	// Start the application

@@ -74,6 +74,9 @@ type Server struct {
 	db     Database
 
 	server *http.Server
+
+	version string
+	gitHash string
 }
 
 type Database interface {
@@ -81,11 +84,14 @@ type Database interface {
 	pages.DB
 }
 
-func NewServer(cnf Config, db Database, log logrus.FieldLogger) *Server {
+func NewServer(cnf Config, db Database, log logrus.FieldLogger, version, gitHash string) *Server {
 	return &Server{
 		config: cnf,
 		db:     db,
 		log:    log,
+		//
+		version: version,
+		gitHash: gitHash,
 	}
 }
 
