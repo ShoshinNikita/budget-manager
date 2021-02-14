@@ -117,7 +117,7 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 
 	months = getLastTwelveMonths(endYear, now.Month(), months)
 
-	annualIncome := func() money.Money {
+	totalIncome := func() money.Money {
 		var res money.Money
 		for _, m := range months {
 			res = res.Add(m.TotalIncome)
@@ -125,7 +125,7 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 		return res
 	}()
 
-	annualSpend := func() money.Money {
+	totalSpend := func() money.Money {
 		var res money.Money
 		for _, m := range months {
 			// Use Add because 'TotalSpend' is negative
@@ -135,34 +135,37 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	// Use Add because 'annualSpend' is negative
-	result := annualIncome.Add(annualSpend)
+	result := totalIncome.Add(totalSpend)
 
 	resp := struct {
-		Year     int
-		NextYear int
-		PrevYear int
+		StartYear int
+		EndYear   int
+		Offset    int
 		//
-		Months       []db.Month
-		AnnualIncome money.Money
-		AnnualSpend  money.Money
-		Result       money.Money
+		Months      []db.Month
+		TotalIncome money.Money
+		TotalSpend  money.Money
+		Result      money.Money
 		//
 		Footer FooterTemplateData
-	}{
-		// TODO
-		Year:     0,
-		NextYear: 0,
-		PrevYear: 0,
 		//
-		Months:       months,
-		AnnualIncome: annualIncome,
-		AnnualSpend:  annualSpend,
-		Result:       result,
+		Add func(int, int) int
+	}{
+		StartYear: endYear - 1,
+		EndYear:   endYear,
+		Offset:    offset,
+		//
+		Months:      months,
+		TotalIncome: totalIncome,
+		TotalSpend:  totalSpend,
+		Result:      result,
 		//
 		Footer: FooterTemplateData{
 			Version: h.version,
 			GitHash: h.gitHash,
 		},
+		//
+		Add: func(a, b int) int { return a + b },
 	}
 	if err := h.tplExecutor.Execute(ctx, w, monthsTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)

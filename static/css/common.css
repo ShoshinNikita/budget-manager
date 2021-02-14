@@ -85,8 +85,11 @@ body {
 /* | Icons */
 
 .feather-icon--btn {
-	cursor: pointer;
 	padding: 3px;
+}
+
+.feather-icon--btn:not(.disabled) {
+	cursor: pointer;
 }
 
 .feather-icon > svg,
@@ -102,7 +105,7 @@ body {
 	opacity: 0.64;
 }
 
-.feather-icon--btn:hover > svg {
+.feather-icon--btn:hover:not(.disabled) > svg {
 	opacity: 1;
 	stroke: #666666;
 }
