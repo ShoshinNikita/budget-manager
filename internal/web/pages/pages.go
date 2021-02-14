@@ -21,9 +21,8 @@ import (
 )
 
 const (
-	overviewTemplateName     = "overview.html"
-	yearTemplateName         = "overview_year.html"
-	monthTemplateName        = "overview_year_month.html"
+	monthsTemplateName       = "months.html"
+	monthTemplateName        = "month.html"
 	searchSpendsTemplateName = "search_spends.html"
 	errorPageTemplateName    = "error_page.html"
 )
@@ -84,32 +83,13 @@ func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
 		WithFields(logrus.Fields{"year": year, "month": int(month)}).
 		Debug("redirect to the current month")
 
-	url := fmt.Sprintf("/overview/%d/%d", year, month)
+	url := fmt.Sprintf("/%d-%d", year, month)
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
-// GET /overview
+// GET /months
 //
-func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	log := reqid.FromContextToLogger(ctx, h.log)
-
-	resp := struct {
-		Footer FooterTemplateData
-	}{
-		Footer: FooterTemplateData{
-			Version: h.version,
-			GitHash: h.gitHash,
-		},
-	}
-	if err := h.tplExecutor.Execute(ctx, w, overviewTemplateName, resp); err != nil {
-		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
-	}
-}
-
-// GET /overview/{year:[0-9]+}
-//
-func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
+func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
 
@@ -186,12 +166,12 @@ func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
 			GitHash: h.gitHash,
 		},
 	}
-	if err := h.tplExecutor.Execute(ctx, w, yearTemplateName, resp); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, monthsTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
 
-// GET /overview/{year:[0-9]+}/{month:[0-9]+}
+// GET /{year:[0-9]+}-{month:[0-9]+}
 //
 //nolint:funlen
 func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {

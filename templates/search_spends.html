@@ -389,7 +389,6 @@
 	<div id="app">
 		<div id="header">
 			<div>
-				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
 				<span class="header__path__element">Search</span>
 				<span class="header__path__element">Spends</span>
 			</div>
@@ -561,7 +560,7 @@
 									</td>
 									<td class="spends__table__cost">{{ .Cost }}</td>
 									<td class="spends__table__link">
-										<a href="/overview/{{ .Year }}/{{ printf `%d` .Month }}#{{ .Day }}">
+										<a href="/{{ .Year }}-{{ printf `%02d` .Month }}#{{ .Day }}">
 											<div class="feather-icon--btn" title="View Day">
 												<svg>
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#external-link` }}" />
