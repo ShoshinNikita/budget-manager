@@ -1016,6 +1016,10 @@
 
 			// Weeks are started from Monday
 			const lastDayNumber = (nextMonth.getDay() + 6) % 7;
+			if (lastDayNumber === 0) {
+				// Special case: month ends on Sunday
+				lastDayNumber = 7;
+			}
 
 			for (let i = 0; i < 7 - lastDayNumber; i++) {
 				const div = createCalendarDay(i + 1, nextMonthName);
