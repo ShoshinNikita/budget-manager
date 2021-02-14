@@ -39,7 +39,7 @@ type Handlers struct {
 type DB interface {
 	GetMonth(ctx context.Context, id uint) (db.Month, error)
 	GetMonthID(ctx context.Context, year, month int) (uint, error)
-	GetMonths(ctx context.Context, year int) ([]db.Month, error)
+	GetMonths(ctx context.Context, years ...int) ([]db.Month, error)
 
 	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
 
@@ -101,7 +101,7 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 
 	months, err := h.db.GetMonths(ctx, year)
 	// Render the page even theare no months for passed year
-	if err != nil && !errors.Is(err, db.ErrYearNotExist) {
+	if err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get months"), err)
 		return
 	}
