@@ -117,30 +117,28 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 
 	months = getLastTwelveMonths(endYear, now.Month(), months)
 
-	totalIncome := func() money.Money {
-		var res money.Money
-		for _, m := range months {
-			res = res.Add(m.TotalIncome)
-		}
-		return res
-	}()
+	var totalIncome money.Money
+	for _, m := range months {
+		totalIncome = totalIncome.Add(m.TotalIncome)
+	}
 
-	totalSpend := func() money.Money {
-		var res money.Money
-		for _, m := range months {
-			// Use Add because 'TotalSpend' is negative
-			res = res.Add(m.TotalSpend)
-		}
-		return res
-	}()
+	var totalSpend money.Money
+	for _, m := range months {
+		// Use Add because 'TotalSpend' is negative
+		totalSpend = totalSpend.Add(m.TotalSpend)
+	}
 
 	// Use Add because 'annualSpend' is negative
 	result := totalIncome.Add(totalSpend)
 
+	yearInterval := strconv.Itoa(endYear)
+	if len(years) > 1 {
+		yearInterval = strconv.Itoa(endYear-1) + "–" + yearInterval
+	}
+
 	resp := struct {
-		StartYear int
-		EndYear   int
-		Offset    int
+		YearInterval string
+		Offset       int
 		//
 		Months      []db.Month
 		TotalIncome money.Money
@@ -151,9 +149,8 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 		//
 		Add func(int, int) int
 	}{
-		StartYear: endYear - 1,
-		EndYear:   endYear,
-		Offset:    offset,
+		YearInterval: yearInterval,
+		Offset:       offset,
 		//
 		Months:      months,
 		TotalIncome: totalIncome,

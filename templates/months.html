@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{ .StartYear }}–{{ .EndYear }} | Budget Manager</title>
+	<title>{{ .YearInterval }} Overview | Budget Manager</title>
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -182,7 +182,7 @@
 	<div id="app">
 		<div id="header">
 			<div>
-				<span class="header__path__element">{{ .StartYear }}–{{ .EndYear }}</span>
+				<span class="header__path__element">{{ .YearInterval }} Overview</span>
 			</div>
 		</div>
 
@@ -244,7 +244,7 @@
 						</div>
 					</a>
 					{{ else }}
-					<div class="feather-icon--btn disabled">
+					<div class="feather-icon--btn disabled" title="No more months">
 						<svg>
 							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
 						</svg>
@@ -255,7 +255,7 @@
 
 			<div id="year-overview">
 				<div id="year-overview__results">
-					<div id="year-overview__results__header" class="noselect">{{ .StartYear }}–{{ .EndYear }} Results</div>
+					<div id="year-overview__results__header" class="noselect">{{ .YearInterval }} Results</div>
 
 					<div id="year-overview__results__result">
 						<div>Total Income:</div>
