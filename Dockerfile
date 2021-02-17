@@ -6,7 +6,7 @@ ARG WORKDIR=/go/src/github.com/ShoshinNikita/budget-manager
 # Build a binary file
 #
 
-FROM golang:1.15-alpine as backend-builder
+FROM golang:1.16-alpine as backend-builder
 ARG WORKDIR
 
 ENV CGO_ENABLED=0
