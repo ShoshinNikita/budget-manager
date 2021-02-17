@@ -92,10 +92,7 @@ func NewApp() *App {
 
 // ParseConfig parses app config
 func (app *App) ParseConfig() error {
-	if err := env.Parse(&app.config); err != nil {
-		return err
-	}
-	return nil
+	return env.Parse(&app.config)
 }
 
 // PrepareComponents prepares logger, db and web server
