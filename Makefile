@@ -10,8 +10,8 @@ build: export-ldflags
 	@ echo "Build Budget Manager..."
 	@ go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
 
-# run runs built Budget Manager and PostgreSQL in container
-run: run-pg export-config
+# run runs built Budget Manager
+run: export-config
 	@ echo "Run Budget Manager..."
 	@ ./bin/budget-manager
 
