@@ -1,17 +1,12 @@
-# Global workdir variable
-ARG WORKDIR=/go/src/github.com/ShoshinNikita/budget-manager
-
-
 #
 # Build a binary file
 #
 
 FROM golang:1.16-alpine as backend-builder
-ARG WORKDIR
 
 ENV CGO_ENABLED=0
 
-WORKDIR ${WORKDIR}
+WORKDIR /build/backend
 
 # Copy dependencies (for better caching)
 COPY go.mod go.sum ./
@@ -23,7 +18,7 @@ COPY internal ./internal
 
 # Build
 ARG LDFLAGS
-RUN go build -ldflags "${LDFLAGS}" -mod vendor -o ./bin/budget-manager ./cmd/budget-manager/main.go
+RUN go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/main.go
 
 
 #
@@ -31,9 +26,8 @@ RUN go build -ldflags "${LDFLAGS}" -mod vendor -o ./bin/budget-manager ./cmd/bud
 #
 
 FROM ubuntu:18.04 as frontend-builder
-ARG WORKDIR
 
-WORKDIR ${WORKDIR}
+WORKDIR /build/frontend
 
 # Install minify
 ADD https://github.com/tdewolff/minify/releases/download/v2.7.2/minify_2.7.2_linux_amd64.tar.gz minify.tar.gz
@@ -60,15 +54,14 @@ RUN sed -i "s/$.tohtmlattr/$.ToHTMLAttr/g" templates/month.html
 #
 
 FROM alpine:3.11
-ARG WORKDIR
 
 WORKDIR /srv
 
 # Copy 'static' directory
-COPY --from=frontend-builder ${WORKDIR}/static ./static
+COPY --from=frontend-builder build/frontend/static ./static
 # Copy 'templates' directory
-COPY --from=frontend-builder ${WORKDIR}/templates ./templates
+COPY --from=frontend-builder build/frontend/templates ./templates
 # Copy binaries
-COPY --from=backend-builder ${WORKDIR}/bin .
+COPY --from=backend-builder build/backend/bin .
 
 ENTRYPOINT [ "/srv/budget-manager" ]
