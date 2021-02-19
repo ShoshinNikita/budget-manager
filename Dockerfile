@@ -53,7 +53,7 @@ RUN minify --html-keep-default-attrvals -o templates/ templates && \
 # So, we have to find a workaround. For example, we can manually fix Go templates in attributes (they can be found with
 # this regexp: \{\{ .*? \}\}>
 #
-RUN sed -i "s/$.tohtmlattr/$.ToHTMLAttr/g" templates/overview_year_month.html
+RUN sed -i "s/$.tohtmlattr/$.ToHTMLAttr/g" templates/month.html
 
 #
 # Build the final image
