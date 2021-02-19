@@ -6,8 +6,7 @@ import (
 )
 
 // Request is a base request model that must be nested into all requests
-type Request struct {
-}
+type Request struct{}
 
 // Check is a default method to implement 'web.RequestChecker' interface
 func (Request) Check() error {

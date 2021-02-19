@@ -7,6 +7,7 @@ run:
 linters:
   enable-all: true
   disable:
+    - cyclop
     - dupl
     - exhaustivestruct
     - godot
@@ -14,8 +15,9 @@ linters:
     - gomnd
     - nlreturn
     - paralleltest
-    - tparallel
     - testpackage
+    - tparallel
+    - thelper
     - whitespace
     - wrapcheck
     - wsl
@@ -28,12 +30,8 @@ linters-settings:
 
 issues:
   exclude:
-    # Ignore underscores in package names
-    - "use(?: an)? underscores? in package names?"
     # Ignore underscores in test functions
     - "use underscores in Go names; (?:func|type) (?:T|t)est"
-    # Ignore long functions in tests
-    - "Function '(?:T|t)est.*' is too long"
     # Ignore warnings about 'github.com/go-pg/pg' specific field 'tableName'
     - "`tableName` is unused"
 
@@ -41,6 +39,10 @@ issues:
     - linters:
         - goerr113
       text: "do not define dynamic errors"
+
+    - linters:
+        - funlen
+      path: _test\.go
 
   # Display all issues
   max-issues-per-linter: 0

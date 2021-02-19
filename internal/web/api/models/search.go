@@ -7,8 +7,6 @@ import (
 )
 
 // SearchSpendsReq is used to search for spends
-//
-//nolint:maligned
 type SearchSpendsReq struct {
 	Request
 

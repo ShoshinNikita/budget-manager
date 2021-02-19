@@ -118,8 +118,6 @@ You can find more commands in [Makefile](./Makefile)
 
 [golangci-lint](https://github.com/golangci/golangci-lint) can be used to lint the code. Just run `make lint`. Config can be found [here](./.golangci.yml)
 
-The recommended version of `golangci-lint` is [v1.31](https://github.com/golangci/golangci-lint/releases/tag/v1.31.0)
-
 #### API documentation
 
 [swag](https://github.com/swaggo/swag) is used to generate API documentation. You can find more information about API endpoints in section [API](#api)
