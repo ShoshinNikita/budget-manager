@@ -38,7 +38,8 @@ COPY templates ./templates
 COPY static ./static
 
 RUN minify --html-keep-default-attrvals -o templates/ templates && \
-	minify -o static/css/ static/css
+	minify -o static/css/ static/css && \
+	minify -o static/js/ static/js
 
 # Minify has poor support of Go template syntax. For example, it converts all attributes to lower case.
 # It causes template execution errors. For example, <html lang="{{ .Lang }}"> is converted to <html lang="{{ .lang }}">
