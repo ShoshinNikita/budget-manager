@@ -14,6 +14,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
+	"github.com/ShoshinNikita/budget-manager/static"
 )
 
 // -------------------------------------------------
@@ -118,7 +119,8 @@ func (s *Server) Prepare() {
 	}
 
 	// Add File Handler
-	fileHandler := http.StripPrefix("/static/", http.FileServer(http.Dir("static")))
+	fs := http.FS(static.New(s.config.CacheTemplates))
+	fileHandler := http.StripPrefix("/static/", http.FileServer(fs))
 	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30) // cache for 1 month
 	router.PathPrefix("/static/").Handler(fileHandler)
 

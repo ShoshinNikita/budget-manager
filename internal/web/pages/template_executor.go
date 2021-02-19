@@ -5,7 +5,7 @@ import (
 	"context"
 	"html/template"
 	"io"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"sync"
 	"time"
@@ -14,10 +14,12 @@ import (
 	"github.com/sirupsen/logrus"
 
 	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	"github.com/ShoshinNikita/budget-manager/templates"
 )
 
 type templateExecutor struct {
 	cacheTemplates bool
+	fs             fs.ReadDirFS
 	log            logrus.FieldLogger
 	commonFuncs    template.FuncMap
 
@@ -27,6 +29,7 @@ type templateExecutor struct {
 
 func newTemplateExecutor(log logrus.FieldLogger, cacheTemplates bool, commonFuncs template.FuncMap) *templateExecutor {
 	return &templateExecutor{
+		fs:             templates.New(cacheTemplates),
 		log:            log,
 		cacheTemplates: cacheTemplates,
 		commonFuncs:    commonFuncs,
@@ -53,8 +56,6 @@ func (e *templateExecutor) Execute(ctx context.Context, w io.Writer, name string
 	return nil
 }
 
-const templatesDir = "./templates"
-
 // loadTemplates loads all templates from file or returns them from cache according to 'cacheTemplates'
 func (e *templateExecutor) loadTemplates() (_ *template.Template, err error) {
 	e.mu.Lock()
@@ -64,23 +65,12 @@ func (e *templateExecutor) loadTemplates() (_ *template.Template, err error) {
 		return e.tpl, nil
 	}
 
-	var templates []string
-	err = filepath.Walk(templatesDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-
-		templates = append(templates, path)
-		return nil
-	})
+	patterns, err := extractAllTemplatePaths(e.fs)
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't get template filenames")
 	}
 
-	e.tpl, err = template.New("base").Funcs(e.getCommonFuncs()).ParseFiles(templates...)
+	e.tpl, err = template.New("base").Funcs(e.getCommonFuncs()).ParseFS(e.fs, patterns...)
 	if err != nil {
 		return nil, err
 	}
@@ -109,4 +99,44 @@ func executeTemplate(log logrus.FieldLogger, tpl *template.Template, w io.Writer
 
 	_, err := io.Copy(w, buff)
 	return err
+}
+
+func extractAllTemplatePaths(fs fs.ReadDirFS) ([]string, error) {
+	const maxDepth = 25
+
+	var walk func(root string, depth int) ([]string, error)
+	walk = func(root string, depth int) (paths []string, err error) {
+		if depth >= maxDepth {
+			return nil, errors.Errorf("max dir depth is reached: %d", maxDepth)
+		}
+
+		entries, err := fs.ReadDir(root)
+		if err != nil {
+			return nil, errors.Wrap(err, "couldn't read dir")
+		}
+
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				if isTemplate(entry.Name()) {
+					paths = append(paths, filepath.Join(root, entry.Name()))
+				}
+				continue
+			}
+
+			nestedPaths, err := walk(filepath.Join(root, entry.Name()), depth+1)
+			if err != nil {
+				return nil, err
+			}
+			paths = append(paths, nestedPaths...)
+		}
+		return paths, nil
+	}
+
+	return walk(".", 0)
+}
+
+func isTemplate(name string) bool {
+	ext := filepath.Ext(name)
+
+	return ext == ".html"
 }
