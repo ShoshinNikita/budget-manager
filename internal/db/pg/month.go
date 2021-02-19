@@ -100,17 +100,16 @@ func (db DB) GetMonthID(ctx context.Context, year, month int) (id uint, err erro
 	return id, nil
 }
 
-// GetMonths returns months of passed year. Months doesn't contains
-// relations (Incomes, Days and etc.)
-func (db DB) GetMonths(ctx context.Context, year int) ([]common.Month, error) {
+// GetMonths returns months of passed years. Months doesn't contains relations (Incomes, Days and etc.)
+func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.Month, error) {
 	var pgMonths []Month
-	query := db.db.ModelContext(ctx, &pgMonths).Where("year = ?", year).Order("month ASC")
+	query := db.db.ModelContext(ctx, &pgMonths).Where("year IN (?)", pg.In(years)).Order("id ASC")
 	err := query.Select()
 	if err != nil {
 		return nil, err
 	}
 	if len(pgMonths) == 0 {
-		return nil, common.ErrYearNotExist
+		return nil, nil
 	}
 
 	months := make([]common.Month, 0, len(pgMonths))

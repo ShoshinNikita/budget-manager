@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{ .Year }} | Budget Manager</title>
+	<title>{{ .YearInterval }} Overview | Budget Manager</title>
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -182,15 +182,14 @@
 	<div id="app">
 		<div id="header">
 			<div>
-				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
-				<span class="header__path__element">{{ .Year }}</span>
+				<span class="header__path__element">{{ .YearInterval }} Overview</span>
 			</div>
 		</div>
 
 		<div id="content">
 			<div id="year">
 				<div id="prev-year-btn" class="switch-year-btn">
-					<a href="/overview/{{ .PrevYear }}">
+					<a href="/months?offset={{ call $.Add .Offset 1 }}">
 						<div class="feather-icon--btn">
 							<svg>
 								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
@@ -206,7 +205,7 @@
 					<!-- Show month overview -->
 
 					<!-- Use the number of a month instead of the name -->
-					<a class="no-decoration" href="/overview/{{ .Year }}/{{ printf `%d` .Month }}">
+					<a class="no-decoration" href="/{{ .Year }}-{{ printf `%02d` .Month }}">
 						<div class="month" title="Go to the month">
 							<div class="month__header">{{ .Month }} {{ .Year }}</div>
 							<div class="month__results">
@@ -235,26 +234,35 @@
 				</div>
 
 				<div id="next-year-btn" class="switch-year-btn">
-					<a href="/overview/{{ .NextYear }}">
+					{{ $offset := call $.Add .Offset -1 }}
+					{{ if ge $offset 0 }}
+					<a href="/months?offset={{ call $.Add .Offset -1 }}">
 						<div class="feather-icon--btn">
 							<svg>
 								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
 							</svg>
 						</div>
 					</a>
+					{{ else }}
+					<div class="feather-icon--btn disabled" title="No more months">
+						<svg>
+							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
+						</svg>
+					</div>
+					{{ end }}
 				</div>
 			</div>
 
 			<div id="year-overview">
 				<div id="year-overview__results">
-					<div id="year-overview__results__header" class="noselect">{{ .Year }} Year Results</div>
+					<div id="year-overview__results__header" class="noselect">{{ .YearInterval }} Results</div>
 
 					<div id="year-overview__results__result">
-						<div>Annual Income:</div>
-						<div class="year-overview__results__result__value money--gain">{{ .AnnualIncome }}</div>
+						<div>Total Income:</div>
+						<div class="year-overview__results__result__value money--gain">{{ .TotalIncome }}</div>
 
-						<div>Annual Spend:</div>
-						<div class="year-overview__results__result__value money--lose">{{ .AnnualSpend }}</div>
+						<div>Total Spend:</div>
+						<div class="year-overview__results__result__value money--lose">{{ .TotalSpend }}</div>
 
 						<div>Result:</div>
 						<div class="year-overview__results__result__value">
@@ -279,8 +287,8 @@
 	<script src="{{ asStaticURL `/static/vendor/chart.js/chart.min.js` }}"></script>
 
 	<script>
-		const monthsResults = JSON.parse(`{{ .Months }}`);
-		const monthsNames = ["January", "February", "March", "April", "May", "June",
+		const monthResults = JSON.parse(`{{ .Months }}`);
+		const monthNames = ["January", "February", "March", "April", "May", "June",
 			"July", "August", "September", "October", "November", "December"];
 
 		// Create the chart
@@ -288,17 +296,17 @@
 		new Chart(ctx, {
 			type: "line",
 			data: {
-				labels: monthsNames,
+				labels: monthResults.map(v => monthNames[v["month"] - 1]),
 				datasets: [
 					// Incomes
 					{
-						data: monthsResults.map(v => v["total_income"]),
+						data: monthResults.map(v => v["total_income"]),
 						borderColor: "green",
 						backgroundColor: "#00ff0018", // green with alpha
 					},
 					// Spends
 					{
-						data: monthsResults.map(v => -v["total_spend"]),
+						data: monthResults.map(v => -v["total_spend"]),
 						borderColor: "crimson",
 						backgroundColor: "#dc143c18", // crimson with alpha
 					}

@@ -6,7 +6,6 @@ import (
 
 // Common errors
 var (
-	ErrYearNotExist           = errors.New("there're no records for passed year")
 	ErrMonthNotExist          = errors.New("such Month doesn't exist")
 	ErrDayNotExist            = errors.New("such Day doesn't exist")
 	ErrIncomeNotExist         = errors.New("such Income doesn't exist")

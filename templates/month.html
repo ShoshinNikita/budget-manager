@@ -399,8 +399,8 @@
 	<div id="app">
 		<div id="header">
 			<div>
-				<span class="header__path__element"> <a href="/overview">Overview</a> </span>
-				<span class="header__path__element"> <a href="/overview/{{ .Year }}">{{ .Year }}</a> </span>
+				<span class="header__path__element"> <a href="/months">Months</a> </span>
+				<span class="header__path__element"> {{ .Year }} </span>
 				<span class="header__path__element"> {{ .Month.Month }} </span>
 			</div>
 
@@ -1039,7 +1039,7 @@
 
 		// Select day
 		window.addEventListener("load", () => {
-			const urlRegexp = /overview\/(\d+)\/(\d+)(?:#(\d+))?/;
+			const urlRegexp = /(\d+)-(\d+)(?:#(\d+))?/;
 			const match = window.location.href.match(urlRegexp);
 
 			// Check whether day is passed in URL

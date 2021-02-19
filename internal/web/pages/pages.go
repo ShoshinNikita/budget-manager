@@ -21,9 +21,8 @@ import (
 )
 
 const (
-	overviewTemplateName     = "overview.html"
-	yearTemplateName         = "overview_year.html"
-	monthTemplateName        = "overview_year_month.html"
+	monthsTemplateName       = "months.html"
+	monthTemplateName        = "month.html"
 	searchSpendsTemplateName = "search_spends.html"
 	errorPageTemplateName    = "error_page.html"
 )
@@ -40,7 +39,7 @@ type Handlers struct {
 type DB interface {
 	GetMonth(ctx context.Context, id uint) (db.Month, error)
 	GetMonthID(ctx context.Context, year, month int) (uint, error)
-	GetMonths(ctx context.Context, year int) ([]db.Month, error)
+	GetMonths(ctx context.Context, years ...int) ([]db.Month, error)
 
 	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
 
@@ -84,114 +83,135 @@ func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
 		WithFields(logrus.Fields{"year": year, "month": int(month)}).
 		Debug("redirect to the current month")
 
-	url := fmt.Sprintf("/overview/%d/%d", year, month)
+	url := fmt.Sprintf("/%d-%d", year, month)
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
-// GET /overview
+// GET /months?offset=0
 //
-func (h Handlers) OverviewPage(w http.ResponseWriter, r *http.Request) {
+func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
 
-	resp := struct {
-		Footer FooterTemplateData
-	}{
-		Footer: FooterTemplateData{
-			Version: h.version,
-			GitHash: h.gitHash,
-		},
-	}
-	if err := h.tplExecutor.Execute(ctx, w, overviewTemplateName, resp); err != nil {
-		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
-	}
-}
-
-// GET /overview/{year:[0-9]+}
-//
-func (h Handlers) YearPage(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	log := reqid.FromContextToLogger(ctx, h.log)
-
-	year, ok := getYear(r)
-	if !ok {
-		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid year"), http.StatusBadRequest)
-		return
+	var offset int
+	if value := r.FormValue("offset"); value != "" {
+		var err error
+		offset, err = strconv.Atoi(value)
+		if err != nil || offset < 0 {
+			h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid offset value"), http.StatusBadRequest)
+			return
+		}
 	}
 
-	months, err := h.db.GetMonths(ctx, year)
-	// Render the page even theare no months for passed year
-	if err != nil && !errors.Is(err, db.ErrYearNotExist) {
+	now := time.Now()
+	endYear := now.Year() - offset
+	years := []int{endYear}
+	if now.Month() != time.December {
+		years = append(years, endYear-1)
+	}
+	months, err := h.db.GetMonths(ctx, years...)
+	if err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get months"), err)
 		return
 	}
 
-	// Display all months. Months without data in DB have zero id
+	months = getLastTwelveMonths(endYear, now.Month(), months)
 
-	allMonths := make([]db.Month, 12)
-	for month := time.January; month <= time.December; month++ {
-		allMonths[month-1] = db.Month{
-			ID:    0,
-			Year:  year,
-			Month: month,
-		}
-	}
+	var totalIncome money.Money
 	for _, m := range months {
-		allMonths[m.Month-1] = m
+		totalIncome = totalIncome.Add(m.TotalIncome)
 	}
 
-	annualIncome := func() money.Money {
-		var res money.Money
-		for _, m := range allMonths {
-			res = res.Add(m.TotalIncome)
-		}
-		return res
-	}()
-
-	annualSpend := func() money.Money {
-		var res money.Money
-		for _, m := range allMonths {
-			// Use Add because 'TotalSpend' is negative
-			res = res.Add(m.TotalSpend)
-		}
-		return res
-	}()
+	var totalSpend money.Money
+	for _, m := range months {
+		// Use Add because 'TotalSpend' is negative
+		totalSpend = totalSpend.Add(m.TotalSpend)
+	}
 
 	// Use Add because 'annualSpend' is negative
-	result := annualIncome.Add(annualSpend)
+	result := totalIncome.Add(totalSpend)
+
+	yearInterval := strconv.Itoa(endYear)
+	if len(years) > 1 {
+		yearInterval = strconv.Itoa(endYear-1) + "–" + yearInterval
+	}
 
 	resp := struct {
-		Year     int
-		NextYear int
-		PrevYear int
+		YearInterval string
+		Offset       int
 		//
-		Months       []db.Month
-		AnnualIncome money.Money
-		AnnualSpend  money.Money
-		Result       money.Money
+		Months      []db.Month
+		TotalIncome money.Money
+		TotalSpend  money.Money
+		Result      money.Money
 		//
 		Footer FooterTemplateData
-	}{
-		Year:     year,
-		NextYear: year + 1,
-		PrevYear: year - 1,
 		//
-		Months:       allMonths,
-		AnnualIncome: annualIncome,
-		AnnualSpend:  annualSpend,
-		Result:       result,
+		Add func(int, int) int
+	}{
+		YearInterval: yearInterval,
+		Offset:       offset,
+		//
+		Months:      months,
+		TotalIncome: totalIncome,
+		TotalSpend:  totalSpend,
+		Result:      result,
 		//
 		Footer: FooterTemplateData{
 			Version: h.version,
 			GitHash: h.gitHash,
 		},
+		//
+		Add: func(a, b int) int { return a + b },
 	}
-	if err := h.tplExecutor.Execute(ctx, w, yearTemplateName, resp); err != nil {
+	if err := h.tplExecutor.Execute(ctx, w, monthsTemplateName, resp); err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, executeErrorMessage, err)
 	}
 }
 
-// GET /overview/{year:[0-9]+}/{month:[0-9]+}
+// getLastTwelveMonths returns the last 12 months according to the passed year and month. If some month
+// can't be found in the passed slice, its id will be 0
+func getLastTwelveMonths(endYear int, endMonth time.Month, months []db.Month) []db.Month {
+	type key struct {
+		year  int
+		month time.Month
+	}
+	requiredMonths := make(map[key]db.Month)
+
+	year, month := endYear, endMonth
+	for i := 0; i < 12; i++ {
+		// Months without data have zero id
+		requiredMonths[key{year, month}] = db.Month{ID: 0, Year: year, Month: month}
+
+		month--
+		if month == 0 {
+			month = time.December
+			year--
+		}
+	}
+
+	for _, m := range months {
+		k := key{m.Year, m.Month}
+		if _, ok := requiredMonths[k]; ok {
+			requiredMonths[k] = m
+		}
+	}
+
+	months = make([]db.Month, 0, len(requiredMonths))
+	for _, m := range requiredMonths {
+		months = append(months, m)
+	}
+	sort.Slice(months, func(i, j int) bool {
+		if months[i].Year == months[j].Year {
+			return months[i].Month < months[j].Month
+		}
+		return months[i].Year < months[j].Year
+	})
+
+	return months
+}
+
+// GET /{year:[0-9]+}-{month:[0-9]+}
 //
 //nolint:funlen
 func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
