@@ -24,9 +24,8 @@ import (
 type Config struct { //nolint:maligned
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
 
-	// CacheTemplates defines whether templates have to be loaded from disk every request.
-	// It is useful during development
-	CacheTemplates bool `env:"SERVER_CACHE_TEMPLATES" envDefault:"true"`
+	// UseEmbed defines whether server should use embedded templates and static files.
+	UseEmbed bool `env:"SERVER_USE_EMBED" envDefault:"true"`
 
 	// SkipAuth disables auth. Works only in Debug mode!
 	SkipAuth bool `env:"SERVER_SKIP_AUTH"`
@@ -100,6 +99,10 @@ func (s *Server) Prepare() {
 	router := mux.NewRouter()
 	router.StrictSlash(true)
 
+	if !s.config.UseEmbed {
+		s.log.Warn("don't use embedded templates and static files")
+	}
+
 	// Add middlewares
 	router.Use(s.requestIDMeddleware)
 	router.Use(s.loggingMiddleware)
@@ -119,7 +122,7 @@ func (s *Server) Prepare() {
 	}
 
 	// Add File Handler
-	fs := http.FS(static.New(s.config.CacheTemplates))
+	fs := http.FS(static.New(s.config.UseEmbed))
 	fileHandler := http.StripPrefix("/static/", http.FileServer(fs))
 	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30) // cache for 1 month
 	router.PathPrefix("/static/").Handler(fileHandler)

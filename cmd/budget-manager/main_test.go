@@ -27,6 +27,7 @@ func TestConfig(t *testing.T) {
 		{"DB_PG_PASSWORD", "qwerty"},
 		{"DB_PG_DATABASE", "db"},
 		{"SERVER_PORT", "6666"},
+		{"SERVER_USE_EMBED", "false"},
 		{"SERVER_CREDENTIALS", "user:qwerty,admin:admin"},
 	}
 	for _, env := range envs {
@@ -34,7 +35,6 @@ func TestConfig(t *testing.T) {
 	}
 
 	want := Config{
-		Debug: true,
 		Logger: logger.Config{
 			Debug: true,
 			Level: "fatal",
@@ -49,8 +49,8 @@ func TestConfig(t *testing.T) {
 			Database: "db",
 		},
 		Server: web.Config{
-			Port:           6666,
-			CacheTemplates: true,
+			Port:     6666,
+			UseEmbed: false,
 			Credentials: web.Credentials{
 				"user":  "qwerty",
 				"admin": "admin",

@@ -68,8 +68,6 @@ type App struct {
 }
 
 type Config struct {
-	Debug bool `env:"DEBUG" envDefault:"false"`
-
 	Logger logger.Config
 
 	DBType     string `env:"DB_TYPE" envDefault:"postgres"`
