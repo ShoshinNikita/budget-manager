@@ -131,7 +131,7 @@ The recommended version of `golangci-lint` is [v1.31](https://github.com/golangc
 You can find screenshots of pages [here](./docs/images/README.md)
 
 - `/months` - Last 12 months
-- `/{year}-{month}` - Month Page
+- `/{year}-{month}` - Month info
 - `/search/spends` - Search for Spends
 
 #### API

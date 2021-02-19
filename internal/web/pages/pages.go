@@ -170,7 +170,7 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // getLastTwelveMonths returns the last 12 months according to the passed year and month. If some month
-// can't be found in the passed slice, its id is set to 0
+// can't be found in the passed slice, its id will be 0
 func getLastTwelveMonths(endYear int, endMonth time.Month, months []db.Month) []db.Month {
 	type key struct {
 		year  int
