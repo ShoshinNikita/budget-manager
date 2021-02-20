@@ -61,6 +61,10 @@ RUN go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/
 
 FROM alpine:3.11
 
+LABEL \
+	org.opencontainers.image.url=https://github.com/users/ShoshinNikita/packages/container/package/budget-manager \
+	org.opencontainers.image.source=https://github.com/ShoshinNikita/budget-manager
+
 WORKDIR /srv
 
 COPY --from=backend-builder build/backend/bin .
