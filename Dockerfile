@@ -1,28 +1,5 @@
 #
-# Build a binary file
-#
-
-FROM golang:1.16-alpine as backend-builder
-
-ENV CGO_ENABLED=0
-
-WORKDIR /build/backend
-
-# Copy dependencies (for better caching)
-COPY go.mod go.sum ./
-COPY vendor ./vendor
-
-# Copy code
-COPY cmd ./cmd
-COPY internal ./internal
-
-# Build
-ARG LDFLAGS
-RUN go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/main.go
-
-
-#
-# Minify files
+# Minify templates and static files
 #
 
 FROM ubuntu:18.04 as frontend-builder
@@ -50,6 +27,34 @@ RUN minify --html-keep-default-attrvals -o templates/ templates && \
 #
 RUN sed -i "s/$.tohtmlattr/$.ToHTMLAttr/g" templates/month.html
 
+
+#
+# Build a binary file
+#
+
+FROM golang:1.16-alpine as backend-builder
+
+ENV CGO_ENABLED=0
+
+WORKDIR /build/backend
+
+# Copy dependencies (for better caching)
+COPY go.mod go.sum ./
+COPY vendor ./vendor
+
+# Copy code
+COPY cmd ./cmd
+COPY internal ./internal
+
+# Copy minified templates and static files
+COPY --from=frontend-builder build/frontend/static ./static
+COPY --from=frontend-builder build/frontend/templates ./templates
+
+# Build
+ARG LDFLAGS
+RUN go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/main.go
+
+
 #
 # Build the final image
 #
@@ -58,11 +63,6 @@ FROM alpine:3.11
 
 WORKDIR /srv
 
-# Copy 'static' directory
-COPY --from=frontend-builder build/frontend/static ./static
-# Copy 'templates' directory
-COPY --from=frontend-builder build/frontend/templates ./templates
-# Copy binaries
 COPY --from=backend-builder build/backend/bin .
 
 ENTRYPOINT [ "/srv/budget-manager" ]

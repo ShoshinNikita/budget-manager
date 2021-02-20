@@ -17,7 +17,7 @@ type route struct {
 }
 
 func (s Server) addRoutes(router *mux.Router) {
-	pageHandlers := pages.NewHandlers(s.db, s.log, s.config.CacheTemplates, s.version, s.gitHash)
+	pageHandlers := pages.NewHandlers(s.db, s.log, s.config.UseEmbed, s.version, s.gitHash)
 
 	apiHandlers := api.NewHandlers(s.db, s.log)
 
