@@ -5,7 +5,7 @@
 	--fade-font-color: #999999;
 	--border-color: #f4f4f4;
 	--border-accent-color: #d2d2d2;
-	--hover-color: #f9f9f9;
+	--hover-color: #fafafa;
 	--disabled-color: #b0b0b0;
 }
 
@@ -81,6 +81,32 @@ body {
 	#footer {
 		display: none;
 	}
+}
+
+/* | Card */
+
+.card {
+	background: #ffffff;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+}
+
+.card__title {
+	background-color: #ffffff;
+	border-bottom: 1px solid var(--border-accent-color);
+	font-size: 1.3rem;
+	padding: 5px 10px;
+	position: sticky;
+	margin-bottom: 5px;
+	top: 0;
+	z-index: 1;
+}
+
+.card__body {
+	padding: 0 5px;
+}
+
+.card--hover:hover {
+	padding-left: 5px;
 }
 
 /* | Icons */
