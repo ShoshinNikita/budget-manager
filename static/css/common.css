@@ -202,14 +202,6 @@ a:link:hover {
 
 /* | Money */
 
-.money::after,
-.money--gain::after,
-.money--lose::after {
-	color: black;
-	content: "⛁";
-	margin-left: 3px;
-}
-
 .money--gain {
 	color: green;
 }
