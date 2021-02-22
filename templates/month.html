@@ -356,6 +356,7 @@
 				</div>
 				<div class="card__body">
 					<table>
+						{{ if .Incomes }}
 						<thead>
 							<tr class="noselect">
 								<th>Title</th>
@@ -364,6 +365,7 @@
 								<th></th>
 							</tr>
 						</thead>
+						{{ end }}
 
 						<tbody>
 							{{ range .Incomes }}
@@ -399,7 +401,7 @@
 									<td>
 										<input type="text" id="new-income-notes" placeholder="Notes">
 									</td>
-									<td class="table-shrink-cell">
+									<td class="money table-shrink-cell">
 										<input type="text" id="new-income-income" placeholder="Income">
 									</td>
 									<td class="table-shrink-cell">
@@ -432,6 +434,7 @@
 				</div>
 				<div class="card__body">
 					<table>
+						{{ if .MonthlyPayments }}
 						<thead>
 							<tr class="noselect">
 								<th>Title</th>
@@ -441,6 +444,7 @@
 								<th></th>
 							</tr>
 						</thead>
+						{{ end }}
 
 						<tbody>
 							{{ range .MonthlyPayments }}
@@ -493,7 +497,7 @@
 											{{ end }}
 										</select>
 									</td>
-									<td class="table-shrink-cell">
+									<td class="money table-shrink-cell">
 										<input type="text" id="new-monthly-payment-cost" placeholder="Cost">
 									</td>
 									<td class="table-shrink-cell">
@@ -560,6 +564,7 @@
 
 					<div class="card__body">
 						<table>
+							{{ if .Spends }}
 							<thead>
 								<tr class="noselect">
 									<th>Title</th>
@@ -569,6 +574,7 @@
 									<th></th>
 								</tr>
 							</thead>
+							{{ end }}
 
 							<tbody>
 								{{ range .Spends }}
@@ -628,7 +634,7 @@
 												{{ end }}
 											</select>
 										</td>
-										<td class="table-shrink-cell">
+										<td class="money table-shrink-cell">
 											<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost">
 										</td>
 										<td class="table-shrink-cell">
