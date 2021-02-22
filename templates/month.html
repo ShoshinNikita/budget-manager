@@ -160,25 +160,16 @@
 		}
 
 		.calendar__day.disabled {
+			cursor: default;
 			opacity: 0.2;
 		}
 
+		.calendar__day__date {
+			margin-bottom: 5px;
+		}
+
 		.calendar__day__info {
-			display: flex;
-		}
-
-		.calendar__day__info__spend-number {
-			display: flex;
-		}
-
-		.calendar__day__info__spend-number::before {
-			content: "·";
-			margin-left: 5px;
-			padding-right: 5px;
-		}
-
-		.calendar__day__saldo {
-			text-align: right;
+			white-space: nowrap;
 		}
 
 		.day {
@@ -356,11 +347,11 @@
 				font-size: 18px;
 			}
 
-			.calendar__day__info {
-				justify-content: center;
+			.calendar__day__date {
+				text-align: center;
 			}
 
-			.calendar__day__saldo {
+			.calendar__day__info {
 				display: none;
 			}
 		}
@@ -590,24 +581,21 @@
 			<div id="days-info" class="card">
 				<div id="calendar">
 					{{ range .Days }}
-					<div id="id-calendar-day-{{ .Day }}" class="calendar__day"
-						onclick="selectDay('{{ .Day }}');">
-
-						<div class="calendar__day__info">
-							<div>
-								<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
-							</div>
-							<div class="calendar__day__info__spend-number" title="Spends">
-								{{ len .Spends }}
-							</div>
+					<div id="id-calendar-day-{{ .Day }}" class="calendar__day" onclick="selectDay('{{ .Day }}');">
+						<div class="calendar__day__date">
+							<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
 						</div>
 
-						<div class="calendar__day__saldo" title="Saldo">
-							{{ if ge .Saldo 0 }}
-							<span class="money--gain">{{ .Saldo }}</span>
-							{{ else }}
-							<span class="money--lose">{{ .Saldo }}</span>
-							{{ end }}
+						<div class="calendar__day__info">
+							<span title="Saldo">
+								{{ if ge .Saldo 0 }}
+								<span class="money--gain">{{ .Saldo }}</span>
+								{{ else }}
+								<span class="money--lose">{{ .Saldo }}</span>
+								{{ end }}
+							</span>
+							<span> · </span>
+							<span title="Spends">{{ len .Spends }}</span>
 						</div>
 					</div>
 					{{ end }}
