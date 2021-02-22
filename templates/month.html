@@ -35,19 +35,6 @@
 			row-gap: 5px;
 		}
 
-		#header__stats {
-			column-gap: 15px;
-			display: grid;
-			grid-template-columns: repeat(3, min-content);
-		}
-
-		.header__stats__stat {
-			column-gap: 5px;
-			display: grid;
-			grid-template-columns: repeat(2, min-content);
-			white-space: nowrap;
-		}
-
 		#header__buttons {
 			column-gap: 5px;
 			display: grid;
@@ -97,6 +84,10 @@
 		td.money {
 			min-width: 80px;
 			text-align: right;
+		}
+
+		.card__title>.money {
+			font-size: 1rem;
 		}
 
 		/* || Income */
@@ -335,29 +326,6 @@
 				<span class="header__path__element"> {{ .Month.Month }} </span>
 			</div>
 
-			<!-- Stats: Total Income and Spend, Result -->
-			<div id="header__stats">
-				<div class="header__stats__stat">
-					<div class="noselect">Incomes:</div>
-					<div class="money--gain">{{ .TotalIncome }}</div>
-				</div>
-
-				<div class="header__stats__stat">
-					<div class="noselect">Spends:</div>
-					<div class="money--lose">{{ .TotalSpend }}</div>
-				</div>
-
-				<div class="header__stats__stat">
-					<div class="noselect">Result:</div>
-					<!-- .Result > 0 -->
-					{{ if ge .Result 0 }}
-					<div class="money--gain">{{ .Result }}</div>
-					{{ else }}
-					<div class="money--lose">{{ .Result }}</div>
-					{{ end }}
-				</div>
-			</div>
-
 			<div id="header__buttons">
 				<!-- Search for Spends -->
 				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
@@ -382,7 +350,10 @@
 		<div id="content">
 			<!-- Incomes -->
 			<div id="incomes" class="card">
-				<div class="card__title noselect">Incomes</div>
+				<div class="card__title noselect">
+					<span>Incomes</span>
+					<span class="money money--gain">{{ .TotalIncome }}</span>
+				</div>
 				<div class="card__body">
 					<table>
 						<thead>
@@ -428,7 +399,7 @@
 									<td>
 										<input type="text" id="new-income-notes" placeholder="Notes">
 									</td>
-									<td>
+									<td class="table-shrink-cell">
 										<input type="text" id="new-income-income" placeholder="Income">
 									</td>
 									<td class="table-shrink-cell">
@@ -455,7 +426,10 @@
 
 			<!-- Monthly Payments -->
 			<div id="monthly-payments" class="card">
-				<div class="card__title noselect">Monthly Payments</div>
+				<div class="card__title noselect">
+					<span>Monthly Payments</span>
+					<span class="money money--lose">{{ .TotalSpend }}</span>
+				</div>
 				<div class="card__body">
 					<table>
 						<thead>
@@ -511,7 +485,7 @@
 									<td>
 										<input type="text" id="new-monthly-payment-notes" placeholder="Notes">
 									</td>
-									<td>
+									<td class="table-shrink-cell">
 										<select id="new-monthly-payment-type">
 											<option value="0">-</option>
 											{{ range $.SpendTypes }}
@@ -519,7 +493,7 @@
 											{{ end }}
 										</select>
 									</td>
-									<td>
+									<td class="table-shrink-cell">
 										<input type="text" id="new-monthly-payment-cost" placeholder="Cost">
 									</td>
 									<td class="table-shrink-cell">
@@ -573,7 +547,15 @@
 				{{ range .Days }}
 				<div id="id-day-{{ .Day }}" class="card day">
 					<div class="card__title">
-						{{ .Day }} {{ $.Month.Month }}
+						<span>{{ .Day }} {{ $.Month.Month }}</span>
+
+						<!-- Spends must be always <= 0 -->
+						{{ $totalCost := call $.SumSpendCosts .Spends }}
+						{{ if eq $totalCost 0 }}
+						<span class="money money--gain">{{ $totalCost }}</span>
+						{{ else }}
+						<span class="money money--lose">{{ $totalCost }}</span>
+						{{ end }}
 					</div>
 
 					<div class="card__body">
@@ -638,7 +620,7 @@
 										<td>
 											<input type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes">
 										</td>
-										<td>
+										<td class="table-shrink-cell">
 											<select id="new-spend-type-{{ .ID }}">
 												<option value="0">-</option>
 												{{ range $.SpendTypes }}
@@ -646,7 +628,7 @@
 												{{ end }}
 											</select>
 										</td>
-										<td>
+										<td class="table-shrink-cell">
 											<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost">
 										</td>
 										<td class="table-shrink-cell">
@@ -662,28 +644,6 @@
 								</tr>
 							</tfoot>
 						</table>
-					</div>
-
-					<div class="day__result">
-						<div>
-							<span class="noselect">Spent:</span>
-							<!-- Spends must be always <= 0 -->
-							{{ $totalCost := call $.SumSpendCosts .Spends }}
-							{{ if eq $totalCost 0 }}
-							<span class="money--gain">{{ $totalCost }}</span>
-							{{ else }}
-							<span class="money--lose">{{ $totalCost }}</span>
-							{{ end }}
-						</div>
-
-						<div>
-							<span class="noselect">Saldo:</span>
-							{{ if ge .Saldo 0 }}
-							<span class="money--gain">{{ .Saldo }}</span>
-							{{ else }}
-							<span class="money--lose">{{ .Saldo }}</span>
-							{{ end }}
-						</div>
 					</div>
 				</div>
 				{{ end }}
