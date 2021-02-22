@@ -72,7 +72,7 @@
 			row-gap: 20px;
 		}
 
-		.detailed-info__block {
+		.card {
 			border: 1px solid var(--border-color);
 			border-radius: 2px;
 			display: flex;
@@ -81,7 +81,7 @@
 			overflow-x: auto;
 		}
 
-		.detailed-info__block__header {
+		.card-title {
 			border-bottom: 1px solid var(--border-accent-color);
 			margin: 0 5px 5px;
 			font-size: 20px;
@@ -89,16 +89,7 @@
 			text-align: center;
 		}
 
-		.detailed-info__block__table {
-			height: 100%;
-			overflow-x: auto;
-		}
-
-		.detailed-info__block__table>table th,
-		.detailed-info__block__table>table td {
-			word-break: break-word;
-		}
-
+		/* TODO */
 		#detailed-info__block__table__copy-from-previous-month-button {
 			height: 30px;
 			margin-top: 30px;
@@ -123,24 +114,24 @@
 
 		/* || Income */
 
-		#detailed-info__incomes {
+		#incomes {
 			grid-area: incomes;
 		}
 
 		/* || Monthly Payments */
 
-		#detailed-info__monthly-payments {
+		#monthly-payments {
 			grid-area: monthly-payments;
 		}
 
 		/* || Days */
 
-		#detailed-info__days {
+		#days-info {
 			border: none;
 			grid-area: days;
 		}
 
-		#detailed-info__days__calendar {
+		#calendar {
 			display: grid;
 			grid-template-columns: repeat(7, 1fr);
 			column-gap: 10px;
@@ -148,7 +139,7 @@
 			margin-bottom: 30px;
 		}
 
-		.detailed-info__days__calendar__week-day-name {
+		.calendar__week-day-name {
 			border-bottom: 1px solid var(--border-color);
 			font-size: 14px;
 			margin: auto;
@@ -157,41 +148,40 @@
 			width: min-content;
 		}
 
-		.detailed-info__days__calendar__day,
-		.detailed-info__days__calendar__day--disabled {
+		.calendar__day {
 			border: 1px solid var(--border-color);
 			border-radius: 2px;
 			padding: 5px 7px;
 		}
 
-		.detailed-info__days__calendar__day:hover {
+		.calendar__day:hover {
 			background-color: var(--hover-color);
 			cursor: pointer;
 		}
 
-		.detailed-info__days__calendar__day--disabled {
+		.calendar__day.disabled {
 			opacity: 0.2;
 		}
 
-		.detailed-info__days__calendar__day__info {
+		.calendar__day__info {
 			display: flex;
 		}
 
-		.detailed-info__days__calendar__day__info__spend-number {
+		.calendar__day__info__spend-number {
 			display: flex;
 		}
 
-		.detailed-info__days__calendar__day__info__spend-number::before {
+		.calendar__day__info__spend-number::before {
 			content: "·";
 			margin-left: 5px;
 			padding-right: 5px;
 		}
 
-		.detailed-info__days__calendar__day__saldo {
+		.calendar__day__saldo {
 			text-align: right;
 		}
 
-		.detailed-info__days__day {
+		.day {
 			/* Hidden by default */
 			display: none;
 			border: 1px solid var(--border-color);
@@ -201,7 +191,7 @@
 			padding-top: 0;
 		}
 
-		.detailed-info__days__day__date {
+		.day__date {
 			background-color: white;
 			border-bottom: 1px solid var(--border-accent-color);
 			font-size: 20px;
@@ -213,11 +203,11 @@
 			z-index: 1;
 		}
 
-		.detailed-info__days__day__spends {
+		.day__spends {
 			overflow-x: auto;
 		}
 
-		.detailed-info__days__day__result {
+		.day__result {
 			column-gap: 20px;
 			display: grid;
 			grid-template-columns: repeat(2, max-content);
@@ -361,16 +351,16 @@
 					"days days";
 			}
 
-			.detailed-info__block__header,
-			.detailed-info__days__day__date {
+			.card-title,
+			.day__date {
 				font-size: 18px;
 			}
 
-			.detailed-info__days__calendar__day__info {
+			.calendar__day__info {
 				justify-content: center;
 			}
 
-			.detailed-info__days__calendar__day__saldo {
+			.calendar__day__saldo {
 				display: none;
 			}
 		}
@@ -433,8 +423,8 @@
 		<div id="content">
 			<div id="detailed-info">
 				<!-- Incomes -->
-				<div id="detailed-info__incomes" class="detailed-info__block">
-					<div class="detailed-info__block__header noselect">Incomes</div>
+				<div id="incomes" class="card">
+					<div class="card-title noselect">Incomes</div>
 					<div class="detailed-info__block__table">
 						<table>
 							<thead>
@@ -506,8 +496,8 @@
 				</div>
 
 				<!-- Monthly Payments -->
-				<div id="detailed-info__monthly-payments" class="detailed-info__block">
-					<div class="detailed-info__block__header noselect">Monthly Payments</div>
+				<div id="monthly-payments" class="card">
+					<div class="card-title noselect">Monthly Payments</div>
 					<!-- Monthly Payment list -->
 					<div class="detailed-info__block__table">
 						<table>
@@ -598,22 +588,22 @@
 				</div>
 
 				<!-- Days -->
-				<div id="detailed-info__days" class="detailed-info__block">
-					<div id="detailed-info__days__calendar">
+				<div id="days-info" class="card">
+					<div id="calendar">
 						{{ range .Days }}
-						<div id="id-calendar-day-{{ .Day }}" class="detailed-info__days__calendar__day"
+						<div id="id-calendar-day-{{ .Day }}" class="calendar__day"
 							onclick="selectDay('{{ .Day }}');">
 
-							<div class="detailed-info__days__calendar__day__info">
-								<div class="detailed-info__days__calendar__day__info__date">
+							<div class="calendar__day__info">
+								<div>
 									<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
 								</div>
-								<div class="detailed-info__days__calendar__day__info__spend-number" title="Spends">
+								<div class="calendar__day__info__spend-number" title="Spends">
 									{{ len .Spends }}
 								</div>
 							</div>
 
-							<div class="detailed-info__days__calendar__day__saldo" title="Saldo">
+							<div class="calendar__day__saldo" title="Saldo">
 								{{ if ge .Saldo 0 }}
 								<span class="money--gain">{{ .Saldo }}</span>
 								{{ else }}
@@ -625,12 +615,12 @@
 					</div>
 
 					{{ range .Days }}
-					<div id="id-day-{{ .Day }}" class="detailed-info__days__day">
-						<div class="detailed-info__days__day__date">
+					<div id="id-day-{{ .Day }}" class="day">
+						<div class="day__date">
 							{{ .Day }} {{ $.Month.Month }}
 						</div>
 
-						<div class="detailed-info__days__day__spends">
+						<div class="day__spends">
 							<table>
 								<thead>
 									<tr class="noselect">
@@ -718,7 +708,7 @@
 							</table>
 						</div>
 
-						<div class="detailed-info__days__day__result">
+						<div class="day__result">
 							<div>
 								<span class="noselect">Spent:</span>
 								<!-- Spends must be always <= 0 -->
@@ -943,25 +933,24 @@
 
 		// Fill weeks in calendar: add days of previous and next months if needed
 		window.addEventListener("load", () => {
-			const calendar = document.getElementById("detailed-info__days__calendar");
+			const calendar = document.getElementById("calendar");
 			if (calendar === null) {
-				console.error("couldn't get element with id 'detailed-info__days__calendar'");
+				console.error("couldn't get element with id 'calendar'");
 				return;
 			}
 
 			const createCalendarDay = (dayNumber, monthName) => {
 				const div = document.createElement("div");
-				div.classList.add("detailed-info__days__calendar__day--disabled", "noselect");
+				div.classList.add("calendar__day", "disabled", "noselect");
 
 				const info = document.createElement("div");
-				info.classList.add("detailed-info__days__calendar__day__info");
+				info.classList.add("calendar__day__info");
 
 				if (monthName.length > 4) {
 					monthName = monthName.slice(0, 3);
 				}
 				const date = `${dayNumber} ${monthName}`;
 				const dateElem = document.createElement("div");
-				dateElem.classList.add("detailed-info__days__calendar__day__info__date");
 				dateElem.textContent = date;
 				info.append(dateElem);
 
@@ -1007,7 +996,7 @@
 			const weekDayNamesShort = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 			for (let i = weekDayNames.length - 1; i >= 0; i--) {
 				let div = document.createElement("div");
-				div.classList.add("detailed-info__days__calendar__week-day-name", "noselect")
+				div.classList.add("calendar__week-day-name", "noselect")
 				div.textContent = weekDayNames[i];
 				calendar.prepend(div);
 			}
@@ -1042,10 +1031,10 @@
 		});
 
 		const calendarDayIDPrefix = "id-calendar-day-";
-		const calendarDayClass = "detailed-info__days__calendar__day";
+		const calendarDayClass = "calendar__day";
 		//
 		const dayIDPrefix = "id-day-";
-		const dayClass = "detailed-info__days__day";
+		const dayClass = "day";
 
 		function selectDay(dayNumber) {
 			// Calendar
