@@ -63,9 +63,9 @@
 			width: 30px;
 		}
 
-		/* | Detailed info */
+		/* | Content */
 
-		#detailed-info {
+		#content {
 			column-gap: 20px;
 			display: grid;
 			height: 100%;
@@ -328,7 +328,7 @@
 				grid-template-columns: 325px auto;
 			}
 
-			#detailed-info {
+			#content {
 				grid-template-columns: 1fr 2fr;
 				grid-template-rows: 1fr 1fr;
 				grid-template-areas:
@@ -343,7 +343,7 @@
 				grid-template-columns: max-content auto;
 			}
 
-			#detailed-info {
+			#content {
 				grid-template-columns: 1fr 1fr;
 				grid-template-rows: 2fr 5fr;
 				grid-template-areas:
@@ -421,85 +421,205 @@
 		</div>
 
 		<div id="content">
-			<div id="detailed-info">
-				<!-- Incomes -->
-				<div id="incomes" class="card">
-					<div class="card-title noselect">Incomes</div>
-					<div class="detailed-info__block__table">
-						<table>
-							<thead>
-								<tr class="noselect">
-									<th>Title</th>
-									<th>Notes</th>
-									<th class="money">Income</th>
-									<th></th>
-								</tr>
-							</thead>
+			<!-- Incomes -->
+			<div id="incomes" class="card">
+				<div class="card-title noselect">Incomes</div>
+				<div class="detailed-info__block__table">
+					<table>
+						<thead>
+							<tr class="noselect">
+								<th>Title</th>
+								<th>Notes</th>
+								<th class="money">Income</th>
+								<th></th>
+							</tr>
+						</thead>
 
-							<tbody>
-								{{ range .Incomes }}
-								<tr>
-									<td>{{ .Title }}</td>
-									<td>{{ .Notes }}</td>
-									<td class="money table-shrink-cell">{{ .Income }}</td>
-									<td class="table-shrink-cell">
-										<div class="actions-horizontal-list">
-											<div class="feather-icon--btn" title="Edit"
-												onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
-												<svg>
-													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
-												</svg>
-											</div>
-											<div class="feather-icon--btn" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
-												<svg>
-													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
-												</svg>
-											</div>
+						<tbody>
+							{{ range .Incomes }}
+							<tr>
+								<td>{{ .Title }}</td>
+								<td>{{ .Notes }}</td>
+								<td class="money table-shrink-cell">{{ .Income }}</td>
+								<td class="table-shrink-cell">
+									<div class="actions-horizontal-list">
+										<div class="feather-icon--btn" title="Edit"
+											onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
+											<svg>
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
+											</svg>
 										</div>
+										<div class="feather-icon--btn" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
+											<svg>
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
+											</svg>
+										</div>
+									</div>
+								</td>
+							</tr>
+							{{ end }}
+						</tbody>
+
+						<tfoot>
+							<tr>
+								<form onsubmit="addIncome()" autocomplete="off">
+									<td>
+										<input type="text" id="new-income-title" placeholder="Title">
 									</td>
-								</tr>
-								{{ end }}
-							</tbody>
+									<td>
+										<input type="text" id="new-income-notes" placeholder="Notes">
+									</td>
+									<td>
+										<input type="text" id="new-income-income" placeholder="Income">
+									</td>
+									<td class="table-shrink-cell">
+										<button type="submit" class="actions-horizontal-list">
+											<div class="feather-icon--btn" title="Add">
+												<svg class="svg-icon-plus">
+													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
+												</svg>
+											</div>
+										</button>
+									</td>
+								</form>
+							</tr>
+						</tfoot>
+					</table>
 
-							<tfoot>
-								<tr>
-									<form onsubmit="addIncome()" autocomplete="off">
-										<td>
-											<input type="text" id="new-income-title" placeholder="Title">
-										</td>
-										<td>
-											<input type="text" id="new-income-notes" placeholder="Notes">
-										</td>
-										<td>
-											<input type="text" id="new-income-income" placeholder="Income">
-										</td>
-										<td class="table-shrink-cell">
-											<button type="submit" class="actions-horizontal-list">
-												<div class="feather-icon--btn" title="Add">
-													<svg class="svg-icon-plus">
-														<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
-													</svg>
-												</div>
-											</button>
-										</td>
-									</form>
-								</tr>
-							</tfoot>
-						</table>
-
-						{{ if not .Incomes }}
-						<div id="detailed-info__block__table__copy-from-previous-month-button">
-							<input type="button" value="Copy from previous Month" onclick="copyIncomesFromPreviousMonth()">
-						</div>
-						{{ end }}
+					{{ if not .Incomes }}
+					<div id="detailed-info__block__table__copy-from-previous-month-button">
+						<input type="button" value="Copy from previous Month" onclick="copyIncomesFromPreviousMonth()">
 					</div>
+					{{ end }}
+				</div>
+			</div>
+
+			<!-- Monthly Payments -->
+			<div id="monthly-payments" class="card">
+				<div class="card-title noselect">Monthly Payments</div>
+				<!-- Monthly Payment list -->
+				<div class="detailed-info__block__table">
+					<table>
+						<thead>
+							<tr class="noselect">
+								<th>Title</th>
+								<th>Notes</th>
+								<th>Type</th>
+								<th class="money">Cost</th>
+								<th></th>
+							</tr>
+						</thead>
+
+						<tbody>
+							{{ range .MonthlyPayments }}
+							<tr>
+								<td>{{ .Title }}</td>
+								<td>{{ .Notes }}</td>
+								<td class="table-shrink-cell">
+									{{ if .Type }}
+									{{ .Type.Name }}
+									{{ else }}
+									-
+									{{ end }}
+								</td>
+								<td class="money table-shrink-cell">{{ .Cost }}</td>
+								<td class="table-shrink-cell">
+									<div class="actions-horizontal-list">
+										<div class="feather-icon--btn" title="Edit"
+											onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
+												'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
+											<svg>
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
+											</svg>
+										</div>
+										<div class="feather-icon--btn" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
+											<svg>
+												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
+											</svg>
+										</div>
+									</div>
+								</td>
+							</tr>
+							{{ end }}
+						</tbody>
+
+						<tfoot>
+							<!-- Inputs for new Monthly Payment -->
+							<tr>
+								<form onsubmit="addMonthlyPayment()" autocomplete="off">
+									<td>
+										<input type="text" id="new-monthly-payment-title" placeholder="Title">
+									</td>
+									<td>
+										<input type="text" id="new-monthly-payment-notes" placeholder="Notes">
+									</td>
+									<td>
+										<select id="new-monthly-payment-type">
+											<option value="0">-</option>
+											{{ range $.SpendTypes }}
+											<option value="{{ .ID }}">{{ .FullName }}</option>
+											{{ end }}
+										</select>
+									</td>
+									<td>
+										<input type="text" id="new-monthly-payment-cost" placeholder="Cost">
+									</td>
+									<td class="table-shrink-cell">
+										<button type="submit" class="actions-horizontal-list">
+											<div class="feather-icon--btn" title="Add">
+												<svg class="svg-icon-plus">
+													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
+												</svg>
+											</div>
+										</button>
+									</td>
+								</form>
+							</tr>
+						</tfoot>
+					</table>
+
+					{{ if not .MonthlyPayments }}
+					<div id="detailed-info__block__table__copy-from-previous-month-button">
+						<input type="button" value="Copy from previous Month" onclick="copyMonthlyPaymentsFromPreviousMonth()">
+					</div>
+					{{ end }}
+				</div>
+			</div>
+
+			<!-- Days -->
+			<div id="days-info" class="card">
+				<div id="calendar">
+					{{ range .Days }}
+					<div id="id-calendar-day-{{ .Day }}" class="calendar__day"
+						onclick="selectDay('{{ .Day }}');">
+
+						<div class="calendar__day__info">
+							<div>
+								<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
+							</div>
+							<div class="calendar__day__info__spend-number" title="Spends">
+								{{ len .Spends }}
+							</div>
+						</div>
+
+						<div class="calendar__day__saldo" title="Saldo">
+							{{ if ge .Saldo 0 }}
+							<span class="money--gain">{{ .Saldo }}</span>
+							{{ else }}
+							<span class="money--lose">{{ .Saldo }}</span>
+							{{ end }}
+						</div>
+					</div>
+					{{ end }}
 				</div>
 
-				<!-- Monthly Payments -->
-				<div id="monthly-payments" class="card">
-					<div class="card-title noselect">Monthly Payments</div>
-					<!-- Monthly Payment list -->
-					<div class="detailed-info__block__table">
+				{{ range .Days }}
+				<div id="id-day-{{ .Day }}" class="day">
+					<div class="day__date">
+						{{ .Day }} {{ $.Month.Month }}
+					</div>
+
+					<div class="day__spends">
 						<table>
 							<thead>
 								<tr class="noselect">
@@ -512,7 +632,7 @@
 							</thead>
 
 							<tbody>
-								{{ range .MonthlyPayments }}
+								{{ range .Spends }}
 								<tr>
 									<td>{{ .Title }}</td>
 									<td>{{ .Notes }}</td>
@@ -527,13 +647,13 @@
 									<td class="table-shrink-cell">
 										<div class="actions-horizontal-list">
 											<div class="feather-icon--btn" title="Edit"
-												onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
-												'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
+												onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
+													'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 												<svg>
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
 												</svg>
 											</div>
-											<div class="feather-icon--btn" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
+											<div class="feather-icon--btn" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
 												<svg>
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
 												</svg>
@@ -545,17 +665,24 @@
 							</tbody>
 
 							<tfoot>
-								<!-- Inputs for new Monthly Payment -->
-								<tr>
-									<form onsubmit="addMonthlyPayment()" autocomplete="off">
+								<!--
+										Inputs for new Spend
+
+										We use '-{{ .ID }}' suffix because we render all days, just hide them.
+										So, ids without this suffix wouldn't be unique. We use day id instead of
+										day number because we pass into 'addSpend' function day id.
+									-->
+								<tr class="detailed-info__days__day__spends__new-spend" data-day-id="{{ .ID }}">
+									<form onsubmit="addSpend(Number('{{ .ID }}'))" autocomplete="off">
 										<td>
-											<input type="text" id="new-monthly-payment-title" placeholder="Title">
+											<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" list="spend-datalist-{{ .ID }}">
+											<datalist id="spend-datalist-{{ .ID }}"></datalist>
 										</td>
 										<td>
-											<input type="text" id="new-monthly-payment-notes" placeholder="Notes">
+											<input type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes">
 										</td>
 										<td>
-											<select id="new-monthly-payment-type">
+											<select id="new-spend-type-{{ .ID }}">
 												<option value="0">-</option>
 												{{ range $.SpendTypes }}
 												<option value="{{ .ID }}">{{ .FullName }}</option>
@@ -563,7 +690,7 @@
 											</select>
 										</td>
 										<td>
-											<input type="text" id="new-monthly-payment-cost" placeholder="Cost">
+											<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost">
 										</td>
 										<td class="table-shrink-cell">
 											<button type="submit" class="actions-horizontal-list">
@@ -578,339 +705,210 @@
 								</tr>
 							</tfoot>
 						</table>
+					</div>
 
-						{{ if not .MonthlyPayments }}
-						<div id="detailed-info__block__table__copy-from-previous-month-button">
-							<input type="button" value="Copy from previous Month" onclick="copyMonthlyPaymentsFromPreviousMonth()">
+					<div class="day__result">
+						<div>
+							<span class="noselect">Spent:</span>
+							<!-- Spends must be always <= 0 -->
+							{{ $totalCost := call $.SumSpendCosts .Spends }}
+							{{ if eq $totalCost 0 }}
+							<span class="money--gain">{{ $totalCost }}</span>
+							{{ else }}
+							<span class="money--lose">{{ $totalCost }}</span>
+							{{ end }}
 						</div>
-						{{ end }}
+
+						<div>
+							<span class="noselect">Saldo:</span>
+							{{ if ge .Saldo 0 }}
+							<span class="money--gain">{{ .Saldo }}</span>
+							{{ else }}
+							<span class="money--lose">{{ .Saldo }}</span>
+							{{ end }}
+						</div>
 					</div>
 				</div>
-
-				<!-- Days -->
-				<div id="days-info" class="card">
-					<div id="calendar">
-						{{ range .Days }}
-						<div id="id-calendar-day-{{ .Day }}" class="calendar__day"
-							onclick="selectDay('{{ .Day }}');">
-
-							<div class="calendar__day__info">
-								<div>
-									<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
-								</div>
-								<div class="calendar__day__info__spend-number" title="Spends">
-									{{ len .Spends }}
-								</div>
-							</div>
-
-							<div class="calendar__day__saldo" title="Saldo">
-								{{ if ge .Saldo 0 }}
-								<span class="money--gain">{{ .Saldo }}</span>
-								{{ else }}
-								<span class="money--lose">{{ .Saldo }}</span>
-								{{ end }}
-							</div>
-						</div>
-						{{ end }}
-					</div>
-
-					{{ range .Days }}
-					<div id="id-day-{{ .Day }}" class="day">
-						<div class="day__date">
-							{{ .Day }} {{ $.Month.Month }}
-						</div>
-
-						<div class="day__spends">
-							<table>
-								<thead>
-									<tr class="noselect">
-										<th>Title</th>
-										<th>Notes</th>
-										<th>Type</th>
-										<th class="money">Cost</th>
-										<th></th>
-									</tr>
-								</thead>
-
-								<tbody>
-									{{ range .Spends }}
-									<tr>
-										<td>{{ .Title }}</td>
-										<td>{{ .Notes }}</td>
-										<td class="table-shrink-cell">
-											{{ if .Type }}
-											{{ .Type.Name }}
-											{{ else }}
-											-
-											{{ end }}
-										</td>
-										<td class="money table-shrink-cell">{{ .Cost }}</td>
-										<td class="table-shrink-cell">
-											<div class="actions-horizontal-list">
-												<div class="feather-icon--btn" title="Edit"
-													onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
-													'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
-													<svg>
-														<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
-													</svg>
-												</div>
-												<div class="feather-icon--btn" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
-													<svg>
-														<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
-													</svg>
-												</div>
-											</div>
-										</td>
-									</tr>
-									{{ end }}
-								</tbody>
-
-								<tfoot>
-									<!--
-										Inputs for new Spend
-
-										We use '-{{ .ID }}' suffix because we render all days, just hide them.
-										So, ids without this suffix wouldn't be unique. We use day id instead of
-										day number because we pass into 'addSpend' function day id.
-									-->
-									<tr class="detailed-info__days__day__spends__new-spend" data-day-id="{{ .ID }}">
-										<form onsubmit="addSpend(Number('{{ .ID }}'))" autocomplete="off">
-											<td>
-												<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" list="spend-datalist-{{ .ID }}">
-												<datalist id="spend-datalist-{{ .ID }}"></datalist>
-											</td>
-											<td>
-												<input type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes">
-											</td>
-											<td>
-												<select id="new-spend-type-{{ .ID }}">
-													<option value="0">-</option>
-													{{ range $.SpendTypes }}
-													<option value="{{ .ID }}">{{ .FullName }}</option>
-													{{ end }}
-												</select>
-											</td>
-											<td>
-												<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost">
-											</td>
-											<td class="table-shrink-cell">
-												<button type="submit" class="actions-horizontal-list">
-													<div class="feather-icon--btn" title="Add">
-														<svg class="svg-icon-plus">
-															<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
-														</svg>
-													</div>
-												</button>
-											</td>
-										</form>
-									</tr>
-								</tfoot>
-							</table>
-						</div>
-
-						<div class="day__result">
-							<div>
-								<span class="noselect">Spent:</span>
-								<!-- Spends must be always <= 0 -->
-								{{ $totalCost := call $.SumSpendCosts .Spends }}
-								{{ if eq $totalCost 0 }}
-								<span class="money--gain">{{ $totalCost }}</span>
-								{{ else }}
-								<span class="money--lose">{{ $totalCost }}</span>
-								{{ end }}
-							</div>
-
-							<div>
-								<span class="noselect">Saldo:</span>
-								{{ if ge .Saldo 0 }}
-								<span class="money--gain">{{ .Saldo }}</span>
-								{{ else }}
-								<span class="money--lose">{{ .Saldo }}</span>
-								{{ end }}
-							</div>
-						</div>
-					</div>
-					{{ end }}
-				</div>
+				{{ end }}
 			</div>
+		</div>
 
-			<!-- Modal windows (hidden by default) -->
-			<div id="modal-window__background">
-				<!-- Edit Income -->
-				<form id="modal-window__edit-income" class="modal-window">
-					<div class="modal-window__header noselect">Edit Income</div>
+		<!-- Modal windows (hidden by default) -->
+		<div id="modal-window__background">
+			<!-- Edit Income -->
+			<form id="modal-window__edit-income" class="modal-window">
+				<div class="modal-window__header noselect">Edit Income</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Title:</span>
-						<input id="modal-window__edit-income__title" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-income__title" type="text">
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Notes:</span>
-						<input id="modal-window__edit-income__notes" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-income__notes" type="text">
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Income:</span>
-						<input id="modal-window__edit-income__income" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Income:</span>
+					<input id="modal-window__edit-income__income" type="text">
+				</div>
 
-					<div class="modal-window__save-button">
-						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-						<input type="submit" id="modal-window__edit-income__save-button" value="Save">
-					</div>
-				</form>
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="submit" id="modal-window__edit-income__save-button" value="Save">
+				</div>
+			</form>
 
-				<!-- Edit Monthly Payment -->
-				<form id="modal-window__edit-monthly-payment" class="modal-window">
-					<div class="modal-window__header noselect">Edit Monthly Payment</div>
+			<!-- Edit Monthly Payment -->
+			<form id="modal-window__edit-monthly-payment" class="modal-window">
+				<div class="modal-window__header noselect">Edit Monthly Payment</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Title:</span>
-						<input id="modal-window__edit-monthly-payment__title" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-monthly-payment__title" type="text">
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Notes:</span>
-						<input id="modal-window__edit-monthly-payment__notes" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-monthly-payment__notes" type="text">
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Type:</span>
-						<select id="modal-window__edit-monthly-payment__type">
-							<option value="0">-</option>
-							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .FullName }}</option>
-							{{ end }}
-						</select>
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Type:</span>
+					<select id="modal-window__edit-monthly-payment__type">
+						<option value="0">-</option>
+						{{ range $.SpendTypes }}
+						<option value="{{ .ID }}">{{ .FullName }}</option>
+						{{ end }}
+					</select>
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Cost:</span>
-						<input id="modal-window__edit-monthly-payment__cost" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Cost:</span>
+					<input id="modal-window__edit-monthly-payment__cost" type="text">
+				</div>
 
-					<div class="modal-window__save-button">
-						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-						<input type="submit" id="modal-window__edit-monthly-payment__save-button" value="Save">
-					</div>
-				</form>
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="submit" id="modal-window__edit-monthly-payment__save-button" value="Save">
+				</div>
+			</form>
 
-				<!-- Edit Spend -->
-				<form id="modal-window__edit-spend" class="modal-window">
-					<div class="modal-window__header noselect">Edit Spend</div>
+			<!-- Edit Spend -->
+			<form id="modal-window__edit-spend" class="modal-window">
+				<div class="modal-window__header noselect">Edit Spend</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Title:</span>
-						<input id="modal-window__edit-spend__title" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Title:</span>
+					<input id="modal-window__edit-spend__title" type="text">
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Notes:</span>
-						<input id="modal-window__edit-spend__notes" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Notes:</span>
+					<input id="modal-window__edit-spend__notes" type="text">
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Type:</span>
-						<select id="modal-window__edit-spend__type">
-							<option value="0">-</option>
-							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .FullName }}</option>
-							{{ end }}
-						</select>
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Type:</span>
+					<select id="modal-window__edit-spend__type">
+						<option value="0">-</option>
+						{{ range $.SpendTypes }}
+						<option value="{{ .ID }}">{{ .FullName }}</option>
+						{{ end }}
+					</select>
+				</div>
 
-					<div class="modal-window__edit-field">
-						<span class="noselect">Cost:</span>
-						<input id="modal-window__edit-spend__cost" type="text">
-					</div>
+				<div class="modal-window__edit-field">
+					<span class="noselect">Cost:</span>
+					<input id="modal-window__edit-spend__cost" type="text">
+				</div>
 
-					<div class="modal-window__save-button">
-						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-						<input type="submit" id="modal-window__edit-spend__save-button" value="Save">
-					</div>
-				</form>
+				<div class="modal-window__save-button">
+					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+					<input type="submit" id="modal-window__edit-spend__save-button" value="Save">
+				</div>
+			</form>
 
-				<!-- Manage types -->
-				<div id="modal-window__manage-types" class="modal-window">
-					<div class="modal-window__header noselect">Manage Spend Types</div>
+			<!-- Manage types -->
+			<div id="modal-window__manage-types" class="modal-window">
+				<div class="modal-window__header noselect">Manage Spend Types</div>
 
-					{{ range .SpendTypes }}
-					<div id="modal-window__manage-types__spend-type-{{ .ID }}" class="modal-window__manage-types__spend-type">
-						{{ $currentType := . }}
-						<select id="edit-spend-type-parent-id-{{ .ID }}" class="reverse" autocomplete="off" title="Parent Spend Type">
-							<option value="0"></option>
-							{{ range $.SpendTypes }}
+				{{ range .SpendTypes }}
+				<div id="modal-window__manage-types__spend-type-{{ .ID }}" class="modal-window__manage-types__spend-type">
+					{{ $currentType := . }}
+					<select id="edit-spend-type-parent-id-{{ .ID }}" class="reverse" autocomplete="off" title="Parent Spend Type">
+						<option value="0"></option>
+						{{ range $.SpendTypes }}
 
-							{{ $attributes := "" }}
-							{{ if eq $currentType.ParentID .ID }}
-							{{ $attributes = (printf "%s %s" $attributes "selected") }}
-							{{ end }}
-							{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
-							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
-							{{ end }}
+						{{ $attributes := "" }}
+						{{ if eq $currentType.ParentID .ID }}
+						{{ $attributes = (printf "%s %s" $attributes "selected") }}
+						{{ end }}
+						{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
+						{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
+						{{ end }}
 
-							<option value="{{ .ID }}" {{ call $.ToHTMLAttr $attributes }}>{{ .FullName }}</option>
-							{{ end }}
-						</select>
+						<option value="{{ .ID }}" {{ call $.ToHTMLAttr $attributes }}>{{ .FullName }}</option>
+						{{ end }}
+					</select>
 
-						<span class="noselect">/</span>
+					<span class="noselect">/</span>
 
-						<input type="text" id="edit-spend-type-name-{{ .ID }}" value="{{ .Name }}" autocomplete="off"
-							placeholder="{{ .Name }}">
+					<input type="text" id="edit-spend-type-name-{{ .ID }}" value="{{ .Name }}" autocomplete="off"
+						placeholder="{{ .Name }}">
 
-						<div class="actions-horizontal-list">
-							<div class="feather-icon--btn" title="Save" onclick="editSpendType('{{ .ID }}')">
-								<svg>
-									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#check` }}" />
-								</svg>
-							</div>
-							<div class="feather-icon--btn" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
-								<svg>
-									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
-								</svg>
-							</div>
-						</div>
-					</div>
-					{{ end }}
-
-					<!-- New Spend Type -->
-					<form class="modal-window__manage-types__spend-type" onsubmit="addSpendType()">
-						<select id="new-spend-type-parent-id" class="reverse" autocomplete="off" title="Parent Spend Type">
-							<option value="0"></option>
-							{{ range $.SpendTypes }}
-							<option value="{{ .ID }}">{{ .FullName }}</option>
-							{{ end }}
-						</select>
-
-						<span class="noselect">/</span>
-
-						<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
-
-						<div class="actions-horizontal-list">
-							<button type="submit" class="feather-icon--btn" title="Add">
-								<svg>
-									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
-								</svg>
-							</button>
-							<!-- Use this disabled and hidden element to align 'Add' button -->
-							<div class="feather-icon--btn" style="opacity: 0; pointer-events: none;">
-								<svg>
-									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
-								</svg>
-							</div>
-						</div>
-					</form>
-
-					<div id="modal-window__manage-types__saved-msg">
-						<div class="feather-icon">
+					<div class="actions-horizontal-list">
+						<div class="feather-icon--btn" title="Save" onclick="editSpendType('{{ .ID }}')">
 							<svg>
 								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#check` }}" />
 							</svg>
 						</div>
-
-						<span>Saved</span>
+						<div class="feather-icon--btn" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
+							<svg>
+								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
+							</svg>
+						</div>
 					</div>
+				</div>
+				{{ end }}
+
+				<!-- New Spend Type -->
+				<form class="modal-window__manage-types__spend-type" onsubmit="addSpendType()">
+					<select id="new-spend-type-parent-id" class="reverse" autocomplete="off" title="Parent Spend Type">
+						<option value="0"></option>
+						{{ range $.SpendTypes }}
+						<option value="{{ .ID }}">{{ .FullName }}</option>
+						{{ end }}
+					</select>
+
+					<span class="noselect">/</span>
+
+					<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
+
+					<div class="actions-horizontal-list">
+						<button type="submit" class="feather-icon--btn" title="Add">
+							<svg>
+								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
+							</svg>
+						</button>
+						<!-- Use this disabled and hidden element to align 'Add' button -->
+						<div class="feather-icon--btn" style="opacity: 0; pointer-events: none;">
+							<svg>
+								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
+							</svg>
+						</div>
+					</div>
+				</form>
+
+				<div id="modal-window__manage-types__saved-msg">
+					<div class="feather-icon">
+						<svg>
+							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#check` }}" />
+						</svg>
+					</div>
+
+					<span>Saved</span>
 				</div>
 			</div>
 		</div>
