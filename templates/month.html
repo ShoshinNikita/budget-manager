@@ -9,17 +9,6 @@
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
-		/* | Global */
-
-		table th,
-		td {
-			word-break: keep-all;
-		}
-
-		table th {
-			white-space: nowrap;
-		}
-
 		/* || Actions */
 
 		.actions-horizontal-list {
@@ -110,24 +99,6 @@
 			word-break: break-word;
 		}
 
-		.detailed-info__block__table__type,
-		.detailed-info__block__table__money,
-		.detailed-info__block__table__money--input,
-		.detailed-info__block__table__actions {
-			/* Set width to minimum */
-			width: 1px;
-			white-space: nowrap;
-		}
-
-		.detailed-info__block__table__money {
-			min-width: 80px;
-			text-align: right;
-		}
-
-		td.detailed-info__block__table__money {
-			padding-right: 10px;
-		}
-
 		#detailed-info__block__table__copy-from-previous-month-button {
 			height: 30px;
 			margin-top: 30px;
@@ -137,6 +108,17 @@
 		#detailed-info__block__table__copy-from-previous-month-button>input {
 			width: auto;
 			padding: 6px;
+		}
+
+		.table-shrink-cell {
+			width: 1px;
+			white-space: nowrap;
+		}
+
+		th.money,
+		td.money {
+			min-width: 80px;
+			text-align: right;
 		}
 
 		/* || Income */
@@ -453,25 +435,24 @@
 				<!-- Incomes -->
 				<div id="detailed-info__incomes" class="detailed-info__block">
 					<div class="detailed-info__block__header noselect">Incomes</div>
-					<!-- Incomes list -->
 					<div class="detailed-info__block__table">
 						<table>
 							<thead>
-								<tr>
-									<th class="detailed-info__block__table__title noselect">Title</th>
-									<th class="detailed-info__block__table__notes noselect">Notes</th>
-									<th class="detailed-info__block__table__money money noselect">Income</th>
-									<th class="detailed-info__block__table__actions"></th>
+								<tr class="noselect">
+									<th>Title</th>
+									<th>Notes</th>
+									<th class="money">Income</th>
+									<th></th>
 								</tr>
 							</thead>
 
 							<tbody>
 								{{ range .Incomes }}
 								<tr>
-									<td class="detailed-info__block__table__title">{{ .Title }}</td>
-									<td class="detailed-info__block__table__notes">{{ .Notes }}</td>
-									<td class="detailed-info__block__table__money">{{ .Income }}</td>
-									<td class="detailed-info__block__table__actions">
+									<td>{{ .Title }}</td>
+									<td>{{ .Notes }}</td>
+									<td class="money table-shrink-cell">{{ .Income }}</td>
+									<td class="table-shrink-cell">
 										<div class="actions-horizontal-list">
 											<div class="feather-icon--btn" title="Edit"
 												onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
@@ -491,20 +472,18 @@
 							</tbody>
 
 							<tfoot>
-								<!-- Inputs for new Income -->
 								<tr>
-									<form onsubmit="addIncome()">
-										<td class="detailed-info__block__table__title">
-											<input type="text" id="new-income-title" placeholder="Title" autocomplete="off">
+									<form onsubmit="addIncome()" autocomplete="off">
+										<td>
+											<input type="text" id="new-income-title" placeholder="Title">
 										</td>
-										<td class="detailed-info__block__table__notes">
-											<input
-												type="text" id="new-income-notes" placeholder="Notes" autocomplete="off">
+										<td>
+											<input type="text" id="new-income-notes" placeholder="Notes">
 										</td>
-										<td class="detailed-info__block__table__money--input">
-											<input type="text" id="new-income-income" placeholder="Income" autocomplete="off">
+										<td>
+											<input type="text" id="new-income-income" placeholder="Income">
 										</td>
-										<td class="detailed-info__block__table__actions">
+										<td class="table-shrink-cell">
 											<button type="submit" class="actions-horizontal-list">
 												<div class="feather-icon--btn" title="Add">
 													<svg class="svg-icon-plus">
@@ -533,29 +512,29 @@
 					<div class="detailed-info__block__table">
 						<table>
 							<thead>
-								<tr>
-									<th class="detailed-info__block__table__title noselect">Title</th>
-									<th class="detailed-info__block__table__notes noselect">Notes</th>
-									<th class="detailed-info__block__table__type noselect">Type</th>
-									<th class="detailed-info__block__table__money money noselect">Cost</th>
-									<th class="detailed-info__block__table__actions"></th>
+								<tr class="noselect">
+									<th>Title</th>
+									<th>Notes</th>
+									<th>Type</th>
+									<th class="money">Cost</th>
+									<th></th>
 								</tr>
 							</thead>
 
 							<tbody>
 								{{ range .MonthlyPayments }}
 								<tr>
-									<td class="detailed-info__block__table__title">{{ .Title }}</td>
-									<td class="detailed-info__block__table__notes">{{ .Notes }}</td>
-									<td class="detailed-info__block__table__type">
+									<td>{{ .Title }}</td>
+									<td>{{ .Notes }}</td>
+									<td class="table-shrink-cell">
 										{{ if .Type }}
 										{{ .Type.Name }}
 										{{ else }}
 										-
 										{{ end }}
 									</td>
-									<td class="detailed-info__block__table__money">{{ .Cost }}</td>
-									<td class="detailed-info__block__table__actions">
+									<td class="money table-shrink-cell">{{ .Cost }}</td>
+									<td class="table-shrink-cell">
 										<div class="actions-horizontal-list">
 											<div class="feather-icon--btn" title="Edit"
 												onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
@@ -578,27 +557,25 @@
 							<tfoot>
 								<!-- Inputs for new Monthly Payment -->
 								<tr>
-									<form onsubmit="addMonthlyPayment()">
-										<td class="detailed-info__block__table__title">
-											<input type="text" id="new-monthly-payment-title" placeholder="Title"
-												autocomplete="off">
+									<form onsubmit="addMonthlyPayment()" autocomplete="off">
+										<td>
+											<input type="text" id="new-monthly-payment-title" placeholder="Title">
 										</td>
-										<td class="detailed-info__block__table__notes">
-											<input
-												type="text" id="new-monthly-payment-notes" placeholder="Notes" autocomplete="off">
+										<td>
+											<input type="text" id="new-monthly-payment-notes" placeholder="Notes">
 										</td>
-										<td class="detailed-info__block__table__type">
-											<select id="new-monthly-payment-type" autocomplete="off">
+										<td>
+											<select id="new-monthly-payment-type">
 												<option value="0">-</option>
 												{{ range $.SpendTypes }}
 												<option value="{{ .ID }}">{{ .FullName }}</option>
 												{{ end }}
 											</select>
 										</td>
-										<td class="detailed-info__block__table__money--input">
-											<input type="text" id="new-monthly-payment-cost" placeholder="Cost" autocomplete="off">
+										<td>
+											<input type="text" id="new-monthly-payment-cost" placeholder="Cost">
 										</td>
-										<td class="detailed-info__block__table__actions">
+										<td class="table-shrink-cell">
 											<button type="submit" class="actions-horizontal-list">
 												<div class="feather-icon--btn" title="Add">
 													<svg class="svg-icon-plus">
@@ -656,29 +633,29 @@
 						<div class="detailed-info__days__day__spends">
 							<table>
 								<thead>
-									<tr>
-										<th class="detailed-info__block__table__title noselect">Title</th>
-										<th class="detailed-info__block__table__notes noselect">Notes</th>
-										<th class="detailed-info__block__table__type noselect">Type</th>
-										<th class="detailed-info__block__table__money money noselect">Cost</th>
-										<th class="detailed-info__block__table__actions"></th>
+									<tr class="noselect">
+										<th>Title</th>
+										<th>Notes</th>
+										<th>Type</th>
+										<th class="money">Cost</th>
+										<th></th>
 									</tr>
 								</thead>
 
 								<tbody>
 									{{ range .Spends }}
 									<tr>
-										<td class="detailed-info__block__table__title">{{ .Title }}</td>
-										<td class="detailed-info__block__table__notes">{{ .Notes }}</td>
-										<td class="detailed-info__block__table__type">
+										<td>{{ .Title }}</td>
+										<td>{{ .Notes }}</td>
+										<td class="table-shrink-cell">
 											{{ if .Type }}
 											{{ .Type.Name }}
 											{{ else }}
 											-
 											{{ end }}
 										</td>
-										<td class="detailed-info__block__table__money">{{ .Cost }}</td>
-										<td class="detailed-info__block__table__actions">
+										<td class="money table-shrink-cell">{{ .Cost }}</td>
+										<td class="table-shrink-cell">
 											<div class="actions-horizontal-list">
 												<div class="feather-icon--btn" title="Edit"
 													onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
@@ -707,27 +684,26 @@
 										day number because we pass into 'addSpend' function day id.
 									-->
 									<tr class="detailed-info__days__day__spends__new-spend" data-day-id="{{ .ID }}">
-										<form onsubmit="addSpend(Number('{{ .ID }}'))">
-											<td class="detailed-info__block__table__title">
-												<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" autocomplete="off" list="spend-datalist-{{ .ID }}">
+										<form onsubmit="addSpend(Number('{{ .ID }}'))" autocomplete="off">
+											<td>
+												<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" list="spend-datalist-{{ .ID }}">
 												<datalist id="spend-datalist-{{ .ID }}"></datalist>
 											</td>
-											<td class="detailed-info__block__table__notes">
-												<input
-													type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes" autocomplete="off">
+											<td>
+												<input type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes">
 											</td>
-											<td class="detailed-info__block__table__type">
-												<select id="new-spend-type-{{ .ID }}" autocomplete="off">
+											<td>
+												<select id="new-spend-type-{{ .ID }}">
 													<option value="0">-</option>
 													{{ range $.SpendTypes }}
 													<option value="{{ .ID }}">{{ .FullName }}</option>
 													{{ end }}
 												</select>
 											</td>
-											<td class="detailed-info__block__table__money--input">
-												<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost" autocomplete="off">
+											<td>
+												<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost">
 											</td>
-											<td class="detailed-info__block__table__actions">
+											<td class="table-shrink-cell">
 												<button type="submit" class="actions-horizontal-list">
 													<div class="feather-icon--btn" title="Add">
 														<svg class="svg-icon-plus">
@@ -1110,6 +1086,7 @@
 			location.hash = dayNumber;
 
 			// Focus new Spend title input
+			// TODO: fix
 			const newSpendForm = dayElem.querySelector(".detailed-info__days__day__spends__new-spend");
 			const newSpendTitle = newSpendForm.querySelector(".detailed-info__block__table__title");
 			const newSpendTitleInput = newSpendTitle.querySelector("input");
