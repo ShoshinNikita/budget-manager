@@ -360,7 +360,7 @@
 						<thead>
 							<tr class="noselect">
 								<th>Title</th>
-								<th>Notes</th>
+								<th class="notes">Notes</th>
 								<th class="money">Income</th>
 								<th></th>
 							</tr>
@@ -371,7 +371,7 @@
 							{{ range .Incomes }}
 							<tr>
 								<td>{{ .Title }}</td>
-								<td>{{ .Notes }}</td>
+								<td class="notes">{{ .Notes }}</td>
 								<td class="money table-shrink-cell">{{ .Income }}</td>
 								<td class="table-shrink-cell">
 									<div class="actions-horizontal-list">
@@ -398,7 +398,7 @@
 									<td>
 										<input type="text" id="new-income-title" placeholder="Title">
 									</td>
-									<td>
+									<td class="notes">
 										<input type="text" id="new-income-notes" placeholder="Notes">
 									</td>
 									<td class="money table-shrink-cell">
@@ -438,7 +438,7 @@
 						<thead>
 							<tr class="noselect">
 								<th>Title</th>
-								<th>Notes</th>
+								<th class="notes">Notes</th>
 								<th>Type</th>
 								<th class="money">Cost</th>
 								<th></th>
@@ -450,7 +450,7 @@
 							{{ range .MonthlyPayments }}
 							<tr>
 								<td>{{ .Title }}</td>
-								<td>{{ .Notes }}</td>
+								<td class="notes">{{ .Notes }}</td>
 								<td class="table-shrink-cell">
 									{{ if .Type }}
 									{{ .Type.Name }}
@@ -486,7 +486,7 @@
 									<td>
 										<input type="text" id="new-monthly-payment-title" placeholder="Title">
 									</td>
-									<td>
+									<td class="notes">
 										<input type="text" id="new-monthly-payment-notes" placeholder="Notes">
 									</td>
 									<td class="table-shrink-cell">
@@ -568,7 +568,7 @@
 							<thead>
 								<tr class="noselect">
 									<th>Title</th>
-									<th>Notes</th>
+									<th class="notes">Notes</th>
 									<th>Type</th>
 									<th class="money">Cost</th>
 									<th></th>
@@ -580,7 +580,7 @@
 								{{ range .Spends }}
 								<tr>
 									<td>{{ .Title }}</td>
-									<td>{{ .Notes }}</td>
+									<td class="notes">{{ .Notes }}</td>
 									<td class="table-shrink-cell">
 										{{ if .Type }}
 										{{ .Type.Name }}
@@ -623,7 +623,7 @@
 											<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" list="spend-datalist-{{ .ID }}">
 											<datalist id="spend-datalist-{{ .ID }}"></datalist>
 										</td>
-										<td>
+										<td class="notes">
 											<input type="text" id="new-spend-notes-{{ .ID }}" placeholder="Notes">
 										</td>
 										<td class="table-shrink-cell">
@@ -1594,7 +1594,7 @@
 	<script src="{{ asStaticURL `/static/js/link-formatter.js` }}"></script>
 	<script>
 		window.addEventListener("load", () => {
-			formatLinks(".detailed-info__block__table__notes:not(.noselect)");
+			formatLinks("td.notes");
 		})
 	</script>
 
