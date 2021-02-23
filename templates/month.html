@@ -129,11 +129,6 @@
 			padding: 5px 7px;
 		}
 
-		.calendar__day:hover {
-			background-color: var(--hover-color);
-			cursor: pointer;
-		}
-
 		.calendar__day.disabled {
 			cursor: default;
 			opacity: 0.2;
@@ -523,7 +518,7 @@
 				<!-- Calendar -->
 				<div id="calendar">
 					{{ range .Days }}
-					<div id="id-calendar-day-{{ .Day }}" class="calendar__day" onclick="selectDay('{{ .Day }}');">
+					<a href="#{{ .Day }}" id="id-calendar-day-{{ .Day }}" class="calendar__day card--hover" onclick="selectDay('{{ .Day }}');">
 						<div class="calendar__day__date">
 							<span>{{ .Day }} {{ call $.ToShortMonth $.Month.Month }}</span>
 						</div>
@@ -539,7 +534,7 @@
 							<span> · </span>
 							<span title="Spends">{{ len .Spends }}</span>
 						</div>
-					</div>
+					</a>
 					{{ end }}
 				</div>
 

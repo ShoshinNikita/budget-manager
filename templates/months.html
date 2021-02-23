@@ -8,10 +8,6 @@
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
-		a:link.no-decoration {
-			text-decoration: none !important;
-		}
-
 		/* | App */
 
 		#content {
@@ -53,32 +49,18 @@
 			row-gap: 20px;
 		}
 
-		.month,
-		.month--not-exist {
-			border: 1px solid var(--border-color);
-			border-radius: 2px;
-			cursor: pointer;
+		.month {
 			height: 120px;
-			padding: 7px;
-			padding-left: 10px;
-
-			transition-property: padding-left;
-			transition-duration: 0.175s;
-			transition-timing-function: ease-in-out;
+			padding: 10px;
 		}
 
-		.month:hover {
-			background-color: var(--hover-color);
-			padding-left: 15px;
-		}
-
-		.month--not-exist {
+		.month.disabled {
 			cursor: default;
 			opacity: 0.5;
 		}
 
 		.month__header {
-			font-size: 17px;
+			font-size: 18px;
 		}
 
 		.month__results {
@@ -88,7 +70,7 @@
 			margin-top: 7px;
 		}
 
-		.month__results__value {
+		.month__result {
 			text-align: right;
 		}
 
@@ -203,28 +185,26 @@
 					<!-- Show month overview -->
 
 					<!-- Use the number of a month instead of the name -->
-					<a class="no-decoration" href="/{{ .Year }}-{{ printf `%02d` .Month }}">
-						<div class="month" title="Go to the month">
-							<div class="month__header">{{ .Month }} {{ .Year }}</div>
-							<div class="month__results">
-								<div>Income:</div>
-								<div class="month__results__value money--gain">{{ .TotalIncome }}</div>
-								<div>Spend:</div>
-								<div class="month__results__value money--lose">{{ .TotalSpend }}</div>
-								<div>Result:</div>
-								<div class="month__results__value">
-									{{ if ge .Result 0 }}
-									<span class="money--gain">{{ .Result }}</span>
-									{{ else }}
-									<span class="money--lose">{{ .Result }}</span>
-									{{ end }}
-								</div>
+					<a href="/{{ .Year }}-{{ printf `%02d` .Month }}" class="month card card--hover" title="Go to the month">
+						<div class="month__header">{{ .Month }} {{ .Year }}</div>
+						<div class="month__results">
+							<div>Income:</div>
+							<div class="month__result money--gain">{{ .TotalIncome }}</div>
+							<div>Spend:</div>
+							<div class="month__result money--lose">{{ .TotalSpend }}</div>
+							<div>Result:</div>
+							<div class="month__result">
+								{{ if ge .Result 0 }}
+								<span class="money--gain">{{ .Result }}</span>
+								{{ else }}
+								<span class="money--lose">{{ .Result }}</span>
+								{{ end }}
 							</div>
 						</div>
 					</a>
 					{{ else }}
 					<!-- Just show a stub -->
-					<div class="month--not-exist" title="No data for the month">
+					<div class="month card disabled" title="No data for the month">
 						<div class="month__header">{{ .Month }} {{ .Year }}</div>
 					</div>
 					{{ end }}

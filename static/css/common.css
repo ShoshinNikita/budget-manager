@@ -105,8 +105,21 @@ body {
 	padding: 0 5px;
 }
 
+.card--hover {
+	transition-duration: 0.175s;
+	transition-property: padding-left;
+	transition-timing-function: ease-in-out;
+}
+
+.card--hover:focus,
 .card--hover:hover {
-	padding-left: 5px;
+	background-color: var(--hover-color);
+	padding-left: 7%;
+}
+
+a:link.card--hover:focus,
+a:link.card--hover:hover {
+	text-decoration: none;
 }
 
 /* | Icons */
