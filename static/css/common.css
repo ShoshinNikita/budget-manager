@@ -111,16 +111,7 @@ body {
 
 /* | Icons */
 
-.feather-icon--btn {
-	padding: 3px;
-}
-
-.feather-icon--btn:not(.disabled) {
-	cursor: pointer;
-}
-
-.feather-icon > svg,
-.feather-icon--btn > svg {
+.feather-icon > svg {
 	fill: none;
 	stroke: #888888;
 	stroke-linecap: round;
@@ -128,17 +119,34 @@ body {
 	stroke-width: 2;
 }
 
-.feather-icon--btn > svg {
+a.feather-icon,
+button.feather-icon {
+	display: block;
+	padding: 3px;
+	background-color: #00000000;
+}
+
+a.feather-icon:not(.disabled),
+button.feather-icon:not(.disabled) {
+	cursor: pointer;
+}
+
+a.feather-icon > svg,
+button.feather-icon > svg {
 	opacity: 0.64;
 }
 
-.feather-icon--btn:hover:not(.disabled) > svg {
+a.feather-icon:hover:not(.disabled) > svg,
+button.feather-icon:hover:not(.disabled) > svg,
+a.feather-icon:focus:not(.disabled) > svg,
+button.feather-icon:focus:not(.disabled) > svg {
 	opacity: 1;
 	stroke: #666666;
 }
 
 /* | Inputs */
 
+a:focus,
 input:focus,
 select:focus,
 textarea:focus,
@@ -222,6 +230,7 @@ a:visited {
 	color: #039be5;
 }
 
+a:link:focus,
 a:link:hover {
 	text-decoration: underline;
 }

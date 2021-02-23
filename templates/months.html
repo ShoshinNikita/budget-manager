@@ -36,12 +36,12 @@
 			transform: translateX(10px) rotate(180deg);
 		}
 
-		.switch-year-btn .feather-icon--btn {
+		.switch-year-btn .feather-icon {
 			height: 100%;
 			padding: 0;
 		}
 
-		.switch-year-btn .feather-icon--btn>svg {
+		.switch-year-btn .feather-icon>svg {
 			height: 100%;
 			width: 100%;
 		}
@@ -189,12 +189,10 @@
 		<div id="content">
 			<div id="year">
 				<div id="prev-year-btn" class="switch-year-btn">
-					<a href="/months?offset={{ call $.Add .Offset 1 }}">
-						<div class="feather-icon--btn">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-							</svg>
-						</div>
+					<a href="/months?offset={{ call $.Add .Offset 1 }}" class="feather-icon">
+						<svg>
+							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
+						</svg>
 					</a>
 				</div>
 
@@ -236,19 +234,17 @@
 				<div id="next-year-btn" class="switch-year-btn">
 					{{ $offset := call $.Add .Offset -1 }}
 					{{ if ge $offset 0 }}
-					<a href="/months?offset={{ call $.Add .Offset -1 }}">
-						<div class="feather-icon--btn">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-							</svg>
-						</div>
-					</a>
-					{{ else }}
-					<div class="feather-icon--btn disabled" title="No more months">
+					<a href="/months?offset={{ call $.Add .Offset -1 }}" class="feather-icon">
 						<svg>
 							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
 						</svg>
-					</div>
+					</a>
+					{{ else }}
+					<a class="feather-icon disabled" title="No more months">
+						<svg>
+							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
+						</svg>
+					</a>
 					{{ end }}
 				</div>
 			</div>

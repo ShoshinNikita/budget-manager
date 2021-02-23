@@ -15,7 +15,7 @@
 			display: flex;
 		}
 
-		.actions-horizontal-list>.feather-icon--btn>svg {
+		.actions-horizontal-list>button.feather-icon>svg {
 			width: 18px;
 			height: 18px;
 		}
@@ -227,7 +227,7 @@
 			opacity: 0.5;
 		}
 
-		.modal-window__manage-types__spend-type>.feather-icon--btn>svg {
+		.modal-window__manage-types__spend-type>.feather-icon>svg {
 			height: 20px;
 			vertical-align: middle;
 			width: 20px;
@@ -328,20 +328,18 @@
 				<!-- Search for Spends -->
 				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
 				{{ $before := printf `%d-%02d-%d` .Year .Month.Month (len .Month.Days) }}
-				<a href="/search/spends?after={{ $after }}&before={{ $before }}">
-					<div class="feather-icon--btn" title="Search & Statistics">
-						<svg>
-							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#bar-chart-2` }}" />
-						</svg>
-					</div>
+				<a href="/search/spends?after={{ $after }}&before={{ $before }}" class="feather-icon" title="Search & Statistics">
+					<svg>
+						<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#bar-chart-2` }}" />
+					</svg>
 				</a>
 
 				<!-- Manage Spend Types -->
-				<div class="feather-icon--btn" title="Manage Types" onclick="showModalWindowToEditTypes()">
+				<button class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
 					<svg>
 						<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#tag` }}" />
 					</svg>
-				</div>
+				</button>
 			</div>
 		</div>
 
@@ -373,17 +371,17 @@
 								<td class="money table-shrink-cell">{{ .Income }}</td>
 								<td class="table-shrink-cell">
 									<div class="actions-horizontal-list">
-										<div class="feather-icon--btn" title="Edit"
+										<button class="feather-icon" title="Edit"
 											onclick="showModalWindowToEditIncome('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}', '{{ printf `%f` .Income }}')">
 											<svg>
 												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
 											</svg>
-										</div>
-										<div class="feather-icon--btn" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
+										</button>
+										<button class="feather-icon" title="Remove" onclick="removeIncome(Number('{{ .ID }}'))">
 											<svg>
 												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
 											</svg>
-										</div>
+										</button>
 									</div>
 								</td>
 							</tr>
@@ -403,13 +401,13 @@
 										<input type="text" id="new-income-income" placeholder="Income">
 									</td>
 									<td class="table-shrink-cell">
-										<button type="submit" class="actions-horizontal-list">
-											<div class="feather-icon--btn" title="Add">
+										<div class="actions-horizontal-list">
+											<button type="submit" class="feather-icon" title="Add">
 												<svg class="svg-icon-plus">
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
 												</svg>
-											</div>
-										</button>
+											</button>
+										</div>
 									</td>
 								</form>
 							</tr>
@@ -459,18 +457,18 @@
 								<td class="money table-shrink-cell">{{ .Cost }}</td>
 								<td class="table-shrink-cell">
 									<div class="actions-horizontal-list">
-										<div class="feather-icon--btn" title="Edit"
+										<button class="feather-icon" title="Edit"
 											onclick="showModalWindowToEditMonthlyPayment('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
 												'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 											<svg>
 												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
 											</svg>
-										</div>
-										<div class="feather-icon--btn" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
+										</button>
+										<button class="feather-icon" title="Remove" onclick="removeMonthlyPayment(Number('{{ .ID }}'))">
 											<svg>
 												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
 											</svg>
-										</div>
+										</button>
 									</div>
 								</td>
 							</tr>
@@ -499,13 +497,13 @@
 										<input type="text" id="new-monthly-payment-cost" placeholder="Cost">
 									</td>
 									<td class="table-shrink-cell">
-										<button type="submit" class="actions-horizontal-list">
-											<div class="feather-icon--btn" title="Add">
+										<div class="actions-horizontal-list">
+											<button type="submit" class="feather-icon" title="Add">
 												<svg class="svg-icon-plus">
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
 												</svg>
-											</div>
-										</button>
+											</button>
+										</div>
 									</td>
 								</form>
 							</tr>
@@ -589,18 +587,18 @@
 									<td class="money table-shrink-cell">{{ .Cost }}</td>
 									<td class="table-shrink-cell">
 										<div class="actions-horizontal-list">
-											<div class="feather-icon--btn" title="Edit"
+											<button class="feather-icon" title="Edit"
 												onclick="showModalWindowToEditSpend('{{ .ID }}', '{{ .Title }}', '{{ .Notes }}',
 													'{{ if .Type }}{{ .Type.ID }}{{ else }}0{{ end }}', '{{ printf `%f` .Cost }}')">
 												<svg>
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#edit-2` }}" />
 												</svg>
-											</div>
-											<div class="feather-icon--btn" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
+											</button>
+											<button class="feather-icon" title="Remove" onclick="removeSpend(Number('{{ .ID }}'))">
 												<svg>
 													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
 												</svg>
-											</div>
+											</button>
 										</div>
 									</td>
 								</tr>
@@ -636,13 +634,13 @@
 											<input type="text" id="new-spend-cost-{{ .ID }}" placeholder="Cost">
 										</td>
 										<td class="table-shrink-cell">
-											<button type="submit" class="actions-horizontal-list">
-												<div class="feather-icon--btn" title="Add">
+											<div class="actions-horizontal-list">
+												<button type="submit" class="feather-icon" title="Add">
 													<svg class="svg-icon-plus">
 														<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
 													</svg>
-												</div>
-											</button>
+												</button>
+											</div>
 										</td>
 									</form>
 								</tr>
@@ -787,16 +785,16 @@
 							placeholder="{{ .Name }}">
 
 						<div class="actions-horizontal-list">
-							<div class="feather-icon--btn" title="Save" onclick="editSpendType('{{ .ID }}')">
+							<button class="feather-icon" title="Save" onclick="editSpendType('{{ .ID }}')">
 								<svg>
 									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#check` }}" />
 								</svg>
-							</div>
-							<div class="feather-icon--btn" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
+							</button>
+							<button class="feather-icon" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
 								<svg>
 									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
 								</svg>
-							</div>
+							</button>
 						</div>
 					</div>
 					{{ end }}
@@ -815,17 +813,17 @@
 						<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
 
 						<div class="actions-horizontal-list">
-							<button type="submit" class="feather-icon--btn" title="Add">
+							<button type="submit" class="feather-icon" title="Add">
 								<svg>
 									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
 								</svg>
 							</button>
 							<!-- Use this disabled and hidden element to align 'Add' button -->
-							<div class="feather-icon--btn" style="opacity: 0; pointer-events: none;">
+							<button class="feather-icon" style="opacity: 0; pointer-events: none;">
 								<svg>
 									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
 								</svg>
-							</div>
+							</button>
 						</div>
 					</form>
 				</div>
