@@ -96,13 +96,12 @@ body {
 	font-size: 1.3rem;
 	padding: 5px 10px;
 	position: sticky;
-	margin-bottom: 5px;
 	top: 0;
 	z-index: 1;
 }
 
 .card__body {
-	padding: 0 5px;
+	padding: 10px 5px 20px;
 }
 
 .card--hover {
@@ -180,14 +179,16 @@ input {
 	font-size: 15px;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="date"] {
 	border: none;
 	border-bottom: 1px solid var(--border-color);
 	width: 100%;
 }
 
-input[type="text"]:focus {
-	border-bottom: 1px solid var(--border-accent-color);
+input[type="text"]:focus,
+input[type="date"]:focus {
+	border-color: var(--border-accent-color);
 }
 
 input[type="button"],
@@ -199,13 +200,10 @@ input[type="submit"] {
 }
 
 input[type="button"]:hover,
-input[type="submit"]:hover {
+input[type="submit"]:hover,
+input[type="button"]:focus,
+input[type="submit"]:focus {
 	background-color: var(--hover-color);
-}
-
-input[type="button"]:active,
-input[type="submit"]:active {
-	color: var(--font-color);
 }
 
 select {
@@ -231,10 +229,6 @@ select.reverse {
 	padding-right: 0;
 	padding-left: 16px;
 	text-align: right;
-}
-
-select:active {
-	color: var(--font-color);
 }
 
 /* | Links */

@@ -10,13 +10,8 @@
 
 	<style>
 		input[type=date] {
-			border: none;
-			border-bottom: 1px solid var(--border-accent-color);
 			min-width: 120px;
-			width: 100%;
 		}
-
-		/* TODO: move 'static/css/common.css'? */
 
 		.tooltip {
 			position: relative;
@@ -86,17 +81,12 @@
 		/* || Filters */
 
 		#filters {
-			border: 1px solid var(--border-color);
-			border-radius: 2px;
 			height: 100%;
-			padding: 10px;
 		}
 
-		#filters__header {
-			border-bottom: 1px solid var(--border-accent-color);
-			font-size: 18px;
-			margin-bottom: 20px;
-			text-align: center;
+		#filters .card__body {
+			padding-left: 10px;
+			padding-right: 10px;
 		}
 
 		.filter {
@@ -403,10 +393,10 @@
 
 		<div id="content">
 			<!-- Filters -->
-			<div id="filters">
-				<div id="filters__header" class="noselect">Filters</div>
+			<div id="filters" class="card">
+				<div class="card__title noselect">Filters</div>
 
-				<form action="/search/spends">
+				<form action="/search/spends" class="card__body">
 					<!-- Title -->
 					<div id="filters__title" class="filter">
 						<input type="text" name="title" placeholder="Title" title="Title">
