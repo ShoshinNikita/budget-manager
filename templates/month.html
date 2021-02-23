@@ -60,14 +60,13 @@
 			overflow-x: auto;
 		}
 
-		/* TODO */
-		#detailed-info__block__table__copy-from-previous-month-button {
+		.card__body .copy-from-previous-month {
 			height: 30px;
 			margin-top: 30px;
 			text-align: center;
 		}
 
-		#detailed-info__block__table__copy-from-previous-month-button>input {
+		.card__body .copy-from-previous-month>input {
 			width: auto;
 			padding: 6px;
 		}
@@ -418,7 +417,7 @@
 					</table>
 
 					{{ if not .Incomes }}
-					<div id="detailed-info__block__table__copy-from-previous-month-button">
+					<div class="copy-from-previous-month">
 						<input type="button" value="Copy from previous Month" onclick="copyIncomesFromPreviousMonth()">
 					</div>
 					{{ end }}
@@ -514,7 +513,7 @@
 					</table>
 
 					{{ if not .MonthlyPayments }}
-					<div id="detailed-info__block__table__copy-from-previous-month-button">
+					<div class="copy-from-previous-month">
 						<input type="button" value="Copy from previous Month" onclick="copyMonthlyPaymentsFromPreviousMonth()">
 					</div>
 					{{ end }}
@@ -616,7 +615,7 @@
 										So, ids without this suffix wouldn't be unique. We use day id instead of
 										day number because we pass into 'addSpend' function day id.
 									-->
-								<tr class="detailed-info__days__day__spends__new-spend" data-day-id="{{ .ID }}">
+								<tr class="day__new-spend" data-day-id="{{ .ID }}">
 									<form onsubmit="addSpend(Number('{{ .ID }}'))" autocomplete="off">
 										<td>
 											<input type="text" id="new-spend-title-{{ .ID }}" placeholder="Title" list="spend-datalist-{{ .ID }}">
@@ -1003,10 +1002,9 @@
 			location.hash = dayNumber;
 
 			// Focus new Spend title input
-			// TODO: fix
-			const newSpendForm = dayElem.querySelector(".detailed-info__days__day__spends__new-spend");
-			const newSpendTitle = newSpendForm.querySelector(".detailed-info__block__table__title");
-			const newSpendTitleInput = newSpendTitle.querySelector("input");
+			const newSpendForm = dayElem.querySelector(".day__new-spend");
+			const dayID = Number(newSpendForm.getAttribute("data-day-id"));
+			const newSpendTitleInput = newSpendForm.querySelector(`#new-spend-title-${dayID}`)
 			newSpendTitleInput.focus();
 		}
 
@@ -1784,7 +1782,7 @@
 		}
 
 		window.addEventListener("load", () => {
-			const elements = document.getElementsByClassName("detailed-info__days__day__spends__new-spend");
+			const elements = document.getElementsByClassName("day__new-spend");
 			for (let elem of elements) {
 				const dayID = Number(elem.getAttribute("data-day-id"));
 				new SpendAutocompleter(dayID);
