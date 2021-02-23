@@ -169,7 +169,7 @@
 		/* | Modal windows */
 
 		#modal-window__background {
-			background-color: #00000050;
+			background-color: #00000040;
 			display: none;
 			height: 100%;
 			left: 0;
@@ -181,22 +181,22 @@
 		}
 
 		.modal-window {
-			background-color: white;
-			border-radius: 2px;
 			box-shadow: 0px 0px 10px 10px #00000020;
 			display: none;
 			margin: 9vh auto 5vh;
 			max-width: 80%;
 			min-width: 700px;
 			overflow-x: auto;
-			padding: 20px;
 			width: max-content;
 		}
 
-		.modal-window__header {
-			font-size: 18px;
-			margin-bottom: 10px;
-			text-align: center;
+		.modal-window>.card__title {
+			font-size: 1.4rem;
+			padding: 10px 20px;
+		}
+
+		.modal-window>.card__body {
+			padding: 10px 20px 20px;
 		}
 
 		.modal-window__edit-field {
@@ -659,170 +659,178 @@
 		<!-- Modal windows (hidden by default) -->
 		<div id="modal-window__background">
 			<!-- Edit Income -->
-			<form id="modal-window__edit-income" class="modal-window">
-				<div class="modal-window__header noselect">Edit Income</div>
+			<form id="modal-window__edit-income" class="card modal-window">
+				<div class="card__title noselect">Edit Income</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Title:</span>
-					<input id="modal-window__edit-income__title" type="text">
-				</div>
+				<div class="card__body">
+					<div class="modal-window__edit-field">
+						<span class="noselect">Title:</span>
+						<input id="modal-window__edit-income__title" type="text">
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Notes:</span>
-					<input id="modal-window__edit-income__notes" type="text">
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Notes:</span>
+						<input id="modal-window__edit-income__notes" type="text">
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Income:</span>
-					<input id="modal-window__edit-income__income" type="text">
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Income:</span>
+						<input id="modal-window__edit-income__income" type="text">
+					</div>
 
-				<div class="modal-window__save-button">
-					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-					<input type="submit" id="modal-window__edit-income__save-button" value="Save">
+					<div class="modal-window__save-button">
+						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+						<input type="submit" id="modal-window__edit-income__save-button" value="Save">
+					</div>
 				</div>
 			</form>
 
 			<!-- Edit Monthly Payment -->
-			<form id="modal-window__edit-monthly-payment" class="modal-window">
-				<div class="modal-window__header noselect">Edit Monthly Payment</div>
+			<form id="modal-window__edit-monthly-payment" class="card modal-window">
+				<div class="card__title noselect">Edit Monthly Payment</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Title:</span>
-					<input id="modal-window__edit-monthly-payment__title" type="text">
-				</div>
+				<div class="card__body">
+					<div class="modal-window__edit-field">
+						<span class="noselect">Title:</span>
+						<input id="modal-window__edit-monthly-payment__title" type="text">
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Notes:</span>
-					<input id="modal-window__edit-monthly-payment__notes" type="text">
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Notes:</span>
+						<input id="modal-window__edit-monthly-payment__notes" type="text">
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Type:</span>
-					<select id="modal-window__edit-monthly-payment__type">
-						<option value="0">-</option>
-						{{ range $.SpendTypes }}
-						<option value="{{ .ID }}">{{ .FullName }}</option>
-						{{ end }}
-					</select>
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Type:</span>
+						<select id="modal-window__edit-monthly-payment__type">
+							<option value="0">-</option>
+							{{ range $.SpendTypes }}
+							<option value="{{ .ID }}">{{ .FullName }}</option>
+							{{ end }}
+						</select>
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Cost:</span>
-					<input id="modal-window__edit-monthly-payment__cost" type="text">
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Cost:</span>
+						<input id="modal-window__edit-monthly-payment__cost" type="text">
+					</div>
 
-				<div class="modal-window__save-button">
-					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-					<input type="submit" id="modal-window__edit-monthly-payment__save-button" value="Save">
+					<div class="modal-window__save-button">
+						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+						<input type="submit" id="modal-window__edit-monthly-payment__save-button" value="Save">
+					</div>
 				</div>
 			</form>
 
 			<!-- Edit Spend -->
-			<form id="modal-window__edit-spend" class="modal-window">
-				<div class="modal-window__header noselect">Edit Spend</div>
+			<form id="modal-window__edit-spend" class="card modal-window">
+				<div class="card__title noselect">Edit Spend</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Title:</span>
-					<input id="modal-window__edit-spend__title" type="text">
-				</div>
+				<div class="card__body">
+					<div class="modal-window__edit-field">
+						<span class="noselect">Title:</span>
+						<input id="modal-window__edit-spend__title" type="text">
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Notes:</span>
-					<input id="modal-window__edit-spend__notes" type="text">
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Notes:</span>
+						<input id="modal-window__edit-spend__notes" type="text">
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Type:</span>
-					<select id="modal-window__edit-spend__type">
-						<option value="0">-</option>
-						{{ range $.SpendTypes }}
-						<option value="{{ .ID }}">{{ .FullName }}</option>
-						{{ end }}
-					</select>
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Type:</span>
+						<select id="modal-window__edit-spend__type">
+							<option value="0">-</option>
+							{{ range $.SpendTypes }}
+							<option value="{{ .ID }}">{{ .FullName }}</option>
+							{{ end }}
+						</select>
+					</div>
 
-				<div class="modal-window__edit-field">
-					<span class="noselect">Cost:</span>
-					<input id="modal-window__edit-spend__cost" type="text">
-				</div>
+					<div class="modal-window__edit-field">
+						<span class="noselect">Cost:</span>
+						<input id="modal-window__edit-spend__cost" type="text">
+					</div>
 
-				<div class="modal-window__save-button">
-					<input type="button" value="Cancel" onclick="hideAllModalWindows()">
-					<input type="submit" id="modal-window__edit-spend__save-button" value="Save">
+					<div class="modal-window__save-button">
+						<input type="button" value="Cancel" onclick="hideAllModalWindows()">
+						<input type="submit" id="modal-window__edit-spend__save-button" value="Save">
+					</div>
 				</div>
 			</form>
 
 			<!-- Manage types -->
-			<div id="modal-window__manage-types" class="modal-window">
-				<div class="modal-window__header noselect">Manage Spend Types</div>
+			<div id="modal-window__manage-types" class="card modal-window">
+				<div class="card__title noselect">Manage Spend Types</div>
 
-				{{ range .SpendTypes }}
-				<div id="modal-window__manage-types__spend-type-{{ .ID }}" class="modal-window__manage-types__spend-type">
-					{{ $currentType := . }}
-					<select id="edit-spend-type-parent-id-{{ .ID }}" class="reverse" autocomplete="off" title="Parent Spend Type">
-						<option value="0"></option>
-						{{ range $.SpendTypes }}
+				<div class="card__body">
+					{{ range .SpendTypes }}
+					<div id="modal-window__manage-types__spend-type-{{ .ID }}" class="modal-window__manage-types__spend-type">
+						{{ $currentType := . }}
+						<select id="edit-spend-type-parent-id-{{ .ID }}" class="reverse" autocomplete="off" title="Parent Spend Type">
+							<option value="0"></option>
+							{{ range $.SpendTypes }}
 
-						{{ $attributes := "" }}
-						{{ if eq $currentType.ParentID .ID }}
-						{{ $attributes = (printf "%s %s" $attributes "selected") }}
-						{{ end }}
-						{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
-						{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
-						{{ end }}
+							{{ $attributes := "" }}
+							{{ if eq $currentType.ParentID .ID }}
+							{{ $attributes = (printf "%s %s" $attributes "selected") }}
+							{{ end }}
+							{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
+							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
+							{{ end }}
 
-						<option value="{{ .ID }}" {{ call $.ToHTMLAttr $attributes }}>{{ .FullName }}</option>
-						{{ end }}
-					</select>
+							<option value="{{ .ID }}" {{ call $.ToHTMLAttr $attributes }}>{{ .FullName }}</option>
+							{{ end }}
+						</select>
 
-					<span class="noselect">/</span>
+						<span class="noselect">/</span>
 
-					<input type="text" id="edit-spend-type-name-{{ .ID }}" value="{{ .Name }}" autocomplete="off"
-						placeholder="{{ .Name }}">
+						<input type="text" id="edit-spend-type-name-{{ .ID }}" value="{{ .Name }}" autocomplete="off"
+							placeholder="{{ .Name }}">
 
-					<div class="actions-horizontal-list">
-						<div class="feather-icon--btn" title="Save" onclick="editSpendType('{{ .ID }}')">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#check` }}" />
-							</svg>
-						</div>
-						<div class="feather-icon--btn" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
-							</svg>
+						<div class="actions-horizontal-list">
+							<div class="feather-icon--btn" title="Save" onclick="editSpendType('{{ .ID }}')">
+								<svg>
+									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#check` }}" />
+								</svg>
+							</div>
+							<div class="feather-icon--btn" title="Remove" onclick="removeSpendType(Number('{{ .ID }}'))">
+								<svg>
+									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#trash` }}" />
+								</svg>
+							</div>
 						</div>
 					</div>
+					{{ end }}
+
+					<!-- New Spend Type -->
+					<form class="modal-window__manage-types__spend-type" onsubmit="addSpendType()">
+						<select id="new-spend-type-parent-id" class="reverse" autocomplete="off" title="Parent Spend Type">
+							<option value="0"></option>
+							{{ range $.SpendTypes }}
+							<option value="{{ .ID }}">{{ .FullName }}</option>
+							{{ end }}
+						</select>
+
+						<span class="noselect">/</span>
+
+						<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
+
+						<div class="actions-horizontal-list">
+							<button type="submit" class="feather-icon--btn" title="Add">
+								<svg>
+									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
+								</svg>
+							</button>
+							<!-- Use this disabled and hidden element to align 'Add' button -->
+							<div class="feather-icon--btn" style="opacity: 0; pointer-events: none;">
+								<svg>
+									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
+								</svg>
+							</div>
+						</div>
+					</form>
 				</div>
-				{{ end }}
-
-				<!-- New Spend Type -->
-				<form class="modal-window__manage-types__spend-type" onsubmit="addSpendType()">
-					<select id="new-spend-type-parent-id" class="reverse" autocomplete="off" title="Parent Spend Type">
-						<option value="0"></option>
-						{{ range $.SpendTypes }}
-						<option value="{{ .ID }}">{{ .FullName }}</option>
-						{{ end }}
-					</select>
-
-					<span class="noselect">/</span>
-
-					<input type="text" id="new-spend-type-name" placeholder="New Spend Type" autocomplete="off">
-
-					<div class="actions-horizontal-list">
-						<button type="submit" class="feather-icon--btn" title="Add">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
-							</svg>
-						</button>
-						<!-- Use this disabled and hidden element to align 'Add' button -->
-						<div class="feather-icon--btn" style="opacity: 0; pointer-events: none;">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#plus` }}" />
-							</svg>
-						</div>
-					</div>
-				</form>
 
 				<div id="modal-window__manage-types__saved-msg">
 					<div class="feather-icon">

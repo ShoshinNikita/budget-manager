@@ -170,9 +170,8 @@ input[type="text"]:focus {
 input[type="button"],
 input[type="submit"] {
 	border: 1px solid var(--border-accent-color);
-	border-radius: 2px;
 	cursor: pointer;
-	padding: 2px;
+	padding: 3px;
 	width: 80px;
 }
 
