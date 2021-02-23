@@ -126,10 +126,12 @@ a:link.card--hover:hover {
 
 .feather-icon > svg {
 	fill: none;
+	height: 18px;
 	stroke: #888888;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	stroke-width: 2;
+	width: 18px;
 }
 
 a.feather-icon,
