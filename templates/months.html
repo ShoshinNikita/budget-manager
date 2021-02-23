@@ -172,9 +172,7 @@
 			<div id="year">
 				<div id="prev-year-btn" class="switch-year-btn">
 					<a href="/months?offset={{ call $.Add .Offset 1 }}" class="feather-icon">
-						<svg>
-							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-						</svg>
+						{{ template "components/icon" "chevron-left" }}
 					</a>
 				</div>
 
@@ -215,15 +213,11 @@
 					{{ $offset := call $.Add .Offset -1 }}
 					{{ if ge $offset 0 }}
 					<a href="/months?offset={{ call $.Add .Offset -1 }}" class="feather-icon">
-						<svg>
-							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-						</svg>
+						{{ template "components/icon" "chevron-left" }}
 					</a>
 					{{ else }}
 					<a class="feather-icon disabled" title="No more months">
-						<svg>
-							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-						</svg>
+						{{ template "components/icon" "chevron-left" }}
 					</a>
 					{{ end }}
 				</div>

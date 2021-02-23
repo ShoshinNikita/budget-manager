@@ -109,9 +109,7 @@
 	<div id="error">
 		<div id="error__oops">
 			<div id="error__oops__icon" class="feather-icon">
-				<svg>
-					<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#alert-circle` }}" />
-				</svg>
+				{{ template "components/icon" "alert-circle" }}
 			</div>
 			<div id="error__oops__message" class="noselect">Oops! Something went wrong</div>
 		</div>
