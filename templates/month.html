@@ -29,10 +29,7 @@
 		/* | Header */
 
 		#header {
-			display: grid;
-			column-gap: 20px;
 			position: relative;
-			row-gap: 5px;
 		}
 
 		#header__buttons {
@@ -272,12 +269,8 @@
 
 		/* | Layouts */
 
-		/* For large screens (> 1350px) */
+		/* For medium and large screens (> 1350px) */
 		@media (min-width: 1351px) {
-			#header {
-				grid-template-columns: 325px auto;
-			}
-
 			#content {
 				grid-template-columns: 1fr 2fr;
 				grid-template-rows: 1fr 1fr;
@@ -287,18 +280,24 @@
 			}
 		}
 
-		/* For medium screens (<= 1350px) */
-		@media (max-width: 1350px) {
-			#header {
-				grid-template-columns: max-content auto;
-			}
+		/* For medium screens (<= 1550px) */
+		@media (max-width: 1550px) {
 
+			th.notes,
+			td.notes {
+				display: none;
+			}
+		}
+
+		/* For small screens (<= 1350px) */
+		@media (max-width: 1350px) {
 			#content {
 				grid-template-columns: 1fr 1fr;
 				grid-template-rows: 2fr 5fr;
 				grid-template-areas:
 					"incomes monthly-payments"
 					"days days";
+				row-gap: 30px;
 			}
 
 			.card__title,
