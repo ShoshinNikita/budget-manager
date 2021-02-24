@@ -10,13 +10,8 @@
 
 	<style>
 		input[type=date] {
-			border: none;
-			border-bottom: 1px solid var(--border-accent-color);
 			min-width: 120px;
-			width: 100%;
 		}
-
-		/* TODO: move 'static/css/common.css'? */
 
 		.tooltip {
 			position: relative;
@@ -86,17 +81,12 @@
 		/* || Filters */
 
 		#filters {
-			border: 1px solid var(--border-color);
-			border-radius: 2px;
 			height: 100%;
-			padding: 10px;
 		}
 
-		#filters__header {
-			border-bottom: 1px solid var(--border-accent-color);
-			font-size: 18px;
-			margin-bottom: 20px;
-			text-align: center;
+		#filters .card__body {
+			padding-left: 10px;
+			padding-right: 10px;
 		}
 
 		.filter {
@@ -153,7 +143,7 @@
 			padding: 0px;
 		}
 
-		.filters__button>.feather-icon--btn>svg {
+		.filters__button.feather-icon>svg {
 			height: 25px;
 			width: 25px;
 		}
@@ -181,17 +171,18 @@
 			border-bottom: 1px solid var(--border-color);
 			column-gap: 20px;
 			display: grid;
-			font-size: 19px;
 			grid-template-columns: repeat(2, min-content);
 			justify-content: center;
 		}
 
 		.result__tab-title {
 			cursor: pointer;
+			font-size: 19px;
 			margin-bottom: 2px;
 			padding: 2px 5px;
 		}
 
+		.result__tab-title:focus,
 		.result__tab-title:hover,
 		.result__tab-title--chosen {
 			border-bottom: 2px solid var(--border-accent-color);
@@ -246,6 +237,10 @@
 			padding-right: 5px;
 		}
 
+		#spends__table th * {
+			color: inherit
+		}
+
 		.spends__table__date,
 		.spends__table__type,
 		.spends__table__cost,
@@ -267,28 +262,24 @@
 			z-index: 1;
 		}
 
-		.spends__table__link div.feather-icon--btn>svg {
+		.spends__table__link .feather-icon>svg {
 			height: 20px;
 			width: 20px;
 		}
 
-		.spends__table__sort-icon__wrapper {
+		.spends__table__sort-icon__wrapper.feather-icon {
 			display: inline-grid;
 			grid-template-rows: 1fr 1fr;
 			vertical-align: middle;
 		}
 
-		.spends__table__sort-icon__wrapper svg.spends__table__sort-icon,
-		.spends__table__sort-icon__wrapper svg.spends__table__sort-icon--asc,
-		.spends__table__sort-icon__wrapper svg.spends__table__sort-icon--desc {
+		.spends__table__sort-icon__wrapper svg {
 			height: 12px;
 			stroke-width: 4;
 			width: 12px;
 		}
 
-		.spends__table__sort-icon__wrapper:hover svg.spends__table__sort-icon,
-		.spends__table__sort-icon__wrapper:hover svg.spends__table__sort-icon--asc,
-		.spends__table__sort-icon__wrapper:hover svg.spends__table__sort-icon--desc {
+		.spends__table__sort-icon__wrapper:hover svg {
 			/* Reset to default */
 			opacity: 0.64;
 			stroke: #888888;
@@ -394,22 +385,18 @@
 			</div>
 
 			<div id="header__current-month-link">
-				<a href="/">
-					<div class="feather-icon--btn" title="Go to the Current Month">
-						<svg>
-							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#home` }}" />
-						</svg>
-					</div>
+				<a href="/" class="feather-icon" title="Go to the Current Month">
+					{{ template "components/icon" "home" }}
 				</a>
 			</div>
 		</div>
 
 		<div id="content">
 			<!-- Filters -->
-			<div id="filters">
-				<div id="filters__header" class="noselect">Filters</div>
+			<div id="filters" class="card">
+				<div class="card__title noselect">Filters</div>
 
-				<form action="/search/spends">
+				<form action="/search/spends" class="card__body">
 					<!-- Title -->
 					<div id="filters__title" class="filter">
 						<input type="text" name="title" placeholder="Title" title="Title">
@@ -470,18 +457,12 @@
 
 					<!-- Buttons -->
 					<div id="filters__buttons">
-						<button type="button" class="filters__button" title="Reset" onclick="resetForm(this.form)">
-							<div class="feather-icon--btn">
-								<svg>
-									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#rotate-ccw` }}" /> </svg>
-							</div>
+						<button type="button" class="filters__button feather-icon" title="Reset" onclick="resetForm(this.form)">
+							{{ template "components/icon" "rotate-ccw" }}
 						</button>
 
-						<button type="submit" class="filters__button" title="Search" onclick="updateFormActionHash(this.form)">
-							<div class="feather-icon--btn">
-								<svg>
-									<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#search` }}" /> </svg>
-							</div>
+						<button type="submit" class="filters__button feather-icon" title="Search" onclick="updateFormActionHash(this.form)">
+							{{ template "components/icon" "search" }}
 						</button>
 					</div>
 				</form>
@@ -492,13 +473,13 @@
 				{{ if not .Spends }}
 				<div id="result__no-spends" class="noselect">No Spends found</div>
 				{{ else }}
-				<div id="result__tab-titles">
-					<div class="noselect result__tab-title" data-title-for-tab="spends" onclick="switchTab('spends')">
-						<span>Spends</span>
-					</div>
-					<div class="noselect result__tab-title" data-title-for-tab="statistics" onclick="switchTab('statistics')">
-						<span>Statistics</span>
-					</div>
+				<div id="result__tab-titles" class="noselect">
+					<button class="result__tab-title" data-title-for-tab="spends" onclick="switchTab('spends')">
+						Spends
+					</button>
+					<button class="result__tab-title" data-title-for-tab="statistics" onclick="switchTab('statistics')">
+						Statistics
+					</button>
 				</div>
 
 				<div id="result__tabs">
@@ -506,45 +487,34 @@
 					<div id="spends" class="result__tab">
 						<table id="spends__table">
 							<thead>
-								<tr>
-									<th class="spends__table__date noselect">
+								<tr class="noselect">
+									<th class="spends__table__date">
 										<span>Date</span>
-										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
-											<svg class="spends__table__sort-icon--asc">
-												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-up` }}" />
-											</svg>
-											<svg class="spends__table__sort-icon--desc">
-												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-down` }}" />
-											</svg>
-										</div>
+										<button class="feather-icon spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('date')">
+											{{ template "components/icon" "chevron-up" }}
+											{{ template "components/icon" "chevron-down" }}
+										</button>
 									</th>
-									<th class="spends__table__title noselect">
+									<th class="spends__table__title">
 										<span>Title</span>
-										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
-											<svg class="spends__table__sort-icon--asc">
-												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-up` }}" />
-											</svg>
-											<svg class="spends__table__sort-icon--desc">
-												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-down` }}" />
-											</svg>
-										</div>
+										<button class="feather-icon spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('title')">
+											{{ template "components/icon" "chevron-up" }}
+											{{ template "components/icon" "chevron-down" }}
+										</button>
 									</th>
-									<th class="spends__table__notes noselect">Notes</th>
-									<th class="spends__table__type noselect">Type</th>
-									<th class="spends__table__cost noselect">
+									<th class="spends__table__notes">Notes</th>
+									<th class="spends__table__type">Type</th>
+									<th class="spends__table__cost">
 										<span>Cost</span>
-										<div class="feather-icon--btn spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
-											<svg class="spends__table__sort-icon--asc">
-												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-up` }}" />
-											</svg>
-											<svg class="spends__table__sort-icon--desc">
-												<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-down` }}" />
-											</svg>
-										</div>
+										<button class="feather-icon spends__table__sort-icon__wrapper" title="Sort" onclick="searchWithSort('cost')">
+											{{ template "components/icon" "chevron-up" }}
+											{{ template "components/icon" "chevron-down" }}
+										</button>
 									</th>
-									<th class="spends__table__link noselect">Link</th>
+									<th class="spends__table__link">Link</th>
 								</tr>
 							</thead>
+
 							<tbody>
 								{{ range .Spends }}
 								<tr>
@@ -560,12 +530,8 @@
 									</td>
 									<td class="spends__table__cost">{{ .Cost }}</td>
 									<td class="spends__table__link">
-										<a href="/{{ .Year }}-{{ printf `%02d` .Month }}#{{ .Day }}">
-											<div class="feather-icon--btn" title="View Day">
-												<svg>
-													<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#external-link` }}" />
-												</svg>
-											</div>
+										<a href="/{{ .Year }}-{{ printf `%02d` .Month }}#{{ .Day }}" class="feather-icon" title="View Day">
+											{{ template "components/icon" "external-link" }}
 										</a>
 									</td>
 								</tr>
@@ -595,9 +561,7 @@
 								<div class="statistics__chart-title">
 									<span class="noselect">Cost Distribution</span>
 									<span class="feather-icon tooltip" style="vertical-align: middle;">
-										<svg style="width: 18px; height: 18px">
-											<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#help-circle` }}" />
-										</svg>
+										{{ template "components/icon" "help-circle" }}
 
 										<span class="tooltip__text">Without 5% of the smallest and largest Spends</span>
 									</span>
@@ -673,11 +637,11 @@
 			CurrentOrder = query.get("order");
 			let orderSelector = "";
 			if (CurrentOrder === "desc") {
-				orderSelector = ".spends__table__sort-icon--desc";
+				orderSelector = "svg:last-child";
 			} else {
 				// Default order is asc
 				CurrentOrder = "asc";
-				orderSelector = ".spends__table__sort-icon--asc";
+				orderSelector = "svg:first-child";
 			}
 
 			const selector = sortSelector + " " + orderSelector;

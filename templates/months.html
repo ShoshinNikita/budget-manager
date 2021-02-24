@@ -8,10 +8,6 @@
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
-		a:link.no-decoration {
-			text-decoration: none !important;
-		}
-
 		/* | App */
 
 		#content {
@@ -36,12 +32,12 @@
 			transform: translateX(10px) rotate(180deg);
 		}
 
-		.switch-year-btn .feather-icon--btn {
+		.switch-year-btn .feather-icon {
 			height: 100%;
 			padding: 0;
 		}
 
-		.switch-year-btn .feather-icon--btn>svg {
+		.switch-year-btn .feather-icon>svg {
 			height: 100%;
 			width: 100%;
 		}
@@ -53,32 +49,18 @@
 			row-gap: 20px;
 		}
 
-		.month,
-		.month--not-exist {
-			border: 1px solid var(--border-color);
-			border-radius: 2px;
-			cursor: pointer;
+		.month {
 			height: 120px;
-			padding: 7px;
-			padding-left: 10px;
-
-			transition-property: padding-left;
-			transition-duration: 0.175s;
-			transition-timing-function: ease-in-out;
+			padding: 10px;
 		}
 
-		.month:hover {
-			background-color: #fafafa;
-			padding-left: 15px;
-		}
-
-		.month--not-exist {
+		.month.disabled {
 			cursor: default;
 			opacity: 0.5;
 		}
 
 		.month__header {
-			font-size: 17px;
+			font-size: 18px;
 		}
 
 		.month__results {
@@ -88,7 +70,7 @@
 			margin-top: 7px;
 		}
 
-		.month__results__value {
+		.month__result {
 			text-align: right;
 		}
 
@@ -102,22 +84,19 @@
 			max-height: 400px;
 		}
 
-		#year-overview__results__header {
-			border-bottom: 1px solid var(--border-accent-color);
-			font-size: 20px;
-			margin-bottom: 10px;
-			text-align: center;
+		#year-overview__results {
+			height: min-content;
 		}
 
-		#year-overview__results__result {
+		#year-overview__results .card__body {
 			column-gap: 10px;
 			display: grid;
 			grid-template-columns: 130px max-content;
 			font-size: 18px;
-			padding-left: 5px;
+			height: min-content;
 		}
 
-		.year-overview__results__result__value {
+		.year-overview__result {
 			text-align: right;
 		}
 
@@ -148,11 +127,11 @@
 				grid-template-columns: repeat(4, 1fr);
 			}
 
-			#year-overview__results__header {
+			.card__title {
 				font-size: 18px;
 			}
 
-			#year-overview__results__result {
+			#year-overview__results {
 				font-size: 16px;
 			}
 		}
@@ -189,12 +168,8 @@
 		<div id="content">
 			<div id="year">
 				<div id="prev-year-btn" class="switch-year-btn">
-					<a href="/months?offset={{ call $.Add .Offset 1 }}">
-						<div class="feather-icon--btn">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-							</svg>
-						</div>
+					<a href="/months?offset={{ call $.Add .Offset 1 }}" class="feather-icon">
+						{{ template "components/icon" "chevron-left" }}
 					</a>
 				</div>
 
@@ -205,28 +180,26 @@
 					<!-- Show month overview -->
 
 					<!-- Use the number of a month instead of the name -->
-					<a class="no-decoration" href="/{{ .Year }}-{{ printf `%02d` .Month }}">
-						<div class="month" title="Go to the month">
-							<div class="month__header">{{ .Month }} {{ .Year }}</div>
-							<div class="month__results">
-								<div>Income:</div>
-								<div class="month__results__value money--gain">{{ .TotalIncome }}</div>
-								<div>Spend:</div>
-								<div class="month__results__value money--lose">{{ .TotalSpend }}</div>
-								<div>Result:</div>
-								<div class="month__results__value">
-									{{ if ge .Result 0 }}
-									<span class="money--gain">{{ .Result }}</span>
-									{{ else }}
-									<span class="money--lose">{{ .Result }}</span>
-									{{ end }}
-								</div>
+					<a href="/{{ .Year }}-{{ printf `%02d` .Month }}" class="month card card--hover" title="Go to the month">
+						<div class="month__header">{{ .Month }} {{ .Year }}</div>
+						<div class="month__results">
+							<div>Income:</div>
+							<div class="month__result money--gain">{{ .TotalIncome }}</div>
+							<div>Spend:</div>
+							<div class="month__result money--lose">{{ .TotalSpend }}</div>
+							<div>Result:</div>
+							<div class="month__result">
+								{{ if ge .Result 0 }}
+								<span class="money--gain">{{ .Result }}</span>
+								{{ else }}
+								<span class="money--lose">{{ .Result }}</span>
+								{{ end }}
 							</div>
 						</div>
 					</a>
 					{{ else }}
 					<!-- Just show a stub -->
-					<div class="month--not-exist" title="No data for the month">
+					<div class="month card disabled" title="No data for the month">
 						<div class="month__header">{{ .Month }} {{ .Year }}</div>
 					</div>
 					{{ end }}
@@ -236,36 +209,30 @@
 				<div id="next-year-btn" class="switch-year-btn">
 					{{ $offset := call $.Add .Offset -1 }}
 					{{ if ge $offset 0 }}
-					<a href="/months?offset={{ call $.Add .Offset -1 }}">
-						<div class="feather-icon--btn">
-							<svg>
-								<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-							</svg>
-						</div>
+					<a href="/months?offset={{ call $.Add .Offset -1 }}" class="feather-icon">
+						{{ template "components/icon" "chevron-left" }}
 					</a>
 					{{ else }}
-					<div class="feather-icon--btn disabled" title="No more months">
-						<svg>
-							<use xlink:href="{{ asStaticURL `/static/vendor/feather/feather-sprite.svg#chevron-left` }}" />
-						</svg>
-					</div>
+					<a class="feather-icon disabled" title="No more months">
+						{{ template "components/icon" "chevron-left" }}
+					</a>
 					{{ end }}
 				</div>
 			</div>
 
 			<div id="year-overview">
-				<div id="year-overview__results">
-					<div id="year-overview__results__header" class="noselect">{{ .YearInterval }} Results</div>
+				<div id="year-overview__results" class="card">
+					<div class="card__title noselect">{{ .YearInterval }} Results</div>
 
-					<div id="year-overview__results__result">
+					<div class="card__body">
 						<div>Total Income:</div>
-						<div class="year-overview__results__result__value money--gain">{{ .TotalIncome }}</div>
+						<div class="year-overview__result money--gain">{{ .TotalIncome }}</div>
 
 						<div>Total Spend:</div>
-						<div class="year-overview__results__result__value money--lose">{{ .TotalSpend }}</div>
+						<div class="year-overview__result money--lose">{{ .TotalSpend }}</div>
 
 						<div>Result:</div>
-						<div class="year-overview__results__result__value">
+						<div class="year-overview__result">
 							{{ if ge .Result 0 }}
 							<span class="money--gain">{{ .Result }}</span>
 							{{ else }}

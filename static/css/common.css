@@ -2,9 +2,10 @@
 
 :root {
 	--font-color: #212121;
+	--fade-font-color: #999999;
 	--border-color: #f4f4f4;
 	--border-accent-color: #d2d2d2;
-	--hover-color: #f9f9f9;
+	--hover-color: #fafafa;
 	--disabled-color: #b0b0b0;
 }
 
@@ -82,36 +83,84 @@ body {
 	}
 }
 
+/* | Card */
+
+.card {
+	background: #ffffff;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+}
+
+.card__title {
+	background-color: #ffffff;
+	border-bottom: 1px solid var(--border-accent-color);
+	font-size: 1.3rem;
+	padding: 5px 10px;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.card__body {
+	padding: 10px 5px 20px;
+}
+
+.card--hover {
+	transition-duration: 0.175s;
+	transition-property: padding-left;
+	transition-timing-function: ease-in-out;
+}
+
+.card--hover:focus,
+.card--hover:hover {
+	background-color: var(--hover-color);
+	padding-left: 7%;
+}
+
+a:link.card--hover:focus,
+a:link.card--hover:hover {
+	text-decoration: none;
+}
+
 /* | Icons */
 
-.feather-icon--btn {
-	padding: 3px;
-}
-
-.feather-icon--btn:not(.disabled) {
-	cursor: pointer;
-}
-
-.feather-icon > svg,
-.feather-icon--btn > svg {
+.feather-icon > svg {
 	fill: none;
+	height: 18px;
 	stroke: #888888;
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	stroke-width: 2;
+	width: 18px;
 }
 
-.feather-icon--btn > svg {
+a.feather-icon,
+button.feather-icon {
+	display: block;
+	padding: 3px;
+	background-color: #00000000;
+}
+
+a.feather-icon:not(.disabled),
+button.feather-icon:not(.disabled) {
+	cursor: pointer;
+}
+
+a.feather-icon > svg,
+button.feather-icon > svg {
 	opacity: 0.64;
 }
 
-.feather-icon--btn:hover:not(.disabled) > svg {
+a.feather-icon:hover:not(.disabled) > svg,
+button.feather-icon:hover:not(.disabled) > svg,
+a.feather-icon:focus:not(.disabled) > svg,
+button.feather-icon:focus:not(.disabled) > svg {
 	opacity: 1;
 	stroke: #666666;
 }
 
 /* | Inputs */
 
+a:focus,
 input:focus,
 select:focus,
 textarea:focus,
@@ -130,33 +179,31 @@ input {
 	font-size: 15px;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="date"] {
 	border: none;
 	border-bottom: 1px solid var(--border-color);
 	width: 100%;
 }
 
-input[type="text"]:focus {
-	border-bottom: 1px solid var(--border-accent-color);
+input[type="text"]:focus,
+input[type="date"]:focus {
+	border-color: var(--border-accent-color);
 }
 
 input[type="button"],
 input[type="submit"] {
 	border: 1px solid var(--border-accent-color);
-	border-radius: 2px;
 	cursor: pointer;
-	padding: 2px;
+	padding: 3px;
 	width: 80px;
 }
 
 input[type="button"]:hover,
-input[type="submit"]:hover {
+input[type="submit"]:hover,
+input[type="button"]:focus,
+input[type="submit"]:focus {
 	background-color: var(--hover-color);
-}
-
-input[type="button"]:active,
-input[type="submit"]:active {
-	color: var(--font-color);
 }
 
 select {
@@ -184,10 +231,6 @@ select.reverse {
 	text-align: right;
 }
 
-select:active {
-	color: var(--font-color);
-}
-
 /* | Links */
 
 a:link,
@@ -196,19 +239,12 @@ a:visited {
 	color: #039be5;
 }
 
+a:link:focus,
 a:link:hover {
 	text-decoration: underline;
 }
 
 /* | Money */
-
-.money::after,
-.money--gain::after,
-.money--lose::after {
-	color: black;
-	content: "⛁";
-	margin-left: 3px;
-}
 
 .money--gain {
 	color: green;
@@ -261,7 +297,7 @@ td {
 }
 
 table th {
-	border-bottom: 1px solid var(--border-accent-color);
+	color: var(--fade-font-color);
 }
 
 table tbody tr:hover {
