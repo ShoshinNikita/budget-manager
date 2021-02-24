@@ -887,12 +887,9 @@
 
 		// Select day
 		window.addEventListener("load", () => {
-			const urlRegexp = /(\d+)-(\d+)(?:#(\d+))?/;
-			const match = window.location.href.match(urlRegexp);
-
 			// Check whether day is passed in URL
-			if (match[3] && Number(match[3])) {
-				const passedDay = Number(match[3]);
+			const passedDay = Number(location.hash.slice(1));
+			if (passedDay) {
 				const daysInMonth = new Date(Year, MonthNumber, 0).getDate();
 				if (0 < passedDay && passedDay <= daysInMonth) {
 					// Select passed day
@@ -901,15 +898,17 @@
 				}
 			}
 
-			// Check whether we display current month
+			const match = window.location.pathname.match(/(\d+)-(\d+)/);
+
+			// Check whether we display the current month
 			const now = new Date();
 			if (match[1] == now.getFullYear() && match[2] == now.getMonth() + 1) {
-				// Select current day
+				// Select the current day
 				selectDay(now.getDate());
 				return;
 			}
 
-			// Just choose first day
+			// Just choose the first day
 			selectDay(1);
 		});
 
