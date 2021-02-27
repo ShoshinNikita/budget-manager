@@ -125,7 +125,7 @@ func (app *App) prepareDB() (err error) {
 	switch app.config.DBType {
 	case "postgres", "postgresql":
 		app.log.Debug("db type is PostgreSQL")
-		app.db, err = pg.NewDB(app.config.PostgresDB, app.log.WithField("component", "database"))
+		app.db, err = pg.NewDB(app.config.PostgresDB, app.log)
 	default:
 		err = errors.New("unsupported DB type")
 	}
@@ -148,7 +148,7 @@ func (app *App) prepareDB() (err error) {
 
 func (app *App) prepareWebServer() {
 	app.server = web.NewServer(
-		app.config.Server, app.db, app.log.WithField("component", "server"), version, gitHash,
+		app.config.Server, app.db, app.log, version, gitHash,
 	)
 	app.server.Prepare()
 }

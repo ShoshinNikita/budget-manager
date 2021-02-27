@@ -44,7 +44,7 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 			Database: config.Database,
 		}),
 		cron: cron.New(
-			cron.WithLogger(cronLogger{log: log.WithField("component", "cron")}),
+			cron.WithLogger(cronLogger{log: log}),
 		),
 	}
 
