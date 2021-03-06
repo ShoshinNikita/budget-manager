@@ -268,9 +268,15 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return month.MonthlyPayments[i].Cost > month.MonthlyPayments[j].Cost
 	})
 
+	var monthlyPaymentsTotalCost money.Money
+	for _, p := range month.MonthlyPayments {
+		monthlyPaymentsTotalCost = monthlyPaymentsTotalCost.Sub(p.Cost)
+	}
+
 	resp := struct {
 		db.Month
-		SpendTypes []SpendType
+		MonthlyPaymentsTotalCost money.Money
+		SpendTypes               []SpendType
 		//
 		Footer FooterTemplateData
 		//
@@ -279,8 +285,9 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		ToHTMLAttr             func(string) template.HTMLAttr
 		ShouldSuggestSpendType func(spendType, option SpendType) bool
 	}{
-		Month:      month,
-		SpendTypes: spendTypes,
+		Month:                    month,
+		MonthlyPaymentsTotalCost: monthlyPaymentsTotalCost,
+		SpendTypes:               spendTypes,
 		//
 		Footer: FooterTemplateData{
 			Version: h.version,
