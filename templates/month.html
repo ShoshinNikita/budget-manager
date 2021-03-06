@@ -862,7 +862,7 @@
 			const nextMonthName = nextMonth.toLocaleString("default", { month: "long" });
 
 			// Weeks are started from Monday
-			const lastDayNumber = (nextMonth.getDay() + 6) % 7;
+			let lastDayNumber = (nextMonth.getDay() + 6) % 7;
 			if (lastDayNumber === 0) {
 				// Special case: month ends on Sunday
 				lastDayNumber = 7;
