@@ -9,7 +9,7 @@ See the [public meeting
 notes](https://docs.google.com/document/d/1A63zSWX0x2CyCK_LoNhmQC4rqhLpYXJzXbEPDUQ2n6w/edit#heading=h.9tngw7jdwd6b)
 for a summary description of past meetings. To request edit access,
 join the meeting or get in touch on
-[Gitter](https://gitter.im/open-telemetry/opentelemetry-go).
+[Slack](https://cloud-native.slack.com/archives/C01NPAXACKT).
 
 ## Development
 
@@ -118,7 +118,7 @@ As with other OpenTelemetry clients, opentelemetry-go follows the
 [opentelemetry-specification](https://github.com/open-telemetry/opentelemetry-specification).
 
 It's especially valuable to read through the [library
-guidelines](https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/library-guidelines.md).
+guidelines](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/library-guidelines.md).
 
 ### Focus on Capabilities, Not Structure Compliance
 
@@ -361,6 +361,7 @@ Approvers:
 - [Evan Torrie](https://github.com/evantorrie), Verizon Media
 - [Josh MacDonald](https://github.com/jmacd), LightStep
 - [Sam Xie](https://github.com/XSAM)
+- [David Ashpole](https://github.com/dashpole), Google
 
 Maintainers:
 
@@ -370,4 +371,4 @@ Maintainers:
 ### Become an Approver or a Maintainer
 
 See the [community membership document in OpenTelemetry community
-repo](https://github.com/open-telemetry/community/blob/master/community-membership.md).
+repo](https://github.com/open-telemetry/community/blob/main/community-membership.md).

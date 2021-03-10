@@ -144,17 +144,17 @@ func migrationFile() string {
 // DiscoverSQLMigrations scan the dir for files with .sql extension
 // and adds discovered SQL migrations to the collection.
 func (c *Collection) DiscoverSQLMigrations(dir string) error {
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+
 	return c.DiscoverSQLMigrationsFromFilesystem(osfilesystem{}, dir)
 }
 
 // DiscoverSQLMigrations scan the dir from the given filesystem for files with .sql extension
 // and adds discovered SQL migrations to the collection.
 func (c *Collection) DiscoverSQLMigrationsFromFilesystem(fs http.FileSystem, dir string) error {
-	dir, err := filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
-
 	if c.isVisitedDir(dir) {
 		return nil
 	}
@@ -742,7 +742,7 @@ func createMigrationFile(filename string) error {
 		return fmt.Errorf("file=%q already exists (%s)", filename, err)
 	}
 
-	return ioutil.WriteFile(filename, migrationTemplate, 0644)
+	return ioutil.WriteFile(filename, migrationTemplate, 0o644)
 }
 
 var migrationTemplate = []byte(`package main

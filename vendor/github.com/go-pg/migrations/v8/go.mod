@@ -1,9 +1,10 @@
 module github.com/go-pg/migrations/v8
 
-go 1.11
+go 1.16
 
 require (
-	github.com/go-pg/pg/v10 v10.0.0-beta.11
-	golang.org/x/exp v0.0.0-20200901203048-c4f52b2c50aa // indirect
-	golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a // indirect
+	github.com/go-pg/pg/v10 v10.4.0
+	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
+	golang.org/x/net v0.0.0-20201016165138-7b1cca2348c0 // indirect
+	golang.org/x/sys v0.0.0-20201017003518-b09fb700fbb7 // indirect
 )

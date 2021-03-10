@@ -280,7 +280,7 @@ func getFromFile(filename string) (value string, err error) {
 func getOr(key, defaultValue string, defExists bool, envs map[string]string) (value string, exists bool) {
 	value, exists = envs[key]
 	switch {
-	case !exists && defExists:
+	case (!exists || key == "") && defExists:
 		return defaultValue, true
 	case !exists:
 		return "", false
