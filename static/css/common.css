@@ -1,12 +1,22 @@
 /* | Variables */
 
 :root {
+	--background-color: #ffffff;
+
 	--font-color: #212121;
-	--fade-font-color: #999999;
+	--font-color--disabled: #b0b0b0;
+	--font-color--faded: #999999;
+
 	--border-color: #f4f4f4;
-	--border-accent-color: #d2d2d2;
+	--border-color--accent: #d2d2d2;
+
 	--hover-color: #fafafa;
-	--disabled-color: #b0b0b0;
+
+	--icon-color: #888888;
+	--icon-color--hover: #666666;
+
+	--scrollbar-track-color: #eff0f1;
+	--scrollbar-thumb-color: #e1e1e1;
 }
 
 /* | Common */
@@ -32,6 +42,7 @@ All pages should stick to this layout:
 */
 
 body {
+	background-color: var(--background-color);
 	height: 100vh;
 	margin: 0;
 	padding: 0px;
@@ -51,7 +62,7 @@ body {
 }
 
 #header {
-	border-bottom: 1px solid var(--border-accent-color);
+	border-bottom: 1px solid var(--border-color--accent);
 	box-sizing: content-box;
 	font-size: 20px;
 	height: 35px;
@@ -81,13 +92,13 @@ body {
 /* | Card */
 
 .card {
-	background: #ffffff;
+	background-color: var(--background-color);
 	box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
 }
 
 .card__title {
-	background-color: #ffffff;
-	border-bottom: 1px solid var(--border-accent-color);
+	background-color: var(--background-color);
+	border-bottom: 1px solid var(--border-color--accent);
 	font-size: 1.3rem;
 	padding: 5px 10px;
 	position: sticky;
@@ -121,7 +132,7 @@ a:link.card--hover:hover {
 .feather-icon > svg {
 	fill: none;
 	height: 18px;
-	stroke: #888888;
+	stroke: var(--icon-color);
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	stroke-width: 2;
@@ -150,7 +161,7 @@ button.feather-icon:hover:not(.disabled) > svg,
 a.feather-icon:focus:not(.disabled) > svg,
 button.feather-icon:focus:not(.disabled) > svg {
 	opacity: 1;
-	stroke: #666666;
+	stroke: var(--icon-color--hover);
 }
 
 /* | Inputs */
@@ -164,13 +175,13 @@ button:focus {
 }
 
 button {
-	background-color: white;
+	background-color: var(--background-color);
 	border: none;
 	padding: 0;
 }
 
 input {
-	background-color: white;
+	background-color: var(--background-color);
 	font-size: 15px;
 }
 
@@ -183,12 +194,12 @@ input[type="date"] {
 
 input[type="text"]:focus,
 input[type="date"]:focus {
-	border-color: var(--border-accent-color);
+	border-color: var(--border-color--accent);
 }
 
 input[type="button"],
 input[type="submit"] {
-	border: 1px solid var(--border-accent-color);
+	border: 1px solid var(--border-color--accent);
 	cursor: pointer;
 	padding: 3px;
 	width: 80px;
@@ -207,7 +218,7 @@ select {
 	-webkit-appearance: none;
 	background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>")
 		no-repeat right;
-	background-color: white;
+	background-color: var(--background-color);
 	border: none;
 	border-bottom: 1px solid var(--border-color);
 	cursor: pointer;
@@ -216,7 +227,7 @@ select {
 }
 
 select:focus {
-	border-color: var(--border-accent-color);
+	border-color: var(--border-color--accent);
 }
 
 select.reverse {
@@ -268,11 +279,11 @@ a:link:hover {
 }
 
 ::-webkit-scrollbar-track {
-	background-color: #eff0f1;
+	background-color: var(--scrollbar-track-color);
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: #e1e1e1;
+	background-color: var(--scrollbar-thumb-color);
 }
 
 /* | Table */
@@ -292,7 +303,7 @@ td {
 }
 
 table th {
-	color: var(--fade-font-color);
+	color: var(--font-color--faded);
 }
 
 table tbody tr:hover {

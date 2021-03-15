@@ -739,7 +739,7 @@
 							{{ $attributes = (printf "%s %s" $attributes "selected") }}
 							{{ end }}
 							{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
-							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
+							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--font-color--disabled)'") }}
 							{{ end }}
 
 							<option value="{{ .ID }}" {{ toHTMLAttr $attributes }}>{{ .FullName }}</option>
