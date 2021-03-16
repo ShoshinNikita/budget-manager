@@ -869,7 +869,10 @@
 	{{ if .Spends }}
 	<script src="{{ asStaticURL `/static/vendor/chart.js/chart.min.js` }}"></script>
 	<script src="{{ asStaticURL `/static/vendor/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
+	<script src="{{ asStaticURL `/static/js/chart.js` }}"></script>
 	<script>
+		Chart.defaults.global.tooltips.displayColors = false;
+
 		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
 		const labelSeparator = " – ";
 		const backgroundColor = "#dddddd";
@@ -900,20 +903,12 @@
 			},
 			options: {
 				aspectRatio: 1,
+				maintainAspectRatio: true,
 				// Tune doughnut
 				cutoutPercentage: 30,
 				rotation: -5 / 4 * Math.PI,
-				// Disable animations
-				animation: { duration: 0 },
-				hover: { animationDuration: 0 },
-				responsiveAnimationDuration: 0,
 				// Tune tooltips
 				tooltips: {
-					titleFontSize: 15,
-					bodyFontSize: 14,
-					backgroundColor: "#000000d0",
-					cornerRadius: 5,
-					displayColors: false,
 					filter: function (tooltipItem, data) {
 						const labels = data.datasets[tooltipItem.datasetIndex].labels;
 						return labels ? labels[tooltipItem.index] !== "" : true;
@@ -1015,20 +1010,8 @@
 				}
 			],
 			options: {
-				maintainAspectRatio: false,
-				// Hide legend
-				legend: { display: false },
-				// Disable animations
-				animation: { duration: 0 },
-				hover: { animationDuration: 0 },
-				responsiveAnimationDuration: 0,
 				// Tune tooltips
 				tooltips: {
-					titleFontSize: 15,
-					bodyFontSize: 14,
-					backgroundColor: "#000000d0",
-					cornerRadius: 5,
-					displayColors: false,
 					callbacks: {
 						label: function (tooltipItem, data) {
 							const interval = costIntervals[tooltipItem.index];
@@ -1079,20 +1062,8 @@
 				}],
 			},
 			options: {
-				maintainAspectRatio: false,
-				// Hide legend
-				legend: { display: false },
-				// Disable animations
-				animation: { duration: 0 },
-				hover: { animationDuration: 0 },
-				responsiveAnimationDuration: 0,
 				// Tune tooltips
 				tooltips: {
-					titleFontSize: 15,
-					bodyFontSize: 14,
-					backgroundColor: "#000000d0",
-					cornerRadius: 5,
-					displayColors: false,
 					callbacks: {
 						title: function (tooltipItem, data) { return "" },
 						label: function (tooltipItem, data) {

@@ -252,6 +252,7 @@
 	</div>
 
 	<script src="{{ asStaticURL `/static/vendor/chart.js/chart.min.js` }}"></script>
+	<script src="{{ asStaticURL `/static/js/chart.js` }}"></script>
 
 	<script>
 		const monthResults = JSON.parse(`{{ .Months }}`);
@@ -280,32 +281,11 @@
 				],
 			},
 			options: {
-				// Hide legend
-				legend: { display: false },
-				// Disable animations
-				animation: { duration: 0 },
-				hover: { animationDuration: 0 },
-				responsiveAnimationDuration: 0,
-				// Tune elements
+				// Change bezier curves
 				elements: {
-					// Change bezier curves
 					line: { tension: 0.2 },
 					point: { hitRadius: 5 }
 				},
-				// Change font size of ticks
-				scales: {
-					xAxes: [{ ticks: { fontSize: 14 } }],
-					yAxes: [{ ticks: { fontSize: 14, beginAtZero: true } }]
-				},
-				// Tune tooltips
-				tooltips: {
-					titleFontSize: 15,
-					bodyFontSize: 14,
-					backgroundColor: "#000000d0",
-					cornerRadius: 5,
-				},
-				// Other
-				maintainAspectRatio: false,
 			}
 		});
 	</script>
