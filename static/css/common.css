@@ -4,7 +4,7 @@
 	--background-color: #ffffff;
 
 	--font-color: #212121;
-	--font-color--disabled: #b0b0b0;
+	--font-color--disabled: #21212140;
 	--font-color--faded: #999999;
 
 	--border-color: #f4f4f4;
@@ -17,6 +17,25 @@
 
 	--scrollbar-track-color: #eff0f1;
 	--scrollbar-thumb-color: #e1e1e1;
+}
+
+[data-theme="dark"] {
+	--background-color: #121212;
+
+	--font-color: #ffffffa0;
+	--font-color--disabled: #ffffff40;
+	--font-color--faded: #666666;
+
+	--border-color: #242424;
+	--border-color--accent: #555555;
+
+	--hover-color: #0c0c0c;
+
+	--icon-color: #888888;
+	--icon-color--hover: #aaaaaa;
+
+	--scrollbar-track-color: #292929;
+	--scrollbar-thumb-color: #414141;
 }
 
 /* | Common */
@@ -99,6 +118,10 @@ body {
 .card {
 	background-color: var(--background-color);
 	box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+}
+
+[data-theme="dark"] .card {
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
 .card__title {
@@ -221,14 +244,19 @@ select {
 	appearance: none;
 	-moz-appearance: none;
 	-webkit-appearance: none;
-	background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>")
-		no-repeat right;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>");
+	background-position: right;
+	background-repeat: no-repeat;
 	background-color: var(--background-color);
 	border: none;
 	border-bottom: 1px solid var(--border-color);
 	cursor: pointer;
 	padding: 2px 16px 2px 0;
 	scrollbar-width: unset;
+}
+
+[data-theme="dark"] select {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffffa0' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>");
 }
 
 select:focus {

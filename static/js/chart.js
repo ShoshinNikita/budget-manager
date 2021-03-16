@@ -19,4 +19,12 @@
 	const scale = Chart.defaults.scale;
 	scale.ticks.fontSize = 14;
 	scale.beginAtZero = true;
+	scale.gridLines.color = getGridLinesColor();
 })();
+
+function getGridLinesColor() {
+	if (isDarkTheme()) {
+		return "rgba(255, 255, 255, 0.1)";
+	}
+	return "rgba(0, 0, 0, 0.1)";
+}
