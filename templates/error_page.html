@@ -9,18 +9,18 @@
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
+		#app {
+			min-width: unset;
+		}
+
 		#error {
 			margin: auto;
+			padding-top: 50px;
 			width: 750px;
 		}
 
 		#error__oops {
 			text-align: center;
-		}
-
-		#error__oops__icon {
-			margin-top: 50px;
-			pointer-events: none;
 		}
 
 		#error__oops__icon>svg {
@@ -106,36 +106,45 @@
 </head>
 
 <body>
-	<div id="error">
-		<div id="error__oops">
-			<div id="error__oops__icon" class="feather-icon">
-				{{ template "components/icon" "alert-circle" }}
-			</div>
-			<div id="error__oops__message" class="noselect">Oops! Something went wrong</div>
-		</div>
+	<div id="app">
+		<!-- Header -->
+		<div></div>
 
-		<div id="error__details">
-			<div id="error__details__code" title="Error code">{{ .Code }}</div>
+		<div id="content">
+			<div id="error">
+				<div id="error__oops">
+					<div id="error__oops__icon" class="feather-icon">
+						{{ template "components/icon" "alert-circle" }}
+					</div>
+					<div id="error__oops__message" class="noselect">Oops! Something went wrong</div>
+				</div>
 
-			<div id="error__details__info">
-				<div id="error__details__info__message" title="Error message">{{ .Message }}</div>
-				<br>
-				<div id="error__details__info__request-id">
-					<span>Request ID:</span>
-					<span title="Request ID">{{ .RequestID }}</span>
+				<div id="error__details">
+					<div id="error__details__code" title="Status Code">{{ .Code }}</div>
+
+					<div id="error__details__info">
+						<div id="error__details__info__message" title="Error message">{{ .Message }}</div>
+						<br>
+						<div id="error__details__info__request-id">
+							<span>Request ID:</span>
+							<span title="Request ID">{{ .RequestID }}</span>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
-	</div>
 
-	<div id="links">
-		<a href="/">Go to the current Month</a>
-		<span id="links__github">
-			<br>
-			<span>or</span>
-			<br>
-			<a href="https://github.com/ShoshinNikita/budget-manager/issues">Create an issue</a>
-		</span>
+			<div id="links">
+				<a href="/">Go to the current Month</a>
+				<span id="links__github">
+					<br>
+					<span>or</span>
+					<br>
+					<a href="https://github.com/ShoshinNikita/budget-manager/issues">Create an issue</a>
+				</span>
+			</div>
+		</div>
+
+		{{ template "components/footer.html" .Footer }}
 	</div>
 </body>
 

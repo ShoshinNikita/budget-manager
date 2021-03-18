@@ -25,10 +25,17 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 		Code      int
 		RequestID reqid.RequestID
 		Message   string
+		//
+		Footer FooterTemplateData
 	}{
 		Code:      code,
 		RequestID: reqid.FromContext(ctx),
 		Message:   respMsg,
+		//
+		Footer: FooterTemplateData{
+			Version: h.version,
+			GitHash: h.gitHash,
+		},
 	}
 	if err := h.tplExecutor.Execute(ctx, w, errorPageTemplateName, data); err != nil {
 		utils.ProcessInternalError(ctx, log, w, executeErrorMessage, err)
