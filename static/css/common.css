@@ -352,3 +352,7 @@ table tr:last-child td {
 	cursor: default;
 	user-select: none;
 }
+
+.blurred {
+	filter: blur(2px);
+}

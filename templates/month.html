@@ -1328,6 +1328,7 @@
 		 */
 		function showModalWindowToEditIncome(id, title, notes, income) {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Set current values
 			setValue("modal-window__edit-income__title", title);
@@ -1352,6 +1353,7 @@
 		 */
 		function showModalWindowToEditMonthlyPayment(id, title, notes, typeID, cost) {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Set current values
 			setValue("modal-window__edit-monthly-payment__title", title);
@@ -1377,6 +1379,7 @@
 		 */
 		function showModalWindowToEditSpend(id, title, notes, typeID, cost) {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Set current values
 			setValue("modal-window__edit-spend__title", title);
@@ -1417,6 +1420,7 @@
 
 		function showModalWindowToEditTypes() {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Show Modal Window
 			showElement(manageSpendTypesModalWindowID);
@@ -1427,6 +1431,8 @@
 		 * hideAllModalWindows hides all Modal Windows
 		 */
 		function hideAllModalWindows() {
+			unblurBackground();
+
 			hideElement(modalWindowID);
 			hideElement(editIncomeModalWindowID);
 			hideElement(editMonthlyPaymentModalWindowID);
@@ -1437,6 +1443,18 @@
 				// Reload page to display updated Spend Types
 				location.reload();
 			}
+		}
+
+		function blurBackground() {
+			document.getElementById("header").classList.add("blurred");
+			document.getElementById("content").classList.add("blurred");
+			document.getElementById("footer").classList.add("blurred");
+		}
+
+		function unblurBackground() {
+			document.getElementById("header").classList.remove("blurred");
+			document.getElementById("content").classList.remove("blurred");
+			document.getElementById("footer").classList.remove("blurred");
 		}
 
 		// ----------------------------------------------------
