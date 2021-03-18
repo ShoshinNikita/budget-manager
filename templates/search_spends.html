@@ -50,7 +50,7 @@
 
 		.tooltip .tooltip__text::before {
 			border-width: 5px;
-			border-color: transparent white transparent transparent;
+			border-color: transparent var(--border-color--accent) transparent transparent;
 			top: 3px;
 			z-index: 2;
 		}
@@ -185,7 +185,9 @@
 		}
 
 		#result__tabs {
+			background-color: var(--base-color);
 			overflow-y: auto;
+			z-index: 0;
 		}
 
 		.result__tab {
@@ -272,6 +274,11 @@
 			height: 12px;
 			stroke-width: 4;
 			width: 12px;
+		}
+
+		.spends__table__sort-icon__wrapper svg.chosen {
+			opacity: 1;
+			stroke: var(--icon-color--hover);
 		}
 
 		/* ||| Statistics */
@@ -636,7 +643,7 @@
 			const selector = sortSelector + " " + orderSelector;
 			const icon = document.querySelector(selector);
 			if (icon !== null) {
-				icon.style["stroke"] = "black";
+				icon.classList.add("chosen");
 			}
 
 			// Don't set sort and order in form. It allows to 'reset' sort/order by clicking 'Search' button
