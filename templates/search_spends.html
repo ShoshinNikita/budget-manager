@@ -862,12 +862,19 @@
 	<script>
 		Chart.defaults.global.tooltips.displayColors = false;
 
-		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
-		const labelSeparator = " – ";
-		const backgroundColor = "#dddddd";
-		const hoverBackgroundColor = "#d4d4d4";
+		const invisibleColor = "#00000000";
 
-		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+		function getBackgroundColor() {
+			return isDarkTheme() ? "#26292f" : "#dddddd";
+		}
+
+		function getHoverBackgroundColor() {
+			return isDarkTheme() ? "#31343a" : "#d4d4d4";
+		}
+
+		function getBorderColor() {
+			return isDarkTheme() ? "#0d1117" : "#ffffff";
+		}
 
 		// Spent by Spend Type chart
 
@@ -877,15 +884,19 @@
 			spendBySpendTypeDatasets.push({
 				data: data.map(v => v["spent"]),
 				labels: data.map(v => v["spend_type_name"]),
-				backgroundColor: data.map(v => v["spend_type_name"] ? backgroundColor : "#00000000"),
-				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? hoverBackgroundColor : "#00000000"),
-				borderColor: data.map(v => v["spend_type_name"] ? undefined : "#00000000"), // Use 'undefined' for default border color
-				hoverBorderColor: data.map(v => "#00000000"), // Hide hover border colors
+				backgroundColor: data.map(v => v["spend_type_name"] ? getBackgroundColor() : invisibleColor),
+				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? getHoverBackgroundColor() : invisibleColor),
+				borderColor: data.map(v => v["spend_type_name"] ? getBorderColor() : invisibleColor),
+				hoverBorderColor: data.map(v => invisibleColor), // Hide hover border colors
 			});
 		}
 
+		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
+		const labelSeparator = " – ";
+
 		const spentBySpendTypeCtx = document.getElementById("spent-by-spend-type__chart").getContext("2d");
-		new Chart(spentBySpendTypeCtx, {
+		const spentBySpendTypeChart = new Chart(spentBySpendTypeCtx, {
 			type: "doughnut",
 			data: {
 				datasets: spendBySpendTypeDatasets,
@@ -949,14 +960,14 @@
 		costIntervalLabels.push(costIntervals[costIntervals.length - 1].to);
 
 		const costIntervalsCtx = document.getElementById("cost-distribution__chart").getContext("2d");
-		new Chart(costIntervalsCtx, {
+		const costIntervalsChart = new Chart(costIntervalsCtx, {
 			type: "bar",
 			data: {
 				labels: new Array(costIntervalLabels.length - 1).fill(""),
 				datasets: [{
 					data: costIntervalData,
-					backgroundColor: backgroundColor,
-					hoverBackgroundColor: hoverBackgroundColor,
+					backgroundColor: getBackgroundColor(),
+					hoverBackgroundColor: getHoverBackgroundColor(),
 				}],
 			},
 			plugins: [
@@ -978,10 +989,12 @@
 						const y = chart.height - 10;
 						const offset = axis.left;
 
+						const ctxFont = chart.ctx.font;
+						const fillStyle = chart.ctx.fillStyle;
+
 						// Sometimes canvas font can be bold (for example, on hover). Change it to normal while drawing intervals
-						const ctxFont = chart.ctx.font.replace("bold", "");
-						const normalFont = chart.ctx.font.replace("bold", "");
-						chart.ctx.font = normalFont;
+						chart.ctx.font = chart.ctx.font.replace("bold", "");
+						chart.ctx.fillStyle = chart.options.defaultFontColor;
 
 						for (let i = 0; i < costIntervalLabels.length; i++) {
 							const text = costIntervalLabels[i];
@@ -993,8 +1006,9 @@
 							chart.ctx.restore();
 						}
 
-						// Revert canvas font
+						// Revert canvas options
 						chart.ctx.font = ctxFont;
+						chart.ctx.fillStyle = fillStyle;
 					}
 				}
 			],
@@ -1025,7 +1039,6 @@
 			}
 		});
 
-
 		// Spent by Day chart
 
 		const spentByDayStatistics = JSON.parse(`{{ .SpentByDayDataset }}`);
@@ -1040,14 +1053,14 @@
 		}
 
 		const spentByDayCtx = document.getElementById("spent-by-day__chart").getContext("2d");
-		new Chart(spentByDayCtx, {
+		const spentByDayChart = new Chart(spentByDayCtx, {
 			type: "bar",
 			data: {
 				labels: spentByDayLabels,
 				datasets: [{
 					data: spentByDayData,
-					backgroundColor: backgroundColor,
-					hoverBackgroundColor: hoverBackgroundColor,
+					backgroundColor: getBackgroundColor(),
+					hoverBackgroundColor: getHoverBackgroundColor(),
 				}],
 			},
 			options: {
@@ -1077,6 +1090,55 @@
 				}
 			}
 		});
+
+		window.addEventListener(themeChangeEventName, () => {
+			const backgroundColor = getBackgroundColor();
+			const hoverBackgroundColor = getHoverBackgroundColor();
+			const borderColor = getBorderColor();
+			const gridLinesColor = getGridLinesColor();
+
+			function getDatasetColor(color, newColor) {
+				if (color instanceof Array) {
+					for (let i = 0; i < color.length; i++) {
+						if (color[i] === invisibleColor) {
+							continue;
+						}
+						color[i] = newColor;
+					}
+					return color;
+				}
+
+				if (typeof color === "string" || color instanceof String) {
+					if (color === invisibleColor) {
+						return color;
+					}
+					return newColor;
+				}
+
+				// Indicate something went wrong
+				return "red";
+			}
+
+			for (const chart of [spentBySpendTypeChart, costIntervalsChart, spentByDayChart]) {
+				// Update dataset color
+				for (const dataset of chart.data.datasets) {
+					dataset.backgroundColor = getDatasetColor(dataset.backgroundColor, backgroundColor);
+					dataset.hoverBackgroundColor = getDatasetColor(dataset.hoverBackgroundColor, hoverBackgroundColor);
+					dataset.borderColor = getDatasetColor(dataset.borderColor, borderColor);
+				}
+
+				// Update color of grid lines
+				if (chart.options.scales) {
+					for (const axes of [chart.options.scales.xAxes, chart.options.scales.yAxes]) {
+						for (const axis of axes) {
+							axis.gridLines.color = gridLinesColor
+						}
+					}
+				}
+
+				chart.update();
+			}
+		})
 	</script>
 	{{ end }}
 

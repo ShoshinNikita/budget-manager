@@ -1,4 +1,5 @@
 const localStorageKey = "theme";
+const themeChangeEventName = "theme-change";
 
 const lightTheme = "light";
 const darkTheme = "dark";
@@ -17,6 +18,11 @@ function switchTheme(newTheme) {
 
 	localStorage.setItem(localStorageKey, newTheme);
 	document.getElementsByTagName("html")[0].setAttribute(themeAttrName, newTheme);
+	window.dispatchEvent(new Event(themeChangeEventName));
+}
+
+function isDarkTheme() {
+	return localStorage.getItem(localStorageKey) === darkTheme;
 }
 
 // Call immediately
