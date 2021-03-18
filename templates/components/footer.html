@@ -1,9 +1,33 @@
 {{ define "components/footer.html" }}
 <style>
+	#footer {
+		position: relative;
+	}
+
 	#footer__app-info {
 		column-gap: 5px;
 		display: flex;
 		justify-content: center;
+	}
+
+	#footer__theme-switcher {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+	}
+
+	#footer__theme-switcher>button.feather-icon {
+		padding: 0;
+	}
+
+	#footer__theme-switcher>button.feather-icon>svg {
+		height: 25px;
+		width: 25px;
+	}
+
+	#footer__theme-switcher>button.hidden {
+		display: none;
 	}
 </style>
 
@@ -17,5 +41,38 @@
 			</a>
 		</div>
 	</div>
+
+	<div id="footer__theme-switcher">
+		<button id="light-theme-btn" class="feather-icon hidden" onclick="toggleTheme();" title="Turn off Dark Theme">
+			{{ template "components/icon" "sun" }}
+		</button>
+
+		<button id="dark-theme-btn" class="feather-icon hidden" onclick="toggleTheme()" title="Turn on Dark Theme">
+			{{ template "components/icon" "moon" }}
+		</button>
+	</div>
 </div>
+
+<script>
+	window.addEventListener("load", updateThemeButton);
+	window.addEventListener(themeChangeEventName, updateThemeButton);
+
+	const lightThemeBtn = document.getElementById("light-theme-btn");
+	const darkThemeBtn = document.getElementById("dark-theme-btn");
+
+	function updateThemeButton() {
+		if (isDarkTheme()) {
+			switchButton(lightThemeBtn, darkThemeBtn);
+		} else {
+			switchButton(darkThemeBtn, lightThemeBtn);
+		}
+	}
+
+	function switchButton(show, hide) {
+		const className = "hidden";
+
+		show.classList.remove(className);
+		hide.classList.add(className);
+	}
+</script>
 {{ end }}
