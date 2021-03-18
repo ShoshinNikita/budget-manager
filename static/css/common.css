@@ -1,10 +1,11 @@
 /* | Variables */
 
 :root {
+	--base-color: #ffffff;
 	--background-color: #ffffff;
 
 	--font-color: #212121;
-	--font-color--disabled: #b0b0b0;
+	--font-color--disabled: #21212140;
 	--font-color--faded: #999999;
 
 	--border-color: #f4f4f4;
@@ -15,8 +16,26 @@
 	--icon-color: #888888;
 	--icon-color--hover: #666666;
 
-	--scrollbar-track-color: #eff0f1;
+	--scrollbar-track-color: var(--background-color);
 	--scrollbar-thumb-color: #e1e1e1;
+}
+
+[data-theme="dark"] {
+	--base-color: #0d1117;
+	--background-color: #10141a; /* Base Color + rgba(255, 255, 255, 0.01) */
+
+	--font-color: #ffffffa0;
+	--font-color--disabled: #ffffff40;
+	--font-color--faded: #666666;
+
+	--border-color: #242424;
+	--border-color--accent: #555555;
+
+	--hover-color: #161a20; /* Base Color + rgba(255, 255, 255, 0.04) */
+
+	--icon-color--hover: #aaaaaa;
+
+	--scrollbar-thumb-color: #414141;
 }
 
 /* | Common */
@@ -42,7 +61,7 @@ All pages should stick to this layout:
 */
 
 body {
-	background-color: var(--background-color);
+	background-color: var(--base-color);
 	height: 100vh;
 	margin: 0;
 	padding: 0px;
@@ -94,6 +113,10 @@ body {
 .card {
 	background-color: var(--background-color);
 	box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+}
+
+[data-theme="dark"] .card {
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
 }
 
 .card__title {
@@ -216,14 +239,19 @@ select {
 	appearance: none;
 	-moz-appearance: none;
 	-webkit-appearance: none;
-	background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>")
-		no-repeat right;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>");
+	background-position: right;
+	background-repeat: no-repeat;
 	background-color: var(--background-color);
 	border: none;
 	border-bottom: 1px solid var(--border-color);
 	cursor: pointer;
 	padding: 2px 16px 2px 0;
 	scrollbar-width: unset;
+}
+
+[data-theme="dark"] select {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffffa0' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>");
 }
 
 select:focus {
@@ -235,6 +263,10 @@ select.reverse {
 	padding-right: 0;
 	padding-left: 16px;
 	text-align: right;
+}
+
+[data-theme="dark"] ::-webkit-calendar-picker-indicator {
+	filter: invert(1);
 }
 
 /* | Links */
