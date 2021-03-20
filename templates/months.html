@@ -50,13 +50,16 @@
 		}
 
 		.month {
-			height: 120px;
-			padding: 10px;
+			padding: 10px 10px 20px;
 		}
 
 		.month.disabled {
 			cursor: default;
 			opacity: 0.5;
+		}
+
+		.month.disabled .month__results {
+			opacity: 0;
 		}
 
 		.month__header {
@@ -79,8 +82,9 @@
 		#year-overview {
 			column-gap: 20px;
 			display: grid;
-			grid-template-columns: 3fr 7fr;
+			grid-template-columns: min-content auto;
 			height: 100%;
+			margin-left: 45px;
 			max-height: 400px;
 		}
 
@@ -91,9 +95,11 @@
 		#year-overview__results .card__body {
 			column-gap: 10px;
 			display: grid;
-			grid-template-columns: 130px max-content;
+			grid-template-columns: max-content max-content;
 			font-size: 18px;
 			height: min-content;
+			padding-left: 10px;
+			padding-right: 30px;
 		}
 
 		.year-overview__result {
@@ -127,31 +133,31 @@
 				grid-template-columns: repeat(4, 1fr);
 			}
 
-			.card__title {
+			.month {
+				padding: 10px;
+			}
+
+			#year-overview {
+				margin-left: 35px;
+			}
+
+			#year-overview__results .card__title {
 				font-size: 18px;
 			}
 
-			#year-overview__results {
+			#year-overview__results .card__body {
 				font-size: 16px;
 			}
 		}
 
 		@media (max-width: 1100px) {
 
-			#year {
-				display: block;
+			.month__header {
+				font-size: 16px;
 			}
 
-			.switch-year-btn {
-				display: none;
-			}
-
-			#content {
-				row-gap: 30px;
-			}
-
-			#months-list {
-				grid-template-columns: repeat(3, 1fr);
+			.month__results {
+				font-size: 14px;
 			}
 		}
 	</style>
@@ -176,11 +182,12 @@
 				<div id="months-list">
 					{{ range .Months }}
 
+					{{ $attributes := `class="month card disabled noselect" title="No data for the month"` }}
 					{{ if ne .ID 0 }}
-					<!-- Show month overview -->
+					{{ $attributes = (printf `href="/%d-%02d" class="month card card--hover" title="Go to the month"` .Year .Month)}}
+					{{ end }}
 
-					<!-- Use the number of a month instead of the name -->
-					<a href="/{{ .Year }}-{{ printf `%02d` .Month }}" class="month card card--hover" title="Go to the month">
+					<a {{ toHTMLAttr $attributes }}>
 						<div class="month__header">{{ .Month }} {{ .Year }}</div>
 						<div class="month__results">
 							<div>Income:</div>
@@ -197,12 +204,6 @@
 							</div>
 						</div>
 					</a>
-					{{ else }}
-					<!-- Just show a stub -->
-					<div class="month card disabled" title="No data for the month">
-						<div class="month__header">{{ .Month }} {{ .Year }}</div>
-					</div>
-					{{ end }}
 					{{ end }}
 				</div>
 

@@ -742,7 +742,7 @@
 							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
 							{{ end }}
 
-							<option value="{{ .ID }}" {{ call $.ToHTMLAttr $attributes }}>{{ .FullName }}</option>
+							<option value="{{ .ID }}" {{ toHTMLAttr $attributes }}>{{ .FullName }}</option>
 							{{ end }}
 						</select>
 

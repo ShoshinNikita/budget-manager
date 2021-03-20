@@ -71,6 +71,9 @@ func commonTemplateFuncs(gitHash string) template.FuncMap {
 
 			return url.String(), nil
 		},
+		"toHTMLAttr": func(s string) template.HTMLAttr {
+			return template.HTMLAttr(s) //nolint:gosec
+		},
 	}
 }
 
@@ -282,7 +285,6 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		//
 		ToShortMonth           func(time.Month) string
 		SumSpendCosts          func([]db.Spend) money.Money
-		ToHTMLAttr             func(string) template.HTMLAttr
 		ShouldSuggestSpendType func(spendType, option SpendType) bool
 	}{
 		Month:                    month,
@@ -296,9 +298,6 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		//
 		ToShortMonth:  toShortMonth,
 		SumSpendCosts: sumSpendCosts,
-		ToHTMLAttr: func(s string) template.HTMLAttr {
-			return template.HTMLAttr(s) //nolint:gosec
-		},
 		ShouldSuggestSpendType: func(origin, suggestion SpendType) bool {
 			if origin.ID == suggestion.ID {
 				return false
