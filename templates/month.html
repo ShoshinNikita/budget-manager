@@ -317,17 +317,17 @@
 			</div>
 
 			<div id="header__buttons">
+				<!-- Manage Spend Types -->
+				<button class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
+					{{ template "components/icon" "tag" }}
+				</button>
+
 				<!-- Search for Spends -->
 				{{ $after := printf `%d-%02d-01` .Year .Month.Month }}
 				{{ $before := printf `%d-%02d-%d` .Year .Month.Month (len .Month.Days) }}
 				<a href="/search/spends?after={{ $after }}&before={{ $before }}" class="feather-icon" title="Search & Statistics">
 					{{ template "components/icon" "bar-chart-2" }}
 				</a>
-
-				<!-- Manage Spend Types -->
-				<button class="feather-icon" title="Manage Types" onclick="showModalWindowToEditTypes()">
-					{{ template "components/icon" "tag" }}
-				</button>
 			</div>
 		</div>
 
