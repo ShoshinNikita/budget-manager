@@ -22,8 +22,5 @@
 })();
 
 function getGridLinesColor() {
-	if (isDarkTheme()) {
-		return "rgba(255, 255, 255, 0.1)";
-	}
-	return "rgba(0, 0, 0, 0.1)";
+	return isDarkTheme() ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
 }

@@ -298,13 +298,10 @@
 			const gridLinesColor = getGridLinesColor();
 
 			// Update color of grid lines
-			if (yearOverviewChart.options.scales) {
-				const scales = yearOverviewChart.options.scales;
-
-				for (const axes of [scales.xAxes, scales.yAxes]) {
-					for (const axis of axes) {
-						axis.gridLines.color = gridLinesColor
-					}
+			const scales = yearOverviewChart.options.scales;
+			for (const axes of [scales.xAxes, scales.yAxes]) {
+				for (const axis of axes) {
+					axis.gridLines.color = gridLinesColor
 				}
 			}
 
