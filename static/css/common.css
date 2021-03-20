@@ -70,16 +70,11 @@ body {
 
 @media (max-width: 1350px) {
 	#app {
-		grid-template-rows: 40px calc(100% - 40px - 10px);
-		padding: 5px 10px 10px;
+		padding: 0 10px;
 	}
 
 	#header {
 		font-size: 18px;
-	}
-
-	#footer {
-		display: none;
 	}
 }
 
