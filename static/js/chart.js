@@ -17,7 +17,7 @@
 
 	// Tune scale
 	const scale = Chart.defaults.scale;
-	scale.beginAtZero = true;
+	scale.ticks.beginAtZero = true;
 	scale.gridLines.color = getGridLinesColor();
 })();
 
