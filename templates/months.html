@@ -5,6 +5,10 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>{{ .YearInterval }} Overview | Budget Manager</title>
+
+	<!-- Theme Switcher -->
+	<script src="{{ asStaticURL `/static/js/theme-switcher.js` }}"></script>
+
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -261,8 +265,8 @@
 			"July", "August", "September", "October", "November", "December"];
 
 		// Create the chart
-		const ctx = document.getElementById("year-overview__chart").getContext("2d");
-		new Chart(ctx, {
+		const yearOverviewCtx = document.getElementById("year-overview__chart").getContext("2d");
+		const yearOverviewChart = new Chart(yearOverviewCtx, {
 			type: "line",
 			data: {
 				labels: monthResults.map(v => monthNames[v["month"] - 1]),
@@ -289,6 +293,20 @@
 				},
 			}
 		});
+
+		window.addEventListener(themeChangeEventName, () => {
+			const gridLinesColor = getGridLinesColor();
+
+			// Update color of grid lines
+			const scales = yearOverviewChart.options.scales;
+			for (const axes of [scales.xAxes, scales.yAxes]) {
+				for (const axis of axes) {
+					axis.gridLines.color = gridLinesColor
+				}
+			}
+
+			yearOverviewChart.update();
+		})
 	</script>
 </body>
 

@@ -6,6 +6,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>{{ .Month.Month }} {{ .Year }} | Budget Manager</title>
 
+	<!-- Theme Switcher -->
+	<script src="{{ asStaticURL `/static/js/theme-switcher.js` }}"></script>
+
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -739,7 +742,7 @@
 							{{ $attributes = (printf "%s %s" $attributes "selected") }}
 							{{ end }}
 							{{ if not (call $.ShouldSuggestSpendType $currentType .) }}
-							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--disabled-color)'") }}
+							{{ $attributes = (printf "%s %s" $attributes "disabled style='color: var(--font-color--disabled)'") }}
 							{{ end }}
 
 							<option value="{{ .ID }}" {{ toHTMLAttr $attributes }}>{{ .FullName }}</option>
@@ -1325,6 +1328,7 @@
 		 */
 		function showModalWindowToEditIncome(id, title, notes, income) {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Set current values
 			setValue("modal-window__edit-income__title", title);
@@ -1349,6 +1353,7 @@
 		 */
 		function showModalWindowToEditMonthlyPayment(id, title, notes, typeID, cost) {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Set current values
 			setValue("modal-window__edit-monthly-payment__title", title);
@@ -1374,6 +1379,7 @@
 		 */
 		function showModalWindowToEditSpend(id, title, notes, typeID, cost) {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Set current values
 			setValue("modal-window__edit-spend__title", title);
@@ -1414,6 +1420,7 @@
 
 		function showModalWindowToEditTypes() {
 			hideAllModalWindows();
+			blurBackground();
 
 			// Show Modal Window
 			showElement(manageSpendTypesModalWindowID);
@@ -1424,6 +1431,8 @@
 		 * hideAllModalWindows hides all Modal Windows
 		 */
 		function hideAllModalWindows() {
+			unblurBackground();
+
 			hideElement(modalWindowID);
 			hideElement(editIncomeModalWindowID);
 			hideElement(editMonthlyPaymentModalWindowID);
@@ -1434,6 +1443,18 @@
 				// Reload page to display updated Spend Types
 				location.reload();
 			}
+		}
+
+		function blurBackground() {
+			document.getElementById("header").classList.add("blurred");
+			document.getElementById("content").classList.add("blurred");
+			document.getElementById("footer").classList.add("blurred");
+		}
+
+		function unblurBackground() {
+			document.getElementById("header").classList.remove("blurred");
+			document.getElementById("content").classList.remove("blurred");
+			document.getElementById("footer").classList.remove("blurred");
 		}
 
 		// ----------------------------------------------------

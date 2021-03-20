@@ -6,6 +6,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Search & Statistics | Budget Manager</title>
 
+	<!-- Theme Switcher -->
+	<script src="{{ asStaticURL `/static/js/theme-switcher.js` }}"></script>
+
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -18,7 +21,7 @@
 		}
 
 		.tooltip .tooltip__text {
-			border: 2px solid var(--border-accent-color);
+			border: 2px solid var(--border-color--accent);
 			border-radius: 5px;
 			font-size: 14px;
 			padding: 3px 10px;
@@ -37,7 +40,7 @@
 		.tooltip .tooltip__text::after,
 		.tooltip .tooltip__text::before {
 			border: 7px solid;
-			border-color: transparent var(--border-accent-color) transparent transparent;
+			border-color: transparent var(--border-color--accent) transparent transparent;
 			content: "";
 			position: absolute;
 			right: 100%;
@@ -47,7 +50,7 @@
 
 		.tooltip .tooltip__text::before {
 			border-width: 5px;
-			border-color: transparent white transparent transparent;
+			border-color: transparent var(--border-color--accent) transparent transparent;
 			top: 3px;
 			z-index: 2;
 		}
@@ -106,7 +109,6 @@
 
 		.filters__separator::before {
 			content: "–";
-			color: #4d4d4d;
 		}
 
 		#filters__types {
@@ -134,13 +136,6 @@
 			display: grid;
 			grid-template-columns: repeat(2, min-content);
 			justify-content: center;
-		}
-
-		.filters__button {
-			background-color: white;
-			border: none;
-			margin: 0px;
-			padding: 0px;
 		}
 
 		.filters__button.feather-icon>svg {
@@ -185,12 +180,14 @@
 		.result__tab-title:focus,
 		.result__tab-title:hover,
 		.result__tab-title--chosen {
-			border-bottom: 2px solid var(--border-accent-color);
+			border-bottom: 2px solid var(--border-color--accent);
 			margin-bottom: 0;
 		}
 
 		#result__tabs {
+			background-color: var(--base-color);
 			overflow-y: auto;
+			z-index: 0;
 		}
 
 		.result__tab {
@@ -214,8 +211,8 @@
 		}
 
 		#spends__table th {
-			background-color: white;
-			border-bottom: 1px solid var(--border-accent-color);
+			background-color: var(--background-color);
+			border-bottom: 1px solid var(--border-color--accent);
 			font-size: 18px;
 			position: sticky;
 			top: 0;
@@ -279,10 +276,9 @@
 			width: 12px;
 		}
 
-		.spends__table__sort-icon__wrapper:hover svg {
-			/* Reset to default */
-			opacity: 0.64;
-			stroke: #888888;
+		.spends__table__sort-icon__wrapper svg.chosen {
+			opacity: 1;
+			stroke: var(--icon-color--hover);
 		}
 
 		/* ||| Statistics */
@@ -647,7 +643,7 @@
 			const selector = sortSelector + " " + orderSelector;
 			const icon = document.querySelector(selector);
 			if (icon !== null) {
-				icon.style["stroke"] = "black";
+				icon.classList.add("chosen");
 			}
 
 			// Don't set sort and order in form. It allows to 'reset' sort/order by clicking 'Search' button
@@ -742,7 +738,7 @@
 
 				const columns = row.querySelectorAll("td");
 				for (const column of columns) {
-					column.style.borderTop = "1px solid var(--border-accent-color)";
+					column.style.borderTop = "1px solid var(--border-color--accent)";
 				}
 			}
 		})
@@ -873,12 +869,19 @@
 	<script>
 		Chart.defaults.global.tooltips.displayColors = false;
 
-		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
-		const labelSeparator = " – ";
-		const backgroundColor = "#dddddd";
-		const hoverBackgroundColor = "#d4d4d4";
+		const invisibleColor = "#00000000";
 
-		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+		function getBackgroundColor() {
+			return isDarkTheme() ? "#26292f" : "#dddddd";
+		}
+
+		function getHoverBackgroundColor() {
+			return isDarkTheme() ? "#31343a" : "#d4d4d4";
+		}
+
+		function getBorderColor() {
+			return isDarkTheme() ? "#0d1117" : "#ffffff";
+		}
 
 		// Spent by Spend Type chart
 
@@ -888,15 +891,19 @@
 			spendBySpendTypeDatasets.push({
 				data: data.map(v => v["spent"]),
 				labels: data.map(v => v["spend_type_name"]),
-				backgroundColor: data.map(v => v["spend_type_name"] ? backgroundColor : "#00000000"),
-				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? hoverBackgroundColor : "#00000000"),
-				borderColor: data.map(v => v["spend_type_name"] ? undefined : "#00000000"), // Use 'undefined' for default border color
-				hoverBorderColor: data.map(v => "#00000000"), // Hide hover border colors
+				backgroundColor: data.map(v => v["spend_type_name"] ? getBackgroundColor() : invisibleColor),
+				hoverBackgroundColor: data.map(v => v["spend_type_name"] ? getHoverBackgroundColor() : invisibleColor),
+				borderColor: data.map(v => v["spend_type_name"] ? getBorderColor() : invisibleColor),
+				hoverBorderColor: data.map(v => invisibleColor), // Hide hover border colors
 			});
 		}
 
+		const totalSpent = Math.abs(`{{ .TotalCost }}`);
+		// labelSeparator is En dash - https://en.wikipedia.org/wiki/Dash#En_dash
+		const labelSeparator = " – ";
+
 		const spentBySpendTypeCtx = document.getElementById("spent-by-spend-type__chart").getContext("2d");
-		new Chart(spentBySpendTypeCtx, {
+		const spentBySpendTypeChart = new Chart(spentBySpendTypeCtx, {
 			type: "doughnut",
 			data: {
 				datasets: spendBySpendTypeDatasets,
@@ -960,14 +967,14 @@
 		costIntervalLabels.push(costIntervals[costIntervals.length - 1].to);
 
 		const costIntervalsCtx = document.getElementById("cost-distribution__chart").getContext("2d");
-		new Chart(costIntervalsCtx, {
+		const costIntervalsChart = new Chart(costIntervalsCtx, {
 			type: "bar",
 			data: {
 				labels: new Array(costIntervalLabels.length - 1).fill(""),
 				datasets: [{
 					data: costIntervalData,
-					backgroundColor: backgroundColor,
-					hoverBackgroundColor: hoverBackgroundColor,
+					backgroundColor: getBackgroundColor(),
+					hoverBackgroundColor: getHoverBackgroundColor(),
 				}],
 			},
 			plugins: [
@@ -989,10 +996,12 @@
 						const y = chart.height - 10;
 						const offset = axis.left;
 
+						const ctxFont = chart.ctx.font;
+						const fillStyle = chart.ctx.fillStyle;
+
 						// Sometimes canvas font can be bold (for example, on hover). Change it to normal while drawing intervals
-						const ctxFont = chart.ctx.font.replace("bold", "");
-						const normalFont = chart.ctx.font.replace("bold", "");
-						chart.ctx.font = normalFont;
+						chart.ctx.font = chart.ctx.font.replace("bold", "");
+						chart.ctx.fillStyle = chart.options.defaultFontColor;
 
 						for (let i = 0; i < costIntervalLabels.length; i++) {
 							const text = costIntervalLabels[i];
@@ -1004,8 +1013,9 @@
 							chart.ctx.restore();
 						}
 
-						// Revert canvas font
+						// Revert canvas options
 						chart.ctx.font = ctxFont;
+						chart.ctx.fillStyle = fillStyle;
 					}
 				}
 			],
@@ -1036,7 +1046,6 @@
 			}
 		});
 
-
 		// Spent by Day chart
 
 		const spentByDayStatistics = JSON.parse(`{{ .SpentByDayDataset }}`);
@@ -1051,14 +1060,14 @@
 		}
 
 		const spentByDayCtx = document.getElementById("spent-by-day__chart").getContext("2d");
-		new Chart(spentByDayCtx, {
+		const spentByDayChart = new Chart(spentByDayCtx, {
 			type: "bar",
 			data: {
 				labels: spentByDayLabels,
 				datasets: [{
 					data: spentByDayData,
-					backgroundColor: backgroundColor,
-					hoverBackgroundColor: hoverBackgroundColor,
+					backgroundColor: getBackgroundColor(),
+					hoverBackgroundColor: getHoverBackgroundColor(),
 				}],
 			},
 			options: {
@@ -1088,6 +1097,55 @@
 				}
 			}
 		});
+
+		window.addEventListener(themeChangeEventName, () => {
+			const backgroundColor = getBackgroundColor();
+			const hoverBackgroundColor = getHoverBackgroundColor();
+			const borderColor = getBorderColor();
+			const gridLinesColor = getGridLinesColor();
+
+			function getDatasetColor(color, newColor) {
+				if (color instanceof Array) {
+					for (let i = 0; i < color.length; i++) {
+						if (color[i] === invisibleColor) {
+							continue;
+						}
+						color[i] = newColor;
+					}
+					return color;
+				}
+
+				if (typeof color === "string" || color instanceof String) {
+					if (color === invisibleColor) {
+						return color;
+					}
+					return newColor;
+				}
+
+				// Indicate something went wrong
+				return "red";
+			}
+
+			for (const chart of [spentBySpendTypeChart, costIntervalsChart, spentByDayChart]) {
+				// Update dataset color
+				for (const dataset of chart.data.datasets) {
+					dataset.backgroundColor = getDatasetColor(dataset.backgroundColor, backgroundColor);
+					dataset.hoverBackgroundColor = getDatasetColor(dataset.hoverBackgroundColor, hoverBackgroundColor);
+					dataset.borderColor = getDatasetColor(dataset.borderColor, borderColor);
+				}
+
+				// Update color of grid lines
+				if (chart.options.scales) {
+					for (const axes of [chart.options.scales.xAxes, chart.options.scales.yAxes]) {
+						for (const axis of axes) {
+							axis.gridLines.color = gridLinesColor
+						}
+					}
+				}
+
+				chart.update();
+			}
+		})
 	</script>
 	{{ end }}
 

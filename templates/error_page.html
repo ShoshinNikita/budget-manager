@@ -6,6 +6,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Error | Budget Manager</title>
 
+	<!-- Theme Switcher -->
+	<script src="{{ asStaticURL `/static/js/theme-switcher.js` }}"></script>
+
 	<link rel="stylesheet" href="{{ asStaticURL `/static/css/common.css` }}">
 
 	<style>
@@ -38,7 +41,7 @@
 		}
 
 		#error__details * {
-			color: #666666;
+			color: var(--font-color--faded);
 		}
 
 		#error__details__code {
@@ -48,7 +51,7 @@
 		}
 
 		#error__details__info {
-			border-left: 3px solid #e2e2e2;
+			border-left: 3px solid var(--border-color--accent);
 			font-size: 20px;
 			margin: auto;
 			max-width: 70%;

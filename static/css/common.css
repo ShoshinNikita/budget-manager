@@ -1,12 +1,41 @@
 /* | Variables */
 
 :root {
+	--base-color: #ffffff;
+	--background-color: #ffffff;
+
 	--font-color: #212121;
-	--fade-font-color: #999999;
+	--font-color--disabled: #21212140;
+	--font-color--faded: #999999;
+
 	--border-color: #f4f4f4;
-	--border-accent-color: #d2d2d2;
+	--border-color--accent: #d2d2d2;
+
 	--hover-color: #fafafa;
-	--disabled-color: #b0b0b0;
+
+	--icon-color: #888888;
+	--icon-color--hover: #666666;
+
+	--scrollbar-track-color: var(--background-color);
+	--scrollbar-thumb-color: #e1e1e1;
+}
+
+[data-theme="dark"] {
+	--base-color: #0d1117;
+	--background-color: #10141a; /* Base Color + rgba(255, 255, 255, 0.01) */
+
+	--font-color: #ffffffa0;
+	--font-color--disabled: #ffffff40;
+	--font-color--faded: #666666;
+
+	--border-color: #242424;
+	--border-color--accent: #555555;
+
+	--hover-color: #161a20; /* Base Color + rgba(255, 255, 255, 0.04) */
+
+	--icon-color--hover: #aaaaaa;
+
+	--scrollbar-thumb-color: #414141;
 }
 
 /* | Common */
@@ -32,6 +61,7 @@ All pages should stick to this layout:
 */
 
 body {
+	background-color: var(--base-color);
 	height: 100vh;
 	margin: 0;
 	padding: 0px;
@@ -51,7 +81,7 @@ body {
 }
 
 #header {
-	border-bottom: 1px solid var(--border-accent-color);
+	border-bottom: 1px solid var(--border-color--accent);
 	box-sizing: content-box;
 	font-size: 20px;
 	height: 35px;
@@ -81,13 +111,17 @@ body {
 /* | Card */
 
 .card {
-	background: #ffffff;
+	background-color: var(--background-color);
 	box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
 }
 
+[data-theme="dark"] .card {
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
+}
+
 .card__title {
-	background-color: #ffffff;
-	border-bottom: 1px solid var(--border-accent-color);
+	background-color: var(--background-color);
+	border-bottom: 1px solid var(--border-color--accent);
 	font-size: 1.3rem;
 	padding: 5px 10px;
 	position: sticky;
@@ -121,7 +155,7 @@ a:link.card--hover:hover {
 .feather-icon > svg {
 	fill: none;
 	height: 18px;
-	stroke: #888888;
+	stroke: var(--icon-color);
 	stroke-linecap: round;
 	stroke-linejoin: round;
 	stroke-width: 2;
@@ -150,7 +184,7 @@ button.feather-icon:hover:not(.disabled) > svg,
 a.feather-icon:focus:not(.disabled) > svg,
 button.feather-icon:focus:not(.disabled) > svg {
 	opacity: 1;
-	stroke: #666666;
+	stroke: var(--icon-color--hover);
 }
 
 /* | Inputs */
@@ -164,13 +198,13 @@ button:focus {
 }
 
 button {
-	background-color: white;
+	background-color: var(--background-color);
 	border: none;
 	padding: 0;
 }
 
 input {
-	background-color: white;
+	background-color: var(--background-color);
 	font-size: 15px;
 }
 
@@ -183,12 +217,12 @@ input[type="date"] {
 
 input[type="text"]:focus,
 input[type="date"]:focus {
-	border-color: var(--border-accent-color);
+	border-color: var(--border-color--accent);
 }
 
 input[type="button"],
 input[type="submit"] {
-	border: 1px solid var(--border-accent-color);
+	border: 1px solid var(--border-color--accent);
 	cursor: pointer;
 	padding: 3px;
 	width: 80px;
@@ -205,9 +239,10 @@ select {
 	appearance: none;
 	-moz-appearance: none;
 	-webkit-appearance: none;
-	background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>")
-		no-repeat right;
-	background-color: white;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>");
+	background-position: right;
+	background-repeat: no-repeat;
+	background-color: var(--background-color);
 	border: none;
 	border-bottom: 1px solid var(--border-color);
 	cursor: pointer;
@@ -215,8 +250,12 @@ select {
 	scrollbar-width: unset;
 }
 
+[data-theme="dark"] select {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffffa0' stroke-width='2' stroke-linecap='round'><polyline points='19 12 12 19 5 12'></polyline></svg>");
+}
+
 select:focus {
-	border-color: var(--border-accent-color);
+	border-color: var(--border-color--accent);
 }
 
 select.reverse {
@@ -224,6 +263,10 @@ select.reverse {
 	padding-right: 0;
 	padding-left: 16px;
 	text-align-last: right;
+}
+
+[data-theme="dark"] ::-webkit-calendar-picker-indicator {
+	filter: invert(1);
 }
 
 /* | Links */
@@ -268,11 +311,11 @@ a:link:hover {
 }
 
 ::-webkit-scrollbar-track {
-	background-color: #eff0f1;
+	background-color: var(--scrollbar-track-color);
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: #e1e1e1;
+	background-color: var(--scrollbar-thumb-color);
 }
 
 /* | Table */
@@ -292,7 +335,7 @@ td {
 }
 
 table th {
-	color: var(--fade-font-color);
+	color: var(--font-color--faded);
 }
 
 table tbody tr:hover {
@@ -308,4 +351,8 @@ table tr:last-child td {
 .noselect {
 	cursor: default;
 	user-select: none;
+}
+
+.blurred {
+	filter: blur(2px);
 }
