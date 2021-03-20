@@ -223,7 +223,7 @@ select.reverse {
 	background-position: left;
 	padding-right: 0;
 	padding-left: 16px;
-	text-align: right;
+	text-align-last: right;
 }
 
 /* | Links */
