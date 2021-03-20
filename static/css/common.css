@@ -161,7 +161,7 @@ button.feather-icon:focus:not(.disabled) > svg {
 /* | Inputs */
 
 a:focus,
-input:focus,
+input:not([type="checkbox"]):focus,
 select:focus,
 textarea:focus,
 button:focus {
