@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -49,7 +48,7 @@ type DB interface {
 func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool, version, gitHash string) *Handlers {
 	return &Handlers{
 		db:          db,
-		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs(gitHash)),
+		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs()),
 		log:         log,
 		//
 		version: version,
@@ -57,19 +56,10 @@ func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool, version, gi
 	}
 }
 
-func commonTemplateFuncs(gitHash string) template.FuncMap {
+func commonTemplateFuncs() template.FuncMap {
 	return template.FuncMap{
-		"asStaticURL": func(rawURL string) (string, error) {
-			url, err := url.Parse(rawURL)
-			if err != nil {
-				return "", err
-			}
-
-			query := url.Query()
-			query.Add("hash", gitHash)
-			url.RawQuery = query.Encode()
-
-			return url.String(), nil
+		"asStaticURL": func(url string) (string, error) {
+			return url, nil
 		},
 		"toHTMLAttr": func(s string) template.HTMLAttr {
 			return template.HTMLAttr(s) //nolint:gosec
