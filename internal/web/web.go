@@ -124,7 +124,7 @@ func (s *Server) Prepare() {
 	// Add File Handler
 	fs := http.FS(static.New(s.config.UseEmbed))
 	fileHandler := http.StripPrefix("/static/", http.FileServer(fs))
-	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30) // cache for 1 month
+	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30, s.gitHash) // cache for 1 month
 	router.PathPrefix("/static/").Handler(fileHandler)
 
 	s.server = &http.Server{
