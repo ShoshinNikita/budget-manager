@@ -963,6 +963,9 @@
 			const dayID = Number(newSpendForm.getAttribute("data-day-id"));
 			const newSpendTitleInput = newSpendForm.querySelector(`#new-spend-title-${dayID}`)
 			newSpendTitleInput.focus();
+
+			// Scroll to bottom
+			dayElem.scrollTop = dayElem.scrollHeight;
 		}
 
 		// ----------------------------------------------------
