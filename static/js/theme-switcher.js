@@ -29,8 +29,8 @@ function isDarkTheme() {
 (function () {
 	let theme = localStorage.getItem(localStorageKey);
 	if (theme != lightTheme && theme != darkTheme) {
-		// Use light theme as a default one
-		theme = lightTheme;
+		// Use dark theme by default
+		theme = darkTheme;
 	}
 	switchTheme(theme);
 })();
