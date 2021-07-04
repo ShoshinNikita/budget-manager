@@ -867,7 +867,8 @@
 	<script src="{{ asStaticURL `/static/vendor/chartjs-plugin-datalabels/chartjs-plugin-datalabels.min.js` }}"></script>
 	<script src="{{ asStaticURL `/static/js/chart.js` }}"></script>
 	<script>
-		Chart.defaults.global.tooltips.displayColors = false;
+		Chart.register(ChartDataLabels);
+		Chart.defaults.plugins.tooltip.displayColors = false;
 
 		const invisibleColor = "#00000000";
 
@@ -909,27 +910,25 @@
 				datasets: spendBySpendTypeDatasets,
 			},
 			options: {
-				aspectRatio: 1,
 				maintainAspectRatio: true,
 				// Tune doughnut
-				cutoutPercentage: 30,
-				rotation: -5 / 4 * Math.PI,
-				// Tune tooltips
-				tooltips: {
-					filter: function (tooltipItem, data) {
-						const labels = data.datasets[tooltipItem.datasetIndex].labels;
-						return labels ? labels[tooltipItem.index] !== "" : true;
-					},
-					callbacks: {
-						label: function (tooltipItem, data) {
-							var dataset = data.datasets[tooltipItem.datasetIndex];
-							var index = tooltipItem.index;
-							return dataset.labels[index] + labelSeparator + dataset.data[index];
-						},
-					}
-				},
+				cutout: "30%",
+				rotation: 225,
 				// Plugins
 				plugins: {
+					tooltip: {
+						filter: function (tooltipItem, index, tooltipItems, data) {
+							const labels = data.datasets[tooltipItem.datasetIndex].labels;
+							return labels ? labels[tooltipItem.dataIndex] !== "" : true;
+						},
+						callbacks: {
+							label: function (tooltipItem) {
+								const dataset = tooltipItem.dataset;
+								const index = tooltipItem.dataIndex;
+								return dataset.labels[index] + labelSeparator + dataset.data[index];
+							},
+						}
+					},
 					datalabels: {
 						textAlign: "center",
 						formatter: function (value, context) {
@@ -990,7 +989,7 @@
 					},
 					// Draw intervals
 					afterDraw: chart => {
-						const axis = chart.scales["x-axis-0"];
+						const axis = chart.scales["x"];
 						const tickDistance = axis.width / (costIntervalLabels.length - 1);
 
 						const y = chart.height - 10;
@@ -1001,7 +1000,7 @@
 
 						// Sometimes canvas font can be bold (for example, on hover). Change it to normal while drawing intervals
 						chart.ctx.font = chart.ctx.font.replace("bold", "");
-						chart.ctx.fillStyle = chart.options.defaultFontColor;
+						chart.ctx.fillStyle = chart.options.color;
 
 						for (let i = 0; i < costIntervalLabels.length; i++) {
 							const text = costIntervalLabels[i];
@@ -1020,17 +1019,15 @@
 				}
 			],
 			options: {
-				// Tune tooltips
-				tooltips: {
-					callbacks: {
-						label: function (tooltipItem, data) {
-							const interval = costIntervals[tooltipItem.index];
-							return `${tooltipItem.value} – ${interval.count} Spends`;
-						},
-					}
-				},
-				// Plugins
 				plugins: {
+					tooltip: {
+						callbacks: {
+							label: function (tooltipItem) {
+								const interval = costIntervals[tooltipItem.dataIndex];
+								return `${tooltipItem.raw} – ${interval.count} Spends`;
+							},
+						}
+					},
 					datalabels: {
 						display: function (context) {
 							const dataset = context.chart.data.datasets[context.datasetIndex];
@@ -1042,6 +1039,9 @@
 							return "auto";
 						}
 					}
+				},
+				scales: {
+					y: { ticks: { callback: Chart.Ticks.formatters.money } }
 				}
 			}
 		});
@@ -1071,18 +1071,16 @@
 				}],
 			},
 			options: {
-				// Tune tooltips
-				tooltips: {
-					callbacks: {
-						title: function (tooltipItem, data) { return "" },
-						label: function (tooltipItem, data) {
-							const date = convertDateToHumanReadableFormat(tooltipItem.label)
-							return date + labelSeparator + tooltipItem.value;
-						},
-					}
-				},
-				// Plugins
 				plugins: {
+					tooltip: {
+						callbacks: {
+							title: function (tooltipItem) { return "" },
+							label: function (tooltipItem) {
+								const date = convertDateToHumanReadableFormat(tooltipItem.label)
+								return date + labelSeparator + tooltipItem.raw;
+							},
+						}
+					},
 					datalabels: {
 						display: function (context) {
 							const dataset = context.chart.data.datasets[context.datasetIndex];
@@ -1094,6 +1092,9 @@
 							return "auto";
 						}
 					}
+				},
+				scales: {
+					y: { ticks: { callback: Chart.Ticks.formatters.money } }
 				}
 			}
 		});
@@ -1136,9 +1137,9 @@
 
 				// Update color of grid lines
 				if (chart.options.scales) {
-					for (const axes of [chart.options.scales.xAxes, chart.options.scales.yAxes]) {
-						for (const axis of axes) {
-							axis.gridLines.color = gridLinesColor
+					for (const axis of [chart.options.scales.x, chart.options.scales.y]) {
+						if (axis) {
+							axis.grid.color = gridLinesColor
 						}
 					}
 				}
