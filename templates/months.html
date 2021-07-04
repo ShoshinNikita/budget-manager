@@ -276,12 +276,14 @@
 						data: monthResults.map(v => v["total_income"]),
 						borderColor: "green",
 						backgroundColor: "#00ff0018", // green with alpha
+						fill: true,
 					},
 					// Spends
 					{
 						data: monthResults.map(v => -v["total_spend"]),
 						borderColor: "crimson",
 						backgroundColor: "#dc143c18", // crimson with alpha
+						fill: true,
 					}
 				],
 			},
@@ -291,6 +293,9 @@
 					line: { tension: 0.2 },
 					point: { hitRadius: 5 }
 				},
+				scales: {
+					y: { ticks: { callback: Chart.Ticks.formatters.money } }
+				}
 			}
 		});
 
@@ -299,10 +304,8 @@
 
 			// Update color of grid lines
 			const scales = yearOverviewChart.options.scales;
-			for (const axes of [scales.xAxes, scales.yAxes]) {
-				for (const axis of axes) {
-					axis.gridLines.color = gridLinesColor
-				}
+			for (const axis of [scales.x, scales.y]) {
+				axis.grid.color = gridLinesColor
 			}
 
 			yearOverviewChart.update();
