@@ -35,5 +35,5 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.37
+          version: v1.41
           skip-go-installation: true

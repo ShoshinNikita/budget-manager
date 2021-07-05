@@ -29,7 +29,6 @@ type spendType struct {
 	childrenIDs []uint
 }
 
-//nolint:gofumpt
 func prepareSpendTypesForDatasets(spendTypes []db.SpendType,
 	spends []db.Spend) (types map[uint]spendType, maxChildDepth int) {
 
@@ -131,7 +130,6 @@ func createSpentBySpendTypeDatasets(types map[uint]spendType, depth int) []Spent
 	return datasets
 }
 
-//nolint:gofumpt
 func addSpendTypeToDatasets(spendTypes map[uint]spendType, datasets []SpentBySpendTypeDataset,
 	typeID uint, depth int) {
 

@@ -159,7 +159,7 @@ lint:
 		-v $(shell go env GOPATH)/pkg:/go/pkg \
 		-v $(shell pwd):/app \
 		-w /app \
-		golangci/golangci-lint:v1.37-alpine golangci-lint run --config .golangci.yml
+		golangci/golangci-lint:v1.41-alpine golangci-lint run --config .golangci.yml
 
 check: build lint test
 

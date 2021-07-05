@@ -25,8 +25,6 @@ func ProcessError(ctx context.Context, w http.ResponseWriter, respMsg string, co
 
 // ProcessError logs internal error with 'LogInternalError' and calls 'ProcessError'
 // with 'http.StatusInternalServerError' status code
-//
-//nolint:gofumpt
 func ProcessInternalError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
 	respMsg string, err error) {
 

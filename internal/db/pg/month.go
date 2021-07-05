@@ -104,8 +104,7 @@ func (db DB) GetMonthID(ctx context.Context, year, month int) (id uint, err erro
 func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.Month, error) {
 	var pgMonths []Month
 	query := db.db.ModelContext(ctx, &pgMonths).Where("year IN (?)", pg.In(years)).Order("id ASC")
-	err := query.Select()
-	if err != nil {
+	if err := query.Select(); err != nil {
 		return nil, err
 	}
 	if len(pgMonths) == 0 {

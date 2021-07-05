@@ -61,7 +61,7 @@ func TestAddMonthlyPayment(t *testing.T) {
 
 	// Check daily budget
 	dailyBudget := func() int64 {
-		var b int64 = income.Int()
+		b := income.Int()
 		for _, p := range payments {
 			b -= p.Cost.Int()
 		}
@@ -161,7 +161,7 @@ func TestEditMonthlyPayment(t *testing.T) {
 
 	// Check daily budget
 	dailyBudget := func() int64 {
-		var b int64 = income.Int()
+		b := income.Int()
 		for _, p := range payments {
 			if p.edited == nil {
 				b -= p.origin.Cost.Int()

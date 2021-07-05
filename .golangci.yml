@@ -7,6 +7,12 @@ run:
 linters:
   enable-all: true
   disable:
+    # Deprecated
+    - maligned
+    - scopelint
+    - golint
+    - interfacer
+    # Useless
     - cyclop
     - dupl
     - exhaustivestruct
@@ -27,6 +33,10 @@ linters-settings:
     local-prefixes: github.com/ShoshinNikita/budget-manager
   funlen:
     lines: 80
+  tagliatelle:
+    case:
+      rules:
+        json: snake
 
 issues:
   exclude:

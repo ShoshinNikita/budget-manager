@@ -16,8 +16,6 @@ import (
 )
 
 // processErrorWithPage is similar to 'utils.ProcessError' but shows the error page instead of returning json
-//
-//nolint:gofumpt
 func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
 	respMsg string, code int) {
 
@@ -44,8 +42,6 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 
 // processInternalErrorWithPage is similar to 'utils.ProcessInternalError' but shows the error page
 // instead of returning json
-//
-//nolint:gofumpt
 func (h Handlers) processInternalErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
 	respMsg string, err error) {
 
