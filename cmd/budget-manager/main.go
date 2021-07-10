@@ -40,13 +40,13 @@ var (
 //
 
 func main() {
-	// Create a new application
-	app := NewApp()
-
-	// Parse application config
-	if err := app.ParseConfig(); err != nil {
+	cfg, err := parseConfig()
+	if err != nil {
 		log.Fatalln(err)
 	}
+
+	// Create a new application
+	app := NewApp(cfg)
 
 	// Prepare the application
 	if err := app.PrepareComponents(); err != nil {
@@ -57,6 +57,13 @@ func main() {
 	if err := app.Run(); err != nil {
 		log.Fatalln(err)
 	}
+}
+
+func parseConfig() (cfg Config, err error) {
+	if err := env.Parse(&cfg); err != nil {
+		return Config{}, err
+	}
+	return cfg, nil
 }
 
 type App struct {
@@ -84,13 +91,10 @@ type Database interface {
 }
 
 // NewApp returns a new instance of App
-func NewApp() *App {
-	return &App{}
-}
-
-// ParseConfig parses app config
-func (app *App) ParseConfig() error {
-	return env.Parse(&app.config)
+func NewApp(cfg Config) *App {
+	return &App{
+		config: cfg,
+	}
 }
 
 // PrepareComponents prepares logger, db and web server
