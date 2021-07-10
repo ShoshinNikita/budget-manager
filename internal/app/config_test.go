@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"os"
@@ -58,7 +58,7 @@ func TestParseConfig(t *testing.T) {
 		},
 	}
 
-	cfg, err := parseConfig()
+	cfg, err := ParseConfig()
 	require.Nil(err)
 	require.Equal(want, cfg)
 }
