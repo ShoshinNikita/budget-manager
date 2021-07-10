@@ -1,15 +1,10 @@
 package app
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
-	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
@@ -31,20 +26,18 @@ type Database interface {
 }
 
 // NewApp returns a new instance of App
-func NewApp(cfg Config, version, gitHash string) *App {
+func NewApp(cfg Config, log *logrus.Logger, version, gitHash string) *App {
 	return &App{
 		config:  cfg,
 		version: version,
 		gitHash: gitHash,
+		//
+		log: log,
 	}
 }
 
 // PrepareComponents prepares logger, db and web server
 func (app *App) PrepareComponents() error {
-	// Logger
-	app.prepareLogger()
-	app.log.Info("logger is initialized")
-
 	// DB
 	app.log.Info("prepare database")
 	if err := app.prepareDB(); err != nil {
@@ -58,10 +51,6 @@ func (app *App) PrepareComponents() error {
 	app.log.Info("web server is initialized")
 
 	return nil
-}
-
-func (app *App) prepareLogger() {
-	app.log = logger.New(app.config.Logger)
 }
 
 func (app *App) prepareDB() (err error) {
@@ -99,34 +88,14 @@ func (app *App) prepareWebServer() {
 	app.server.Prepare()
 }
 
-// Run runs web server and waits for a server error or an interrupt signal
+// Run runs web server. This method should be called in a goroutine
 func (app *App) Run() (appErr error) {
 	app.log.WithFields(logrus.Fields{
 		"version":  app.version,
 		"git_hash": app.gitHash,
 	}).Info("start app")
 
-	// Start the application
-	webServerError := make(chan error, 1)
-	go func() {
-		webServerError <- app.server.ListenAndServer()
-	}()
-
-	// Wait for interrupt signal
-	term := make(chan os.Signal, 1)
-	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
-
-	select {
-	case <-term:
-		app.log.Warn("got an interrupt signal")
-	case err := <-webServerError:
-		appErr = err
-		app.log.WithError(err).Warn("server is down")
-	}
-
-	app.Shutdown()
-
-	return appErr
+	return app.server.ListenAndServer()
 }
 
 // Shutdown shutdowns the app components

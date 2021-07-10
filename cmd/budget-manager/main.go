@@ -1,9 +1,13 @@
 package main
 
 import (
-	"log"
+	stdlog "log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 )
 
 //nolint:gochecknoglobals
@@ -33,19 +37,31 @@ var (
 func main() {
 	cfg, err := app.ParseConfig()
 	if err != nil {
-		log.Fatalln(err)
+		stdlog.Fatalln(err)
 	}
+	log := logger.New(cfg.Logger)
 
-	// Create a new application
-	app := app.NewApp(cfg, version, gitHash)
+	app := app.NewApp(cfg, log, version, gitHash)
 
-	// Prepare the application
 	if err := app.PrepareComponents(); err != nil {
-		log.Fatalln(err)
+		log.WithError(err).Fatalln("couldn't prepare components")
 	}
 
-	// Run the application
-	if err := app.Run(); err != nil {
-		log.Fatalln(err)
+	appErrCh := make(chan error, 1)
+	go func() {
+		appErrCh <- app.Run()
+	}()
+
+	term := make(chan os.Signal, 1)
+	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
+
+	// Wait for an interrupt signal or an app error
+	select {
+	case <-term:
+		log.Warn("got an interrupt signal")
+	case err := <-appErrCh:
+		log.WithError(err).Error("app finished with error")
 	}
+
+	app.Shutdown()
 }
