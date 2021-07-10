@@ -44,15 +44,16 @@ test: test-integ
 
 TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
 	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
-	./cmd/... ./internal/... && \
+	./cmd/... ./internal/... ./tests/... && \
 	go tool cover -func=cover.out && rm cover.out
 
-# test-unit runs only unit tests
+# test-unit runs unit tests
+test-unit: TEST_FLAGS=-short
 test-unit:
 	@ echo "Run unit tests..."
 	${TEST_CMD}
 
-# test-integ runs PostgreSQL in test mode and runs all tests
+# test-integ runs both unit and integration tests
 #
 # Disable parallel tests for packages (with '-p 1') to avoid DB errors.
 # Same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
