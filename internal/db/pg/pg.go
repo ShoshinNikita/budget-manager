@@ -251,17 +251,6 @@ func (db *DB) checkCreatedTables() error {
 	return nil
 }
 
-// DropDB drops all tables and relations. USE ONLY IN TESTS!
-func (db *DB) DropDB() error {
-	_, err := db.db.Exec(`
-		DROP SCHEMA public CASCADE;
-		CREATE SCHEMA public;
-		GRANT ALL ON SCHEMA public TO postgres;
-		GRANT ALL ON SCHEMA public TO public;
-	`)
-	return err
-}
-
 // Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
 	// cron
