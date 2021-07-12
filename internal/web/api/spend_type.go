@@ -62,7 +62,7 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 // @Accept json
 // @Param body body models.AddSpendTypeReq true "New Spend Type"
 // @Produce json
-// @Success 200 {object} models.AddSpendTypeResp
+// @Success 201 {object} models.AddSpendTypeResp
 // @Failure 400 {object} models.Response "Invalid request"
 // @Failure 500 {object} models.Response "Internal error"
 //
@@ -93,6 +93,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	log.Info("Spend Type was successfully added")
 
 	// Encode
+	w.WriteHeader(http.StatusCreated)
 	resp := models.AddSpendTypeResp{
 		Response: models.Response{
 			RequestID: reqid.FromContext(ctx).ToString(),

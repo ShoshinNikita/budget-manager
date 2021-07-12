@@ -32,7 +32,7 @@ type MonthlyPaymentsDB interface {
 // @Accept json
 // @Param body body models.AddMonthlyPaymentReq true "New Monthly Payment"
 // @Produce json
-// @Success 200 {object} models.AddMonthlyPaymentResp
+// @Success 201 {object} models.AddMonthlyPaymentResp
 // @Failure 400 {object} models.Response "Invalid request"
 // @Failure 404 {object} models.Response "Month doesn't exist"
 // @Failure 500 {object} models.Response "Internal error"
@@ -75,6 +75,7 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 	log.Info("Monthly Payment was successfully added")
 
 	// Encode
+	w.WriteHeader(http.StatusCreated)
 	resp := models.AddMonthlyPaymentResp{
 		Response: models.Response{
 			RequestID: reqid.FromContext(ctx).ToString(),

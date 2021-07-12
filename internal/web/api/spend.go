@@ -32,7 +32,7 @@ type SpendsDB interface {
 // @Accept json
 // @Param body body models.AddSpendReq true "New Spend"
 // @Produce json
-// @Success 200 {object} models.AddSpendResp
+// @Success 201 {object} models.AddSpendResp
 // @Failure 400 {object} models.Response "Invalid request"
 // @Failure 404 {object} models.Response "Day doesn't exist"
 // @Failure 500 {object} models.Response "Internal error"
@@ -75,6 +75,7 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	log.Info("Spend was successfully added")
 
 	// Encode
+	w.WriteHeader(http.StatusCreated)
 	resp := models.AddSpendResp{
 		Response: models.Response{
 			RequestID: reqid.FromContext(ctx).ToString(),

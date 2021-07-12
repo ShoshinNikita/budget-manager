@@ -32,7 +32,7 @@ type IncomesDB interface {
 // @Accept json
 // @Param body body models.AddIncomeReq true "New Income"
 // @Produce json
-// @Success 200 {object} models.AddIncomeResp
+// @Success 201 {object} models.AddIncomeResp
 // @Failure 400 {object} models.Response "Invalid request"
 // @Failure 404 {object} models.Response "Month doesn't exist"
 // @Failure 500 {object} models.Response "Internal error"
@@ -73,6 +73,7 @@ func (h IncomesHandlers) AddIncome(w http.ResponseWriter, r *http.Request) {
 	log.Info("Income was successfully added")
 
 	// Encode
+	w.WriteHeader(http.StatusCreated)
 	resp := models.AddIncomeResp{
 		Response: models.Response{
 			RequestID: reqid.FromContext(ctx).ToString(),

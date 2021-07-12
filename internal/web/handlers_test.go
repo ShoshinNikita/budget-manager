@@ -68,7 +68,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 				Title:   "some income",
 				Income:  15000,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.AddIncomeResp{
 				Response: models.Response{
 					RequestID: requestID.ToString(),
@@ -85,7 +85,7 @@ func testHandlers_Income_AddIncome(t *testing.T, server *Server) {
 				Notes:   "some notes",
 				Income:  15000,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.AddIncomeResp{
 				Response: models.Response{
 					RequestID: requestID.ToString(),
@@ -397,7 +397,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 				Title:   "Patreon",
 				Cost:    750,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.AddMonthlyPaymentResp{
 				Response: models.Response{
 					RequestID: requestID.ToString(),
@@ -415,7 +415,7 @@ func testHandlers_MonthlyPayment_AddMonthlyPayment(t *testing.T, server *Server)
 				TypeID:  1,
 				Cost:    7000,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.AddMonthlyPaymentResp{
 				Response: models.Response{
 					RequestID: requestID.ToString(),
@@ -727,7 +727,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			req: models.AddSpendReq{
 				DayID: 1, Title: "Break", Cost: 30,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.AddSpendResp{
 				Response: models.Response{RequestID: requestID.ToString(), Success: true},
 				ID:       1,
@@ -738,7 +738,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			req: models.AddSpendReq{
 				DayID: 10, Title: "Bread", Notes: "warm", TypeID: 1, Cost: 50,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.AddSpendResp{
 				Response: models.Response{RequestID: requestID.ToString(), Success: true},
 				ID:       2,
@@ -749,7 +749,7 @@ func testHandlers_Spend_AddSpend(t *testing.T, server *Server) {
 			req: models.AddSpendReq{
 				DayID: 12, Title: "title", Notes: "some notes", Cost: 0,
 			},
-			statusCode: http.StatusOK,
+			statusCode: http.StatusCreated,
 			resp: models.Response{
 				RequestID: requestID.ToString(),
 				Success:   true,
@@ -1035,7 +1035,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				req: models.AddSpendTypeReq{
 					Name: "first type",
 				},
-				statusCode: http.StatusOK,
+				statusCode: http.StatusCreated,
 				resp: models.AddSpendTypeResp{
 					Response: models.Response{
 						RequestID: requestID.ToString(),
@@ -1049,7 +1049,7 @@ func TestHandlers_SpendType(t *testing.T) {
 				req: models.AddSpendTypeReq{
 					Name: "second type",
 				},
-				statusCode: http.StatusOK,
+				statusCode: http.StatusCreated,
 				resp: models.AddSpendTypeResp{
 					Response: models.Response{
 						RequestID: requestID.ToString(),
