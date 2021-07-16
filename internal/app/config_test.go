@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"os"
@@ -11,7 +11,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
-func TestConfig(t *testing.T) {
+func TestParseConfig(t *testing.T) {
 	t.Parallel()
 
 	require := require.New(t)
@@ -58,8 +58,7 @@ func TestConfig(t *testing.T) {
 		},
 	}
 
-	app := NewApp()
-	err := app.ParseConfig()
+	cfg, err := ParseConfig()
 	require.Nil(err)
-	require.Equal(want, app.config)
+	require.Equal(want, cfg)
 }

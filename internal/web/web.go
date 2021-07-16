@@ -134,7 +134,7 @@ func (s *Server) Prepare() {
 }
 
 func (s Server) ListenAndServer() error {
-	s.log.Info("start server")
+	s.log.Debug("start server")
 
 	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		s.log.WithError(err).Error("server error")
