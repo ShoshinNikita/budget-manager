@@ -37,7 +37,7 @@ var (
 func main() {
 	cfg, err := app.ParseConfig()
 	if err != nil {
-		stdlog.Fatalln(err)
+		stdlog.Fatalf("couldn't parse config: %s\n", err)
 	}
 	log := logger.New(cfg.Logger)
 
