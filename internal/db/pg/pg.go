@@ -100,7 +100,7 @@ func (db *DB) Prepare() error {
 
 	db.log.WithFields(logrus.Fields{
 		"old_version": oldVersion, "new_version": newVersion,
-	}).Info("migration process was finished")
+	}).Debug("migration process was finished")
 
 	// Check the tables
 	if err := db.checkCreatedTables(); err != nil {

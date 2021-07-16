@@ -38,14 +38,12 @@ func NewApp(cfg Config, log *logrus.Logger, version, gitHash string) *App {
 
 // PrepareComponents prepares logger, db and web server
 func (app *App) PrepareComponents() error {
-	// DB
-	app.log.Info("prepare database")
+	app.log.Debug("prepare database")
 	if err := app.prepareDB(); err != nil {
-		return errors.Wrap(err, "database init error")
+		return errors.Wrap(err, "couldn't prepare database")
 	}
 
-	// Web Server
-	app.log.Info("prepare web server")
+	app.log.Debug("prepare web server")
 	app.prepareWebServer()
 
 	return nil
@@ -91,17 +89,15 @@ func (app *App) Run() error {
 
 // Shutdown shutdowns the app components
 func (app *App) Shutdown() {
-	// Server
-	app.log.Info("shutdown web server")
-	err := app.server.Shutdown()
-	if err != nil {
+	app.log.Info("shutdown app")
+
+	app.log.Debug("shutdown web server")
+	if err := app.server.Shutdown(); err != nil {
 		app.log.WithError(err).Error("couldn't shutdown the server gracefully")
 	}
 
-	// Database
-	app.log.Info("shutdown the database")
-	err = app.db.Shutdown()
-	if err != nil {
+	app.log.Debug("shutdown the database")
+	if err := app.db.Shutdown(); err != nil {
 		app.log.WithError(err).Error("couldn't shutdown the db gracefully")
 	}
 }
