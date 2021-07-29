@@ -3,6 +3,7 @@ package tests
 import (
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -52,6 +53,9 @@ func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
 		err := <-appErrCh
 		require.NoError(err)
 	})
+
+	// Make sure app is started
+	time.Sleep(100 * time.Millisecond)
 }
 
 // checkTestMode checks the test mode (whether the -short flag is set) and skips the test if needed

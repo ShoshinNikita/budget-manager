@@ -16,6 +16,8 @@ import (
 )
 
 func TestBasicUsage(t *testing.T) {
+	t.Parallel()
+
 	cfg := app.Config{
 		DBType:     "postgres",
 		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
