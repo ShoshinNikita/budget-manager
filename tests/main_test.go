@@ -47,6 +47,25 @@ func TestMain(t *testing.T) {
 			//
 			runTestSetFn: testBasicUsage,
 		},
+		{
+			name: "auth",
+			//
+			config: app.Config{
+				DBType:     "postgres",
+				PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
+				Server: web.Config{
+					UseEmbed: true,
+					SkipAuth: false,
+					Credentials: web.Credentials{
+						"user": "$apr1$cpHMFyv.$BSB0aaF3bOrTC2f3V2VYG/", // user:qwerty
+					},
+					EnableProfiling: false,
+				},
+			},
+			startComponentFns: []StartComponentFn{startPostgreSQL},
+			//
+			runTestSetFn: testAuth,
+		},
 	}
 	for _, tt := range tests {
 		tt := tt
