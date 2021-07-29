@@ -2,13 +2,13 @@ package tests
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
+	"testing"
 
 	"github.com/gorilla/schema"
 	"github.com/stretchr/testify/require"
@@ -45,28 +45,30 @@ type Request struct {
 	Err        string
 }
 
-func (t Request) Send(require *require.Assertions, host string, resp interface{}) {
-	r := t.sendRequest(require, http.DefaultClient, host)
-	defer r.Body.Close()
+func (r Request) Send(t *testing.T, host string, resp interface{}) {
+	rawResp := r.sendRequest(t, http.DefaultClient, host)
+	defer rawResp.Body.Close()
 
-	t.checkResponse(require, r, resp)
+	r.checkResponse(t, rawResp, resp)
 }
 
-func (t Request) sendRequest(require *require.Assertions, client *http.Client, host string) *http.Response {
+func (r Request) sendRequest(t *testing.T, client *http.Client, host string) *http.Response {
+	require := require.New(t)
+
 	u := &url.URL{
 		Scheme: "http",
 		Host:   host,
-		Path:   string(t.Path),
+		Path:   string(r.Path),
 	}
 
 	var body io.Reader
-	if t.Request != nil {
+	if r.Request != nil {
 		//nolint:exhaustive
-		switch t.Method {
+		switch r.Method {
 		case GET, HEAD:
 			query := url.Values{}
 
-			err := newQueryEncoder().Encode(t.Request, query)
+			err := newQueryEncoder().Encode(r.Request, query)
 			require.NoError(err, "couldn't prepare query")
 
 			u.RawQuery = query.Encode()
@@ -74,15 +76,15 @@ func (t Request) sendRequest(require *require.Assertions, client *http.Client, h
 		default:
 			buf := &bytes.Buffer{}
 
-			err := json.NewEncoder(buf).Encode(t.Request)
+			err := json.NewEncoder(buf).Encode(r.Request)
 			require.NoError(err, "couldn't prepare body")
 
 			body = buf
 		}
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), string(t.Method), u.String(), body)
-	require.NoError(err)
+	req, cancel := newRequest(t, r.Method, u.String(), body)
+	defer cancel()
 
 	resp, err := client.Do(req)
 	require.NoError(err, "request failed")
@@ -96,17 +98,19 @@ func newQueryEncoder() *schema.Encoder {
 	return enc
 }
 
-func (t Request) checkResponse(require *require.Assertions, r *http.Response, customResp interface{}) {
-	body, err := ioutil.ReadAll(r.Body)
+func (r Request) checkResponse(t *testing.T, resp *http.Response, customResp interface{}) {
+	require := require.New(t)
+
+	body, err := ioutil.ReadAll(resp.Body)
 	require.NoError(err, "couldn't read body")
 
 	var basicResp models.Response
 
 	err = json.Unmarshal(body, &basicResp)
 	require.NoError(err, "couldn't decode basic response")
-	require.Equal(t.Err, basicResp.Error)
-	require.Equal(t.Err == "", basicResp.Success)
-	require.Equal(t.StatusCode, r.StatusCode)
+	require.Equal(r.Err, basicResp.Error)
+	require.Equal(r.Err == "", basicResp.Success)
+	require.Equal(r.StatusCode, resp.StatusCode)
 
 	if customResp != nil {
 		err = json.Unmarshal(body, customResp)

@@ -1,7 +1,11 @@
 package tests
 
 import (
+	"context"
+	"io"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -36,4 +40,13 @@ func checkMonth(require *require.Assertions, incomes, monthlyPayments, spends fl
 
 	dailyBudget := inc.Add(mp).Div(int64(len(month.Days)))
 	require.Equal(dailyBudget, month.DailyBudget)
+}
+
+func newRequest(t *testing.T, method Method, url string, body io.Reader) (req *http.Request, cancelCtx func()) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+
+	req, err := http.NewRequestWithContext(ctx, string(method), url, body)
+	require.NoError(t, err)
+
+	return req, cancel
 }

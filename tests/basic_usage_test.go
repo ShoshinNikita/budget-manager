@@ -44,7 +44,7 @@ func testBasicUsage_SpendTypes(t *testing.T, host string) {
 		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "entertainment"}, http.StatusCreated, ""},         // 7
 	} {
 		var resp models.AddSpendTypeResp
-		req.Send(require, host, &resp)
+		req.Send(t, host, &resp)
 		require.Equal(uint(i+1), resp.ID)
 	}
 
@@ -54,12 +54,12 @@ func testBasicUsage_SpendTypes(t *testing.T, host string) {
 		{PUT, SpendTypesPath, models.EditSpendTypeReq{ID: 3, ParentID: ptrUint(1)}, http.StatusOK, ""},
 		{DELETE, SpendTypesPath, models.RemoveSpendTypeReq{ID: 5}, http.StatusOK, ""},
 	} {
-		req.Send(require, host, nil)
+		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetSpendTypesResp
-	Request{GET, SpendTypesPath, nil, http.StatusOK, ""}.Send(require, host, &resp)
+	Request{GET, SpendTypesPath, nil, http.StatusOK, ""}.Send(t, host, &resp)
 	require.Equal(
 		[]db.SpendType{
 			{ID: 1, Name: "food"},
@@ -84,7 +84,7 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "cashback", Notes: "123", Income: 100}, http.StatusCreated, ""}, // 4
 	} {
 		var resp models.AddIncomeResp
-		req.Send(require, host, &resp)
+		req.Send(t, host, &resp)
 		require.Equal(uint(i+1), resp.ID)
 	}
 
@@ -94,12 +94,12 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 		{PUT, IncomesPath, models.EditIncomeReq{ID: 4, Income: ptrFloat(50)}, http.StatusOK, ""},
 		{DELETE, IncomesPath, models.RemoveSpendTypeReq{ID: 3}, http.StatusOK, ""},
 	} {
-		req.Send(require, host, nil)
+		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(require, host, &resp)
+	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &resp)
 
 	expectedIncomes := []db.Income{
 		{ID: 1, Title: "salary", Income: money.FromInt(2500)},
@@ -126,7 +126,7 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "temp", Notes: "123", Cost: 100}, http.StatusCreated, ""},      // 4
 	} {
 		var resp models.AddMonthlyPaymentResp
-		req.Send(require, host, &resp)
+		req.Send(t, host, &resp)
 		require.Equal(uint(i+1), resp.ID)
 	}
 
@@ -136,12 +136,12 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 3, TypeID: ptrUint(7), Notes: ptrStr(""), Cost: ptrFloat(30)}, http.StatusOK, ""},
 		{DELETE, MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 4}, http.StatusOK, ""},
 	} {
-		req.Send(require, host, nil)
+		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(require, host, &resp)
+	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &resp)
 
 	expectedMonthlyPayments := []db.MonthlyPayment{
 		{ID: 1, Title: "rent", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(800)},
@@ -183,7 +183,7 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "temp", Cost: 0}, http.StatusCreated, ""},                                    // 13
 	} {
 		var resp models.AddMonthlyPaymentResp
-		req.Send(require, host, &resp)
+		req.Send(t, host, &resp)
 		require.Equal(uint(i+1), resp.ID)
 	}
 
@@ -193,12 +193,12 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 		{PUT, SpendsPath, models.EditSpendReq{ID: 8, Title: ptrStr("eggs"), Notes: ptrStr("10 count"), Cost: ptrFloat(8)}, http.StatusOK, ""},
 		{DELETE, SpendsPath, models.RemoveSpendReq{ID: 13}, http.StatusOK, ""},
 	} {
-		req.Send(require, host, nil)
+		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(require, host, &resp)
+	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &resp)
 
 	expectedDays := []db.Day{
 		{ID: 1, Spends: []db.Spend{
