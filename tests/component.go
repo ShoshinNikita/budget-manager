@@ -5,10 +5,43 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"testing"
 
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
+
+	"github.com/ShoshinNikita/budget-manager/internal/app"
 )
 
+type StartComponentFn func(*testing.T, *app.Config) *Component
+
+// StartPostgreSQL starts a fresh PostgreSQL instance in a docker container.
+// It updates PostgreSQL config with a chosen port
+func StartPostgreSQL(t *testing.T, cfg *app.Config) *Component {
+	require := require.New(t)
+
+	port := getFreePort(t)
+	cfg.PostgresDB.Port = port
+
+	t.Logf("use port %d for PostgreSQL container", port)
+
+	c := &Component{
+		ImageName: "postgres:12-alpine",
+		Ports: [][2]int{
+			{port, 5432},
+		},
+		Env: []string{
+			"POSTGRES_HOST_AUTH_METHOD=trust",
+		},
+	}
+
+	err := c.Run()
+	require.NoError(err)
+
+	return c
+}
+
+// Component is a dependency (for example, db) that will be run with Docker
 type Component struct {
 	ImageName string
 	Ports     [][2]int

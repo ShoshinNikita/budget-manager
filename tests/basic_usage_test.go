@@ -21,22 +21,27 @@ func TestBasicUsage(t *testing.T) {
 		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
 		Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
 	}
-	prepareApp(t, &cfg, startPostgreSQL)
+	prepareApp(t, &cfg, StartPostgreSQL)
 
 	host := fmt.Sprintf("localhost:%d", cfg.Server.Port)
 
-	runSubtest(t, "spend types", func(t *testing.T) {
-		testBasicUsage_SpendTypes(t, host)
-	})
-	runSubtest(t, "incomes", func(t *testing.T) {
-		testBasicUsage_Incomes(t, host)
-	})
-	runSubtest(t, "monthly payments", func(t *testing.T) {
-		testBasicUsage_MonthlyPayments(t, host)
-	})
-	runSubtest(t, "spends", func(t *testing.T) {
-		testBasicUsage_Spends(t, host)
-	})
+	for _, tt := range []struct {
+		name string
+		f    func(t *testing.T, host string)
+	}{
+		{name: "spend types", f: testBasicUsage_SpendTypes},
+		{name: "incomes", f: testBasicUsage_Incomes},
+		{name: "monthly payments", f: testBasicUsage_MonthlyPayments},
+		{name: "spends", f: testBasicUsage_Spends},
+	} {
+		tt := tt
+		ok := t.Run(tt.name, func(t *testing.T) {
+			tt.f(t, host)
+		})
+		if !ok {
+			t.FailNow()
+		}
+	}
 }
 
 func testBasicUsage_SpendTypes(t *testing.T, host string) {
@@ -271,4 +276,20 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	require.Equal(expectedDays, resp.Month.Days)
 
 	checkMonth(require, 3050, -880, -894, resp.Month)
+}
+
+func checkMonth(require *require.Assertions, incomes, monthlyPayments, spends float64, month db.Month) {
+	inc := money.FromFloat(incomes)
+	require.Equal(inc, month.TotalIncome)
+
+	mp := money.FromFloat(monthlyPayments)
+	sp := money.FromFloat(spends)
+	total := mp.Add(sp)
+	require.Equal(total, month.TotalSpend)
+
+	res := inc.Add(total) // spends and monthlyPayments are < 0
+	require.Equal(res, month.Result)
+
+	dailyBudget := inc.Add(mp).Div(int64(len(month.Days)))
+	require.Equal(dailyBudget, month.DailyBudget)
 }

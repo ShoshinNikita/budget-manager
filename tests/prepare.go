@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"net"
 	"os/exec"
 	"testing"
 
@@ -10,8 +9,6 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
 )
-
-type StartComponentFn func(*testing.T, *app.Config) *Component
 
 func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
 	t.Helper()
@@ -34,12 +31,12 @@ func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
 	}
 
 	// Start app on a free port
-	serverPort := getFreePort(require)
+	serverPort := getFreePort(t)
 	t.Logf("use port %d for web server", serverPort)
 
 	cfg.Server.Port = serverPort
 
-	app := app.NewApp(*cfg, newLogger(), "", "")
+	app := app.NewApp(*cfg, logrus.New(), "", "")
 	err := app.PrepareComponents()
 	require.NoError(err)
 
@@ -72,45 +69,4 @@ func checkDocker(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Fatal("docker is required for integration tests")
 	}
-}
-
-// startPostgreSQL starts a fresh PostgreSQL instance in a docker container.
-// It updates PostgreSQL config with a chosen port
-func startPostgreSQL(t *testing.T, cfg *app.Config) *Component {
-	require := require.New(t)
-
-	port := getFreePort(require)
-	cfg.PostgresDB.Port = port
-
-	t.Logf("use port %d for PostgreSQL container", port)
-
-	c := &Component{
-		ImageName: "postgres:12-alpine",
-		Ports: [][2]int{
-			{port, 5432},
-		},
-		Env: []string{
-			"POSTGRES_HOST_AUTH_METHOD=trust",
-		},
-	}
-
-	err := c.Run()
-	require.NoError(err)
-
-	return c
-}
-
-func getFreePort(require *require.Assertions) (port int) {
-	listener, err := net.Listen("tcp", "")
-	require.NoError(err)
-	defer listener.Close()
-
-	tcpAddr, ok := listener.Addr().(*net.TCPAddr)
-	require.True(ok)
-
-	return tcpAddr.Port
-}
-
-func newLogger() *logrus.Logger {
-	return logrus.New()
 }

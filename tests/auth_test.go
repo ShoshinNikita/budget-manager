@@ -25,7 +25,7 @@ func TestAuth(t *testing.T) {
 			EnableProfiling: false,
 		},
 	}
-	prepareApp(t, &cfg, startPostgreSQL)
+	prepareApp(t, &cfg, StartPostgreSQL)
 
 	url := fmt.Sprintf("http://localhost:%d/api/search/spends", cfg.Server.Port)
 

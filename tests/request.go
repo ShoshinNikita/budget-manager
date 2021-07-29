@@ -46,13 +46,13 @@ type Request struct {
 }
 
 func (r Request) Send(t *testing.T, host string, resp interface{}) {
-	rawResp := r.sendRequest(t, http.DefaultClient, host)
+	rawResp := r.send(t, http.DefaultClient, host)
 	defer rawResp.Body.Close()
 
 	r.checkResponse(t, rawResp, resp)
 }
 
-func (r Request) sendRequest(t *testing.T, client *http.Client, host string) *http.Response {
+func (r Request) send(t *testing.T, client *http.Client, host string) *http.Response {
 	require := require.New(t)
 
 	u := &url.URL{
