@@ -45,6 +45,7 @@ test: test-integ
 TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
 	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
 	./cmd/... ./internal/... ./tests/... && \
+	sed -i '/github.com\/ShoshinNikita\/budget-manager\/tests\//d' cover.out && \
 	go tool cover -func=cover.out && rm cover.out
 
 # test-unit runs unit tests
