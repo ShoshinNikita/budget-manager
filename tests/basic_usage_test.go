@@ -9,11 +9,20 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/internal/web"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
-func testBasicUsage(t *testing.T, cfg app.Config) {
+func TestBasicUsage(t *testing.T) {
+	cfg := app.Config{
+		DBType:     "postgres",
+		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
+		Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
+	}
+	prepareApp(t, &cfg, startPostgreSQL)
+
 	host := fmt.Sprintf("localhost:%d", cfg.Server.Port)
 
 	runSubtest(t, "spend types", func(t *testing.T) {

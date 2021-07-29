@@ -8,9 +8,25 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
+	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
-func testAuth(t *testing.T, cfg app.Config) {
+func TestAuth(t *testing.T) {
+	cfg := app.Config{
+		DBType:     "postgres",
+		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
+		Server: web.Config{
+			UseEmbed: true,
+			SkipAuth: false,
+			Credentials: web.Credentials{
+				"user": "$apr1$cpHMFyv.$BSB0aaF3bOrTC2f3V2VYG/", // user:qwerty
+			},
+			EnableProfiling: false,
+		},
+	}
+	prepareApp(t, &cfg, startPostgreSQL)
+
 	url := fmt.Sprintf("http://localhost:%d/api/search/spends", cfg.Server.Port)
 
 	tests := []struct {

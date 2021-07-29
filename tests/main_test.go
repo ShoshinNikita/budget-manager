@@ -9,117 +9,69 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
-	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
-type (
-	StartComponentFn func(*testing.T, *app.Config) *Component
-	RunTestSetFn     func(*testing.T, app.Config)
-)
+type StartComponentFn func(*testing.T, *app.Config) *Component
 
-func TestMain(t *testing.T) {
+func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
+	t.Helper()
+
+	checkTestMode(t)
+	checkDocker(t)
+
+	require := require.New(t)
+
+	// Start components
+	for _, fn := range components {
+		component := fn(t, cfg)
+
+		t.Cleanup(func() {
+			t.Logf("stop component %q", component.ImageName)
+
+			err := component.Stop()
+			require.NoError(err)
+		})
+	}
+
+	// Start app on a free port
+	serverPort := getFreePort(require)
+	t.Logf("use port %d for web server", serverPort)
+
+	cfg.Server.Port = serverPort
+
+	app := app.NewApp(*cfg, newLogger(), "", "")
+	err := app.PrepareComponents()
+	require.NoError(err)
+
+	appErrCh := make(chan error, 1)
+	go func() {
+		appErrCh <- app.Run()
+	}()
+	t.Cleanup(func() {
+		t.Log("stop app")
+
+		app.Shutdown()
+
+		err := <-appErrCh
+		require.NoError(err)
+	})
+}
+
+// checkTestMode checks the test mode (whether the -short flag is set) and skips the test if needed
+func checkTestMode(t *testing.T) {
+	t.Helper()
+
 	if testing.Short() {
 		t.Skip("skip integration test")
 	}
-
-	if !checkDocker() {
-		t.Fatal("docker is required for integration tests")
-	}
-
-	tests := []struct {
-		name string
-		//
-		config            app.Config
-		startComponentFns []StartComponentFn
-		//
-		runTestSetFn RunTestSetFn
-	}{
-		{
-			name: "basic usage",
-			//
-			config: app.Config{
-				DBType:     "postgres",
-				PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
-				Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
-			},
-			startComponentFns: []StartComponentFn{startPostgreSQL},
-			//
-			runTestSetFn: testBasicUsage,
-		},
-		{
-			name: "auth",
-			//
-			config: app.Config{
-				DBType:     "postgres",
-				PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
-				Server: web.Config{
-					UseEmbed: true,
-					SkipAuth: false,
-					Credentials: web.Credentials{
-						"user": "$apr1$cpHMFyv.$BSB0aaF3bOrTC2f3V2VYG/", // user:qwerty
-					},
-					EnableProfiling: false,
-				},
-			},
-			startComponentFns: []StartComponentFn{startPostgreSQL},
-			//
-			runTestSetFn: testAuth,
-		},
-	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			require := require.New(t)
-
-			// Start components
-			cfg := tt.config
-			for i, fn := range tt.startComponentFns {
-				component := fn(t, &cfg)
-
-				i := i
-				t.Cleanup(func() {
-					t.Logf("stop component #%d", i+1)
-
-					err := component.Stop()
-					require.NoError(err)
-				})
-			}
-
-			// Start app on a free port
-			serverPort := getFreePort(require)
-			t.Logf("use port %d for web server", serverPort)
-
-			cfg.Server.Port = serverPort
-
-			app := app.NewApp(cfg, newLogger(), "", "")
-			err := app.PrepareComponents()
-			require.NoError(err)
-
-			appErrCh := make(chan error, 1)
-			go func() {
-				appErrCh <- app.Run()
-			}()
-			t.Cleanup(func() {
-				t.Log("stop app")
-
-				app.Shutdown()
-
-				err := <-appErrCh
-				require.NoError(err)
-			})
-
-			// Run tests
-			tt.runTestSetFn(t, cfg)
-		})
-	}
 }
 
-func checkDocker() bool {
+func checkDocker(t *testing.T) {
+	t.Helper()
+
 	if _, err := exec.LookPath("docker"); err != nil {
-		return false
+		t.Fatal("docker is required for integration tests")
 	}
-	return true
 }
 
 // startPostgreSQL starts a fresh PostgreSQL instance in a docker container.
