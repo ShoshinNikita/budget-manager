@@ -1,11 +1,10 @@
 package tests
 
 import (
-	"time"
+	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/ShoshinNikita/budget-manager/internal/app"
 )
 
-func runTests(*require.Assertions) {
-	time.Sleep(time.Second)
+func testBasicUsage(t *testing.T, cfg app.Config) {
 }

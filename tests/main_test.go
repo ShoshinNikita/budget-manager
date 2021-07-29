@@ -13,6 +13,11 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
+type (
+	StartComponentFn func(*testing.T, *app.Config) *Component
+	RunTestSetFn     func(*testing.T, app.Config)
+)
+
 func TestMain(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skip integration test")
@@ -23,50 +28,24 @@ func TestMain(t *testing.T) {
 	}
 
 	tests := []struct {
-		name           string
-		config         app.Config
-		startComponent func(*testing.T, *require.Assertions, *app.Config) *Component
+		name string
+		//
+		config            app.Config
+		startComponentFns []StartComponentFn
+		//
+		runTestSetFn RunTestSetFn
 	}{
 		{
-			name: "pg",
+			name: "basic usage",
+			//
 			config: app.Config{
-				DBType: "postgres",
-				PostgresDB: pg.Config{
-					Host:     "localhost",
-					Port:     5432,
-					User:     "postgres",
-					Password: "postgres",
-					Database: "postgres",
-				},
-				Server: web.Config{
-					Port:            0, // will be set later
-					UseEmbed:        true,
-					SkipAuth:        true,
-					Credentials:     nil,
-					EnableProfiling: false,
-				},
+				DBType:     "postgres",
+				PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
+				Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
 			},
-			startComponent: func(t *testing.T, require *require.Assertions, cfg *app.Config) *Component {
-				port := getFreePort(require)
-				cfg.PostgresDB.Port = port
-
-				t.Logf("use port %d for PostgreSQL container", port)
-
-				c := &Component{
-					ImageName: "postgres:12-alpine",
-					Ports: [][2]int{
-						{port, 5432},
-					},
-					Env: []string{
-						"POSTGRES_PASSWORD=postgres",
-					},
-				}
-
-				err := c.Run()
-				require.NoError(err)
-
-				return c
-			},
+			startComponentFns: []StartComponentFn{startPostgreSQL},
+			//
+			runTestSetFn: testBasicUsage,
 		},
 	}
 	for _, tt := range tests {
@@ -74,18 +53,21 @@ func TestMain(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 
+			// Start components
 			cfg := tt.config
-			if tt.startComponent != nil {
-				component := tt.startComponent(t, require, &cfg)
+			for i, fn := range tt.startComponentFns {
+				component := fn(t, &cfg)
 
+				i := i
 				t.Cleanup(func() {
-					t.Log("stop component")
+					t.Logf("stop component #%d", i+1)
 
 					err := component.Stop()
 					require.NoError(err)
 				})
 			}
 
+			// Start app on a free port
 			serverPort := getFreePort(require)
 			t.Logf("use port %d for web server", serverPort)
 
@@ -108,7 +90,8 @@ func TestMain(t *testing.T) {
 				require.NoError(err)
 			})
 
-			runTests(require)
+			// Run tests
+			tt.runTestSetFn(t, cfg)
 		})
 	}
 }
@@ -118,6 +101,32 @@ func checkDocker() bool {
 		return false
 	}
 	return true
+}
+
+// startPostgreSQL starts a fresh PostgreSQL instance in a docker container.
+// It updates PostgreSQL config with a chosen port
+func startPostgreSQL(t *testing.T, cfg *app.Config) *Component {
+	require := require.New(t)
+
+	port := getFreePort(require)
+	cfg.PostgresDB.Port = port
+
+	t.Logf("use port %d for PostgreSQL container", port)
+
+	c := &Component{
+		ImageName: "postgres:12-alpine",
+		Ports: [][2]int{
+			{port, 5432},
+		},
+		Env: []string{
+			"POSTGRES_HOST_AUTH_METHOD=trust",
+		},
+	}
+
+	err := c.Run()
+	require.NoError(err)
+
+	return c
 }
 
 func getFreePort(require *require.Assertions) (port int) {
