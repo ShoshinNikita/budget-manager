@@ -35,6 +35,7 @@ func TestBasicUsage(t *testing.T) {
 		{name: "incomes", f: testBasicUsage_Incomes},
 		{name: "monthly payments", f: testBasicUsage_MonthlyPayments},
 		{name: "spends", f: testBasicUsage_Spends},
+		{name: "search spends", f: testBasicUsage_SearchSpends},
 	} {
 		tt := tt
 		ok := t.Run(tt.name, func(t *testing.T) {
@@ -278,6 +279,109 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	require.Equal(expectedDays, resp.Month.Days)
 
 	checkMonth(require, 3050, -880, -894, resp.Month)
+}
+
+func testBasicUsage_SearchSpends(t *testing.T, host string) {
+	// Prepare spends
+	allSpends := []db.Spend{
+		{ID: 1, Day: 1, Title: "bread", Type: &db.SpendType{ID: 1, Name: "food"}, Notes: "fresh", Cost: money.FromInt(2)},
+		{ID: 2, Day: 1, Title: "grocery", Type: &db.SpendType{ID: 1, Name: "food"}, Cost: money.FromInt(10)},
+		{ID: 3, Day: 1, Title: "milk", Type: &db.SpendType{ID: 1, Name: "food"}, Cost: money.FromInt(2)},
+		{ID: 4, Day: 3, Title: "oil", Cost: money.FromInt(7)},
+		{ID: 5, Day: 3, Title: "dinner in KFC", Type: &db.SpendType{ID: 2, Name: "fastfood", ParentID: 1}, Cost: money.FromInt(15)},
+		{ID: 6, Day: 10, Title: "bicycle", Notes: "https://example.com", Cost: money.FromInt(500)},
+		{ID: 7, Day: 11, Title: "meat", Type: &db.SpendType{ID: 1, Name: "food"}, Cost: money.FromInt(20)},
+		{ID: 8, Day: 11, Title: "eggs", Type: &db.SpendType{ID: 1, Name: "food"}, Notes: "10 count", Cost: money.FromInt(8)},
+		{ID: 9, Day: 12, Title: "pizza", Type: &db.SpendType{ID: 3, Name: "pizza", ParentID: 1}, Cost: money.FromInt(100)},
+		{ID: 10, Day: 15, Title: "book American Gods", Notes: "as a gift", Cost: money.FromInt(30)},
+		{ID: 11, Day: 16, Title: "new mirror in the bathroom", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(150)},
+		{ID: 12, Day: 16, Title: "new towels", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(50)},
+	}
+	var month models.GetMonthResp
+	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &month)
+	for i := range allSpends {
+		allSpends[i].Year = month.Month.Year
+		allSpends[i].Month = month.Month.Month
+	}
+
+	getSpends := func(ids ...uint) []db.Spend {
+		res := make([]db.Spend, 0, len(ids))
+		for _, id := range ids {
+			for _, spend := range allSpends {
+				if spend.ID == id {
+					res = append(res, spend)
+					break
+				}
+			}
+		}
+		return res
+	}
+
+	for _, tt := range []struct {
+		name string
+		req  models.SearchSpendsReq
+		ids  []uint
+	}{
+		{
+			name: "all spends",
+			req:  models.SearchSpendsReq{},
+			ids:  []uint{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+		},
+		{
+			name: "filter by title",
+			req:  models.SearchSpendsReq{Title: "il"},
+			ids:  []uint{3, 4},
+		},
+		{
+			name: "filter by type",
+			req:  models.SearchSpendsReq{TypeIDs: []uint{1, 2}},
+			ids:  []uint{1, 2, 3, 5, 7, 8},
+		},
+		{
+			name: "filter by notes",
+			req:  models.SearchSpendsReq{Notes: "gift"},
+			ids:  []uint{10},
+		},
+		{
+			name: "filter by notes (exactly)",
+			req:  models.SearchSpendsReq{Notes: "gift", NotesExactly: true},
+			ids:  []uint{},
+		},
+		{
+			name: "filter by cost (min)",
+			req:  models.SearchSpendsReq{MinCost: 200},
+			ids:  []uint{6},
+		},
+		{
+			name: "filter by cost (max)",
+			req:  models.SearchSpendsReq{MaxCost: 7},
+			ids:  []uint{1, 3, 4},
+		},
+		{
+			name: "filter by cost (min and max)",
+			req:  models.SearchSpendsReq{MinCost: 10, MaxCost: 30},
+			ids:  []uint{2, 5, 7, 10},
+		},
+		{
+			name: "sort by cost desc",
+			req:  models.SearchSpendsReq{MinCost: 7, MaxCost: 15, Sort: "cost", Order: "desc"},
+			ids:  []uint{5, 2, 8, 4},
+		},
+		{
+			name: "sort by title asc",
+			req:  models.SearchSpendsReq{TypeIDs: []uint{1}, Sort: "title"},
+			ids:  []uint{1, 8, 2, 7, 3},
+		},
+	} {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			require := require.New(t)
+
+			var resp models.SearchSpendsResp
+			Request{GET, SearchSpendsPath, tt.req, http.StatusOK, ""}.Send(t, host, &resp)
+			require.Equal(getSpends(tt.ids...), resp.Spends)
+		})
+	}
 }
 
 func checkMonth(require *require.Assertions, incomes, monthlyPayments, spends float64, month db.Month) {
