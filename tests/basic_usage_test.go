@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -316,6 +317,9 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 		}
 		return res
 	}
+	newDate := func(day int) time.Time {
+		return time.Date(month.Month.Year, month.Month.Month, day, 0, 0, 0, 0, time.UTC)
+	}
 
 	for _, tt := range []struct {
 		name string
@@ -361,6 +365,21 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 			name: "filter by cost (min and max)",
 			req:  models.SearchSpendsReq{MinCost: 10, MaxCost: 30},
 			ids:  []uint{2, 5, 7, 10},
+		},
+		{
+			name: "filter by time (after)",
+			req:  models.SearchSpendsReq{After: newDate(15)},
+			ids:  []uint{10, 11, 12},
+		},
+		{
+			name: "filter by time (before)",
+			req:  models.SearchSpendsReq{Before: newDate(2)},
+			ids:  []uint{1, 2, 3},
+		},
+		{
+			name: "filter by time (after and before)",
+			req:  models.SearchSpendsReq{After: newDate(2), Before: newDate(7)},
+			ids:  []uint{4, 5},
 		},
 		{
 			name: "sort by cost desc",

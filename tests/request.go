@@ -10,10 +10,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gorilla/schema"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
+	"github.com/ShoshinNikita/budget-manager/internal/web/utils/schema"
 )
 
 type Path string
@@ -69,7 +69,7 @@ func (r Request) send(t *testing.T, client *http.Client, host string) *http.Resp
 		case GET, HEAD:
 			query := url.Values{}
 
-			err := newQueryEncoder().Encode(r.Request, query)
+			err := schema.Encode(r.Request, query)
 			require.NoError(err, "couldn't prepare query")
 
 			u.RawQuery = query.Encode()
@@ -91,12 +91,6 @@ func (r Request) send(t *testing.T, client *http.Client, host string) *http.Resp
 	require.NoError(err, "request failed")
 
 	return resp
-}
-
-func newQueryEncoder() *schema.Encoder {
-	enc := schema.NewEncoder()
-	enc.SetAliasTag("json")
-	return enc
 }
 
 func (r Request) checkResponse(t *testing.T, resp *http.Response, customResp interface{}) {
