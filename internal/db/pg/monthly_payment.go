@@ -46,6 +46,9 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymen
 	if !db.checkMonth(ctx, args.MonthID) {
 		return 0, common.ErrMonthNotExist
 	}
+	if args.TypeID != 0 && !db.checkSpendType(ctx, args.TypeID) {
+		return 0, common.ErrSpendTypeNotExist
+	}
 
 	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		mp := &MonthlyPayment{
@@ -73,6 +76,9 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymen
 func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaymentArgs) error {
 	if !db.checkMonthlyPayment(ctx, args.ID) {
 		return common.ErrMonthlyPaymentNotExist
+	}
+	if args.TypeID != nil && *args.TypeID != 0 && !db.checkSpendType(ctx, *args.TypeID) {
+		return common.ErrSpendTypeNotExist
 	}
 
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {

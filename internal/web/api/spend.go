@@ -65,6 +65,8 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, db.ErrDayNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+		case errors.Is(err, db.ErrSpendTypeNotExist):
+			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't add Spend", err)
 		}
@@ -127,6 +129,8 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, db.ErrSpendNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+		case errors.Is(err, db.ErrSpendTypeNotExist):
+			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend", err)
 		}

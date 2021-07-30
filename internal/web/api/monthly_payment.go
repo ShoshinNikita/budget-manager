@@ -65,6 +65,8 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 		switch {
 		case errors.Is(err, db.ErrMonthNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+		case errors.Is(err, db.ErrSpendTypeNotExist):
+			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't add Monthly Payment", err)
 		}
@@ -127,6 +129,8 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 		switch {
 		case errors.Is(err, db.ErrMonthlyPaymentNotExist):
 			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+		case errors.Is(err, db.ErrSpendTypeNotExist):
+			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 		default:
 			utils.ProcessInternalError(ctx, log, w, "couldn't edit Monthly Payment", err)
 		}
