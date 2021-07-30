@@ -127,9 +127,16 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	log = log.WithFields(logrus.Fields{"id": req.ID, "name": req.Name})
 
 	if req.ParentID != nil && *req.ParentID != 0 {
-		hasCycle, err := h.checkSpendTypeForCycle(ctx, req.ID, *req.ParentID)
+		allSpendTypes, err := h.db.GetSpendTypes(ctx)
 		if err != nil {
-			utils.ProcessInternalError(ctx, log, w, "couldn't check Spend Type for a cycle", err)
+			utils.ProcessInternalError(ctx, log, w, "couldn't get all Spend Types to check for a cycle", err)
+			return
+		}
+
+		hasCycle, err := checkSpendTypeForCycle(allSpendTypes, req.ID, *req.ParentID)
+		if err != nil {
+			err = errors.Wrap(err, "check for a cycle failed")
+			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if hasCycle {
@@ -164,15 +171,6 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 		Success:   true,
 	}
 	utils.EncodeResponse(w, r, log, resp)
-}
-
-func (h SpendTypesHandlers) checkSpendTypeForCycle(ctx context.Context, originalID, newParentID uint) (bool, error) {
-	spendTypes, err := h.db.GetSpendTypes(ctx)
-	if err != nil {
-		return false, errors.Wrap(err, "couldn't get Spend Types")
-	}
-
-	return checkSpendTypeForCycle(spendTypes, originalID, newParentID)
 }
 
 func checkSpendTypeForCycle(spendTypesSlice []db.SpendType, originalID, newParentID uint) (hasCycle bool, _ error) {
