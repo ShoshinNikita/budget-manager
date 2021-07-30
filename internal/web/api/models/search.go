@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
@@ -35,6 +36,19 @@ type SearchSpendsReq struct {
 	Sort string `json:"sort" enums:"title,cost,date" default:"date"`
 	// Order specify sort order
 	Order string `json:"order" enums:"asc,desc" default:"asc"`
+}
+
+func (req *SearchSpendsReq) SanitizeAndCheck() error {
+	sanitizeString(&req.Title)
+	sanitizeString(&req.Notes)
+	sanitizeString(&req.Sort)
+	sanitizeString(&req.Order)
+
+	if req.MinCost != 0 && req.MaxCost != 0 && req.MinCost > req.MaxCost {
+		return fmt.Errorf("min_cost can't be greater than max_cost")
+	}
+
+	return nil
 }
 
 type SearchSpendsResp struct {

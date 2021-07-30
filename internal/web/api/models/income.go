@@ -9,7 +9,10 @@ type AddIncomeReq struct {
 	Income  float64 `json:"income" validate:"required" example:"10000"`
 }
 
-func (req AddIncomeReq) Check() error {
+func (req *AddIncomeReq) SanitizeAndCheck() error {
+	sanitizeString(&req.Title)
+	sanitizeString(&req.Notes)
+
 	if req.MonthID == 0 {
 		return emptyOrZeroFieldError("month_id")
 	}
@@ -38,7 +41,10 @@ type EditIncomeReq struct {
 	Income *float64 `json:"income"`
 }
 
-func (req EditIncomeReq) Check() error {
+func (req *EditIncomeReq) SanitizeAndCheck() error {
+	sanitizeString(req.Title)
+	sanitizeString(req.Notes)
+
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}
@@ -58,7 +64,7 @@ type RemoveIncomeReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
-func (req RemoveIncomeReq) Check() error {
+func (req *RemoveIncomeReq) SanitizeAndCheck() error {
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}

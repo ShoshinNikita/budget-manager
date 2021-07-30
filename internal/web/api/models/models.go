@@ -8,11 +8,6 @@ import (
 // Request is a base request model that must be nested into all requests
 type Request struct{}
 
-// Check is a default method to implement 'web.RequestChecker' interface
-func (Request) Check() error {
-	return nil
-}
-
 // Response is a base response model that must be nested into all responses
 type Response struct {
 	RequestID string `json:"request_id"`
@@ -31,7 +26,7 @@ type GetMonthByIDReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
-func (req GetMonthByIDReq) Check() error {
+func (req *GetMonthByIDReq) SanitizeAndCheck() error {
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}
@@ -45,7 +40,7 @@ type GetMonthByDateReq struct {
 	Month int `json:"month" validate:"required" example:"7"`
 }
 
-func (req GetMonthByDateReq) Check() error {
+func (req *GetMonthByDateReq) SanitizeAndCheck() error {
 	if req.Year == 0 {
 		return emptyOrZeroFieldError("year")
 	}
@@ -71,7 +66,7 @@ type GetDayByIDReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
-func (req GetDayByIDReq) Check() error {
+func (req *GetDayByIDReq) SanitizeAndCheck() error {
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}
@@ -86,7 +81,7 @@ type GetDayByDateReq struct {
 	Day   int `json:"day" validate:"required" example:"13"`
 }
 
-func (req GetDayByDateReq) Check() error {
+func (req *GetDayByDateReq) SanitizeAndCheck() error {
 	if req.Year == 0 {
 		return emptyOrZeroFieldError("year")
 	}

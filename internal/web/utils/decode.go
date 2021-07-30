@@ -19,12 +19,12 @@ func init() {
 	queryDecoder.SetAliasTag("json")
 }
 
-type RequestChecker interface {
-	Check() error
+type Request interface {
+	SanitizeAndCheck() error
 }
 
 // DecodeRequest decodes request and checks its validity. It process error if needed
-func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogger, req RequestChecker) (ok bool) {
+func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogger, req Request) (ok bool) {
 	ctx := r.Context()
 
 	if err := r.ParseForm(); err != nil {
@@ -44,7 +44,7 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogge
 		return false
 	}
 
-	if err := req.Check(); err != nil {
+	if err := req.SanitizeAndCheck(); err != nil {
 		ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
 		return false
 	}

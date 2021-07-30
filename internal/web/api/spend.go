@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 
@@ -56,9 +55,9 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("add Spend")
 	args := db.AddSpendArgs{
 		DayID:  req.DayID,
-		Title:  strings.TrimSpace(req.Title),
+		Title:  req.Title,
 		TypeID: req.TypeID,
-		Notes:  strings.TrimSpace(req.Notes),
+		Notes:  req.Notes,
 		Cost:   money.FromFloat(req.Cost),
 	}
 	id, err := h.db.AddSpend(ctx, args)
@@ -115,8 +114,8 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("edit Spend")
 	args := db.EditSpendArgs{
 		ID:     req.ID,
-		Title:  trimSpacePointer(req.Title),
-		Notes:  trimSpacePointer(req.Notes),
+		Title:  req.Title,
+		Notes:  req.Notes,
 		TypeID: req.TypeID,
 	}
 	if req.Cost != nil {

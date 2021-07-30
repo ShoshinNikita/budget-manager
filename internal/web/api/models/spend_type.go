@@ -17,7 +17,9 @@ type AddSpendTypeReq struct {
 	ParentID uint   `json:"parent_id"`
 }
 
-func (req AddSpendTypeReq) Check() error {
+func (req *AddSpendTypeReq) SanitizeAndCheck() error {
+	sanitizeString(&req.Name)
+
 	if req.Name == "" {
 		return emptyFieldError("name")
 	}
@@ -38,7 +40,9 @@ type EditSpendTypeReq struct {
 	ParentID *uint   `json:"parent_id" example:"1"`
 }
 
-func (req EditSpendTypeReq) Check() error {
+func (req *EditSpendTypeReq) SanitizeAndCheck() error {
+	sanitizeString(req.Name)
+
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}
@@ -54,7 +58,7 @@ type RemoveSpendTypeReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
-func (req RemoveSpendTypeReq) Check() error {
+func (req *RemoveSpendTypeReq) SanitizeAndCheck() error {
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}

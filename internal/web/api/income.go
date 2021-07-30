@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 
@@ -55,8 +54,8 @@ func (h IncomesHandlers) AddIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("add Income")
 	args := db.AddIncomeArgs{
 		MonthID: req.MonthID,
-		Title:   strings.TrimSpace(req.Title),
-		Notes:   strings.TrimSpace(req.Notes),
+		Title:   req.Title,
+		Notes:   req.Notes,
 		Income:  money.FromFloat(req.Income),
 	}
 	id, err := h.db.AddIncome(ctx, args)
@@ -113,8 +112,8 @@ func (h IncomesHandlers) EditIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("edit Income")
 	args := db.EditIncomeArgs{
 		ID:    req.ID,
-		Title: trimSpacePointer(req.Title),
-		Notes: trimSpacePointer(req.Notes),
+		Title: req.Title,
+		Notes: req.Notes,
 	}
 	if req.Income != nil {
 		income := money.FromFloat(*req.Income)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 
@@ -56,9 +55,9 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 	log.Debug("add Monthly Payment")
 	args := db.AddMonthlyPaymentArgs{
 		MonthID: req.MonthID,
-		Title:   strings.TrimSpace(req.Title),
+		Title:   req.Title,
 		TypeID:  req.TypeID,
-		Notes:   strings.TrimSpace(req.Notes),
+		Notes:   req.Notes,
 		Cost:    money.FromFloat(req.Cost),
 	}
 	id, err := h.db.AddMonthlyPayment(ctx, args)
@@ -115,8 +114,8 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 	log.Debug("edit Monthly Payment")
 	args := db.EditMonthlyPaymentArgs{
 		ID:     req.ID,
-		Title:  trimSpacePointer(req.Title),
-		Notes:  trimSpacePointer(req.Notes),
+		Title:  req.Title,
+		Notes:  req.Notes,
 		TypeID: req.TypeID,
 	}
 	if req.Cost != nil {

@@ -11,7 +11,10 @@ type AddMonthlyPaymentReq struct {
 	Cost   float64 `json:"cost" validate:"required" example:"1500"`
 }
 
-func (req AddMonthlyPaymentReq) Check() error {
+func (req *AddMonthlyPaymentReq) SanitizeAndCheck() error {
+	sanitizeString(&req.Title)
+	sanitizeString(&req.Notes)
+
 	if req.MonthID == 0 {
 		return emptyOrZeroFieldError("month_id")
 	}
@@ -42,7 +45,10 @@ type EditMonthlyPaymentReq struct {
 	Cost   *float64 `json:"cost"`
 }
 
-func (req EditMonthlyPaymentReq) Check() error {
+func (req *EditMonthlyPaymentReq) SanitizeAndCheck() error {
+	sanitizeString(req.Title)
+	sanitizeString(req.Notes)
+
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}
@@ -63,7 +69,7 @@ type RemoveMonthlyPaymentReq struct {
 	ID uint `json:"id" validate:"required" example:"1"`
 }
 
-func (req RemoveMonthlyPaymentReq) Check() error {
+func (req *RemoveMonthlyPaymentReq) SanitizeAndCheck() error {
 	if req.ID == 0 {
 		return emptyOrZeroFieldError("id")
 	}

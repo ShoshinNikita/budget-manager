@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -81,7 +80,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	// Process
 	log.Debug("add Spend Type")
 	args := db.AddSpendTypeArgs{
-		Name:     strings.TrimSpace(req.Name),
+		Name:     req.Name,
 		ParentID: req.ParentID,
 	}
 	id, err := h.db.AddSpendType(ctx, args)
@@ -144,7 +143,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 
 	args := db.EditSpendTypeArgs{
 		ID:       req.ID,
-		Name:     trimSpacePointer(req.Name),
+		Name:     req.Name,
 		ParentID: req.ParentID,
 	}
 	err := h.db.EditSpendType(ctx, args)

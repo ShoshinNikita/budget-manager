@@ -53,8 +53,8 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	// Process
 	log.Debug("search for Spends")
 	args := db.SearchSpendsArgs{
-		Title:        strings.ToLower(strings.TrimSpace(req.Title)),
-		Notes:        strings.ToLower(strings.TrimSpace(req.Notes)),
+		Title:        strings.ToLower(req.Title),
+		Notes:        strings.ToLower(req.Notes),
 		TitleExactly: req.TitleExactly,
 		NotesExactly: req.NotesExactly,
 		After:        req.After,

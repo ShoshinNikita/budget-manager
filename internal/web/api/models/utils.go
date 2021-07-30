@@ -1,6 +1,18 @@
 package models
 
-import "github.com/pkg/errors"
+import (
+	"strings"
+
+	"github.com/pkg/errors"
+)
+
+func sanitizeString(s *string) {
+	if s == nil {
+		return
+	}
+
+	*s = strings.TrimSpace(*s)
+}
 
 // emptyFieldError must be used when field of type string is empty
 func emptyFieldError(fieldName string) error {
