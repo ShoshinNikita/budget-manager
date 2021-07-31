@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )

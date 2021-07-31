@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/templates"
 )
 

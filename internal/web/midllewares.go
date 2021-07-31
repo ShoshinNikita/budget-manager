@@ -9,7 +9,7 @@ import (
 	auth "github.com/abbot/go-http-auth"
 	"github.com/sirupsen/logrus"
 
-	reqid "github.com/ShoshinNikita/budget-manager/internal/pkg/request_id"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 )
 
 // basicAuthMiddleware checks whether user is authorized
