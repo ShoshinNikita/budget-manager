@@ -52,6 +52,7 @@ issues:
 
     - linters:
         - funlen
+        - lll
       path: _test\.go
 
   # Display all issues

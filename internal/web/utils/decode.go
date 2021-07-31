@@ -6,18 +6,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/gorilla/schema"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ShoshinNikita/budget-manager/internal/web/utils/schema"
 )
-
-//nolint:gochecknoglobals
-var queryDecoder = schema.NewDecoder()
-
-//nolint:gochecknoinits
-func init() {
-	queryDecoder.IgnoreUnknownKeys(true)
-	queryDecoder.SetAliasTag("json")
-}
 
 type Request interface {
 	SanitizeAndCheck() error
@@ -59,5 +51,5 @@ func decodeJSONRequest(body io.Reader, req interface{}) error {
 }
 
 func decodeQueryRequest(form url.Values, req interface{}) error {
-	return queryDecoder.Decode(req, form)
+	return schema.Decode(req, form)
 }

@@ -44,25 +44,25 @@ test: test-integ
 
 TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
 	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
-	./cmd/... ./internal/... && \
+	./cmd/... ./internal/... ./tests/... && \
+	sed -i '/github.com\/ShoshinNikita\/budget-manager\/tests\//d' cover.out && \
 	go tool cover -func=cover.out && rm cover.out
 
-# test-unit runs only unit tests
+# test-unit runs unit tests
+test-unit: TEST_FLAGS=-short
 test-unit:
 	@ echo "Run unit tests..."
 	${TEST_CMD}
 
-# test-integ runs PostgreSQL in test mode and runs all tests
+# test-integ runs both unit and integration tests
 #
 # Disable parallel tests for packages (with '-p 1') to avoid DB errors.
 # Same situation: https://medium.com/@xcoulon/how-to-avoid-parallel-execution-of-tests-in-golang-763d32d88eec)
 #
-test-integ: TEST_FLAGS = -tags=integration -p=1 -count=1
+test-integ: TEST_FLAGS=-p=1
 test-integ:
 	@ echo "Run integration tests..."
-	@ $(MAKE) --no-print-directory run-pg-test
 	${TEST_CMD}
-	@ $(MAKE) --no-print-directory stop-pg-test
 
 #
 # PostgreSQL
@@ -85,20 +85,6 @@ run-pg: stop-pg
 stop-pg:
 	@ echo "Stop develop PostgreSQL instance..."
 	@ docker stop ${PG_CONAINER_NAME} > /dev/null 2>&1 || true
-
-# run-pg-test runs test PostgreSQL instance
-run-pg-test: stop-pg stop-pg-test
-	@ echo "Run test PostgreSQL instance..."
-	@ docker run --rm -d \
-		--name ${PG_CONAINER_NAME}-test \
-		-p "5432:5432" \
-		${PG_ENV} \
-		postgres:12-alpine -c "log_statement=all"
-
-# stop-pg-test stops test PostgreSQL instance
-stop-pg-test:
-	@ echo "Stop test PostgreSQL instance..."
-	@ docker stop ${PG_CONAINER_NAME}-test > /dev/null 2>&1 || true
 
 #
 # Configuration
