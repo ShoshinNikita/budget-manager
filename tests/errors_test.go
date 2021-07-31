@@ -102,17 +102,14 @@ func testErrors_EditRequests(t *testing.T, host string) {
 	}
 
 	// Add entities to edit
-	for _, tt := range []struct {
-		path Path
-		req  interface{}
-	}{
-		{IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "title", Income: 100}},
-		{MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "title", Cost: 100}},
-		{SpendsPath, models.AddSpendReq{DayID: 1, Title: "title", Cost: 100}},
-		{SpendTypesPath, models.AddSpendTypeReq{Name: "#1"}},
-		{SpendTypesPath, models.AddSpendTypeReq{Name: "#2", ParentID: 1}},
+	for _, req := range []RequestCreated{
+		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "title", Income: 100}},
+		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "title", Cost: 100}},
+		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "title", Cost: 100}},
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "#1"}},
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "#2", ParentID: 1}},
 	} {
-		Request{POST, tt.path, tt.req, http.StatusCreated, ""}.Send(t, host, nil)
+		req.Send(t, host, nil)
 	}
 
 	for _, tt := range []struct {

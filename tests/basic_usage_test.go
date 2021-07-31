@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 
@@ -52,14 +51,14 @@ func testBasicUsage_SpendTypes(t *testing.T, host string) {
 	require := require.New(t)
 
 	// Add
-	for i, req := range []Request{
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "f00d"}, http.StatusCreated, ""},                  // 1
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "fastfood", ParentID: 1}, http.StatusCreated, ""}, // 2
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "pizza", ParentID: 2}, http.StatusCreated, ""},    // 3
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "travel"}, http.StatusCreated, ""},                // 4
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "avia", ParentID: 4}, http.StatusCreated, ""},     // 5
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "house"}, http.StatusCreated, ""},                 // 6
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "entertainment"}, http.StatusCreated, ""},         // 7
+	for i, req := range []RequestCreated{
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "f00d"}},                  // 1
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "fastfood", ParentID: 1}}, // 2
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "pizza", ParentID: 2}},    // 3
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "travel"}},                // 4
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "avia", ParentID: 4}},     // 5
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "house"}},                 // 6
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "entertainment"}},         // 7
 	} {
 		var resp models.AddSpendTypeResp
 		req.Send(t, host, &resp)
@@ -67,17 +66,17 @@ func testBasicUsage_SpendTypes(t *testing.T, host string) {
 	}
 
 	// Manage
-	for _, req := range []Request{
-		{PUT, SpendTypesPath, models.EditSpendTypeReq{ID: 1, Name: ptrStr("food")}, http.StatusOK, ""},
-		{PUT, SpendTypesPath, models.EditSpendTypeReq{ID: 3, ParentID: ptrUint(1)}, http.StatusOK, ""},
-		{DELETE, SpendTypesPath, models.RemoveSpendTypeReq{ID: 5}, http.StatusOK, ""},
+	for _, req := range []RequestOK{
+		{PUT, SpendTypesPath, models.EditSpendTypeReq{ID: 1, Name: ptrStr("food")}},
+		{PUT, SpendTypesPath, models.EditSpendTypeReq{ID: 3, ParentID: ptrUint(1)}},
+		{DELETE, SpendTypesPath, models.RemoveSpendTypeReq{ID: 5}},
 	} {
 		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetSpendTypesResp
-	Request{GET, SpendTypesPath, nil, http.StatusOK, ""}.Send(t, host, &resp)
+	RequestOK{GET, SpendTypesPath, nil}.Send(t, host, &resp)
 	require.Equal(
 		[]db.SpendType{
 			{ID: 1, Name: "food"},
@@ -95,11 +94,11 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 	require := require.New(t)
 
 	// Add
-	for i, req := range []Request{
-		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "salary", Income: 2500}, http.StatusCreated, ""},                // 1
-		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "gifts", Income: 500}, http.StatusCreated, ""},                  // 2
-		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "temp", Income: 100}, http.StatusCreated, ""},                   // 3
-		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "cashback", Notes: "123", Income: 100}, http.StatusCreated, ""}, // 4
+	for i, req := range []RequestCreated{
+		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "salary", Income: 2500}},                // 1
+		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "gifts", Income: 500}},                  // 2
+		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "temp", Income: 100}},                   // 3
+		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "cashback", Notes: "123", Income: 100}}, // 4
 	} {
 		var resp models.AddIncomeResp
 		req.Send(t, host, &resp)
@@ -107,17 +106,17 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 	}
 
 	// Manage
-	for _, req := range []Request{
-		{PUT, IncomesPath, models.EditIncomeReq{ID: 2, Title: ptrStr("gift"), Notes: ptrStr("from friends")}, http.StatusOK, ""},
-		{PUT, IncomesPath, models.EditIncomeReq{ID: 4, Income: ptrFloat(50)}, http.StatusOK, ""},
-		{DELETE, IncomesPath, models.RemoveSpendTypeReq{ID: 3}, http.StatusOK, ""},
+	for _, req := range []RequestOK{
+		{PUT, IncomesPath, models.EditIncomeReq{ID: 2, Title: ptrStr("gift"), Notes: ptrStr("from friends")}},
+		{PUT, IncomesPath, models.EditIncomeReq{ID: 4, Income: ptrFloat(50)}},
+		{DELETE, IncomesPath, models.RemoveSpendTypeReq{ID: 3}},
 	} {
 		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &resp)
+	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &resp)
 
 	expectedIncomes := []db.Income{
 		{ID: 1, Title: "salary", Income: money.FromInt(2500)},
@@ -137,11 +136,11 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 	require := require.New(t)
 
 	// Add
-	for i, req := range []Request{
-		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "rent", TypeID: 6, Cost: 800}, http.StatusCreated, ""},         // 1
-		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "patre0n", Cost: 50}, http.StatusCreated, ""},                  // 2
-		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "netflix", Notes: "remove", Cost: 20}, http.StatusCreated, ""}, // 3
-		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "temp", Notes: "123", Cost: 100}, http.StatusCreated, ""},      // 4
+	for i, req := range []RequestCreated{
+		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "rent", TypeID: 6, Cost: 800}},         // 1
+		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "patre0n", Cost: 50}},                  // 2
+		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "netflix", Notes: "remove", Cost: 20}}, // 3
+		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "temp", Notes: "123", Cost: 100}},      // 4
 	} {
 		var resp models.AddMonthlyPaymentResp
 		req.Send(t, host, &resp)
@@ -149,17 +148,17 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 	}
 
 	// Manage
-	for _, req := range []Request{
-		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 2, Title: ptrStr("patreon"), Notes: ptrStr("with VAT")}, http.StatusOK, ""},
-		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 3, TypeID: ptrUint(7), Notes: ptrStr(""), Cost: ptrFloat(30)}, http.StatusOK, ""},
-		{DELETE, MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 4}, http.StatusOK, ""},
+	for _, req := range []RequestOK{
+		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 2, Title: ptrStr("patreon"), Notes: ptrStr("with VAT")}},
+		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 3, TypeID: ptrUint(7), Notes: ptrStr(""), Cost: ptrFloat(30)}},
+		{DELETE, MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 4}},
 	} {
 		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &resp)
+	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &resp)
 
 	expectedMonthlyPayments := []db.MonthlyPayment{
 		{ID: 1, Title: "rent", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(800)},
@@ -179,26 +178,26 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	require := require.New(t)
 
 	// Add
-	for i, req := range []Request{
-		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "bread", Notes: "fresh", TypeID: 1, Cost: 2}, http.StatusCreated, ""}, // 1
-		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "grocery", TypeID: 1, Cost: 10}, http.StatusCreated, ""},              // 2
-		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "milk", TypeID: 1, Cost: 2}, http.StatusCreated, ""},                  // 3
+	for i, req := range []RequestCreated{
+		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "bread", Notes: "fresh", TypeID: 1, Cost: 2}}, // 1
+		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "grocery", TypeID: 1, Cost: 10}},              // 2
+		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "milk", TypeID: 1, Cost: 2}},                  // 3
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 3, Title: "oil", TypeID: 1, Cost: 7}, http.StatusCreated, ""},            // 4
-		{POST, SpendsPath, models.AddSpendReq{DayID: 3, Title: "dinner in KFC", TypeID: 2, Cost: 15}, http.StatusCreated, ""}, // 5
+		{POST, SpendsPath, models.AddSpendReq{DayID: 3, Title: "oil", TypeID: 1, Cost: 7}},            // 4
+		{POST, SpendsPath, models.AddSpendReq{DayID: 3, Title: "dinner in KFC", TypeID: 2, Cost: 15}}, // 5
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 10, Title: "bicycle", Notes: "https://example.com", Cost: 500}, http.StatusCreated, ""}, // 6
+		{POST, SpendsPath, models.AddSpendReq{DayID: 10, Title: "bicycle", Notes: "https://example.com", Cost: 500}}, // 6
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "meat", TypeID: 1, Cost: 20}, http.StatusCreated, ""}, // 7
-		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "egg", TypeID: 1, Cost: 7}, http.StatusCreated, ""},   // 8
+		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "meat", TypeID: 1, Cost: 20}}, // 7
+		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "egg", TypeID: 1, Cost: 7}},   // 8
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 12, Title: "pizza", TypeID: 3, Cost: 100}, http.StatusCreated, ""}, // 9
+		{POST, SpendsPath, models.AddSpendReq{DayID: 12, Title: "pizza", TypeID: 3, Cost: 100}}, // 9
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 15, Title: "book American Gods", Notes: "as a gift", Cost: 30}, http.StatusCreated, ""}, // 10
+		{POST, SpendsPath, models.AddSpendReq{DayID: 15, Title: "book American Gods", Notes: "as a gift", Cost: 30}}, // 10
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "new mirror in the bathroom", TypeID: 6, Cost: 150}, http.StatusCreated, ""}, // 11
-		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "new towels", TypeID: 6, Cost: 50}, http.StatusCreated, ""},                  // 12
-		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "temp", Cost: 0}, http.StatusCreated, ""},                                    // 13
+		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "new mirror in the bathroom", TypeID: 6, Cost: 150}}, // 11
+		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "new towels", TypeID: 6, Cost: 50}},                  // 12
+		{POST, SpendsPath, models.AddSpendReq{DayID: 16, Title: "temp", Cost: 0}},                                    // 13
 	} {
 		var resp models.AddMonthlyPaymentResp
 		req.Send(t, host, &resp)
@@ -206,17 +205,17 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	}
 
 	// Manage
-	for _, req := range []Request{
-		{PUT, SpendsPath, models.EditSpendReq{ID: 4, TypeID: ptrUint(0)}, http.StatusOK, ""},
-		{PUT, SpendsPath, models.EditSpendReq{ID: 8, Title: ptrStr("eggs"), Notes: ptrStr("10 count"), Cost: ptrFloat(8)}, http.StatusOK, ""},
-		{DELETE, SpendsPath, models.RemoveSpendReq{ID: 13}, http.StatusOK, ""},
+	for _, req := range []RequestOK{
+		{PUT, SpendsPath, models.EditSpendReq{ID: 4, TypeID: ptrUint(0)}},
+		{PUT, SpendsPath, models.EditSpendReq{ID: 8, Title: ptrStr("eggs"), Notes: ptrStr("10 count"), Cost: ptrFloat(8)}},
+		{DELETE, SpendsPath, models.RemoveSpendReq{ID: 13}},
 	} {
 		req.Send(t, host, nil)
 	}
 
 	// Check
 	var resp models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &resp)
+	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &resp)
 
 	expectedDays := []db.Day{
 		{ID: 1, Spends: []db.Spend{
@@ -299,7 +298,7 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 		{ID: 12, Day: 16, Title: "new towels", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(50)},
 	}
 	var month models.GetMonthResp
-	Request{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}, http.StatusOK, ""}.Send(t, host, &month)
+	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &month)
 	for i := range allSpends {
 		allSpends[i].Year = month.Month.Year
 		allSpends[i].Month = month.Month.Month
@@ -397,7 +396,7 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 			require := require.New(t)
 
 			var resp models.SearchSpendsResp
-			Request{GET, SearchSpendsPath, tt.req, http.StatusOK, ""}.Send(t, host, &resp)
+			RequestOK{GET, SearchSpendsPath, tt.req}.Send(t, host, &resp)
 			require.Equal(getSpends(tt.ids...), resp.Spends)
 		})
 	}

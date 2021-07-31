@@ -38,6 +38,26 @@ const (
 	DELETE Method = http.MethodDelete
 )
 
+type RequestOK struct {
+	Method  Method
+	Path    Path
+	Request interface{}
+}
+
+func (r RequestOK) Send(t *testing.T, host string, resp interface{}) {
+	Request{r.Method, r.Path, r.Request, http.StatusOK, ""}.Send(t, host, resp)
+}
+
+type RequestCreated struct {
+	Method  Method
+	Path    Path
+	Request interface{}
+}
+
+func (r RequestCreated) Send(t *testing.T, host string, resp interface{}) {
+	Request{r.Method, r.Path, r.Request, http.StatusCreated, ""}.Send(t, host, resp)
+}
+
 type Request struct {
 	Method  Method
 	Path    Path
