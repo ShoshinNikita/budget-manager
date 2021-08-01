@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -200,11 +201,21 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 	}
 
 	// Update Days
+
+	values := strings.Repeat("(?, ?),", len(m.Days))
+	values = values[:len(values)-1]
+
+	params := make([]interface{}, 0, len(m.Days)*2)
 	for _, day := range m.Days {
-		query := tx.ModelContext(ctx, (*Day)(nil)).Where("id = ?", day.ID).Set("saldo = ?", day.Saldo)
-		if _, err := query.Update(); err != nil {
-			return errors.Wrap(err, "couldn't update days")
-		}
+		params = append(params, day.ID, day.Saldo)
+	}
+
+	_, err = tx.Exec(
+		"UPDATE days SET saldo = v.saldo FROM (values ?) AS v(id, saldo) WHERE days.id = v.id",
+		pg.SafeQuery(values, params...),
+	)
+	if err != nil {
+		return errors.Wrap(err, "couldn't update days")
 	}
 
 	return nil
