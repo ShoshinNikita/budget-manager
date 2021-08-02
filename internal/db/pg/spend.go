@@ -44,14 +44,14 @@ func (s Spend) ToCommon(year int, month time.Month, day int) common.Spend {
 
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, err error) {
-	if !db.checkDay(ctx, args.DayID) {
-		return 0, common.ErrDayNotExist
-	}
-	if args.TypeID != 0 && !db.checkSpendType(ctx, args.TypeID) {
-		return 0, common.ErrSpendTypeNotExist
-	}
-
 	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
+		if !checkDay(ctx, tx, args.DayID) {
+			return common.ErrDayNotExist
+		}
+		if args.TypeID != 0 && !checkSpendType(ctx, tx, args.TypeID) {
+			return common.ErrSpendTypeNotExist
+		}
+
 		spend := &Spend{
 			DayID:  args.DayID,
 			Title:  args.Title,
@@ -80,14 +80,14 @@ func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, e
 
 // EditSpend edits existeng Spend
 func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
-	if !db.checkSpend(ctx, args.ID) {
-		return common.ErrSpendNotExist
-	}
-	if args.TypeID != nil && *args.TypeID != 0 && !db.checkSpendType(ctx, *args.TypeID) {
-		return common.ErrSpendTypeNotExist
-	}
-
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkSpend(ctx, tx, args.ID) {
+			return common.ErrSpendNotExist
+		}
+		if args.TypeID != nil && *args.TypeID != 0 && !checkSpendType(ctx, tx, *args.TypeID) {
+			return common.ErrSpendTypeNotExist
+		}
+
 		dayID, err := db.selectSpendDayID(ctx, tx, args.ID)
 		if err != nil {
 			return err
@@ -128,11 +128,11 @@ func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 
 // RemoveSpend removes Spend with passed id
 func (db DB) RemoveSpend(ctx context.Context, id uint) error {
-	if !db.checkSpend(ctx, id) {
-		return common.ErrSpendNotExist
-	}
-
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkSpend(ctx, tx, id) {
+			return common.ErrSpendNotExist
+		}
+
 		dayID, err := db.selectSpendDayID(ctx, tx, id)
 		if err != nil {
 			return err

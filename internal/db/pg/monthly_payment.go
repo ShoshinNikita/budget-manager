@@ -43,14 +43,14 @@ func (mp MonthlyPayment) ToCommon(year int, month time.Month) common.MonthlyPaym
 
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
-	if !db.checkMonth(ctx, args.MonthID) {
-		return 0, common.ErrMonthNotExist
-	}
-	if args.TypeID != 0 && !db.checkSpendType(ctx, args.TypeID) {
-		return 0, common.ErrSpendTypeNotExist
-	}
-
 	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkMonth(ctx, tx, args.MonthID) {
+			return common.ErrMonthNotExist
+		}
+		if args.TypeID != 0 && !checkSpendType(ctx, tx, args.TypeID) {
+			return common.ErrSpendTypeNotExist
+		}
+
 		mp := &MonthlyPayment{
 			MonthID: args.MonthID,
 			Title:   args.Title,
@@ -74,14 +74,14 @@ func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymen
 
 // EditMonthlyPayment modifies existing Monthly Payment
 func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaymentArgs) error {
-	if !db.checkMonthlyPayment(ctx, args.ID) {
-		return common.ErrMonthlyPaymentNotExist
-	}
-	if args.TypeID != nil && *args.TypeID != 0 && !db.checkSpendType(ctx, *args.TypeID) {
-		return common.ErrSpendTypeNotExist
-	}
-
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkMonthlyPayment(ctx, tx, args.ID) {
+			return common.ErrMonthlyPaymentNotExist
+		}
+		if args.TypeID != nil && *args.TypeID != 0 && !checkSpendType(ctx, tx, *args.TypeID) {
+			return common.ErrSpendTypeNotExist
+		}
+
 		monthID, err := db.selectMonthlyPaymentMonthID(tx, args.ID)
 		if err != nil {
 			return err
@@ -118,11 +118,11 @@ func (db DB) EditMonthlyPayment(ctx context.Context, args common.EditMonthlyPaym
 
 // RemoveMonthlyPayment removes Monthly Payment with passed id
 func (db DB) RemoveMonthlyPayment(ctx context.Context, id uint) error {
-	if !db.checkMonthlyPayment(ctx, id) {
-		return common.ErrMonthlyPaymentNotExist
-	}
-
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkMonthlyPayment(ctx, tx, id) {
+			return common.ErrMonthlyPaymentNotExist
+		}
+
 		monthID, err := db.selectMonthlyPaymentMonthID(tx, id)
 		if err != nil {
 			return err

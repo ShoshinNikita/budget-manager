@@ -86,11 +86,11 @@ func (db DB) AddSpendType(ctx context.Context, args common.AddSpendTypeArgs) (id
 
 // EditSpendType modifies existing Spend Type
 func (db DB) EditSpendType(ctx context.Context, args common.EditSpendTypeArgs) error {
-	if !db.checkSpendType(ctx, args.ID) {
-		return common.ErrSpendTypeNotExist
-	}
-
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkSpendType(ctx, tx, args.ID) {
+			return common.ErrSpendTypeNotExist
+		}
+
 		query := tx.ModelContext(ctx, (*SpendType)(nil)).Where("id = ?", args.ID)
 		if args.Name != nil {
 			query = query.Set("name = ?", *args.Name)
@@ -110,11 +110,11 @@ func (db DB) EditSpendType(ctx context.Context, args common.EditSpendTypeArgs) e
 
 // RemoveSpendType removes Spend Type with passed id
 func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
-	if !db.checkSpendType(ctx, id) {
-		return common.ErrSpendTypeNotExist
-	}
-
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		if !checkSpendType(ctx, tx, id) {
+			return common.ErrSpendTypeNotExist
+		}
+
 		// Reset Spend Type
 		_, err := tx.ModelContext(ctx, (*MonthlyPayment)(nil)).Set("type_id = NULL").Where("type_id = ?", id).Update()
 		if err != nil {
