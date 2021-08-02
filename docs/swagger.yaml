@@ -286,18 +286,6 @@ definitions:
     required:
     - id
     type: object
-  models.GetDayResp:
-    properties:
-      day:
-        $ref: '#/definitions/db.Day'
-      error:
-        description: Error is specified only when success if false
-        type: string
-      request_id:
-        type: string
-      success:
-        type: boolean
-    type: object
   models.GetMonthResp:
     properties:
       error:
@@ -389,76 +377,6 @@ info:
   title: Budget Manager API
   version: v0.2
 paths:
-  /api/days/date:
-    get:
-      parameters:
-      - example: 13
-        in: query
-        name: day
-        required: true
-        type: integer
-      - example: 7
-        in: query
-        name: month
-        required: true
-        type: integer
-      - example: 2020
-        in: query
-        name: year
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.GetDayResp'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "404":
-          description: Day doesn't exist
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Get Day by date
-      tags:
-      - Days
-  /api/days/id:
-    get:
-      parameters:
-      - example: 1
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.GetDayResp'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "404":
-          description: Day doesn't exist
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Get Day by id
-      tags:
-      - Days
   /api/incomes:
     delete:
       consumes:
@@ -686,36 +604,6 @@ paths:
           schema:
             $ref: '#/definitions/models.Response'
       summary: Get Month by date
-      tags:
-      - Months
-  /api/months/id:
-    get:
-      parameters:
-      - example: 1
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.GetMonthResp'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/models.Response'
-        "404":
-          description: Month doesn't exist
-          schema:
-            $ref: '#/definitions/models.Response'
-        "500":
-          description: Internal error
-          schema:
-            $ref: '#/definitions/models.Response'
-      summary: Get Month by id
       tags:
       - Months
   /api/search/spends:
