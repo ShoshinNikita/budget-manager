@@ -51,7 +51,6 @@ func testErrors_GetRequests(t *testing.T, host string) {
 	}{
 		{SearchSpendsPath, models.SearchSpendsReq{MinCost: 10, MaxCost: 5}, "min_cost can't be greater than max_cost", http.StatusBadRequest},
 		{MonthsPath, models.GetMonthByIDReq{ID: 10}, "such Month doesn't exist", http.StatusNotFound},
-		{DaysPath, models.GetDayByIDReq{ID: 100}, "such Day doesn't exist", http.StatusNotFound},
 	} {
 		Request{GET, tt.path, tt.req, tt.code, tt.err}.Send(t, host, nil)
 	}
