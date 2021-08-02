@@ -115,8 +115,7 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 	}
 
 	// Check
-	var resp models.GetMonthResp
-	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &resp)
+	month := getCurrentMonth(t, host)
 
 	expectedIncomes := []db.Income{
 		{ID: 1, Title: "salary", Income: money.FromInt(2500)},
@@ -124,12 +123,12 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 		{ID: 4, Title: "cashback", Notes: "123", Income: money.FromInt(50)},
 	}
 	for i := range expectedIncomes {
-		expectedIncomes[i].Year = resp.Month.Year
-		expectedIncomes[i].Month = resp.Month.Month
+		expectedIncomes[i].Year = month.Year
+		expectedIncomes[i].Month = month.Month
 	}
-	require.Equal(expectedIncomes, resp.Month.Incomes)
+	require.Equal(expectedIncomes, month.Incomes)
 
-	checkMonth(require, 3050, 0, 0, resp.Month)
+	checkMonth(require, 3050, 0, 0, month)
 }
 
 func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
@@ -157,8 +156,7 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 	}
 
 	// Check
-	var resp models.GetMonthResp
-	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &resp)
+	month := getCurrentMonth(t, host)
 
 	expectedMonthlyPayments := []db.MonthlyPayment{
 		{ID: 1, Title: "rent", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(800)},
@@ -166,12 +164,12 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 		{ID: 3, Title: "netflix", Type: &db.SpendType{ID: 7, Name: "entertainment"}, Cost: money.FromInt(30)},
 	}
 	for i := range expectedMonthlyPayments {
-		expectedMonthlyPayments[i].Year = resp.Month.Year
-		expectedMonthlyPayments[i].Month = resp.Month.Month
+		expectedMonthlyPayments[i].Year = month.Year
+		expectedMonthlyPayments[i].Month = month.Month
 	}
-	require.Equal(expectedMonthlyPayments, resp.Month.MonthlyPayments)
+	require.Equal(expectedMonthlyPayments, month.MonthlyPayments)
 
-	checkMonth(require, 3050, -880, 0, resp.Month)
+	checkMonth(require, 3050, -880, 0, month)
 }
 
 func testBasicUsage_Spends(t *testing.T, host string) {
@@ -214,8 +212,7 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	}
 
 	// Check
-	var resp models.GetMonthResp
-	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &resp)
+	month := getCurrentMonth(t, host)
 
 	expectedDays := []db.Day{
 		{ID: 1, Spends: []db.Spend{
@@ -254,12 +251,12 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 			{ID: 12, Title: "new towels", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(50)},
 		}},
 	}
-	for i := len(expectedDays) + 1; i <= len(resp.Month.Days); i++ {
+	for i := len(expectedDays) + 1; i <= len(month.Days); i++ {
 		expectedDays = append(expectedDays, db.Day{ID: uint(i), Spends: []db.Spend{}})
 	}
 	for i := range expectedDays {
-		expectedDays[i].Year = resp.Month.Year
-		expectedDays[i].Month = resp.Month.Month
+		expectedDays[i].Year = month.Year
+		expectedDays[i].Month = month.Month
 		expectedDays[i].Day = int(expectedDays[i].ID)
 		for j := range expectedDays[i].Spends {
 			expectedDays[i].Spends[j].Year = expectedDays[i].Year
@@ -271,14 +268,14 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 		if i > 0 {
 			prevSaldo = expectedDays[i-1].Saldo
 		}
-		expectedDays[i].Saldo = prevSaldo.Add(resp.Month.DailyBudget)
+		expectedDays[i].Saldo = prevSaldo.Add(month.DailyBudget)
 		for _, s := range expectedDays[i].Spends {
 			expectedDays[i].Saldo = expectedDays[i].Saldo.Sub(s.Cost)
 		}
 	}
-	require.Equal(expectedDays, resp.Month.Days)
+	require.Equal(expectedDays, month.Days)
 
-	checkMonth(require, 3050, -880, -894, resp.Month)
+	checkMonth(require, 3050, -880, -894, month)
 }
 
 func testBasicUsage_SearchSpends(t *testing.T, host string) {
@@ -297,11 +294,10 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 		{ID: 11, Day: 16, Title: "new mirror in the bathroom", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(150)},
 		{ID: 12, Day: 16, Title: "new towels", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(50)},
 	}
-	var month models.GetMonthResp
-	RequestOK{GET, MonthsPath, models.GetMonthByIDReq{ID: 1}}.Send(t, host, &month)
+	month := getCurrentMonth(t, host)
 	for i := range allSpends {
-		allSpends[i].Year = month.Month.Year
-		allSpends[i].Month = month.Month.Month
+		allSpends[i].Year = month.Year
+		allSpends[i].Month = month.Month
 	}
 
 	getSpends := func(ids ...uint) []db.Spend {
@@ -317,7 +313,7 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 		return res
 	}
 	newDate := func(day int) time.Time {
-		return time.Date(month.Month.Year, month.Month.Month, day, 0, 0, 0, 0, time.UTC)
+		return time.Date(month.Year, month.Month, day, 0, 0, 0, 0, time.UTC)
 	}
 
 	for _, tt := range []struct {
@@ -400,6 +396,16 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 			require.Equal(getSpends(tt.ids...), resp.Spends)
 		})
 	}
+}
+
+func getCurrentMonth(t *testing.T, host string) db.Month {
+	// It's very unlikely that tests were run at the last seconds of a month,
+	// and time.Now() will return the next month
+	year, month, _ := time.Now().Date()
+
+	var resp models.GetMonthResp
+	RequestOK{GET, MonthsPath, models.GetMonthByDateReq{Year: year, Month: month}}.Send(t, host, &resp)
+	return resp.Month
 }
 
 func checkMonth(require *require.Assertions, incomes, monthlyPayments, spends float64, month db.Month) {

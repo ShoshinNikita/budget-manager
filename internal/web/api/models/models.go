@@ -2,6 +2,9 @@
 package models
 
 import (
+	"errors"
+	"time"
+
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
@@ -20,32 +23,19 @@ type Response struct {
 // Month
 // -------------------------------------------------
 
-type GetMonthByIDReq struct {
-	Request
-
-	ID uint `json:"id" validate:"required" example:"1"`
-}
-
-func (req *GetMonthByIDReq) SanitizeAndCheck() error {
-	if req.ID == 0 {
-		return emptyOrZeroFieldError("id")
-	}
-	return nil
-}
-
 type GetMonthByDateReq struct {
 	Request
 
-	Year  int `json:"year" validate:"required" example:"2020"`
-	Month int `json:"month" validate:"required" example:"7"`
+	Year  int        `json:"year" validate:"required" example:"2020"`
+	Month time.Month `json:"month" validate:"required" swaggertype:"integer" example:"7"`
 }
 
 func (req *GetMonthByDateReq) SanitizeAndCheck() error {
 	if req.Year == 0 {
 		return emptyOrZeroFieldError("year")
 	}
-	if req.Month == 0 {
-		return emptyOrZeroFieldError("month")
+	if !(time.January <= req.Month && req.Month <= time.December) {
+		return errors.New("invalid month")
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ const (
 	SpendsPath          Path = "/api/spends"
 	SpendTypesPath      Path = "/api/spend-types"
 	SearchSpendsPath    Path = "/api/search/spends"
-	MonthsPath          Path = "/api/months/id"
+	MonthsPath          Path = "/api/months/date"
 )
 
 type Method string
