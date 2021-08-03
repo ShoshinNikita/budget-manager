@@ -72,33 +72,20 @@ func (m Month) ToCommon() common.Month {
 	}
 }
 
-func (db DB) GetMonth(ctx context.Context, id uint) (common.Month, error) {
+func (db DB) GetMonthByDate(ctx context.Context, year int, month time.Month) (common.Month, error) {
 	var pgMonth Month
 	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
-		pgMonth, err = db.getMonth(tx, id)
+		pgMonth, err = getMonth(tx, "year = ? AND month = ?", year, month)
 		return err
 	})
 	if err != nil {
 		if errors.Is(err, pg.ErrNoRows) {
-			return common.Month{}, common.ErrMonthNotExist
+			err = common.ErrMonthNotExist
 		}
 		return common.Month{}, err
 	}
 
 	return pgMonth.ToCommon(), nil
-}
-
-func (db DB) GetMonthID(ctx context.Context, year, month int) (id uint, err error) {
-	query := db.db.ModelContext(ctx, (*Month)(nil)).Column("id").Where("year = ? AND month = ?", year, month)
-	err = query.Select(&id)
-	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
-			return 0, common.ErrMonthNotExist
-		}
-		return 0, err
-	}
-
-	return id, nil
 }
 
 // GetMonths returns months of passed years. Months doesn't contains relations (Incomes, Days and etc.)
@@ -183,7 +170,7 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 
 	ctx := tx.Context()
 
-	m, err := db.getMonth(tx, monthID)
+	m, err := getMonth(tx, "id = ?", monthID)
 	if err != nil {
 		return errors.Wrap(err, "couldn't select month")
 	}
@@ -260,7 +247,7 @@ func recomputeMonth(m Month) Month {
 	return m
 }
 
-func (DB) getMonth(tx *pg.Tx, id uint) (m Month, err error) {
+func getMonth(tx *pg.Tx, whereCond string, params ...interface{}) (m Month, err error) {
 	err = tx.ModelContext(tx.Context(), &m).
 		Relation("Incomes", orderByID).
 		Relation("MonthlyPayments", orderByID).
@@ -270,7 +257,8 @@ func (DB) getMonth(tx *pg.Tx, id uint) (m Month, err error) {
 		}).
 		Relation("Days.Spends", orderByID).
 		Relation("Days.Spends.Type").
-		Where("id = ?", id).Select()
+		Where(whereCond, params...).
+		Select()
 	if err != nil {
 		return Month{}, err
 	}

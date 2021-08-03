@@ -29,10 +29,7 @@ func (s Server) addRoutes(router *mux.Router) {
 		{methods: "GET", path: "/search/spends", handler: pageHandlers.SearchSpendsPage},
 
 		// API
-		{methods: "GET", path: "/api/months/id", handler: apiHandlers.GetMonthByID},
 		{methods: "GET", path: "/api/months/date", handler: apiHandlers.GetMonthByDate},
-		{methods: "GET", path: "/api/days/id", handler: apiHandlers.GetDayByID},
-		{methods: "GET", path: "/api/days/date", handler: apiHandlers.GetDayByDate},
 		// Income
 		{methods: "POST", path: "/api/incomes", handler: apiHandlers.AddIncome},
 		{methods: "PUT", path: "/api/incomes", handler: apiHandlers.EditIncome},

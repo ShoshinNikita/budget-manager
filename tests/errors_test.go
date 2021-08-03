@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
@@ -50,8 +51,10 @@ func testErrors_GetRequests(t *testing.T, host string) {
 		code int
 	}{
 		{SearchSpendsPath, models.SearchSpendsReq{MinCost: 10, MaxCost: 5}, "min_cost can't be greater than max_cost", http.StatusBadRequest},
-		{MonthsPath, models.GetMonthByIDReq{ID: 10}, "such Month doesn't exist", http.StatusNotFound},
-		{DaysPath, models.GetDayByIDReq{ID: 100}, "such Day doesn't exist", http.StatusNotFound},
+		{MonthsPath, models.GetMonthByDateReq{Year: 2020, Month: time.January}, "such Month doesn't exist", http.StatusNotFound},
+		{MonthsPath, models.GetMonthByDateReq{Year: 2020, Month: -1}, "invalid month", http.StatusBadRequest},
+		{MonthsPath, models.GetMonthByDateReq{Year: 2020, Month: 0}, "invalid month", http.StatusBadRequest},
+		{MonthsPath, models.GetMonthByDateReq{Year: 2020, Month: 13}, "invalid month", http.StatusBadRequest},
 	} {
 		Request{GET, tt.path, tt.req, tt.code, tt.err}.Send(t, host, nil)
 	}

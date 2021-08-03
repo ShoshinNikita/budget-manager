@@ -36,8 +36,7 @@ type Handlers struct {
 }
 
 type DB interface {
-	GetMonth(ctx context.Context, id uint) (db.Month, error)
-	GetMonthID(ctx context.Context, year, month int) (uint, error)
+	GetMonthByDate(ctx context.Context, year int, month time.Month) (db.Month, error)
 	GetMonths(ctx context.Context, years ...int) ([]db.Month, error)
 
 	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
@@ -222,22 +221,14 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	monthID, err := h.db.GetMonthID(ctx, year, int(monthNumber))
+	month, err := h.db.GetMonthByDate(ctx, year, monthNumber)
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrMonthNotExist):
 			h.processErrorWithPage(ctx, log, w, err.Error(), http.StatusNotFound)
 		default:
-			h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get month"), err)
+			h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Month"), err)
 		}
-		return
-	}
-
-	// Process
-	month, err := h.db.GetMonth(ctx, monthID)
-	if err != nil {
-		// Month must exist
-		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Month info"), err)
 		return
 	}
 
