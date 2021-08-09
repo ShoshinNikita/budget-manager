@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
-	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
@@ -28,9 +27,8 @@ type Config struct {
 }
 
 type DB struct {
-	db   *pg.DB
-	cron *cron.Cron
-	log  logrus.FieldLogger
+	db  *pg.DB
+	log logrus.FieldLogger
 }
 
 // NewDB creates a new connection to the db and pings it
@@ -43,9 +41,6 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 			Password: config.Password,
 			Database: config.Database,
 		}),
-		cron: cron.New(
-			cron.WithLogger(cronLogger{log: log}),
-		),
 	}
 
 	// Try to ping the DB
@@ -106,25 +101,6 @@ func (db *DB) Prepare() error {
 	if err := db.checkCreatedTables(); err != nil {
 		return errors.Wrap(err, "database schema is invalid")
 	}
-
-	// Init tables if needed
-	if err = db.initCurrentMonth(); err != nil {
-		return errors.Wrap(err, "couldn't init the current month")
-	}
-
-	// Init a new month monthly at 00:00
-	_, err = db.cron.AddFunc("@monthly", func() {
-		err = db.initCurrentMonth()
-		if err != nil {
-			db.log.WithError(err).Error("couldn't init a new month")
-		}
-	})
-	if err != nil {
-		return errors.Wrap(err, "couldn't add a function to cron")
-	}
-
-	// Start cron
-	db.cron.Start()
 
 	return nil
 }
@@ -253,13 +229,6 @@ func (db *DB) checkCreatedTables() error {
 
 // Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
-	// cron
-	db.log.Debug("wait to stop cron jobs")
-	ctx := db.cron.Stop()
-	<-ctx.Done()
-	db.log.Debug("all cron jobs were stopped")
-
-	// Database connection
 	db.log.Debug("close database connection")
 	return db.db.Close()
 }

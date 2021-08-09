@@ -137,7 +137,6 @@ func (s Server) ListenAndServer() error {
 	s.log.Debug("start server")
 
 	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.log.WithError(err).Error("server error")
 		return errors.Wrap(err, "server error")
 	}
 

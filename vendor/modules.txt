@@ -40,9 +40,6 @@ github.com/mattn/go-isatty
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/robfig/cron/v3 v3.0.1
-## explicit
-github.com/robfig/cron/v3
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
