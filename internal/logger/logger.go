@@ -6,12 +6,14 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
+	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
 type Logger interface {
 	WithField(key string, value interface{}) Logger
 	WithFields(fields Fields) Logger
 	WithError(err error) Logger
+	WithRequest(models.Request) Logger
 
 	Debug(args ...interface{})
 	Debugf(format string, args ...interface{})
@@ -101,4 +103,9 @@ func (l logger) WithFields(fields Fields) Logger {
 
 func (l logger) WithError(err error) Logger {
 	return logger{l.FieldLogger.WithError(err)}
+}
+
+func (l logger) WithRequest(req models.Request) Logger {
+	// TODO
+	return logger{l.FieldLogger.WithField("req", req)}
 }

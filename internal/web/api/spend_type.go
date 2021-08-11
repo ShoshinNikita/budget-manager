@@ -37,7 +37,6 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Process
-	log.Debug("return all Spend Types")
 	types, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
 		utils.ProcessInternalError(ctx, log, w, "couldn't get Spend Types", err)
@@ -74,11 +73,9 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logger.Fields{"name": req.Name, "parent_id": req.ParentID})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("add Spend Type")
 	args := db.AddSpendTypeArgs{
 		Name:     req.Name,
 		ParentID: req.ParentID,
@@ -89,7 +86,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	log = log.WithField("id", id)
-	log.Info("Spend Type was successfully added")
+	log.Debug("Spend Type was successfully added")
 
 	// Encode
 	w.WriteHeader(http.StatusCreated)
@@ -123,8 +120,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logger.Fields{"id": req.ID, "name": req.Name})
+	log = log.WithRequest(req)
 
 	if req.ParentID != nil && *req.ParentID != 0 {
 		allSpendTypes, err := h.db.GetSpendTypes(ctx)
@@ -146,8 +142,6 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	}
 
 	// Process
-	log.Debug("edit Spend Type")
-
 	args := db.EditSpendTypeArgs{
 		ID:       req.ID,
 		Name:     req.Name,
@@ -163,7 +157,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 		}
 		return
 	}
-	log.Info("Spend Type was successfully edited")
+	log.Debug("Spend Type was successfully edited")
 
 	// Encode
 	resp := models.Response{
@@ -221,11 +215,9 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithField("id", req.ID)
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("remove Spend Type")
 	err := h.db.RemoveSpendType(ctx, req.ID)
 	if err != nil {
 		switch {
@@ -236,7 +228,7 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
-	log.Info("Spend Type was successfully removed")
+	log.Debug("Spend Type was successfully removed")
 
 	// Encode
 	resp := models.Response{

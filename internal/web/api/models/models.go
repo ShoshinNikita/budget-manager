@@ -8,8 +8,16 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 )
 
-// Request is a base request model that must be nested into all requests
-type Request struct{}
+// All requests implement the Request interface
+type Request interface {
+	request()
+}
+
+// BaseRequest is a base request model that implements Request interface.
+// It must be nested into all requests
+type BaseRequest struct{}
+
+func (BaseRequest) request() {}
 
 // Response is a base response model that must be nested into all responses
 type Response struct {
@@ -24,7 +32,7 @@ type Response struct {
 // -------------------------------------------------
 
 type GetMonthByDateReq struct {
-	Request
+	BaseRequest
 
 	Year  int        `json:"year" validate:"required" example:"2020"`
 	Month time.Month `json:"month" validate:"required" swaggertype:"integer" example:"7"`

@@ -41,11 +41,9 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logger.Fields{"year": req.Year, "month": req.Month})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("get month from the database")
 	month, err := h.db.GetMonthByDate(ctx, req.Year, req.Month)
 	if err != nil {
 		switch {

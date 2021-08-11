@@ -1,7 +1,7 @@
 package models
 
 type AddSpendReq struct {
-	Request
+	BaseRequest
 
 	DayID uint `json:"day_id" validate:"required" example:"1"`
 
@@ -36,7 +36,7 @@ type AddSpendResp struct {
 }
 
 type EditSpendReq struct {
-	Request
+	BaseRequest
 
 	ID     uint     `json:"id" validate:"required" example:"1"`
 	Title  *string  `json:"title"`
@@ -64,7 +64,7 @@ func (req *EditSpendReq) SanitizeAndCheck() error {
 }
 
 type RemoveSpendReq struct {
-	Request
+	BaseRequest
 
 	ID uint `json:"id" validate:"required" example:"1"`
 }

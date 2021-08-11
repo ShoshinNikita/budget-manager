@@ -133,7 +133,7 @@ func (app *App) startMonthInit() error {
 
 		select {
 		case now := <-time.After(after):
-			app.log.WithField("date", now.Format("2006-01-02")).Debug("init a new month")
+			app.log.WithField("date", now.Format("2006-01-02")).Info("init a new month")
 
 			if err := app.initMonth(now); err != nil {
 				return errors.Wrap(err, "couldn't init a new month")

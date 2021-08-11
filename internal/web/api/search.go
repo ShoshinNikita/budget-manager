@@ -40,17 +40,9 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logger.Fields{
-		"title": req.Title, "title_exactly": req.TitleExactly,
-		"notes": req.Notes, "notes_exactly": req.NotesExactly,
-		"after": req.After, "before": req.Before, "type_ids": req.TypeIDs,
-		"min_cost": req.MinCost, "max_cost": req.MaxCost,
-		"sort": req.Sort, "order": req.Order,
-	})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("search for Spends")
 	args := db.SearchSpendsArgs{
 		Title:        strings.ToLower(req.Title),
 		Notes:        strings.ToLower(req.Notes),

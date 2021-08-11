@@ -1,7 +1,7 @@
 package models
 
 type AddIncomeReq struct {
-	Request
+	BaseRequest
 
 	MonthID uint    `json:"month_id" validate:"required" example:"1"`
 	Title   string  `json:"title" validate:"required" example:"Salary"`
@@ -33,7 +33,7 @@ type AddIncomeResp struct {
 }
 
 type EditIncomeReq struct {
-	Request
+	BaseRequest
 
 	ID     uint     `json:"id" validate:"required" example:"1"`
 	Title  *string  `json:"title"`
@@ -59,7 +59,7 @@ func (req *EditIncomeReq) SanitizeAndCheck() error {
 }
 
 type RemoveIncomeReq struct {
-	Request
+	BaseRequest
 
 	ID uint `json:"id" validate:"required" example:"1"`
 }
