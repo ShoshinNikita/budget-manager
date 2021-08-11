@@ -84,9 +84,7 @@ func (app *App) prepareDB() (err error) {
 }
 
 func (app *App) prepareWebServer() {
-	app.server = web.NewServer(
-		app.config.Server, app.db, app.log, app.version, app.gitHash,
-	)
+	app.server = web.NewServer(app.config.Server, app.db, app.log, app.version, app.gitHash)
 	app.server.Prepare()
 }
 

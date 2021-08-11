@@ -45,16 +45,12 @@ func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
 
 	// Try to ping the DB
 	for i := 0; i < connectRetries; i++ {
-		log := db.log.WithField("try", i+1)
-		if i != 0 {
-			log.Debug("ping DB")
-		}
-
 		err := db.db.Ping(context.Background())
 		if err == nil {
 			break
 		}
-		log.WithError(err).Debug("couldn't ping DB")
+
+		log.WithError(err).WithField("try", i+1).Debug("couldn't ping DB")
 		if i+1 == connectRetries {
 			// Don't sleep extra time
 			return nil, errors.New("database is down")
@@ -87,7 +83,6 @@ func (db *DB) Prepare() error {
 	}
 
 	// Run migrations
-	db.log.Debug("run migrations")
 	oldVersion, newVersion, err := migrator.Run(db.db, "up")
 	if err != nil {
 		return errors.Wrap(err, "couldn't run migrations")
@@ -229,6 +224,5 @@ func (db *DB) checkCreatedTables() error {
 
 // Shutdown closes the connection to the db
 func (db *DB) Shutdown() error {
-	db.log.Debug("close database connection")
 	return db.db.Close()
 }

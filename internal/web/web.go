@@ -113,7 +113,6 @@ func (s *Server) Prepare() {
 	}
 
 	// Add API routes
-	s.log.Debug("add routes")
 	s.addRoutes(router)
 	if s.config.EnableProfiling {
 		// Enable pprof handlers
@@ -147,10 +146,5 @@ func (s Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	if err := s.server.Shutdown(ctx); err != nil {
-		s.log.WithError(err).Errorf("couldn't shutdown server gracefully")
-		return err
-	}
-
-	return nil
+	return s.server.Shutdown(ctx)
 }
