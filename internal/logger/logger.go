@@ -44,7 +44,7 @@ type Config struct {
 
 func New(cnf Config) Logger {
 	log := logrus.New()
-	log.SetReportCaller(true)
+	log.SetReportCaller(false)
 
 	logLevel := parseLogLevel(cnf.Level)
 	if cnf.Debug {
