@@ -106,6 +106,8 @@ func (l logger) WithError(err error) Logger {
 }
 
 func (l logger) WithRequest(req models.Request) Logger {
-	// TODO
-	return logger{l.FieldLogger.WithField("req", req)}
+	if fields := structToFields(req); len(fields) != 0 {
+		return l.WithFields(fields)
+	}
+	return l
 }
