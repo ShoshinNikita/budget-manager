@@ -3,6 +3,7 @@ package logger
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"sort"
 
 	"github.com/fatih/color"
@@ -56,6 +57,9 @@ func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	coloredPrintf := logLevelToPrintfFunction(entry.Level)
 	for i, k := range keys {
 		v := entry.Data[k]
+		if isEmptyString(v) {
+			v = `""`
+		}
 
 		buff.WriteString(coloredPrintf(k))
 		buff.WriteByte('=')
@@ -126,4 +130,9 @@ func logLevelToPrintfFunction(lvl logrus.Level) func(format string, a ...interfa
 	default:
 		return color.New().Sprintf
 	}
+}
+
+func isEmptyString(i interface{}) bool {
+	v := reflect.ValueOf(i)
+	return v.Kind() == reflect.String && v.String() == ""
 }
