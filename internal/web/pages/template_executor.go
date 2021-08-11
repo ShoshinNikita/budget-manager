@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/templates"
 )
@@ -20,14 +20,14 @@ import (
 type templateExecutor struct {
 	cacheTemplates bool
 	fs             fs.ReadDirFS
-	log            logrus.FieldLogger
+	log            logger.Logger
 	commonFuncs    template.FuncMap
 
 	mu  sync.Mutex
 	tpl *template.Template
 }
 
-func newTemplateExecutor(log logrus.FieldLogger, cacheTemplates bool, commonFuncs template.FuncMap) *templateExecutor {
+func newTemplateExecutor(log logger.Logger, cacheTemplates bool, commonFuncs template.FuncMap) *templateExecutor {
 	return &templateExecutor{
 		fs:             templates.New(cacheTemplates),
 		log:            log,
@@ -88,7 +88,7 @@ func (e *templateExecutor) getCommonFuncs() template.FuncMap {
 
 // executeTemplate executes passed template. It checks for errors before writing into w: it executes
 // template into temporary buffer and copies data if everything is fine
-func executeTemplate(log logrus.FieldLogger, tpl *template.Template, w io.Writer, data interface{}) error {
+func executeTemplate(log logger.Logger, tpl *template.Template, w io.Writer, data interface{}) error {
 	buff := bytes.NewBuffer(nil)
 
 	now := time.Now()

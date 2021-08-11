@@ -1,6 +1,6 @@
 package api
 
-import "github.com/sirupsen/logrus"
+import "github.com/ShoshinNikita/budget-manager/internal/logger"
 
 type Handlers struct {
 	MonthsHandlers
@@ -20,7 +20,7 @@ type DB interface {
 	SearchDB
 }
 
-func NewHandlers(db DB, log logrus.FieldLogger) *Handlers {
+func NewHandlers(db DB, log logger.Logger) *Handlers {
 	return &Handlers{
 		MonthsHandlers:          MonthsHandlers{db: db, log: log},
 		IncomesHandlers:         IncomesHandlers{db: db, log: log},

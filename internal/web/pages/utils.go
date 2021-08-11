@@ -7,16 +7,16 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
 
 // processErrorWithPage is similar to 'utils.ProcessError' but shows the error page instead of returning json
-func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
+func (h Handlers) processErrorWithPage(ctx context.Context, log logger.Logger, w http.ResponseWriter,
 	respMsg string, code int) {
 
 	data := struct {
@@ -42,7 +42,7 @@ func (h Handlers) processErrorWithPage(ctx context.Context, log logrus.FieldLogg
 
 // processInternalErrorWithPage is similar to 'utils.ProcessInternalError' but shows the error page
 // instead of returning json
-func (h Handlers) processInternalErrorWithPage(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
+func (h Handlers) processInternalErrorWithPage(ctx context.Context, log logger.Logger, w http.ResponseWriter,
 	respMsg string, err error) {
 
 	utils.LogInternalError(log, respMsg, err)

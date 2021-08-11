@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
@@ -15,7 +15,7 @@ import (
 
 type SpendTypesHandlers struct {
 	db  SpendTypesDB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 type SpendTypesDB interface {
@@ -75,7 +75,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	log = log.WithFields(logrus.Fields{"name": req.Name, "parent_id": req.ParentID})
+	log = log.WithFields(logger.Fields{"name": req.Name, "parent_id": req.ParentID})
 
 	// Process
 	log.Debug("add Spend Type")
@@ -124,7 +124,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	log = log.WithFields(logrus.Fields{"id": req.ID, "name": req.Name})
+	log = log.WithFields(logger.Fields{"id": req.ID, "name": req.Name})
 
 	if req.ParentID != nil && *req.ParentID != 0 {
 		allSpendTypes, err := h.db.GetSpendTypes(ctx)

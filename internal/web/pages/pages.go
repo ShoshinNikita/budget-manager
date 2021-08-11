@@ -11,9 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages/statistics"
@@ -29,7 +28,7 @@ const (
 type Handlers struct {
 	db          DB
 	tplExecutor *templateExecutor
-	log         logrus.FieldLogger
+	log         logger.Logger
 
 	version string
 	gitHash string
@@ -44,7 +43,7 @@ type DB interface {
 	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]db.Spend, error)
 }
 
-func NewHandlers(db DB, log logrus.FieldLogger, cacheTemplates bool, version, gitHash string) *Handlers {
+func NewHandlers(db DB, log logger.Logger, cacheTemplates bool, version, gitHash string) *Handlers {
 	return &Handlers{
 		db:          db,
 		tplExecutor: newTemplateExecutor(log, cacheTemplates, commonTemplateFuncs()),
@@ -72,7 +71,7 @@ func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
 	year, month, _ := time.Now().Date()
 
 	reqid.FromContextToLogger(r.Context(), h.log).
-		WithFields(logrus.Fields{"year": year, "month": int(month)}).
+		WithFields(logger.Fields{"year": year, "month": int(month)}).
 		Debug("redirect to the current month")
 
 	url := fmt.Sprintf("/%d-%d", year, month)
@@ -366,7 +365,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 //nolint:funlen
-func parseSearchSpendsArgs(r *http.Request, log logrus.FieldLogger) db.SearchSpendsArgs {
+func parseSearchSpendsArgs(r *http.Request, log logger.Logger) db.SearchSpendsArgs {
 	// Title and Notes
 	title := strings.ToLower(strings.TrimSpace(r.FormValue("title")))
 	notes := strings.ToLower(strings.TrimSpace(r.FormValue("notes")))

@@ -5,8 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
@@ -25,7 +24,7 @@ func ProcessError(ctx context.Context, w http.ResponseWriter, respMsg string, co
 
 // ProcessError logs internal error with 'LogInternalError' and calls 'ProcessError'
 // with 'http.StatusInternalServerError' status code
-func ProcessInternalError(ctx context.Context, log logrus.FieldLogger, w http.ResponseWriter,
+func ProcessInternalError(ctx context.Context, log logger.Logger, w http.ResponseWriter,
 	respMsg string, err error) {
 
 	LogInternalError(log, respMsg, err)
@@ -33,6 +32,6 @@ func ProcessInternalError(ctx context.Context, log logrus.FieldLogger, w http.Re
 	ProcessError(ctx, w, respMsg, http.StatusInternalServerError)
 }
 
-func LogInternalError(log logrus.FieldLogger, respMsg string, internalErr error) {
-	log.WithFields(logrus.Fields{"msg": respMsg, "error": internalErr}).Error("request error")
+func LogInternalError(log logger.Logger, respMsg string, internalErr error) {
+	log.WithFields(logger.Fields{"msg": respMsg, "error": internalErr}).Error("request error")
 }

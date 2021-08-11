@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
@@ -17,7 +17,7 @@ type App struct {
 	gitHash string
 
 	db     Database
-	log    logrus.FieldLogger
+	log    logger.Logger
 	server *web.Server
 
 	shutdownSignal chan struct{}
@@ -32,7 +32,7 @@ type Database interface {
 }
 
 // NewApp returns a new instance of App
-func NewApp(cfg Config, log *logrus.Logger, version, gitHash string) *App {
+func NewApp(cfg Config, log logger.Logger, version, gitHash string) *App {
 	return &App{
 		config:  cfg,
 		version: version,
@@ -90,7 +90,7 @@ func (app *App) prepareWebServer() {
 
 // Run runs web server. This method should be called in a goroutine
 func (app *App) Run() error {
-	app.log.WithFields(logrus.Fields{
+	app.log.WithFields(logger.Fields{
 		"version":  app.version,
 		"git_hash": app.gitHash,
 	}).Info("start app")

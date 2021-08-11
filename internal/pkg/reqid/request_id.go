@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
-	"github.com/sirupsen/logrus"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 )
 
 // RequestID is a random hex string. It doesn't correspond to UUID RFC 4122 format because it would be
@@ -44,7 +44,7 @@ func ToContext(ctx context.Context, reqID RequestID) context.Context {
 const loggerFieldKey = "request_id"
 
 // FromContextToLogger extracts request id from context and returns logger with added field
-func FromContextToLogger(ctx context.Context, log logrus.FieldLogger) *logrus.Entry {
+func FromContextToLogger(ctx context.Context, log logger.Logger) logger.Logger {
 	reqID := FromContext(ctx)
 	return log.WithField(loggerFieldKey, reqID)
 }

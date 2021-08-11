@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
@@ -16,7 +15,7 @@ import (
 
 type MonthsHandlers struct {
 	db  MonthsDB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 type MonthsDB interface {
@@ -43,7 +42,7 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log = log.WithFields(logrus.Fields{"year": req.Year, "month": req.Month})
+	log = log.WithFields(logger.Fields{"year": req.Year, "month": req.Month})
 
 	// Process
 	log.Debug("get month from the database")

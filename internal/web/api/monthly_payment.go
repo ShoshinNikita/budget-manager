@@ -5,9 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
@@ -16,7 +15,7 @@ import (
 
 type MonthlyPaymentsHandlers struct {
 	db  MonthlyPaymentsDB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 type MonthlyPaymentsDB interface {
@@ -46,7 +45,7 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 		return
 	}
 
-	log = log.WithFields(logrus.Fields{
+	log = log.WithFields(logger.Fields{
 		"month_id": req.MonthID, "title": req.Title, "type_id": req.TypeID,
 		"notes": req.Notes, "cost": req.Cost,
 	})
@@ -108,7 +107,7 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 		return
 	}
 
-	log = log.WithFields(logrus.Fields{
+	log = log.WithFields(logger.Fields{
 		"id": req.ID, "title": req.Title, "notes": req.Notes, "type_id": req.TypeID, "cost": req.Cost,
 	})
 

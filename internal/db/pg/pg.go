@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 )
 
 const (
@@ -28,11 +28,11 @@ type Config struct {
 
 type DB struct {
 	db  *pg.DB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 // NewDB creates a new connection to the db and pings it
-func NewDB(config Config, log logrus.FieldLogger) (*DB, error) {
+func NewDB(config Config, log logger.Logger) (*DB, error) {
 	db := &DB{
 		log: log.WithField("db_type", "pg"),
 		db: pg.Connect(&pg.Options{
@@ -88,7 +88,7 @@ func (db *DB) Prepare() error {
 		return errors.Wrap(err, "couldn't run migrations")
 	}
 
-	db.log.WithFields(logrus.Fields{
+	db.log.WithFields(logger.Fields{
 		"old_version": oldVersion, "new_version": newVersion,
 	}).Debug("migration process was finished")
 

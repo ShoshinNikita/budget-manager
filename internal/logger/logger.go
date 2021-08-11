@@ -8,6 +8,26 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
 )
 
+type Logger interface {
+	WithField(key string, value interface{}) Logger
+	WithFields(fields Fields) Logger
+	WithError(err error) Logger
+
+	Debug(args ...interface{})
+	Debugf(format string, args ...interface{})
+
+	Info(args ...interface{})
+	Infof(format string, args ...interface{})
+
+	Warn(args ...interface{})
+	Warnf(format string, args ...interface{})
+
+	Error(args ...interface{})
+	Errorf(format string, args ...interface{})
+}
+
+type Fields logrus.Fields
+
 type Config struct {
 	Debug bool `env:"DEBUG" envDefault:"false"`
 
@@ -20,12 +40,16 @@ type Config struct {
 	Level string `env:"LOGGER_LEVEL" envDefault:"info"`
 }
 
-func New(cnf Config) *logrus.Logger {
+func New(cnf Config) Logger {
 	log := logrus.New()
 	log.SetReportCaller(true)
 
-	// Set passed log level
-	log.SetLevel(logLevelFromString(cnf.Level))
+	logLevel := parseLogLevel(cnf.Level)
+	if cnf.Debug {
+		// Always use the debug level in the debug mode
+		logLevel = logrus.DebugLevel
+	}
+	log.SetLevel(logLevel)
 
 	switch cnf.Mode {
 	case "prod", "production":
@@ -41,16 +65,11 @@ func New(cnf Config) *logrus.Logger {
 		log.SetFormatter(devFormatter{})
 	}
 
-	// Always use debug level in debug mode
-	if cnf.Debug {
-		log.SetLevel(logrus.DebugLevel)
-	}
-
-	return log
+	return logger{log}
 }
 
-// logLevelFromString converts passed string to logrus log level
-func logLevelFromString(lvl string) logrus.Level {
+// parseLogLevel converts passed string to a logrus log level
+func parseLogLevel(lvl string) logrus.Level {
 	switch lvl {
 	case "dbg", "debug":
 		return logrus.DebugLevel
@@ -65,4 +84,21 @@ func logLevelFromString(lvl string) logrus.Level {
 	default:
 		return logrus.InfoLevel
 	}
+}
+
+// logger is a wrapper for logrus.FieldLogger that implements Logger interface
+type logger struct {
+	logrus.FieldLogger
+}
+
+func (l logger) WithField(key string, value interface{}) Logger {
+	return logger{l.FieldLogger.WithField(key, value)}
+}
+
+func (l logger) WithFields(fields Fields) Logger {
+	return logger{l.FieldLogger.WithFields(logrus.Fields(fields))}
+}
+
+func (l logger) WithError(err error) Logger {
+	return logger{l.FieldLogger.WithError(err)}
 }
