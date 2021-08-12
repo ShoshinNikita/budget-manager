@@ -14,7 +14,7 @@ import (
 func ProcessError(ctx context.Context, w http.ResponseWriter, respMsg string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   false,
 		Error:     respMsg,

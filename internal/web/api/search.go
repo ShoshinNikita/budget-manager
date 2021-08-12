@@ -78,7 +78,7 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	resp := models.SearchSpendsResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},

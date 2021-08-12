@@ -45,7 +45,7 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 
 	// Encode
 	resp := models.GetSpendTypesResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
@@ -91,7 +91,7 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	// Encode
 	w.WriteHeader(http.StatusCreated)
 	resp := models.AddSpendTypeResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
@@ -160,7 +160,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	log.Debug("Spend Type was successfully edited")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
@@ -231,7 +231,7 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 	log.Debug("Spend Type was successfully removed")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}

@@ -69,7 +69,7 @@ func (h IncomesHandlers) AddIncome(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.WriteHeader(http.StatusCreated)
 	resp := models.AddIncomeResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
@@ -123,7 +123,7 @@ func (h IncomesHandlers) EditIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Income was successfully edited")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
@@ -166,7 +166,7 @@ func (h IncomesHandlers) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Income was successfully removed")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}

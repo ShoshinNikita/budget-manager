@@ -30,7 +30,7 @@ func (req *AddSpendReq) SanitizeAndCheck() error {
 }
 
 type AddSpendResp struct {
-	Response
+	BaseResponse
 
 	ID uint `json:"id"`
 }

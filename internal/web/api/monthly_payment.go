@@ -72,7 +72,7 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 	// Encode
 	w.WriteHeader(http.StatusCreated)
 	resp := models.AddMonthlyPaymentResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
@@ -129,7 +129,7 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 	log.Debug("Monthly Payment was successfully edited")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
@@ -172,7 +172,7 @@ func (h MonthlyPaymentsHandlers) RemoveMonthlyPayment(w http.ResponseWriter, r *
 	log.Debug("Monthly Payment was successfully removed")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}

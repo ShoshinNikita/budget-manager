@@ -57,7 +57,7 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 
 	// Encode
 	resp := models.GetMonthResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},

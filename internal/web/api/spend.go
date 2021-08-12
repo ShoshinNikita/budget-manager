@@ -72,7 +72,7 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	// Encode
 	w.WriteHeader(http.StatusCreated)
 	resp := models.AddSpendResp{
-		Response: models.Response{
+		BaseResponse: models.BaseResponse{
 			RequestID: reqid.FromContext(ctx).ToString(),
 			Success:   true,
 		},
@@ -129,7 +129,7 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Spend was successfully edited")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}
@@ -172,7 +172,7 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	log.Debug("Spend was successfully removed")
 
 	// Encode
-	resp := models.Response{
+	resp := models.BaseResponse{
 		RequestID: reqid.FromContext(ctx).ToString(),
 		Success:   true,
 	}

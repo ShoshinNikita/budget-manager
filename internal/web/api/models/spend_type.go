@@ -5,7 +5,7 @@ import (
 )
 
 type GetSpendTypesResp struct {
-	Response
+	BaseResponse
 
 	SpendTypes []db.SpendType `json:"spend_types"`
 }
@@ -27,7 +27,7 @@ func (req *AddSpendTypeReq) SanitizeAndCheck() error {
 }
 
 type AddSpendTypeResp struct {
-	Response
+	BaseResponse
 
 	ID uint `json:"id"`
 }

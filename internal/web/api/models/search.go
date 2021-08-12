@@ -52,7 +52,7 @@ func (req *SearchSpendsReq) SanitizeAndCheck() error {
 }
 
 type SearchSpendsResp struct {
-	Response
+	BaseResponse
 
 	Spends []db.Spend `json:"spends"`
 }

@@ -30,7 +30,7 @@ func (req *AddMonthlyPaymentReq) SanitizeAndCheck() error {
 }
 
 type AddMonthlyPaymentResp struct {
-	Response
+	BaseResponse
 
 	ID uint `json:"id"`
 }

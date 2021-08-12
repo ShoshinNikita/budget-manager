@@ -19,8 +19,8 @@ type BaseRequest struct{}
 
 func (BaseRequest) request() {}
 
-// Response is a base response model that must be nested into all responses
-type Response struct {
+// BaseResponse is a base response model that must be nested into all responses
+type BaseResponse struct {
 	RequestID string `json:"request_id"`
 	Success   bool   `json:"success"`
 	// Error is specified only when success if false
@@ -49,7 +49,7 @@ func (req *GetMonthByDateReq) SanitizeAndCheck() error {
 }
 
 type GetMonthResp struct {
-	Response
+	BaseResponse
 
 	Month db.Month `json:"month"`
 }
