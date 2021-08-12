@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils/schema"
 )
 
@@ -16,7 +15,7 @@ type Request interface {
 }
 
 // DecodeRequest decodes request and checks its validity. It process error if needed
-func DecodeRequest(w http.ResponseWriter, r *http.Request, log logrus.FieldLogger, req Request) (ok bool) {
+func DecodeRequest(w http.ResponseWriter, r *http.Request, log logger.Logger, req Request) (ok bool) {
 	ctx := r.Context()
 
 	if err := r.ParseForm(); err != nil {

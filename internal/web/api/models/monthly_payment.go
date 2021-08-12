@@ -1,7 +1,7 @@
 package models
 
 type AddMonthlyPaymentReq struct {
-	Request
+	BaseRequest
 
 	MonthID uint `json:"month_id" validate:"required" example:"1"`
 
@@ -36,7 +36,7 @@ type AddMonthlyPaymentResp struct {
 }
 
 type EditMonthlyPaymentReq struct {
-	Request
+	BaseRequest
 
 	ID     uint     `json:"id" validate:"required" example:"1"`
 	Title  *string  `json:"title"`
@@ -64,7 +64,7 @@ func (req *EditMonthlyPaymentReq) SanitizeAndCheck() error {
 }
 
 type RemoveMonthlyPaymentReq struct {
-	Request
+	BaseRequest
 
 	ID uint `json:"id" validate:"required" example:"1"`
 }

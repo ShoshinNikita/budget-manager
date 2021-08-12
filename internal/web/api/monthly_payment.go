@@ -5,9 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
@@ -16,7 +15,7 @@ import (
 
 type MonthlyPaymentsHandlers struct {
 	db  MonthlyPaymentsDB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 type MonthlyPaymentsDB interface {
@@ -45,14 +44,9 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logrus.Fields{
-		"month_id": req.MonthID, "title": req.Title, "type_id": req.TypeID,
-		"notes": req.Notes, "cost": req.Cost,
-	})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("add Monthly Payment")
 	args := db.AddMonthlyPaymentArgs{
 		MonthID: req.MonthID,
 		Title:   req.Title,
@@ -73,7 +67,7 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 		return
 	}
 	log = log.WithField("id", id)
-	log.Info("Monthly Payment was successfully added")
+	log.Debug("Monthly Payment was successfully added")
 
 	// Encode
 	w.WriteHeader(http.StatusCreated)
@@ -107,13 +101,9 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logrus.Fields{
-		"id": req.ID, "title": req.Title, "notes": req.Notes, "type_id": req.TypeID, "cost": req.Cost,
-	})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("edit Monthly Payment")
 	args := db.EditMonthlyPaymentArgs{
 		ID:     req.ID,
 		Title:  req.Title,
@@ -136,7 +126,7 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 		}
 		return
 	}
-	log.Info("Monthly Payment was successfully edited")
+	log.Debug("Monthly Payment was successfully edited")
 
 	// Encode
 	resp := models.Response{
@@ -166,11 +156,9 @@ func (h MonthlyPaymentsHandlers) RemoveMonthlyPayment(w http.ResponseWriter, r *
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithField("id", req.ID)
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("remove Monthly Payment")
 	err := h.db.RemoveMonthlyPayment(ctx, req.ID)
 	if err != nil {
 		switch {
@@ -181,7 +169,7 @@ func (h MonthlyPaymentsHandlers) RemoveMonthlyPayment(w http.ResponseWriter, r *
 		}
 		return
 	}
-	log.Info("Monthly Payment was successfully removed")
+	log.Debug("Monthly Payment was successfully removed")
 
 	// Encode
 	resp := models.Response{

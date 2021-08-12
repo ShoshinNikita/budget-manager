@@ -5,9 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
@@ -16,7 +15,7 @@ import (
 
 type SpendsHandlers struct {
 	db  SpendsDB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 type SpendsDB interface {
@@ -45,14 +44,9 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logrus.Fields{
-		"day_id": req.DayID, "title": req.Title, "type_id": req.TypeID,
-		"notes": req.Notes, "cost": req.Cost,
-	})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("add Spend")
 	args := db.AddSpendArgs{
 		DayID:  req.DayID,
 		Title:  req.Title,
@@ -73,7 +67,7 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log = log.WithField("id", id)
-	log.Info("Spend was successfully added")
+	log.Debug("Spend was successfully added")
 
 	// Encode
 	w.WriteHeader(http.StatusCreated)
@@ -107,13 +101,9 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logrus.Fields{
-		"id": req.ID, "title": req.Title, "notes": req.Notes, "type_id": req.TypeID,
-	})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("edit Spend")
 	args := db.EditSpendArgs{
 		ID:     req.ID,
 		Title:  req.Title,
@@ -136,7 +126,7 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	log.Info("Spend was successfully edited")
+	log.Debug("Spend was successfully edited")
 
 	// Encode
 	resp := models.Response{
@@ -166,11 +156,9 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithField("id", req.ID)
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("remove Spend")
 	err := h.db.RemoveSpend(ctx, req.ID)
 	if err != nil {
 		switch {
@@ -181,7 +169,7 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	log.Info("Spend was successfully removed")
+	log.Debug("Spend was successfully removed")
 
 	// Encode
 	resp := models.Response{

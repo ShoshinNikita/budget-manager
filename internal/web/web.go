@@ -10,8 +10,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
 	"github.com/ShoshinNikita/budget-manager/static"
@@ -70,7 +70,7 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 
 type Server struct {
 	config Config
-	log    logrus.FieldLogger
+	log    logger.Logger
 	db     Database
 
 	server *http.Server
@@ -84,7 +84,7 @@ type Database interface {
 	pages.DB
 }
 
-func NewServer(cnf Config, db Database, log logrus.FieldLogger, version, gitHash string) *Server {
+func NewServer(cnf Config, db Database, log logger.Logger, version, gitHash string) *Server {
 	return &Server{
 		config: cnf,
 		db:     db,
@@ -113,7 +113,6 @@ func (s *Server) Prepare() {
 	}
 
 	// Add API routes
-	s.log.Debug("add routes")
 	s.addRoutes(router)
 	if s.config.EnableProfiling {
 		// Enable pprof handlers
@@ -147,10 +146,5 @@ func (s Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	if err := s.server.Shutdown(ctx); err != nil {
-		s.log.WithError(err).Errorf("couldn't shutdown server gracefully")
-		return err
-	}
-
-	return nil
+	return s.server.Shutdown(ctx)
 }

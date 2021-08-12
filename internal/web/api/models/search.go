@@ -9,7 +9,7 @@ import (
 
 // SearchSpendsReq is used to search for spends
 type SearchSpendsReq struct {
-	Request
+	BaseRequest
 
 	// Title can be in any case. Search will be performed by lowercased value
 	Title string `json:"title"`

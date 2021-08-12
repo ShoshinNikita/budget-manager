@@ -44,7 +44,7 @@ func main() {
 	app := app.NewApp(cfg, log, version, gitHash)
 
 	if err := app.PrepareComponents(); err != nil {
-		log.WithError(err).Fatalln("couldn't prepare components")
+		stdlog.Fatalf("couldn't prepare components: %s\n", err)
 	}
 
 	appErrCh := make(chan error, 1)

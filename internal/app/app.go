@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
@@ -17,7 +17,7 @@ type App struct {
 	gitHash string
 
 	db     Database
-	log    logrus.FieldLogger
+	log    logger.Logger
 	server *web.Server
 
 	shutdownSignal chan struct{}
@@ -32,7 +32,7 @@ type Database interface {
 }
 
 // NewApp returns a new instance of App
-func NewApp(cfg Config, log *logrus.Logger, version, gitHash string) *App {
+func NewApp(cfg Config, log logger.Logger, version, gitHash string) *App {
 	return &App{
 		config:  cfg,
 		version: version,
@@ -84,15 +84,13 @@ func (app *App) prepareDB() (err error) {
 }
 
 func (app *App) prepareWebServer() {
-	app.server = web.NewServer(
-		app.config.Server, app.db, app.log, app.version, app.gitHash,
-	)
+	app.server = web.NewServer(app.config.Server, app.db, app.log, app.version, app.gitHash)
 	app.server.Prepare()
 }
 
 // Run runs web server. This method should be called in a goroutine
 func (app *App) Run() error {
-	app.log.WithFields(logrus.Fields{
+	app.log.WithFields(logger.Fields{
 		"version":  app.version,
 		"git_hash": app.gitHash,
 	}).Info("start app")
@@ -135,7 +133,7 @@ func (app *App) startMonthInit() error {
 
 		select {
 		case now := <-time.After(after):
-			app.log.WithField("date", now.Format("2006-01-02")).Debug("init a new month")
+			app.log.WithField("date", now.Format("2006-01-02")).Info("init a new month")
 
 			if err := app.initMonth(now); err != nil {
 				return errors.Wrap(err, "couldn't init a new month")

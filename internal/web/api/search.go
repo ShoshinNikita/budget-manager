@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
@@ -16,7 +15,7 @@ import (
 
 type SearchHandlers struct {
 	db  SearchDB
-	log logrus.FieldLogger
+	log logger.Logger
 }
 
 type SearchDB interface {
@@ -41,17 +40,9 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 	if ok := utils.DecodeRequest(w, r, log, req); !ok {
 		return
 	}
-
-	log = log.WithFields(logrus.Fields{
-		"title": req.Title, "title_exactly": req.TitleExactly,
-		"notes": req.Notes, "notes_exactly": req.NotesExactly,
-		"after": req.After, "before": req.Before, "type_ids": req.TypeIDs,
-		"min_cost": req.MinCost, "max_cost": req.MaxCost,
-		"sort": req.Sort, "order": req.Order,
-	})
+	log = log.WithRequest(req)
 
 	// Process
-	log.Debug("search for Spends")
 	args := db.SearchSpendsArgs{
 		Title:        strings.ToLower(req.Title),
 		Notes:        strings.ToLower(req.Notes),

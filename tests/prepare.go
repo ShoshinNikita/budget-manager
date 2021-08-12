@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 )
 
 func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
@@ -37,7 +37,7 @@ func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
 
 	cfg.Server.Port = serverPort
 
-	app := app.NewApp(*cfg, logrus.New(), "", "")
+	app := app.NewApp(*cfg, logger.New(logger.Config{Level: "debug"}), "", "")
 	err := app.PrepareComponents()
 	require.NoError(err)
 

@@ -7,8 +7,8 @@ import (
 	"time"
 
 	auth "github.com/abbot/go-http-auth"
-	"github.com/sirupsen/logrus"
 
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 )
 
@@ -22,7 +22,7 @@ func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := reqid.FromContextToLogger(r.Context(), s.log)
-		log = log.WithFields(logrus.Fields{"ip": r.RemoteAddr})
+		log = log.WithFields(logger.Fields{"ip": r.RemoteAddr})
 
 		if username := basicAuthenticator.CheckAuth(r); username == "" {
 			// Auth has failed
@@ -82,7 +82,7 @@ func (s Server) loggingMiddleware(h http.Handler) http.Handler {
 		}
 
 		log := reqid.FromContextToLogger(r.Context(), s.log)
-		log = log.WithFields(logrus.Fields{"method": r.Method, "url": r.URL.Path})
+		log = log.WithFields(logger.Fields{"method": r.Method, "url": r.URL.Path})
 
 		log.Debug("start request")
 
@@ -91,7 +91,7 @@ func (s Server) loggingMiddleware(h http.Handler) http.Handler {
 		h.ServeHTTP(respWriter, r)
 		since := time.Since(now)
 
-		log.WithFields(logrus.Fields{
+		log.WithFields(logger.Fields{
 			"time":           since,
 			"status_code":    respWriter.statusCode,
 			"content_length": respWriter.contentLength,
