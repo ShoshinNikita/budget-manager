@@ -12,7 +12,7 @@ var fmtStringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 
 // structToFields maps fields of a passed structure to Fields. It returns empty fields
 // for a non-structure arguments.
-func structToFields(i interface{}) (fields Fields) {
+func structToFields(i interface{}, namePrefix string) (fields Fields) {
 	defer func() {
 		if r := recover(); r != nil {
 			fields = Fields{"struct_to_fields_panic": r, "type": fmt.Sprintf("%T", i)}
@@ -28,7 +28,7 @@ func structToFields(i interface{}) (fields Fields) {
 	fieldCount := v.NumField()
 	fields = make(Fields, fieldCount)
 	for i := 0; i < fieldCount; i++ {
-		name, skip := getName(t.Field(i))
+		name, skip := getName(t.Field(i), namePrefix)
 		if skip {
 			continue
 		}
@@ -75,7 +75,7 @@ func structToFields(i interface{}) (fields Fields) {
 			fields[name] = value
 
 		case reflect.Struct:
-			for k, v := range structToFields(f.Interface()) {
+			for k, v := range structToFields(f.Interface(), "") {
 				fields[name+"."+k] = v
 			}
 		}
@@ -83,13 +83,16 @@ func structToFields(i interface{}) (fields Fields) {
 	return fields
 }
 
-func getName(f reflect.StructField) (name string, skip bool) {
+func getName(f reflect.StructField, namePrefix string) (name string, skip bool) {
 	if !token.IsExported(f.Name) {
 		return "", true
 	}
 	name = f.Name
 	if v := f.Tag.Get("json"); v != "" {
 		name = v
+	}
+	if namePrefix != "" {
+		name = namePrefix + "." + name
 	}
 	return name, false
 }

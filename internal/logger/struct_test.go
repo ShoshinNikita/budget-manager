@@ -12,14 +12,15 @@ func TestStructToFields(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
-		in   interface{}
-		want Fields
+		in         interface{}
+		namePrefix string
+		want       Fields
 	}
 	runTestCases := func(t *testing.T, testCases []testCase) {
 		for _, tt := range testCases {
 			tt := tt
 			t.Run("", func(t *testing.T) {
-				got := structToFields(tt.in)
+				got := structToFields(tt.in, tt.namePrefix)
 				require.Equal(t, tt.want, got)
 			})
 		}
@@ -55,8 +56,9 @@ func TestStructToFields(t *testing.T) {
 				want: Fields{"a": 0.15, "b": "hello world", "C": map[string]float64{"1": 2}, "e": 10, "F": "<nil>"},
 			},
 			{
-				in:   S{A: 0, B: "", E: &iPtr},
-				want: Fields{"a": 0.0, "b": "", "C": "<nil>", "e": 10, "F": "<nil>"},
+				in:         S{A: 0, B: "", E: &iPtr},
+				namePrefix: "p",
+				want:       Fields{"p.a": 0.0, "p.b": "", "p.C": "<nil>", "p.e": 10, "p.F": "<nil>"},
 			},
 		})
 	})
@@ -88,8 +90,9 @@ func TestStructToFields(t *testing.T) {
 
 		runTestCases(t, []testCase{
 			{
-				in:   S{Embedded: Embedded{A: 1, B: 2}, A: "qwerty", Nested: Nested{X: 3}},
-				want: Fields{"Embedded.a": 1, "Embedded.b": 2, "a": "qwerty", "nested.x": 3, "nested.nested1.arr": "<nil>"},
+				in:         S{Embedded: Embedded{A: 1, B: 2}, A: "qwerty", Nested: Nested{X: 3}},
+				namePrefix: "req",
+				want:       Fields{"req.Embedded.a": 1, "req.Embedded.b": 2, "req.a": "qwerty", "req.nested.x": 3, "req.nested.nested1.arr": "<nil>"},
 			},
 		})
 	})
