@@ -19,12 +19,22 @@ type BaseRequest struct{}
 
 func (BaseRequest) request() {}
 
-// BaseResponse is a base response model that must be nested into all responses
+// All responses implement the Response interface
+type Response interface {
+	SetBaseResponse(BaseResponse)
+}
+
+// BaseResponse is a base response model that implements Response interface.
+// It must be nested into all responses
 type BaseResponse struct {
 	RequestID string `json:"request_id"`
 	Success   bool   `json:"success"`
 	// Error is specified only when success if false
 	Error string `json:"error,omitempty"`
+}
+
+func (r *BaseResponse) SetBaseResponse(newResp BaseResponse) {
+	*r = newResp
 }
 
 // -------------------------------------------------
