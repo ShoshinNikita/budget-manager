@@ -24,13 +24,14 @@ import (
 type Config struct { //nolint:maligned
 	Port int `env:"SERVER_PORT" envDefault:"8080"`
 
-	// UseEmbed defines whether server should use embedded templates and static files.
+	// UseEmbed defines whether server should use embedded templates and static files
 	UseEmbed bool `env:"SERVER_USE_EMBED" envDefault:"true"`
 
-	// SkipAuth disables auth. Works only in Debug mode!
+	// SkipAuth disables auth
 	SkipAuth bool `env:"SERVER_SKIP_AUTH"`
+
 	// Credentials is a list of pairs 'login:password' separated by comma.
-	// Example: "login:password,user:qwerty"
+	// Passwords must be hashed using BCrypt
 	Credentials Credentials `env:"SERVER_CREDENTIALS"`
 
 	EnableProfiling bool `env:"SERVER_ENABLE_PROFILING" envDefault:"false"`

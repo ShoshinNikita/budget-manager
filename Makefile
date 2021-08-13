@@ -124,7 +124,7 @@ define config
 	export SERVER_SKIP_AUTH = true
 	export SERVER_USE_EMBED = false
 	# user:qwerty
-	export SERVER_CREDENTIALS = user:$$$$apr1$$$$cpHMFyv.$$$$BSB0aaF3bOrTC2f3V2VYG/
+	export SERVER_CREDENTIALS = user:$$$$2y$$$$05$$$$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC
 	export SERVER_ENABLE_PROFILING = true
 endef
 

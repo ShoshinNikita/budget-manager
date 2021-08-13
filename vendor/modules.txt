@@ -1,6 +1,3 @@
-# github.com/abbot/go-http-auth v0.4.0
-## explicit
-github.com/abbot/go-http-auth
 # github.com/caarlos0/env/v6 v6.5.0
 ## explicit
 github.com/caarlos0/env/v6
@@ -76,12 +73,12 @@ go.opentelemetry.io/otel/metric/registry
 # go.opentelemetry.io/otel/trace v0.18.0
 go.opentelemetry.io/otel/trace
 # golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
+## explicit
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/pbkdf2
 # golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 ## explicit
-golang.org/x/net/context
 # golang.org/x/sys v0.0.0-20210309074719-68d13333faf2
 ## explicit
 golang.org/x/sys/cpu

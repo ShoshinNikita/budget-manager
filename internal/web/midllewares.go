@@ -1,33 +1,46 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	auth "github.com/abbot/go-http-auth"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
+	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
 
 // basicAuthMiddleware checks whether user is authorized
 func (s Server) basicAuthMiddleware(h http.Handler) http.Handler {
-	const realm = "Budget Manager"
+	errUnauthorized := errors.New("unauthorized")
 
-	basicAuthenticator := auth.NewBasicAuthenticator(realm, func(user, _ string) string {
-		return s.config.Credentials[user]
-	})
+	checkAuth := func(r *http.Request) bool {
+		username, password, ok := r.BasicAuth()
+		if !ok {
+			return false
+		}
+		hashedPassword, ok := s.config.Credentials[username]
+		if !ok {
+			return false
+		}
+
+		return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) == nil
+	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := reqid.FromContextToLogger(r.Context(), s.log)
+		ctx := r.Context()
+		log := reqid.FromContextToLogger(ctx, s.log)
 		log = log.WithFields(logger.Fields{"ip": r.RemoteAddr})
 
-		if username := basicAuthenticator.CheckAuth(r); username == "" {
-			// Auth has failed
+		if !checkAuth(r) {
 			log.Warn("invalid auth request")
-			basicAuthenticator.RequireAuth(w, r)
+
+			w.Header().Set("WWW-Authenticate", `Basic realm="Budget Manager"`)
+			utils.EncodeError(ctx, w, log, errUnauthorized, http.StatusUnauthorized)
 			return
 		}
 

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/app"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
+	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
 func TestAuth(t *testing.T) {
@@ -22,7 +24,7 @@ func TestAuth(t *testing.T) {
 			UseEmbed: true,
 			SkipAuth: false,
 			Credentials: web.Credentials{
-				"user": "$apr1$cpHMFyv.$BSB0aaF3bOrTC2f3V2VYG/", // user:qwerty
+				"user": "$2y$05$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC", // user:qwerty
 			},
 			EnableProfiling: false,
 		},
@@ -31,27 +33,23 @@ func TestAuth(t *testing.T) {
 
 	url := fmt.Sprintf("http://localhost:%d/api/search/spends", cfg.Server.Port)
 
+	const (
+		User  = "user"
+		Pass  = "qwerty"
+		Wrong = "123"
+	)
+
 	tests := []struct {
 		name               string
 		username, password string
-		wantStatusCode     int
+		//
+		wantAuthorized bool
 	}{
-		{
-			name:           "no auth",
-			wantStatusCode: http.StatusUnauthorized,
-		},
-		{
-			name:           "wrong credentials",
-			username:       "123",
-			password:       "123",
-			wantStatusCode: http.StatusUnauthorized,
-		},
-		{
-			name:           "correct credentials",
-			username:       "user",
-			password:       "qwerty",
-			wantStatusCode: http.StatusOK,
-		},
+		{name: "no auth"},
+		{name: "wrong username and password", username: Wrong, password: Wrong},
+		{name: "wrong username", username: Wrong, password: Pass},
+		{name: "wrong password", username: User, password: Wrong},
+		{name: "correct credentials", username: User, password: Pass, wantAuthorized: true},
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -67,9 +65,27 @@ func TestAuth(t *testing.T) {
 
 			resp, err := http.DefaultClient.Do(req)
 			require.NoError(err)
-			require.Equal(tt.wantStatusCode, resp.StatusCode)
+			defer resp.Body.Close()
 
-			resp.Body.Close()
+			var baseResp models.BaseResponse
+			dec := json.NewDecoder(resp.Body)
+			require.NoError(dec.Decode(&baseResp))
+			require.False(dec.More())
+
+			var (
+				wantStatusCode         = http.StatusUnauthorized
+				wantError              = "unauthorized"
+				wantAuthenticateHeader = `Basic realm="Budget Manager"`
+			)
+			if tt.wantAuthorized {
+				wantStatusCode = http.StatusOK
+				wantError = ""
+				wantAuthenticateHeader = ""
+			}
+
+			require.Equal(wantStatusCode, resp.StatusCode)
+			require.Equal(wantError, baseResp.Error)
+			require.Equal(wantAuthenticateHeader, resp.Header.Get("WWW-Authenticate"))
 		})
 	}
 }
