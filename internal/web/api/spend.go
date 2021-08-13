@@ -58,27 +58,21 @@ func (h SpendsHandlers) AddSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrDayNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		case errors.Is(err, db.ErrSpendTypeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
+			utils.EncodeError(ctx, w, log, err, http.StatusBadRequest)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't add Spend", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't add Spend", err)
 		}
 		return
 	}
 	log = log.WithField("id", id)
 	log.Debug("Spend was successfully added")
 
-	// Encode
-	w.WriteHeader(http.StatusCreated)
-	resp := models.AddSpendResp{
-		BaseResponse: models.BaseResponse{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.AddSpendResp{
 		ID: id,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp), utils.EncodeStatusCode(http.StatusCreated))
 }
 
 // @Summary Edit Spend
@@ -118,22 +112,17 @@ func (h SpendsHandlers) EditSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrSpendNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		case errors.Is(err, db.ErrSpendTypeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
+			utils.EncodeError(ctx, w, log, err, http.StatusBadRequest)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't edit Spend", err)
 		}
 		return
 	}
 	log.Debug("Spend was successfully edited")
 
-	// Encode
-	resp := models.BaseResponse{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }
 
 // @Summary Remove Spend
@@ -163,18 +152,13 @@ func (h SpendsHandlers) RemoveSpend(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrSpendNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't remove Spend", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't remove Spend", err)
 		}
 		return
 	}
 	log.Debug("Spend was successfully removed")
 
-	// Encode
-	resp := models.BaseResponse{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }

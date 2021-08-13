@@ -39,19 +39,14 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 	// Process
 	types, err := h.db.GetSpendTypes(ctx)
 	if err != nil {
-		utils.ProcessInternalError(ctx, log, w, "couldn't get Spend Types", err)
+		utils.EncodeInternalError(ctx, w, log, "couldn't get Spend Types", err)
 		return
 	}
 
-	// Encode
-	resp := models.GetSpendTypesResp{
-		BaseResponse: models.BaseResponse{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.GetSpendTypesResp{
 		SpendTypes: types,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp))
 }
 
 // @Summary Create Spend Type
@@ -82,22 +77,16 @@ func (h SpendTypesHandlers) AddSpendType(w http.ResponseWriter, r *http.Request)
 	}
 	id, err := h.db.AddSpendType(ctx, args)
 	if err != nil {
-		utils.ProcessInternalError(ctx, log, w, "couldn't add Spend Type", err)
+		utils.EncodeInternalError(ctx, w, log, "couldn't add Spend Type", err)
 		return
 	}
 	log = log.WithField("id", id)
 	log.Debug("Spend Type was successfully added")
 
-	// Encode
-	w.WriteHeader(http.StatusCreated)
-	resp := models.AddSpendTypeResp{
-		BaseResponse: models.BaseResponse{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.AddSpendTypeResp{
 		ID: id,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp), utils.EncodeStatusCode(http.StatusCreated))
 }
 
 // @Summary Edit Spend Type
@@ -125,18 +114,18 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	if req.ParentID != nil && *req.ParentID != 0 {
 		allSpendTypes, err := h.db.GetSpendTypes(ctx)
 		if err != nil {
-			utils.ProcessInternalError(ctx, log, w, "couldn't get all Spend Types to check for a cycle", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't get all Spend Types to check for a cycle", err)
 			return
 		}
 
 		hasCycle, err := checkSpendTypeForCycle(allSpendTypes, req.ID, *req.ParentID)
-		if err != nil {
-			err = errors.Wrap(err, "check for a cycle failed")
-			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
-			return
-		}
 		if hasCycle {
-			utils.ProcessError(ctx, w, "Spend Type with new parent type will have a cycle", http.StatusBadRequest)
+			err = errors.New("Spend Type with new parent type will have a cycle")
+		} else if err != nil {
+			err = errors.Wrap(err, "check for a cycle failed")
+		}
+		if err != nil {
+			utils.EncodeError(ctx, w, log, err, http.StatusBadRequest)
 			return
 		}
 	}
@@ -151,20 +140,15 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrSpendTypeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't edit Spend Type", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't edit Spend Type", err)
 		}
 		return
 	}
 	log.Debug("Spend Type was successfully edited")
 
-	// Encode
-	resp := models.BaseResponse{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }
 
 func checkSpendTypeForCycle(spendTypesSlice []db.SpendType, originalID, newParentID uint) (hasCycle bool, _ error) {
@@ -222,18 +206,13 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrSpendTypeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't remove Spend Type", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't remove Spend Type", err)
 		}
 		return
 	}
 	log.Debug("Spend Type was successfully removed")
 
-	// Encode
-	resp := models.BaseResponse{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }
