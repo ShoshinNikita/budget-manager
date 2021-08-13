@@ -57,25 +57,19 @@ func (h IncomesHandlers) AddIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrMonthNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't add Income", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't add Income", err)
 		}
 		return
 	}
 	log = log.WithField("id", id)
 	log.Debug("Income was successfully added")
 
-	// Encode
-	w.WriteHeader(http.StatusCreated)
-	resp := models.AddIncomeResp{
-		Response: models.Response{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.AddIncomeResp{
 		ID: id,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp), utils.EncodeStatusCode(http.StatusCreated))
 }
 
 // @Summary Edit Income
@@ -114,20 +108,15 @@ func (h IncomesHandlers) EditIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrIncomeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't edit Income", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't edit Income", err)
 		}
 		return
 	}
 	log.Debug("Income was successfully edited")
 
-	// Encode
-	resp := models.Response{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }
 
 // @Summary Remove Income
@@ -157,18 +146,13 @@ func (h IncomesHandlers) RemoveIncome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrIncomeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't remove Income", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't remove Income", err)
 		}
 		return
 	}
 	log.Debug("Income was successfully removed")
 
-	// Encode
-	resp := models.Response{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }

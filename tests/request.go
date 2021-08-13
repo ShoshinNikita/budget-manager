@@ -119,10 +119,11 @@ func (r Request) checkResponse(t *testing.T, resp *http.Response, customResp int
 	body, err := ioutil.ReadAll(resp.Body)
 	require.NoError(err, "couldn't read body")
 
-	var basicResp models.Response
+	var basicResp models.BaseResponse
 
 	err = json.Unmarshal(body, &basicResp)
 	require.NoError(err, "couldn't decode basic response")
+	require.NotEqual("", basicResp.RequestID)
 	require.Equal(r.Err, basicResp.Error)
 	require.Equal(r.Err == "", basicResp.Success)
 	require.Equal(r.StatusCode, resp.StatusCode)

@@ -19,12 +19,22 @@ type BaseRequest struct{}
 
 func (BaseRequest) request() {}
 
-// Response is a base response model that must be nested into all responses
-type Response struct {
+// All responses implement the Response interface
+type Response interface {
+	SetBaseResponse(BaseResponse)
+}
+
+// BaseResponse is a base response model that implements Response interface.
+// It must be nested into all responses
+type BaseResponse struct {
 	RequestID string `json:"request_id"`
 	Success   bool   `json:"success"`
 	// Error is specified only when success if false
 	Error string `json:"error,omitempty"`
+}
+
+func (r *BaseResponse) SetBaseResponse(newResp BaseResponse) {
+	*r = newResp
 }
 
 // -------------------------------------------------
@@ -49,7 +59,7 @@ func (req *GetMonthByDateReq) SanitizeAndCheck() error {
 }
 
 type GetMonthResp struct {
-	Response
+	BaseResponse
 
 	Month db.Month `json:"month"`
 }

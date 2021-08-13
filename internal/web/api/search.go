@@ -71,18 +71,13 @@ func (h SearchHandlers) SearchSpends(w http.ResponseWriter, r *http.Request) {
 
 	spends, err := h.db.SearchSpends(ctx, args)
 	if err != nil {
-		utils.ProcessInternalError(ctx, log, w, "couldn't search for Spends", err)
+		utils.EncodeInternalError(ctx, w, log, "couldn't search for Spends", err)
 		return
 	}
 	log.WithField("spend_number", len(spends)).Debug("finish Spend search")
 
-	// Encode
-	resp := models.SearchSpendsResp{
-		Response: models.Response{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.SearchSpendsResp{
 		Spends: spends,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp))
 }

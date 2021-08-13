@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/pkg/errors"
+
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web/utils/schema"
 )
@@ -19,7 +21,7 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logger.Logger, re
 	ctx := r.Context()
 
 	if err := r.ParseForm(); err != nil {
-		ProcessError(ctx, w, "couldn't parse form: "+err.Error(), http.StatusBadRequest)
+		EncodeError(ctx, w, log, errors.Wrap(err, "couldn't parse form"), http.StatusBadRequest)
 		return false
 	}
 
@@ -31,12 +33,12 @@ func DecodeRequest(w http.ResponseWriter, r *http.Request, log logger.Logger, re
 		err = decodeJSONRequest(r.Body, req)
 	}
 	if err != nil {
-		ProcessError(ctx, w, "couldn't decode request: "+err.Error(), http.StatusBadRequest)
+		EncodeError(ctx, w, log, errors.Wrap(err, "couldn't decode request"), http.StatusBadRequest)
 		return false
 	}
 
 	if err := req.SanitizeAndCheck(); err != nil {
-		ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
+		EncodeError(ctx, w, log, err, http.StatusBadRequest)
 		return false
 	}
 

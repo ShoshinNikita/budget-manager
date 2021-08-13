@@ -27,7 +27,7 @@ func (req *AddIncomeReq) SanitizeAndCheck() error {
 }
 
 type AddIncomeResp struct {
-	Response
+	BaseResponse
 
 	ID uint `json:"id"`
 }

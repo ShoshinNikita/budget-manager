@@ -58,27 +58,21 @@ func (h MonthlyPaymentsHandlers) AddMonthlyPayment(w http.ResponseWriter, r *htt
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrMonthNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		case errors.Is(err, db.ErrSpendTypeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
+			utils.EncodeError(ctx, w, log, err, http.StatusBadRequest)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't add Monthly Payment", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't add Monthly Payment", err)
 		}
 		return
 	}
 	log = log.WithField("id", id)
 	log.Debug("Monthly Payment was successfully added")
 
-	// Encode
-	w.WriteHeader(http.StatusCreated)
-	resp := models.AddMonthlyPaymentResp{
-		Response: models.Response{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.AddMonthlyPaymentResp{
 		ID: id,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp), utils.EncodeStatusCode(http.StatusCreated))
 }
 
 // @Summary Edit Monthly Payment
@@ -118,22 +112,17 @@ func (h MonthlyPaymentsHandlers) EditMonthlyPayment(w http.ResponseWriter, r *ht
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrMonthlyPaymentNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		case errors.Is(err, db.ErrSpendTypeNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusBadRequest)
+			utils.EncodeError(ctx, w, log, err, http.StatusBadRequest)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't edit Monthly Payment", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't edit Monthly Payment", err)
 		}
 		return
 	}
 	log.Debug("Monthly Payment was successfully edited")
 
-	// Encode
-	resp := models.Response{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }
 
 // @Summary Remove Monthly Payment
@@ -163,18 +152,13 @@ func (h MonthlyPaymentsHandlers) RemoveMonthlyPayment(w http.ResponseWriter, r *
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrMonthlyPaymentNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't remove Monthly Payment", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't remove Monthly Payment", err)
 		}
 		return
 	}
 	log.Debug("Monthly Payment was successfully removed")
 
-	// Encode
-	resp := models.Response{
-		RequestID: reqid.FromContext(ctx).ToString(),
-		Success:   true,
-	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log)
 }

@@ -48,20 +48,15 @@ func (h MonthsHandlers) GetMonthByDate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, db.ErrMonthNotExist):
-			utils.ProcessError(ctx, w, err.Error(), http.StatusNotFound)
+			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
 		default:
-			utils.ProcessInternalError(ctx, log, w, "couldn't get Month for passed year and month", err)
+			utils.EncodeInternalError(ctx, w, log, "couldn't get Month for passed year and month", err)
 		}
 		return
 	}
 
-	// Encode
-	resp := models.GetMonthResp{
-		Response: models.Response{
-			RequestID: reqid.FromContext(ctx).ToString(),
-			Success:   true,
-		},
+	resp := &models.GetMonthResp{
 		Month: month,
 	}
-	utils.EncodeResponse(w, r, log, resp)
+	utils.Encode(ctx, w, log, utils.EncodeResponse(resp))
 }
