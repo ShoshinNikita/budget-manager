@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/pkg/errors"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 const (

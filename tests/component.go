@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 type StartComponentFn func(*testing.T, *app.Config) *Component

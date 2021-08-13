@@ -3,7 +3,7 @@ package models
 import (
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 func sanitizeString(s *string) {

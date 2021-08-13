@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/pkg/errors"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 // SpendType represents spend type entity in PostgreSQL db

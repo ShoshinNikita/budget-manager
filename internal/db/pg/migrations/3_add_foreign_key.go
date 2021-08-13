@@ -2,7 +2,8 @@ package migrations
 
 import (
 	"github.com/go-pg/migrations/v8"
-	"github.com/pkg/errors"
+
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
 func registerAddForeignKeys(migrator *migrations.Collection) {
