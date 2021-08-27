@@ -11,6 +11,12 @@
 	}
 
 	#footer__theme-switcher {
+		border: 1px solid var(--border-color);
+		border-radius: 20px;
+		column-gap: 5px;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		padding: 3px 5px;
 		position: absolute;
 		right: 0;
 		top: 50%;
@@ -22,12 +28,15 @@
 	}
 
 	#footer__theme-switcher>button.feather-icon>svg {
-		height: 25px;
-		width: 25px;
+		/* Remove extra space */
+		display: block;
+		height: 20px;
+		width: 20px;
 	}
 
-	#footer__theme-switcher>button.hidden {
-		display: none;
+	#footer__theme-switcher>button.feather-icon.chosen>svg {
+		opacity: 1;
+		stroke: var(--icon-color--hover);
 	}
 </style>
 
@@ -43,36 +52,54 @@
 	</div>
 
 	<div id="footer__theme-switcher">
-		<button id="light-theme-btn" class="feather-icon hidden" onclick="toggleTheme()" title="Turn off Dark Theme">
+		<button id="light-theme-btn" class="feather-icon" title="Light Theme" onclick="switchTheme(lightTheme)">
 			{{ template "components/icon" "sun" }}
 		</button>
 
-		<button id="dark-theme-btn" class="feather-icon hidden" onclick="toggleTheme()" title="Turn on Dark Theme">
+		<button id="system-theme-btn" class="feather-icon" title="System Theme" onclick="switchTheme(systemTheme)">
+			{{ template "components/icon" "disc" }}
+		</button>
+
+		<button id="dark-theme-btn" class="feather-icon" title="Dark Theme" onclick="switchTheme(darkTheme)">
 			{{ template "components/icon" "moon" }}
 		</button>
 	</div>
 </div>
 
 <script>
-	window.addEventListener("load", updateThemeButton);
-	window.addEventListener(themeChangeEventName, updateThemeButton);
+	window.addEventListener("load", updateThemeButtons);
+	window.addEventListener(themeChangeEventName, updateThemeButtons);
 
 	const lightThemeBtn = document.getElementById("light-theme-btn");
+	const systemThemeBtn = document.getElementById("system-theme-btn");
 	const darkThemeBtn = document.getElementById("dark-theme-btn");
 
-	function updateThemeButton() {
-		if (isDarkTheme()) {
-			switchButton(lightThemeBtn, darkThemeBtn);
-		} else {
-			switchButton(darkThemeBtn, lightThemeBtn);
+	function updateThemeButtons() {
+		let highlight = null, reset = [];
+
+		switch (getLocalStorageTheme()) {
+			case lightTheme:
+				highlight = lightThemeBtn;
+				reset = [systemThemeBtn, darkThemeBtn];
+				break;
+
+			case systemTheme:
+				highlight = systemThemeBtn;
+				reset = [lightThemeBtn, darkThemeBtn];
+				break;
+
+			case darkTheme:
+				highlight = darkThemeBtn;
+				reset = [lightThemeBtn, systemThemeBtn,];
+				break;
 		}
-	}
 
-	function switchButton(show, hide) {
-		const className = "hidden";
+		const className = "chosen";
 
-		show.classList.remove(className);
-		hide.classList.add(className);
+		highlight.classList.add(className);
+		for (let i = 0; i < reset.length; i++) {
+			reset[i].classList.remove(className)
+		}
 	}
 </script>
 {{ end }}
