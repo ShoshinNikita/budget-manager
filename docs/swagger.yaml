@@ -345,14 +345,6 @@ definitions:
     - id
     type: object
   models.Response:
-    properties:
-      error:
-        description: Error is specified only when success if false
-        type: string
-      request_id:
-        type: string
-      success:
-        type: boolean
     type: object
   models.SearchSpendsResp:
     properties:
