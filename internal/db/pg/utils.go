@@ -13,7 +13,7 @@ import (
 
 // checkMonth checks if a Month with passed id exists
 func checkMonth(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*Month)(nil), id)
+	return checkModel(ctx, tx, (*MonthOverview)(nil), id)
 }
 
 // checkDay checks if a Day with passed id exists

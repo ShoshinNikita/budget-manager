@@ -32,7 +32,6 @@ func TestRecomputeMonth(t *testing.T) {
 					{Cost: toMoney(175)},
 					{Cost: toMoney(25)},
 				},
-				//
 				Days: []Day{
 					{},
 					{
@@ -45,6 +44,12 @@ func TestRecomputeMonth(t *testing.T) {
 				},
 			},
 			want: Month{
+				MonthOverview: MonthOverview{
+					DailyBudget: toMoney(200),
+					TotalIncome: toMoney(1000),
+					TotalSpend:  toMoney(-312),
+					Result:      toMoney(688),
+				},
 				Incomes: []Income{
 					{Income: toMoney(700)},
 					{Income: toMoney(150)},
@@ -54,8 +59,6 @@ func TestRecomputeMonth(t *testing.T) {
 					{Cost: toMoney(175)},
 					{Cost: toMoney(25)},
 				},
-				//
-				DailyBudget: toMoney(200),
 				Days: []Day{
 					{
 						Saldo: toMoney(200),
@@ -72,10 +75,6 @@ func TestRecomputeMonth(t *testing.T) {
 						Saldo: toMoney(688),
 					},
 				},
-				//
-				TotalIncome: toMoney(1000),
-				TotalSpend:  toMoney(-312),
-				Result:      toMoney(688),
 			},
 		},
 		{
@@ -96,10 +95,14 @@ func TestRecomputeMonth(t *testing.T) {
 				},
 			},
 			want: Month{
+				MonthOverview: MonthOverview{
+					DailyBudget: toMoney(250),
+					TotalIncome: toMoney(1000),
+					TotalSpend:  toMoney(-120),
+					Result:      toMoney(880),
+				},
 				Incomes:         []Income{{Income: toMoney(1000)}},
 				MonthlyPayments: nil,
-				//
-				DailyBudget: toMoney(250),
 				Days: []Day{
 					{
 						Saldo: toMoney(250),
@@ -116,10 +119,6 @@ func TestRecomputeMonth(t *testing.T) {
 						Saldo: toMoney(880),
 					},
 				},
-				//
-				TotalIncome: toMoney(1000),
-				TotalSpend:  toMoney(-120),
-				Result:      toMoney(880),
 			},
 		},
 	}

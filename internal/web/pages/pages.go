@@ -36,7 +36,7 @@ type Handlers struct {
 
 type DB interface {
 	GetMonthByDate(ctx context.Context, year int, month time.Month) (db.Month, error)
-	GetMonths(ctx context.Context, years ...int) ([]db.Month, error)
+	GetMonths(ctx context.Context, years ...int) ([]db.MonthOverview, error)
 
 	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
 
@@ -131,7 +131,7 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 		YearInterval string
 		Offset       int
 		//
-		Months      []db.Month
+		Months      []db.MonthOverview
 		TotalIncome money.Money
 		TotalSpend  money.Money
 		Result      money.Money
@@ -162,17 +162,17 @@ func (h Handlers) MonthsPage(w http.ResponseWriter, r *http.Request) {
 
 // getLastTwelveMonths returns the last 12 months according to the passed year and month. If some month
 // can't be found in the passed slice, its id will be 0
-func getLastTwelveMonths(endYear int, endMonth time.Month, months []db.Month) []db.Month {
+func getLastTwelveMonths(endYear int, endMonth time.Month, months []db.MonthOverview) []db.MonthOverview {
 	type key struct {
 		year  int
 		month time.Month
 	}
-	requiredMonths := make(map[key]db.Month)
+	requiredMonths := make(map[key]db.MonthOverview)
 
 	year, month := endYear, endMonth
 	for i := 0; i < 12; i++ {
 		// Months without data have zero id
-		requiredMonths[key{year, month}] = db.Month{ID: 0, Year: year, Month: month}
+		requiredMonths[key{year, month}] = db.MonthOverview{ID: 0, Year: year, Month: month}
 
 		month--
 		if month == 0 {
@@ -188,7 +188,7 @@ func getLastTwelveMonths(endYear int, endMonth time.Month, months []db.Month) []
 		}
 	}
 
-	months = make([]db.Month, 0, len(requiredMonths))
+	months = make([]db.MonthOverview, 0, len(requiredMonths))
 	for _, m := range requiredMonths {
 		months = append(months, m)
 	}

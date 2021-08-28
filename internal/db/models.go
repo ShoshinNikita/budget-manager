@@ -6,24 +6,30 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-type Month struct {
+// MonthOverview contains basic month data
+type MonthOverview struct {
 	ID uint `json:"id"`
 
 	Year  int        `json:"year"`
 	Month time.Month `json:"month" swaggertype:"integer"`
 
-	Incomes         []Income         `json:"incomes"`
-	MonthlyPayments []MonthlyPayment `json:"monthly_payments"`
-
 	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
 	DailyBudget money.Money `json:"daily_budget" swaggertype:"number"`
-	Days        []Day       `json:"days"`
 
 	TotalIncome money.Money `json:"total_income" swaggertype:"number"`
 	// TotalSpend is a cost of all Monthly Payments and Spends
 	TotalSpend money.Money `json:"total_spend" swaggertype:"number"`
 	// Result is TotalIncome - TotalSpend
 	Result money.Money `json:"result" swaggertype:"number"`
+}
+
+// Month contains detailed month data: list of incomes, monthly payments and days
+type Month struct {
+	MonthOverview
+
+	Incomes         []Income         `json:"incomes"`
+	MonthlyPayments []MonthlyPayment `json:"monthly_payments"`
+	Days            []Day            `json:"days"`
 }
 
 type Day struct {

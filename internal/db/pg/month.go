@@ -13,8 +13,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-// Month represents month entity in PostgreSQL db
-type Month struct {
+type MonthOverview struct {
 	tableName struct{} `pg:"months"`
 
 	ID uint `pg:"id,pk"`
@@ -22,24 +21,14 @@ type Month struct {
 	Year  int        `pg:"year"`
 	Month time.Month `pg:"month"`
 
-	Incomes         []Income         `pg:"rel:has-many,join_fk:month_id"`
-	MonthlyPayments []MonthlyPayment `pg:"rel:has-many,join_fk:month_id"`
-
-	// DailyBudget is a (TotalIncome - Cost of Monthly Payments) / Number of Days
 	DailyBudget money.Money `pg:"daily_budget,use_zero"`
-	Days        []Day       `pg:"rel:has-many,join_fk:month_id"`
-
 	TotalIncome money.Money `pg:"total_income,use_zero"`
-	// TotalSpend is a cost of all Monthly Payments and Spends
-	TotalSpend money.Money `pg:"total_spend,use_zero"`
-	// Result is TotalIncome - TotalSpend
-	Result money.Money `pg:"result,use_zero"`
+	TotalSpend  money.Money `pg:"total_spend,use_zero"`
+	Result      money.Money `pg:"result,use_zero"`
 }
 
-// ToCommon converts Month to common Month structure from
-// "github.com/ShoshinNikita/budget-manager/internal/db" package
-func (m Month) ToCommon() common.Month {
-	return common.Month{
+func (m MonthOverview) ToCommon() common.MonthOverview {
+	return common.MonthOverview{
 		ID:          m.ID,
 		Year:        m.Year,
 		Month:       m.Month,
@@ -47,6 +36,22 @@ func (m Month) ToCommon() common.Month {
 		TotalSpend:  m.TotalSpend,
 		DailyBudget: m.DailyBudget,
 		Result:      m.Result,
+	}
+}
+
+type Month struct {
+	MonthOverview
+
+	tableName struct{} `pg:"months"`
+
+	Incomes         []Income         `pg:"rel:has-many,join_fk:month_id"`
+	MonthlyPayments []MonthlyPayment `pg:"rel:has-many,join_fk:month_id"`
+	Days            []Day            `pg:"rel:has-many,join_fk:month_id"`
+}
+
+func (m Month) ToCommon() common.Month {
+	return common.Month{
+		MonthOverview: m.MonthOverview.ToCommon(),
 		//
 		Incomes: func() []common.Income {
 			incomes := make([]common.Income, 0, len(m.Incomes))
@@ -75,7 +80,7 @@ func (m Month) ToCommon() common.Month {
 func (db DB) GetMonthByDate(ctx context.Context, year int, month time.Month) (common.Month, error) {
 	var pgMonth Month
 	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
-		pgMonth, err = getMonth(tx, "year = ? AND month = ?", year, month)
+		pgMonth, err = getFullMonth(tx, "year = ? AND month = ?", year, month)
 		return err
 	})
 	if err != nil {
@@ -89,8 +94,8 @@ func (db DB) GetMonthByDate(ctx context.Context, year int, month time.Month) (co
 }
 
 // GetMonths returns months of passed years. Months doesn't contains relations (Incomes, Days and etc.)
-func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.Month, error) {
-	var pgMonths []Month
+func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.MonthOverview, error) {
+	var pgMonths []MonthOverview
 	query := db.db.ModelContext(ctx, &pgMonths).Where("year IN (?)", pg.In(years)).Order("id ASC")
 	if err := query.Select(); err != nil {
 		return nil, err
@@ -99,7 +104,7 @@ func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.Month, error
 		return nil, nil
 	}
 
-	months := make([]common.Month, 0, len(pgMonths))
+	months := make([]common.MonthOverview, 0, len(pgMonths))
 	for i := range pgMonths {
 		months = append(months, pgMonths[i].ToCommon())
 	}
@@ -109,7 +114,7 @@ func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.Month, error
 // InitMonth inits a month and days for the passed date
 func (db *DB) InitMonth(ctx context.Context, year int, month time.Month) error {
 	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		count, err := tx.ModelContext(ctx, (*Month)(nil)).Where("year = ? AND month = ?", year, month).Count()
+		count, err := tx.ModelContext(ctx, (*MonthOverview)(nil)).Where("year = ? AND month = ?", year, month).Count()
 		if err != nil {
 			return errors.Wrap(err, "couldn't check if the current month exists")
 		}
@@ -121,7 +126,7 @@ func (db *DB) InitMonth(ctx context.Context, year int, month time.Month) error {
 		// We have to init the current month
 
 		// Add the current month
-		currentMonth := &Month{Year: year, Month: month}
+		currentMonth := &MonthOverview{Year: year, Month: month}
 		_, err = tx.ModelContext(ctx, currentMonth).Returning("id").Insert()
 		if err != nil {
 			return errors.Wrap(err, "couldn't init the current month")
@@ -152,7 +157,7 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 
 	ctx := tx.Context()
 
-	m, err := getMonth(tx, "id = ?", monthID)
+	m, err := getFullMonth(tx, "id = ?", monthID)
 	if err != nil {
 		return errors.Wrap(err, "couldn't select month")
 	}
@@ -160,7 +165,7 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 	m = recomputeMonth(m)
 
 	// Update Month
-	query := tx.ModelContext(ctx, (*Month)(nil)).Where("id = ?", m.ID)
+	query := tx.ModelContext(ctx, (*MonthOverview)(nil)).Where("id = ?", m.ID)
 	query = query.Set("daily_budget = ?", m.DailyBudget)
 	query = query.Set("total_income = ?", m.TotalIncome)
 	query = query.Set("total_spend = ?", m.TotalSpend)
@@ -229,7 +234,7 @@ func recomputeMonth(m Month) Month {
 	return m
 }
 
-func getMonth(tx *pg.Tx, whereCond string, params ...interface{}) (m Month, err error) {
+func getFullMonth(tx *pg.Tx, whereCond string, params ...interface{}) (m Month, err error) {
 	err = tx.ModelContext(tx.Context(), &m).
 		Relation("Incomes", orderByID).
 		Relation("MonthlyPayments", orderByID).
