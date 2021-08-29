@@ -1,7 +1,12 @@
 package tests
 
 import (
+	"archive/zip"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"testing"
 	"time"
 
@@ -45,6 +50,14 @@ func TestBasicUsage(t *testing.T) {
 			t.FailNow()
 		}
 	}
+
+	// Check backups
+	t.Run("backup", func(t *testing.T) {
+		jsonBackup := getBackupFromJSON(t, host)
+		zipArchiveBackup := getBackupFromArchive(t, host)
+
+		require.Equal(t, jsonBackup, zipArchiveBackup)
+	})
 }
 
 func testBasicUsage_SpendTypes(t *testing.T, host string) {
@@ -75,19 +88,21 @@ func testBasicUsage_SpendTypes(t *testing.T, host string) {
 	}
 
 	// Check
+	expectedSpendTypes := []db.SpendType{
+		{ID: 1, Name: "food"},
+		{ID: 2, Name: "fastfood", ParentID: 1},
+		{ID: 3, Name: "pizza", ParentID: 1},
+		{ID: 4, Name: "travel"},
+		{ID: 6, Name: "house"},
+		{ID: 7, Name: "entertainment"},
+	}
+
 	var resp models.GetSpendTypesResp
 	RequestOK{GET, SpendTypesPath, nil}.Send(t, host, &resp)
-	require.Equal(
-		[]db.SpendType{
-			{ID: 1, Name: "food"},
-			{ID: 2, Name: "fastfood", ParentID: 1},
-			{ID: 3, Name: "pizza", ParentID: 1},
-			{ID: 4, Name: "travel"},
-			{ID: 6, Name: "house"},
-			{ID: 7, Name: "entertainment"},
-		},
-		resp.SpendTypes,
-	)
+	require.Equal(expectedSpendTypes, resp.SpendTypes)
+
+	backup := getBackupFromJSON(t, host)
+	require.Equal(expectedSpendTypes, backup.SpendTypes)
 }
 
 func testBasicUsage_Incomes(t *testing.T, host string) {
@@ -129,6 +144,9 @@ func testBasicUsage_Incomes(t *testing.T, host string) {
 	require.Equal(expectedIncomes, month.Incomes)
 
 	checkMonth(require, 3050, 0, 0, month)
+
+	backup := getBackupFromJSON(t, host)
+	require.Equal(expectedIncomes, backup.Incomes)
 }
 
 func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
@@ -170,6 +188,9 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 	require.Equal(expectedMonthlyPayments, month.MonthlyPayments)
 
 	checkMonth(require, 3050, -880, 0, month)
+
+	backup := getBackupFromJSON(t, host)
+	require.Equal(expectedMonthlyPayments, backup.MonthlyPayments)
 }
 
 func testBasicUsage_Spends(t *testing.T, host string) {
@@ -396,6 +417,11 @@ func testBasicUsage_SearchSpends(t *testing.T, host string) {
 			require.Equal(getSpends(tt.ids...), resp.Spends)
 		})
 	}
+
+	t.Run("backup", func(t *testing.T) {
+		backup := getBackupFromJSON(t, host)
+		require.Equal(t, allSpends, backup.Spends)
+	})
 }
 
 func getCurrentMonth(t *testing.T, host string) db.Month {
@@ -422,4 +448,54 @@ func checkMonth(require *require.Assertions, incomes, monthlyPayments, spends fl
 
 	dailyBudget := inc.Add(mp).Div(int64(len(month.Days)))
 	require.Equal(dailyBudget, month.DailyBudget)
+}
+
+func getBackupFromJSON(t *testing.T, host string) (backup models.Backup) {
+	var resp models.BackupResp
+	RequestOK{GET, "api/backup/json", nil}.Send(t, host, &resp)
+	return resp.Backup
+}
+
+func getBackupFromArchive(t *testing.T, host string) (backup models.Backup) {
+	require := require.New(t)
+
+	req, cancel := newRequest(t, GET, "http://"+host+"/api/backup/zip", nil)
+	defer cancel()
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(err)
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	require.NoError(err)
+
+	zipReader, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
+	require.NoError(err)
+	require.Len(zipReader.File, 4, "wrong number of files in a backup archive")
+
+	for _, f := range zipReader.File {
+		var target interface{}
+		switch f.Name {
+		case "incomes.json":
+			target = &backup.Incomes
+		case "monthly_payments.json":
+			target = &backup.MonthlyPayments
+		case "spends.json":
+			target = &backup.Spends
+		case "spend_types.json":
+			target = &backup.SpendTypes
+		default:
+			t.Fatalf("unexpected zip file %q", f.Name)
+		}
+
+		file, err := f.Open()
+		require.NoErrorf(err, "couldn't open %q", f.Name)
+
+		err = json.NewDecoder(file).Decode(target)
+		require.NoErrorf(err, "couldn't decode %q", f.Name)
+
+		err = file.Close()
+		require.NoErrorf(err, "couldn't close %q", f.Name)
+	}
+	return backup
 }
