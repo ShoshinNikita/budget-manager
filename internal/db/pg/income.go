@@ -38,6 +38,33 @@ func (in Income) ToCommon(year int, month time.Month) common.Income {
 	}
 }
 
+func (db DB) GetAllIncomes(ctx context.Context) ([]common.Income, error) {
+	var incomes []struct {
+		Income
+
+		Year  int        `pg:"year"`
+		Month time.Month `pg:"month"`
+	}
+	_, err := db.db.Query(&incomes, `
+		SELECT
+			incomes.*,
+			months.year,
+			months.month
+		FROM incomes
+		LEFT JOIN months ON months.id = incomes.month_id
+		ORDER BY incomes.id ASC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]common.Income, 0, len(incomes))
+	for _, i := range incomes {
+		res = append(res, i.ToCommon(i.Year, i.Month))
+	}
+	return res, nil
+}
+
 // AddIncome adds a new income with passed params
 func (db DB) AddIncome(ctx context.Context, args common.AddIncomeArgs) (id uint, err error) {
 	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {

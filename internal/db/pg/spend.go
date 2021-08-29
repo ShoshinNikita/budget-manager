@@ -42,6 +42,40 @@ func (s Spend) ToCommon(year int, month time.Month, day int) common.Spend {
 	}
 }
 
+func (db DB) GetAllSpends(ctx context.Context) ([]common.Spend, error) {
+	var spends []struct {
+		Spend
+
+		Year  int        `pg:"year"`
+		Month time.Month `pg:"month"`
+		Day   int        `pg:"day"`
+	}
+	_, err := db.db.Query(&spends, `
+			SELECT
+				spends.*,
+				months.year,
+				months.month,
+				days.day,
+				spend_types.id AS type__id,
+				spend_types.name AS type__name,
+				spend_types.parent_id AS type__parent_id
+			FROM spends
+			LEFT JOIN days ON days.id = spends.day_id
+			LEFT JOIN months ON months.id = days.month_id
+			LEFT JOIN spend_types AS spend_types ON spend_types.id = spends.type_id
+			ORDER BY spends.id ASC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]common.Spend, 0, len(spends))
+	for _, s := range spends {
+		res = append(res, s.ToCommon(s.Year, s.Month, s.Day))
+	}
+	return res, nil
+}
+
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, err error) {
 	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {

@@ -41,6 +41,37 @@ func (mp MonthlyPayment) ToCommon(year int, month time.Month) common.MonthlyPaym
 	}
 }
 
+func (db DB) GetAllMonthlyPayments(ctx context.Context) ([]common.MonthlyPayment, error) {
+	var monthlyPayments []struct {
+		MonthlyPayment
+
+		Year  int        `pg:"year"`
+		Month time.Month `pg:"month"`
+	}
+	_, err := db.db.Query(&monthlyPayments, `
+		SELECT
+			monthly_payments.*,
+			months.year,
+			months.month,
+			spend_types.id AS type__id,
+			spend_types.name AS type__name,
+			spend_types.parent_id AS type__parent_id
+		FROM monthly_payments
+		LEFT JOIN months ON months.id = monthly_payments.month_id
+		LEFT JOIN spend_types AS spend_types ON spend_types.id = monthly_payments.type_id
+		ORDER BY monthly_payments.id ASC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]common.MonthlyPayment, 0, len(monthlyPayments))
+	for _, mp := range monthlyPayments {
+		res = append(res, mp.ToCommon(mp.Year, mp.Month))
+	}
+	return res, nil
+}
+
 // AddMonthlyPayment adds new Monthly Payment
 func (db DB) AddMonthlyPayment(ctx context.Context, args common.AddMonthlyPaymentArgs) (id uint, err error) {
 	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
