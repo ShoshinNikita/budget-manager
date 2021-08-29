@@ -49,7 +49,7 @@ func (db DB) GetSpendType(ctx context.Context, id uint) (common.SpendType, error
 }
 
 // GetSpendTypes returns all Spend Types
-func (db DB) GetSpendTypes(ctx context.Context) ([]common.SpendType, error) {
+func (db DB) GetAllSpendTypes(ctx context.Context) ([]common.SpendType, error) {
 	var spendTypes []SpendType
 	query := db.db.ModelContext(ctx, &spendTypes).Order("id ASC")
 	if err := query.Select(); err != nil {

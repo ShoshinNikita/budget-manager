@@ -38,7 +38,7 @@ type DB interface {
 	GetMonthByDate(ctx context.Context, year int, month time.Month) (db.Month, error)
 	GetMonths(ctx context.Context, years ...int) ([]db.MonthOverview, error)
 
-	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
+	GetAllSpendTypes(ctx context.Context) ([]db.SpendType, error)
 
 	SearchSpends(ctx context.Context, args db.SearchSpendsArgs) ([]db.Spend, error)
 }
@@ -231,7 +231,7 @@ func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
+	dbSpendTypes, err := h.db.GetAllSpendTypes(ctx)
 	if err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Spend Types"), err)
 		return
@@ -318,7 +318,7 @@ func (h Handlers) SearchSpendsPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbSpendTypes, err := h.db.GetSpendTypes(ctx)
+	dbSpendTypes, err := h.db.GetAllSpendTypes(ctx)
 	if err != nil {
 		h.processInternalErrorWithPage(ctx, log, w, newDBErrorMessage("couldn't get Spend Types"), err)
 		return

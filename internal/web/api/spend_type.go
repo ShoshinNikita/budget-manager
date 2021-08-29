@@ -18,7 +18,7 @@ type SpendTypesHandlers struct {
 }
 
 type SpendTypesDB interface {
-	GetSpendTypes(ctx context.Context) ([]db.SpendType, error)
+	GetAllSpendTypes(ctx context.Context) ([]db.SpendType, error)
 	AddSpendType(ctx context.Context, args db.AddSpendTypeArgs) (id uint, err error)
 	EditSpendType(ctx context.Context, args db.EditSpendTypeArgs) error
 	RemoveSpendType(ctx context.Context, id uint) error
@@ -36,7 +36,7 @@ func (h SpendTypesHandlers) GetSpendTypes(w http.ResponseWriter, r *http.Request
 	log := reqid.FromContextToLogger(ctx, h.log)
 
 	// Process
-	types, err := h.db.GetSpendTypes(ctx)
+	types, err := h.db.GetAllSpendTypes(ctx)
 	if err != nil {
 		utils.EncodeInternalError(ctx, w, log, "couldn't get Spend Types", err)
 		return
@@ -111,7 +111,7 @@ func (h SpendTypesHandlers) EditSpendType(w http.ResponseWriter, r *http.Request
 	log = log.WithRequest(req)
 
 	if req.ParentID != nil && *req.ParentID != 0 {
-		allSpendTypes, err := h.db.GetSpendTypes(ctx)
+		allSpendTypes, err := h.db.GetAllSpendTypes(ctx)
 		if err != nil {
 			utils.EncodeInternalError(ctx, w, log, "couldn't get all Spend Types to check for a cycle", err)
 			return
