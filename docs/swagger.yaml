@@ -226,6 +226,37 @@ definitions:
       success:
         type: boolean
     type: object
+  models.Backup:
+    properties:
+      incomes:
+        items:
+          $ref: '#/definitions/db.Income'
+        type: array
+      monthly_payments:
+        items:
+          $ref: '#/definitions/db.MonthlyPayment'
+        type: array
+      spend_types:
+        items:
+          $ref: '#/definitions/db.SpendType'
+        type: array
+      spends:
+        items:
+          $ref: '#/definitions/db.Spend'
+        type: array
+    type: object
+  models.BackupResp:
+    properties:
+      backup:
+        $ref: '#/definitions/models.Backup'
+      error:
+        description: Error is specified only when success if false
+        type: string
+      request_id:
+        type: string
+      success:
+        type: boolean
+    type: object
   models.EditIncomeReq:
     properties:
       id:
@@ -369,6 +400,38 @@ info:
   title: Budget Manager API
   version: v0.2
 paths:
+  /api/backup/json:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BackupResp'
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Download all data as a JSON
+      tags:
+      - Backup
+  /api/backup/zip:
+    get:
+      produces:
+      - application/zip
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: body
+        "500":
+          description: Internal error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Download all data as a zip archive
+      tags:
+      - Backup
   /api/incomes:
     delete:
       consumes:

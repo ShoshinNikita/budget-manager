@@ -28,7 +28,7 @@ func (s Server) addRoutes(router *mux.Router) {
 		{methods: "GET", path: "/{year:[0-9]+}-{month:[0-9]+}", handler: pageHandlers.MonthPage},
 		{methods: "GET", path: "/search/spends", handler: pageHandlers.SearchSpendsPage},
 
-		// API
+		// Month
 		{methods: "GET", path: "/api/months/date", handler: apiHandlers.GetMonthByDate},
 		// Income
 		{methods: "POST", path: "/api/incomes", handler: apiHandlers.AddIncome},
@@ -47,7 +47,10 @@ func (s Server) addRoutes(router *mux.Router) {
 		{methods: "POST", path: "/api/spend-types", handler: apiHandlers.AddSpendType},
 		{methods: "PUT", path: "/api/spend-types", handler: apiHandlers.EditSpendType},
 		{methods: "DELETE", path: "/api/spend-types", handler: apiHandlers.RemoveSpendType},
-		// Other
+		// Backup
+		{methods: "GET", path: "/api/backup/json", handler: apiHandlers.BackupJSON},
+		{methods: "GET", path: "/api/backup/zip", handler: apiHandlers.BackupZipArchive},
+		// Search
 		{methods: "GET", path: "/api/search/spends", handler: apiHandlers.SearchSpends},
 	}
 	for _, r := range routes {

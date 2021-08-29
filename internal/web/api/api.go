@@ -9,6 +9,7 @@ type Handlers struct {
 	SpendsHandlers
 	SpendTypesHandlers
 	SearchHandlers
+	BackupHandlers
 }
 
 type DB interface {
@@ -18,15 +19,17 @@ type DB interface {
 	SpendsDB
 	SpendTypesDB
 	SearchDB
+	BackupDB
 }
 
 func NewHandlers(db DB, log logger.Logger) *Handlers {
 	return &Handlers{
-		MonthsHandlers:          MonthsHandlers{db: db, log: log},
-		IncomesHandlers:         IncomesHandlers{db: db, log: log},
-		MonthlyPaymentsHandlers: MonthlyPaymentsHandlers{db: db, log: log},
-		SpendsHandlers:          SpendsHandlers{db: db, log: log},
-		SpendTypesHandlers:      SpendTypesHandlers{db: db, log: log},
-		SearchHandlers:          SearchHandlers{db: db, log: log},
+		MonthsHandlers:          MonthsHandlers{db, log},
+		IncomesHandlers:         IncomesHandlers{db, log},
+		MonthlyPaymentsHandlers: MonthlyPaymentsHandlers{db, log},
+		SpendsHandlers:          SpendsHandlers{db, log},
+		SpendTypesHandlers:      SpendTypesHandlers{db, log},
+		SearchHandlers:          SearchHandlers{db, log},
+		BackupHandlers:          BackupHandlers{db, log},
 	}
 }
