@@ -1,30 +1,28 @@
 package pg
 
 import (
+	"bytes"
 	"context"
-	"strings"
+	"database/sql"
+	"fmt"
 	"time"
 
-	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/orm"
+	"github.com/Masterminds/squirrel"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 type MonthOverview struct {
-	tableName struct{} `pg:"months"`
-
-	ID uint `pg:"id,pk"`
-
-	Year  int        `pg:"year"`
-	Month time.Month `pg:"month"`
-
-	DailyBudget money.Money `pg:"daily_budget,use_zero"`
-	TotalIncome money.Money `pg:"total_income,use_zero"`
-	TotalSpend  money.Money `pg:"total_spend,use_zero"`
-	Result      money.Money `pg:"result,use_zero"`
+	ID          uint        `db:"id"`
+	Year        int         `db:"year"`
+	Month       time.Month  `db:"month"`
+	DailyBudget money.Money `db:"daily_budget"`
+	TotalIncome money.Money `db:"total_income"`
+	TotalSpend  money.Money `db:"total_spend"`
+	Result      money.Money `db:"result"`
 }
 
 func (m MonthOverview) ToCommon() common.MonthOverview {
@@ -42,11 +40,9 @@ func (m MonthOverview) ToCommon() common.MonthOverview {
 type Month struct {
 	MonthOverview
 
-	tableName struct{} `pg:"months"`
-
-	Incomes         []Income         `pg:"rel:has-many,join_fk:month_id"`
-	MonthlyPayments []MonthlyPayment `pg:"rel:has-many,join_fk:month_id"`
-	Days            []Day            `pg:"rel:has-many,join_fk:month_id"`
+	Incomes         []Income         `db:"-"`
+	MonthlyPayments []MonthlyPayment `db:"-"`
+	Days            []Day            `db:"-"`
 }
 
 func (m Month) ToCommon() common.Month {
@@ -78,43 +74,46 @@ func (m Month) ToCommon() common.Month {
 }
 
 func (db DB) GetMonthByDate(ctx context.Context, year int, month time.Month) (common.Month, error) {
-	var pgMonth Month
-	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
-		pgMonth, err = getFullMonth(tx, "year = ? AND month = ?", year, month)
+	var m Month
+	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) (err error) {
+		m, err = getFullMonth(tx, "year = ? AND month = ?", year, month)
 		return err
 	})
 	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			err = common.ErrMonthNotExist
 		}
 		return common.Month{}, err
 	}
 
-	return pgMonth.ToCommon(), nil
+	return m.ToCommon(), nil
 }
 
 // GetMonths returns months of passed years. Months doesn't contains relations (Incomes, Days and etc.)
 func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.MonthOverview, error) {
-	var pgMonths []MonthOverview
-	query := db.db.ModelContext(ctx, &pgMonths).Where("year IN (?)", pg.In(years)).Order("id ASC")
-	if err := query.Select(); err != nil {
+	var m []MonthOverview
+	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		return tx.SelectQuery(&m, sqlx.In(`SELECT * FROM months WHERE year IN (?) ORDER BY id ASC`, years))
+	})
+	if err != nil {
 		return nil, err
 	}
-	if len(pgMonths) == 0 {
+	if len(m) == 0 {
 		return nil, nil
 	}
 
-	months := make([]common.MonthOverview, 0, len(pgMonths))
-	for i := range pgMonths {
-		months = append(months, pgMonths[i].ToCommon())
+	res := make([]common.MonthOverview, 0, len(m))
+	for i := range m {
+		res = append(res, m[i].ToCommon())
 	}
-	return months, nil
+	return res, nil
 }
 
 // InitMonth inits a month and days for the passed date
 func (db *DB) InitMonth(ctx context.Context, year int, month time.Month) error {
-	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		count, err := tx.ModelContext(ctx, (*MonthOverview)(nil)).Where("year = ? AND month = ?", year, month).Count()
+	return db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		var count int
+		err := tx.Get(&count, `SELECT COUNT(*) FROM months WHERE year = ? AND month = ?`, year, month)
 		if err != nil {
 			return errors.Wrap(err, "couldn't check if the current month exists")
 		}
@@ -125,37 +124,31 @@ func (db *DB) InitMonth(ctx context.Context, year int, month time.Month) error {
 
 		// We have to init the current month
 
-		// Add the current month
-		currentMonth := &MonthOverview{Year: year, Month: month}
-		_, err = tx.ModelContext(ctx, currentMonth).Returning("id").Insert()
+		var monthID uint
+		err = tx.Get(&monthID, `INSERT INTO months(year, month) VALUES(?, ?) RETURNING id`, year, month)
 		if err != nil {
 			return errors.Wrap(err, "couldn't init the current month")
 		}
 
-		monthID := currentMonth.ID
+		query := squirrel.Insert("days").Columns("month_id", "day")
 
-		// Add days for the current month
 		daysNumber := daysInMonth(year, month)
-		days := make([]Day, daysNumber)
-		for i := range days {
-			days[i] = Day{MonthID: monthID, Day: i + 1, Saldo: 0}
+		for i := 0; i < daysNumber; i++ {
+			query = query.Values(monthID, i+1)
 		}
-
-		if _, err = tx.ModelContext(ctx, &days).Insert(); err != nil {
+		if _, err = tx.ExecQuery(query); err != nil {
 			return errors.Wrap(err, "couldn't insert days for the current month")
 		}
 		return nil
 	})
 }
 
-func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
+func (db DB) recomputeAndUpdateMonth(tx *sqlx.Tx, monthID uint) (err error) {
 	defer func() {
 		if err != nil {
 			err = errors.Wrap(err, "couldn't recompute the month budget")
 		}
 	}()
-
-	ctx := tx.Context()
 
 	m, err := getFullMonth(tx, "id = ?", monthID)
 	if err != nil {
@@ -165,28 +158,26 @@ func (db DB) recomputeAndUpdateMonth(tx *pg.Tx, monthID uint) (err error) {
 	m = recomputeMonth(m)
 
 	// Update Month
-	query := tx.ModelContext(ctx, (*MonthOverview)(nil)).Where("id = ?", m.ID)
-	query = query.Set("daily_budget = ?", m.DailyBudget)
-	query = query.Set("total_income = ?", m.TotalIncome)
-	query = query.Set("total_spend = ?", m.TotalSpend)
-	query = query.Set("result = ?", m.Result)
-	if _, err := query.Update(); err != nil {
-		return errors.Wrap(err, "couldn't update month")
-	}
+	_, err = tx.Exec(
+		`UPDATE months SET daily_budget = ?, total_income = ?, total_spend = ?, result = ? WHERE id = ?`,
+		m.DailyBudget, m.TotalIncome, m.TotalSpend, m.Result, m.ID,
+	)
 
 	// Update Days
 
-	values := strings.Repeat("(?, ?),", len(m.Days))
-	values = values[:len(values)-1]
-
-	params := make([]interface{}, 0, len(m.Days)*2)
-	for _, day := range m.Days {
-		params = append(params, day.ID, day.Saldo)
+	values := &bytes.Buffer{}
+	for i, day := range m.Days {
+		fmt.Fprintf(values, `(%d,%d)`, day.ID, int(day.Saldo))
+		if i+1 != len(m.Days) {
+			values.WriteByte(',')
+		}
 	}
 
 	_, err = tx.Exec(
-		"UPDATE days SET saldo = v.saldo FROM (values ?) AS v(id, saldo) WHERE days.id = v.id",
-		pg.SafeQuery(values, params...),
+		fmt.Sprintf(
+			`UPDATE days SET saldo = v.saldo FROM (values %s) AS v(id, saldo) WHERE days.id = v.id`,
+			values.String(),
+		),
 	)
 	if err != nil {
 		return errors.Wrap(err, "couldn't update days")
@@ -234,24 +225,66 @@ func recomputeMonth(m Month) Month {
 	return m
 }
 
-func getFullMonth(tx *pg.Tx, whereCond string, params ...interface{}) (m Month, err error) {
-	err = tx.ModelContext(tx.Context(), &m).
-		Relation("Incomes", orderByID).
-		Relation("MonthlyPayments", orderByID).
-		Relation("MonthlyPayments.Type").
-		Relation("Days", func(q *orm.Query) (*orm.Query, error) {
-			return q.Order("day ASC"), nil
-		}).
-		Relation("Days.Spends", orderByID).
-		Relation("Days.Spends.Type").
-		Where(whereCond, params...).
-		Select()
+func getFullMonth(tx *sqlx.Tx, whereCond string, args ...interface{}) (m Month, err error) {
+	err = tx.Get(&m.MonthOverview, `SELECT * from months WHERE `+whereCond, args...)
 	if err != nil {
-		return Month{}, err
+		return Month{}, errors.Wrap(err, "couldn't select month")
 	}
-	return m, nil
-}
 
-func orderByID(q *orm.Query) (*orm.Query, error) {
-	return q.Order("id ASC"), nil
+	err = tx.Select(&m.Incomes, `SELECT * FROM incomes WHERE month_id = ? ORDER BY id`, m.ID)
+	if err != nil {
+		return Month{}, errors.Wrap(err, "couldn't select incomes")
+	}
+	err = tx.Select(
+		&m.MonthlyPayments, `
+		SELECT
+			monthly_payments.*,
+			spend_types.id AS "type.id",
+			spend_types.name AS "type.name",
+			spend_types.parent_id AS "type.parent_id"
+		FROM monthly_payments
+		LEFT JOIN spend_types ON spend_types.id = monthly_payments.type_id
+		WHERE monthly_payments.month_id = ?
+		ORDER BY monthly_payments.id`, m.ID,
+	)
+	if err != nil {
+		return Month{}, errors.Wrap(err, "couldn't select monthly payments")
+	}
+
+	err = tx.Select(&m.Days, `SELECT * FROM days WHERE month_id = ? ORDER BY day`, m.ID)
+	if err != nil {
+		return Month{}, errors.Wrap(err, "couldn't select days")
+	}
+
+	dayIndexes := make(map[uint]int) // day id -> slice index
+	dayIDs := make([]int, 0, len(m.Days))
+	for i, d := range m.Days {
+		dayIndexes[d.ID] = i
+		dayIDs = append(dayIDs, int(d.ID))
+	}
+	var allSpends []Spend
+	err = tx.SelectQuery(&allSpends, sqlx.In(`
+		SELECT
+			spends.*,
+			spend_types.id AS "type.id",
+			spend_types.name AS "type.name",
+			spend_types.parent_id AS "type.parent_id"
+		FROM spends
+		LEFT JOIN spend_types ON spend_types.id = spends.type_id
+		WHERE spends.day_id IN (?)
+		ORDER BY spends.id`, dayIDs,
+	))
+	if err != nil {
+		return Month{}, errors.Wrap(err, "couldn't select spends")
+	}
+	for _, s := range allSpends {
+		dayIndex, ok := dayIndexes[s.DayID]
+		if !ok {
+			// Just in case
+			return Month{}, errors.Errorf("spend with id %d has unexpected day id: %d", s.ID, s.DayID)
+		}
+		m.Days[dayIndex].Spends = append(m.Days[dayIndex].Spends, s)
+	}
+
+	return m, nil
 }

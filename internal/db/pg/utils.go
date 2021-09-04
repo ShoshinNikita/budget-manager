@@ -1,10 +1,10 @@
 package pg
 
 import (
-	"context"
+	"fmt"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
 )
 
 // --------------------------------------------------
@@ -12,38 +12,39 @@ import (
 // --------------------------------------------------
 
 // checkMonth checks if a Month with passed id exists
-func checkMonth(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*MonthOverview)(nil), id)
+func checkMonth(tx *sqlx.Tx, id uint) bool {
+	return checkModel(tx, "months", id)
 }
 
 // checkDay checks if a Day with passed id exists
-func checkDay(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*Day)(nil), id)
+func checkDay(tx *sqlx.Tx, id uint) bool {
+	return checkModel(tx, "days", id)
 }
 
 // checkIncome checks if an Income with passed id exists
-func checkIncome(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*Income)(nil), id)
+func checkIncome(tx *sqlx.Tx, id uint) bool {
+	return checkModel(tx, "incomes", id)
 }
 
 // checkMonthlyPayment checks if a Monthly Payment with passed id exists
-func checkMonthlyPayment(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*MonthlyPayment)(nil), id)
+func checkMonthlyPayment(tx *sqlx.Tx, id uint) bool {
+	return checkModel(tx, "monthly_payments", id)
 }
 
 // checkSpend checks if a Spend with passed id exists
-func checkSpend(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*Spend)(nil), id)
+func checkSpend(tx *sqlx.Tx, id uint) bool {
+	return checkModel(tx, "spends", id)
 }
 
 // checkSpendType checks if a Spend Type with passed id exists
-func checkSpendType(ctx context.Context, tx *pg.Tx, id uint) bool {
-	return checkModel(ctx, tx, (*SpendType)(nil), id)
+func checkSpendType(tx *sqlx.Tx, id uint) bool {
+	return checkModel(tx, "spend_types", id)
 }
 
 // checkModel checks if a model with passed id exists
-func checkModel(ctx context.Context, tx *pg.Tx, model interface{}, id uint) bool {
-	c, err := tx.ModelContext(ctx, model).Where("id = ?", id).Count()
+func checkModel(tx *sqlx.Tx, table string, id uint) bool {
+	var c int
+	err := tx.Get(&c, fmt.Sprintf(`SELECT COUNT(*) FROM %s WHERE id = ?`, table), id)
 	if err != nil || c == 0 {
 		return false
 	}

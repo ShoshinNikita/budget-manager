@@ -2,29 +2,28 @@ package pg
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	"github.com/Masterminds/squirrel"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/types"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 // Spend represents spend entity in PostgreSQL db
 type Spend struct {
-	tableName struct{} `pg:"spends"`
+	ID     uint        `db:"id"`
+	DayID  uint        `db:"day_id"`
+	Title  string      `db:"title"`
+	TypeID types.Uint  `db:"type_id"`
+	Notes  string      `db:"notes"`
+	Cost   money.Money `db:"cost"`
 
-	// DayID is a foreign key to 'days' table
-	DayID uint `pg:"day_id"`
-
-	ID uint `pg:"id,pk"`
-
-	Title  string      `pg:"title"`
-	TypeID uint        `pg:"type_id"`
-	Type   *SpendType  `pg:"rel:has-one,fk:type_id"`
-	Notes  string      `pg:"notes"`
-	Cost   money.Money `pg:"cost,use_zero"`
+	Type *SpendType `db:"type"`
 }
 
 // ToCommon converts Spend to common Spend structure from
@@ -44,31 +43,27 @@ func (s Spend) ToCommon(year int, month time.Month, day int) common.Spend {
 
 // AddSpend adds a new Spend
 func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, err error) {
-	err = db.db.RunInTransaction(ctx, func(tx *pg.Tx) (err error) {
-		if !checkDay(ctx, tx, args.DayID) {
+	err = db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) (err error) {
+		if !checkDay(tx, args.DayID) {
 			return common.ErrDayNotExist
 		}
-		if args.TypeID != 0 && !checkSpendType(ctx, tx, args.TypeID) {
+		if args.TypeID != 0 && !checkSpendType(tx, args.TypeID) {
 			return common.ErrSpendTypeNotExist
 		}
 
-		spend := &Spend{
-			DayID:  args.DayID,
-			Title:  args.Title,
-			Notes:  args.Notes,
-			TypeID: args.TypeID,
-			Cost:   args.Cost,
-		}
-		if _, err := tx.ModelContext(ctx, spend).Returning("id").Insert(); err != nil {
-			return err
-		}
-		id = spend.ID
-
-		monthID, err := db.selectMonthIDByDayID(ctx, tx, args.DayID)
+		err = tx.Get(
+			&id,
+			`INSERT INTO spends(day_id, title, notes, type_id, cost) VALUES(?, ?, ?, ?, ?) RETURNING id`,
+			args.DayID, args.Title, args.Notes, types.Uint(args.TypeID), args.Cost,
+		)
 		if err != nil {
 			return err
 		}
 
+		monthID, err := db.selectMonthIDByDayID(tx, args.DayID)
+		if err != nil {
+			return err
+		}
 		return db.recomputeAndUpdateMonth(tx, monthID)
 	})
 	if err != nil {
@@ -80,43 +75,43 @@ func (db DB) AddSpend(ctx context.Context, args common.AddSpendArgs) (id uint, e
 
 // EditSpend edits existeng Spend
 func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
-	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		if !checkSpend(ctx, tx, args.ID) {
+	return db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		if !checkSpend(tx, args.ID) {
 			return common.ErrSpendNotExist
 		}
-		if args.TypeID != nil && *args.TypeID != 0 && !checkSpendType(ctx, tx, *args.TypeID) {
+		if args.TypeID != nil && *args.TypeID != 0 && !checkSpendType(tx, *args.TypeID) {
 			return common.ErrSpendTypeNotExist
 		}
 
-		dayID, err := db.selectSpendDayID(ctx, tx, args.ID)
+		dayID, err := db.selectSpendDayID(tx, args.ID)
 		if err != nil {
 			return err
 		}
 
-		query := tx.ModelContext(ctx, (*Spend)(nil)).Where("id = ?", args.ID)
+		query := squirrel.Update("spends").Where("id = ?", args.ID)
 		if args.Title != nil {
-			query = query.Set("title = ?", *args.Title)
+			query = query.Set("title", *args.Title)
 		}
 		if args.TypeID != nil {
 			if *args.TypeID == 0 {
-				query = query.Set("type_id = NULL")
+				query = query.Set("type_id", nil)
 			} else {
-				query = query.Set("type_id = ?", *args.TypeID)
+				query = query.Set("type_id", *args.TypeID)
 			}
 		}
 		if args.Notes != nil {
-			query = query.Set("notes = ?", *args.Notes)
+			query = query.Set("notes", *args.Notes)
 		}
 		if args.Cost != nil {
-			query = query.Set("cost = ?", *args.Cost)
+			query = query.Set("cost", *args.Cost)
 		}
-		if _, err := query.Update(); err != nil {
+		if _, err := tx.ExecQuery(query); err != nil {
 			return err
 		}
 
 		if args.Cost != nil {
 			// Recompute month only when cost has been changed
-			monthID, err := db.selectMonthIDByDayID(ctx, tx, dayID)
+			monthID, err := db.selectMonthIDByDayID(tx, dayID)
 			if err != nil {
 				return err
 			}
@@ -128,22 +123,22 @@ func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 
 // RemoveSpend removes Spend with passed id
 func (db DB) RemoveSpend(ctx context.Context, id uint) error {
-	return db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		if !checkSpend(ctx, tx, id) {
+	return db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		if !checkSpend(tx, id) {
 			return common.ErrSpendNotExist
 		}
 
-		dayID, err := db.selectSpendDayID(ctx, tx, id)
+		dayID, err := db.selectSpendDayID(tx, id)
 		if err != nil {
 			return err
 		}
 
-		_, err = tx.ModelContext(ctx, (*Spend)(nil)).Where("id = ?", id).Delete()
+		_, err = tx.Exec(`DELETE FROM spends WHERE id = ?`, id)
 		if err != nil {
 			return err
 		}
 
-		monthID, err := db.selectMonthIDByDayID(ctx, tx, dayID)
+		monthID, err := db.selectMonthIDByDayID(tx, dayID)
 		if err != nil {
 			return err
 		}
@@ -151,20 +146,18 @@ func (db DB) RemoveSpend(ctx context.Context, id uint) error {
 	})
 }
 
-func (DB) selectSpendDayID(ctx context.Context, tx *pg.Tx, id uint) (dayID uint, err error) {
-	query := tx.ModelContext(ctx, (*Spend)(nil)).Column("day_id").Where("id = ?", id)
-	err = query.Select(&dayID)
+func (DB) selectSpendDayID(tx *sqlx.Tx, id uint) (dayID uint, err error) {
+	err = tx.Get(&dayID, `SELECT day_id FROM spends WHERE id = ?`, id)
 	if err != nil {
 		return 0, errors.Wrap(err, "couldn't select day id of Spend")
 	}
 	return dayID, nil
 }
 
-func (DB) selectMonthIDByDayID(ctx context.Context, tx *pg.Tx, dayID uint) (monthID uint, err error) {
-	query := tx.ModelContext(ctx, (*Day)(nil)).Column("month_id").Where("id = ?", dayID)
-	err = query.Select(&monthID)
+func (DB) selectMonthIDByDayID(tx *sqlx.Tx, dayID uint) (monthID uint, err error) {
+	err = tx.Get(&monthID, `SELECT month_id FROM days WHERE id = ?`, dayID)
 	if err != nil {
-		if errors.Is(err, pg.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return 0, common.ErrDayNotExist
 		}
 		return 0, errors.Wrap(err, "couldn't get Month which contains Day with passed id")

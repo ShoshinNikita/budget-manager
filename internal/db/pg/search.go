@@ -4,42 +4,37 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/orm"
+	"github.com/Masterminds/squirrel"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]common.Spend, error) {
-	var pgSpends []searchSpendsModel
-	err := db.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
-		return db.buildSearchSpendsQuery(tx, args).Select(&pgSpends)
+	var spends []searchSpendsModel
+	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
+		return tx.SelectQuery(&spends, db.buildSearchSpendsQuery(args))
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	// Convert the internal model to the common one
-	spends := make([]common.Spend, 0, len(pgSpends))
-	for i := range pgSpends {
-		s := common.Spend{
-			ID:    pgSpends[i].ID,
-			Year:  pgSpends[i].Year,
-			Month: pgSpends[i].Month,
-			Day:   pgSpends[i].Day,
-			Title: pgSpends[i].Title,
-			Notes: pgSpends[i].Notes,
-			Cost:  pgSpends[i].Cost,
-		}
-		if pgSpends[i].Type.ID != 0 {
-			// Don't check if a name is empty because Spend Types with non-zero id always have a name
-			s.Type = pgSpends[i].Type.ToCommon()
-		}
-		spends = append(spends, s)
+	res := make([]common.Spend, 0, len(spends))
+	for _, s := range spends {
+		res = append(res, common.Spend{
+			ID:    s.ID,
+			Year:  s.Year,
+			Month: s.Month,
+			Day:   s.Day,
+			Title: s.Title,
+			Type:  s.Type.ToCommon(),
+			Notes: s.Notes,
+			Cost:  s.Cost,
+		})
 	}
-
-	return spends, nil
+	return res, nil
 }
 
 type searchSpendsModel struct {
@@ -82,22 +77,24 @@ type searchSpendsModel struct {
 //   ORDER BY month.year, month.month, day.day, spend.id;
 //
 //nolint:funlen
-func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Query {
-	query := tx.ModelContext(tx.Context(), (*Spend)(nil)).
-		ColumnExpr("spend.id AS id").
-		ColumnExpr("month.year AS year").
-		ColumnExpr("month.month AS month").
-		ColumnExpr("day.day AS day").
-		ColumnExpr("spend.title AS title").
-		ColumnExpr("spend.notes AS notes").
-		ColumnExpr("spend.cost AS cost").
-		ColumnExpr("spend_type.id AS type__id").
-		ColumnExpr("spend_type.name AS type__name").
-		ColumnExpr("spend_type.parent_id AS type__parent_id").
+func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBuilder {
+	query := squirrel.Select(
+		`spend.id AS id`,
+		`month.year AS year`,
+		`month.month AS month`,
+		`day.day AS day`,
+		`spend.title AS title`,
+		`spend.notes AS notes`,
+		`spend.cost AS cost`,
+		`spend_type.id AS "type.id"`,
+		`spend_type.name AS "type.name"`,
+		`spend_type.parent_id AS "type.parent_id"`,
+	).
+		From("spends AS spend").
 		//
-		Join("INNER JOIN days AS day ON day.id = spend.day_id").
-		Join("INNER JOIN months AS month ON month.id = day.month_id").
-		Join("LEFT JOIN spend_types AS spend_type ON spend_type.id = spend.type_id")
+		InnerJoin("days AS day ON day.id = spend.day_id").
+		InnerJoin("months AS month ON month.id = day.month_id").
+		LeftJoin("spend_types AS spend_type ON spend_type.id = spend.type_id")
 
 	if args.Title != "" {
 		title := "%" + args.Title + "%"
@@ -117,39 +114,49 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Q
 
 	switch {
 	case !args.After.IsZero() && !args.Before.IsZero():
-		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?",
-			args.After, args.Before)
+		query = query.Where(
+			"make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?",
+			formatTime(args.After), formatTime(args.Before),
+		)
 	case !args.After.IsZero():
-		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) >= ?", args.After)
+		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) >= ?", formatTime(args.After))
 	case !args.Before.IsZero():
-		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) <= ?", args.Before)
+		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) <= ?", formatTime(args.Before))
 	}
 
 	switch {
 	case args.MinCost != 0 && args.MaxCost != 0:
-		query = query.Where("spend.cost BETWEEN ? AND ?", args.MinCost, args.MaxCost)
+		query = query.Where("spend.cost BETWEEN ? AND ?", int(args.MinCost), int(args.MaxCost))
 	case args.MinCost != 0:
-		query = query.Where("spend.cost >= ?", args.MinCost)
+		query = query.Where("spend.cost >= ?", int(args.MinCost))
 	case args.MaxCost != 0:
-		query = query.Where("spend.cost <= ?", args.MaxCost)
+		query = query.Where("spend.cost <= ?", int(args.MaxCost))
 	}
 
-	query = query.WhereGroup(func(query *orm.Query) (*orm.Query, error) {
-		typeIDs := args.TypeIDs
-		for i, id := range typeIDs {
-			if id == 0 {
-				// Search for spends without type
-				query = query.Where("spend.type_id IS NULL")
-				typeIDs = append(typeIDs[:i], typeIDs[i+1:]...)
-				break
+	if len(args.TypeIDs) != 0 {
+		query = query.Where(func() (or squirrel.Or) {
+			// We have to convert []uint to []int because the limitation of github.com/Masterminds/squirrel:
+			// https://github.com/Masterminds/squirrel/issues/114
+			typeIDs := make([]int, 0, len(args.TypeIDs))
+			for _, id := range args.TypeIDs {
+				typeIDs = append(typeIDs, int(id))
 			}
-		}
 
-		if len(typeIDs) != 0 {
-			query = query.WhereOr("spend.type_id IN (?)", pg.In(typeIDs))
-		}
-		return query, nil
-	})
+			for i, id := range typeIDs {
+				if id == 0 {
+					// Search for spends without type
+					or = append(or, squirrel.Eq{"spend.type_id": nil})
+					typeIDs = append(typeIDs[:i], typeIDs[i+1:]...)
+					break
+				}
+			}
+
+			if len(typeIDs) != 0 {
+				or = append(or, squirrel.Eq{"spend.type_id": typeIDs})
+			}
+			return or
+		}())
+	}
 
 	var orders []string
 	switch args.Sort {
@@ -166,7 +173,13 @@ func (DB) buildSearchSpendsQuery(tx *pg.Tx, args common.SearchSpendsArgs) *orm.Q
 		}
 	}
 	orders = append(orders, "spend.id")
-	query = query.Order(orders...)
+	query = query.OrderBy(orders...)
 
 	return query
+}
+
+func formatTime(t time.Time) string {
+	// TODO: should we use different layout? This layout is used by github.com/go-pg/pg
+	const layout = "2006-01-02 15:04:05.999999999-07:00:00"
+	return t.Format(layout)
 }

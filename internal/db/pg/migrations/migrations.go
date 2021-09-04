@@ -1,24 +1,43 @@
 package migrations
 
-import "github.com/go-pg/migrations/v8"
+import (
+	"github.com/lopezator/migrator"
 
-const migrationTable = "migrations"
+	"github.com/ShoshinNikita/budget-manager/internal/logger"
+)
+
+const MigrationTable = "migrations"
 
 // NewMigrator creates a new migrator and registers all migrations
-func NewMigrator() *migrations.Collection {
-	migrator := migrations.NewCollection().SetTableName(migrationTable).DisableSQLAutodiscover(true)
-	registerMigrations(migrator)
-
-	return migrator
+func NewMigrator(log logger.Logger) (*migrator.Migrator, error) {
+	return migrator.New(
+		migrator.TableName(MigrationTable),
+		migrator.WithLogger(migratorLogger{log}),
+		migrator.Migrations(
+			&migrator.Migration{
+				Name: "init",
+				Func: initUp,
+			},
+			&migrator.Migration{
+				Name: "add NOT NULL constraints",
+				Func: addNotNullUp,
+			},
+			&migrator.Migration{
+				Name: "add FOREIGN KEY constraints",
+				Func: addForeignKeysUp,
+			},
+			&migrator.Migration{
+				Name: "add support of nested types",
+				Func: addParentIDToSpendTypesUp,
+			},
+		),
+	)
 }
 
-// Number of registered migrations. It can be used to check whether we registered all migrations
-const MigrationNumber = 4
+type migratorLogger struct {
+	log logger.Logger
+}
 
-// RegisterMigrations registers all migrations
-func registerMigrations(migrator *migrations.Collection) {
-	registerInit(migrator)
-	registerAddNotNull(migrator)
-	registerAddForeignKeys(migrator)
-	registerAddParentIDToSpendTypes(migrator)
+func (l migratorLogger) Printf(format string, args ...interface{}) {
+	l.log.Debugf(format, args...)
 }

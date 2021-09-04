@@ -1,14 +1,17 @@
 // Package pg provides a PostgreSQL implementation for DB
 package pg
 
+//nolint:gci
 import (
 	"context"
-	"strconv"
+	"fmt"
 	"time"
 
-	"github.com/go-pg/pg/v10"
+	_ "github.com/lib/pq" // register PostgreSQL driver
 
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/types"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
@@ -26,21 +29,24 @@ type Config struct {
 	Database string `env:"DB_PG_DATABASE" envDefault:"postgres"`
 }
 
+func (c Config) toURL() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", c.User, c.Password, c.Host, c.Port, c.Database)
+}
+
 type DB struct {
-	db  *pg.DB
+	db  *sqlx.DB
 	log logger.Logger
 }
 
 // NewDB creates a new connection to the db and pings it
 func NewDB(config Config, log logger.Logger) (*DB, error) {
+	conn, err := sqlx.Open("postgres", config.toURL(), sqlx.Dollar, log)
+	if err != nil {
+		return nil, errors.Wrap(err, "couldn't open a connection to db")
+	}
 	db := &DB{
 		log: log.WithField("db_type", "pg"),
-		db: pg.Connect(&pg.Options{
-			Addr:     config.Host + ":" + strconv.Itoa(config.Port),
-			User:     config.User,
-			Password: config.Password,
-			Database: config.Database,
-		}),
+		db:  conn,
 	}
 
 	// Try to ping the DB
@@ -62,35 +68,16 @@ func NewDB(config Config, log logger.Logger) (*DB, error) {
 	return db, nil
 }
 
-// Prepare prepares the database:
-//   - create tables
-//   - init tables (add days for current month if needed)
-//   - run some subproccess
-//
+// Prepare runs the migrations
 func (db *DB) Prepare() error {
-	// Create a new migrator
-	migrator := migrations.NewMigrator()
-
-	// Check number of migrations
-	if len(migrator.Migrations()) != migrations.MigrationNumber {
-		return errors.Errorf("invalid number of registered migrations: %d (want %d)",
-			len(migrator.Migrations()), migrations.MigrationNumber)
-	}
-
-	// Init migration table
-	if _, _, err := migrator.Run(db.db, "init"); err != nil {
-		return errors.Wrap(err, "couldn't init migration table")
-	}
-
-	// Run migrations
-	oldVersion, newVersion, err := migrator.Run(db.db, "up")
+	migrator, err := migrations.NewMigrator(db.log)
 	if err != nil {
-		return errors.Wrap(err, "couldn't run migrations")
+		return errors.Wrap(err, "couldn't prepare migrator")
 	}
 
-	db.log.WithFields(logger.Fields{
-		"old_version": oldVersion, "new_version": newVersion,
-	}).Debug("migration process was finished")
+	if err := migrator.Migrate(db.db.GetInternalDB()); err != nil {
+		return errors.Wrap(err, "couldn't apply migrations")
+	}
 
 	// Check the tables
 	if err := db.checkCreatedTables(); err != nil {
@@ -105,10 +92,11 @@ func (db *DB) Prepare() error {
 //nolint:funlen
 func (db *DB) checkCreatedTables() error {
 	const tableNumber = 7
+
 	var n int
-	_, err := db.db.Query(pg.Scan(&n),
-		`SELECT COUNT(DISTINCT table_name) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'public'`,
-	)
+	err := db.db.RunInTransaction(context.Background(), func(tx *sqlx.Tx) error {
+		return tx.Get(&n, `SELECT COUNT(DISTINCT table_name) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'public'`)
+	})
 	if err != nil {
 		return errors.Wrap(err, "couldn't get number of tables")
 	}
@@ -117,10 +105,10 @@ func (db *DB) checkCreatedTables() error {
 	}
 
 	type column struct {
-		Name    string `pg:"column_name"`
-		Type    string `pg:"data_type"`
-		IsNull  bool   `pg:"is_nullable"`
-		Default string `pg:"column_default"`
+		Name    string       `db:"column_name"`
+		Type    string       `db:"data_type"`
+		IsNull  bool         `db:"is_nullable"`
+		Default types.String `db:"column_default"`
 	}
 	tables := []struct {
 		name    string
@@ -188,23 +176,20 @@ func (db *DB) checkCreatedTables() error {
 				{Name: "parent_id", Type: "bigint", IsNull: true},
 			},
 		},
-		{
-			name: "migrations",
-			columns: []column{
-				{Name: "created_at", Type: "timestamp with time zone", IsNull: true},
-				{Name: "id", Type: "integer", Default: "nextval('migrations_id_seq'::regclass)"},
-				{Name: "version", Type: "bigint", IsNull: true},
-			},
-		},
+		// Skip table for migrations
 	}
-	var columnsInDB []column
 	for _, table := range tables {
-		_, err := db.db.Query(&columnsInDB,
-			`SELECT column_name, data_type, is_nullable::bool , column_default
-			   FROM INFORMATION_SCHEMA.COLUMNS
-			  WHERE table_name = ?
-			  ORDER BY column_name`, table.name,
-		)
+		var columnsInDB []column
+		err := db.db.RunInTransaction(context.Background(), func(tx *sqlx.Tx) error {
+			return tx.Select(
+				&columnsInDB,
+				`SELECT column_name, data_type, is_nullable::bool, column_default
+				FROM INFORMATION_SCHEMA.COLUMNS
+				WHERE table_name = ?
+				ORDER BY column_name`,
+				table.name,
+			)
+		})
 		if err != nil {
 			return errors.Wrapf(err, "couldn't get description of table '%s'", table.name)
 		}

@@ -7,8 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/orm"
 	"github.com/stretchr/testify/require"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -18,15 +16,15 @@ import (
 func TestBuildSearchSpendsQuery(t *testing.T) {
 	t.Parallel()
 
-	const defaultOrderByQuery = `ORDER BY "month"."year", "month"."month", "day"."day", "spend"."id"`
+	const defaultOrderByQuery = `ORDER BY month.year, month.month, day.day, spend.id`
 
 	buildWhereQuery := func(whereQuery string, orderByQuery string) string {
 		query := `
 			SELECT spend.id AS id, month.year AS year, month.month AS month, day.day AS day,
 			       spend.title AS title, spend.notes AS notes, spend.cost AS cost,
-			       spend_type.id AS type__id, spend_type.name AS type__name, spend_type.parent_id AS type__parent_id
+			       spend_type.id AS "type.id", spend_type.name AS "type.name", spend_type.parent_id AS "type.parent_id"
 
-			 FROM "spends" AS "spend"
+			 FROM spends AS spend
 			      INNER JOIN days AS day
 			      ON day.id = spend.day_id
 
@@ -44,145 +42,147 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 	}
 
 	tests := []struct {
-		desc     string
-		args     common.SearchSpendsArgs
-		reqQuery string
+		desc      string
+		args      common.SearchSpendsArgs
+		wantQuery string
+		wantArgs  []interface{}
 	}{
-		// Notes:
-		//  - we don't add ';' because orm.Query.AppendQuery returns query without it.
-		//  - some names should be surrounded by quotes because go-pg escapes column and table names
 		{
-			desc:     "no args",
-			reqQuery: buildWhereQuery("", defaultOrderByQuery), // empty WHERE clause
-			args:     common.SearchSpendsArgs{},
+			desc:      "no args",
+			wantQuery: buildWhereQuery("", defaultOrderByQuery), // empty WHERE clause
+			args:      common.SearchSpendsArgs{},
 		},
 		{
-			desc:     "specify title",
-			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE '%rent%')`, defaultOrderByQuery),
+			desc: "specify title",
 			args: common.SearchSpendsArgs{
 				Title: "rent",
 			},
+			wantQuery: buildWhereQuery(`WHERE LOWER(spend.title) LIKE ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{"%rent%"},
 		},
 		{
-			desc:     "specify title (exactly)",
-			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE 'rent')`, defaultOrderByQuery),
+			desc: "specify title (exactly)",
 			args: common.SearchSpendsArgs{
 				Title:        "rent",
 				TitleExactly: true,
 			},
+			wantQuery: buildWhereQuery(`WHERE LOWER(spend.title) LIKE ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{"rent"},
 		},
 		{
-			desc:     "specify notes",
-			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.notes) LIKE '%note%')`, defaultOrderByQuery),
+			desc: "specify notes",
 			args: common.SearchSpendsArgs{
 				Notes: "note",
 			},
+			wantQuery: buildWhereQuery(`WHERE LOWER(spend.notes) LIKE ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{"%note%"},
 		},
 		{
-			desc:     "specify notes (exactly)",
-			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.notes) LIKE 'note')`, defaultOrderByQuery),
+			desc: "specify notes (exactly)",
 			args: common.SearchSpendsArgs{
 				Notes:        "note",
 				NotesExactly: true,
 			},
+			wantQuery: buildWhereQuery(`WHERE LOWER(spend.notes) LIKE ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{"note"},
 		},
 		{
 			desc: "specify title and notes",
-			reqQuery: buildWhereQuery(
-				`WHERE (LOWER(spend.title) LIKE 'rent') AND (LOWER(spend.notes) LIKE '%note%')`,
-				defaultOrderByQuery,
-			),
 			args: common.SearchSpendsArgs{
 				Title:        "rent",
 				TitleExactly: true,
 				Notes:        "note",
 			},
+			wantQuery: buildWhereQuery(
+				`WHERE LOWER(spend.title) LIKE ? AND LOWER(spend.notes) LIKE ?`,
+				defaultOrderByQuery,
+			),
+			wantArgs: []interface{}{"rent", "%note%"},
 		},
 		{
 			desc: "specify after",
-			reqQuery: buildWhereQuery(
-				`WHERE (make_date(month.year::int, month.month::int, day.day::int) >= '2018-01-15 15:37:00+00:00:00')`,
-				defaultOrderByQuery,
-			),
 			args: common.SearchSpendsArgs{
 				After: time.Date(2018, time.January, 15, 15, 37, 0, 0, time.UTC),
 			},
+			wantQuery: buildWhereQuery(
+				`WHERE make_date(month.year::int, month.month::int, day.day::int) >= ?`,
+				defaultOrderByQuery,
+			),
+			wantArgs: []interface{}{"2018-01-15 15:37:00+00:00:00"},
 		},
 		{
 			desc: "specify before",
-			reqQuery: buildWhereQuery(
-				`WHERE (make_date(month.year::int, month.month::int, day.day::int) <= '2018-07-28 15:37:18+00:00:00')`,
-				defaultOrderByQuery,
-			),
 			args: common.SearchSpendsArgs{
 				Before: time.Date(2018, time.July, 28, 15, 37, 18, 0, time.UTC),
 			},
+			wantQuery: buildWhereQuery(
+				`WHERE make_date(month.year::int, month.month::int, day.day::int) <= ?`,
+				defaultOrderByQuery,
+			),
+			wantArgs: []interface{}{"2018-07-28 15:37:18+00:00:00"},
 		},
 		{
 			desc: "specify after and before",
-			reqQuery: buildWhereQuery(
-				`WHERE (make_date(month.year::int, month.month::int, day.day::int) BETWEEN
-					   '2018-01-15 15:37:00+00:00:00' AND '2018-07-28 15:37:18+00:00:00')`,
-				defaultOrderByQuery,
-			),
 			args: common.SearchSpendsArgs{
 				After:  time.Date(2018, time.January, 15, 15, 37, 0, 0, time.UTC),
 				Before: time.Date(2018, time.July, 28, 15, 37, 18, 0, time.UTC),
 			},
+			wantQuery: buildWhereQuery(
+				`WHERE make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?`,
+				defaultOrderByQuery,
+			),
+			wantArgs: []interface{}{"2018-01-15 15:37:00+00:00:00", "2018-07-28 15:37:18+00:00:00"},
 		},
 		{
-			desc:     "specify min cost",
-			reqQuery: buildWhereQuery(`WHERE (spend.cost >= 1535)`, defaultOrderByQuery),
+			desc: "specify min cost",
 			args: common.SearchSpendsArgs{
 				MinCost: money.FromFloat(15.35),
 			},
+			wantQuery: buildWhereQuery(`WHERE spend.cost >= ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{1535},
 		},
 		{
-			desc:     "specify max cost",
-			reqQuery: buildWhereQuery(`WHERE (spend.cost <= 1500050)`, defaultOrderByQuery),
+			desc: "specify max cost",
 			args: common.SearchSpendsArgs{
 				MaxCost: money.FromFloat(15000.50),
 			},
+			wantQuery: buildWhereQuery(`WHERE spend.cost <= ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{1500050},
 		},
 		{
-			desc:     "specify min and max costs",
-			reqQuery: buildWhereQuery(`WHERE (spend.cost BETWEEN 1535 AND 1500050)`, defaultOrderByQuery),
+			desc: "specify min and max costs",
 			args: common.SearchSpendsArgs{
 				MinCost: money.FromFloat(15.35),
 				MaxCost: money.FromFloat(15000.50),
 			},
+			wantQuery: buildWhereQuery(`WHERE spend.cost BETWEEN ? AND ?`, defaultOrderByQuery),
+			wantArgs:  []interface{}{1535, 1500050},
 		},
 		{
-			desc:     "specify type ids",
-			reqQuery: buildWhereQuery(`WHERE ((spend.type_id IN (1,2,5,25,3)))`, defaultOrderByQuery),
+			desc: "specify type ids",
 			args: common.SearchSpendsArgs{
 				TypeIDs: []uint{1, 2, 5, 25, 3},
 			},
+			wantQuery: buildWhereQuery(`WHERE (spend.type_id IN (?,?,?,?,?))`, defaultOrderByQuery),
+			wantArgs:  []interface{}{1, 2, 5, 25, 3},
 		},
 		{
-			desc:     "without type",
-			reqQuery: buildWhereQuery(`WHERE ((spend.type_id IS NULL))`, defaultOrderByQuery),
+			desc: "without type",
 			args: common.SearchSpendsArgs{
 				TypeIDs: []uint{0},
 			},
+			wantQuery: buildWhereQuery(`WHERE (spend.type_id IS NULL)`, defaultOrderByQuery),
 		},
 		{
-			desc:     "with and without type",
-			reqQuery: buildWhereQuery(`WHERE ((spend.type_id IS NULL) OR (spend.type_id IN (5,3)))`, defaultOrderByQuery),
+			desc: "with and without type",
 			args: common.SearchSpendsArgs{
 				TypeIDs: []uint{5, 3, 0},
 			},
+			wantQuery: buildWhereQuery(`WHERE (spend.type_id IS NULL OR spend.type_id IN (?,?))`, defaultOrderByQuery),
+			wantArgs:  []interface{}{5, 3},
 		},
 		{
 			desc: "all args",
-			reqQuery: buildWhereQuery(`
-				WHERE (LOWER(spend.title) LIKE '%123%')
-				      AND (LOWER(spend.notes) LIKE 'some note')
-				      AND (make_date(month.year::int, month.month::int, day.day::int)
-				          BETWEEN '2020-01-01 00:00:00+00:00:00' AND '2020-02-01 00:00:00+00:00:00')
-				      AND (spend.cost BETWEEN 20000 AND 500000)
-				      AND ((spend.type_id IS NULL) OR (spend.type_id IN (1,7)))
-			`, defaultOrderByQuery),
 			args: common.SearchSpendsArgs{
 				Title:        "123",
 				Notes:        "some note",
@@ -193,45 +193,60 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				MaxCost:      money.FromFloat(5000),
 				TypeIDs:      []uint{0, 1, 7},
 			},
+			wantQuery: buildWhereQuery(`
+				WHERE LOWER(spend.title) LIKE ?
+					  AND LOWER(spend.notes) LIKE ?
+					  AND make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?
+					  AND spend.cost BETWEEN ? AND ?
+					  AND (spend.type_id IS NULL OR spend.type_id IN (?,?))
+			`, defaultOrderByQuery),
+			wantArgs: []interface{}{
+				"%123%",
+				"some note",
+				"2020-01-01 00:00:00+00:00:00", "2020-02-01 00:00:00+00:00:00",
+				20000, 500000,
+				1, 7,
+			},
 		},
 		{
 			desc: "sort by date (desc)",
-			reqQuery: buildWhereQuery(
-				"", `ORDER BY "month"."year" DESC, "month"."month" DESC, "day"."day" DESC, "spend"."id"`,
-			),
 			args: common.SearchSpendsArgs{
 				Order: common.OrderByDesc,
 			},
+			wantQuery: buildWhereQuery(
+				"", `ORDER BY month.year DESC, month.month DESC, day.day DESC, spend.id`,
+			),
 		},
 		{
-			desc:     "sort by title",
-			reqQuery: buildWhereQuery("", `ORDER BY "spend"."title", "spend"."id"`),
+			desc: "sort by title",
 			args: common.SearchSpendsArgs{
 				Sort: common.SortSpendsByTitle,
 			},
+			wantQuery: buildWhereQuery("", `ORDER BY spend.title, spend.id`),
 		},
 		{
-			desc:     "sort by title (desc)",
-			reqQuery: buildWhereQuery("", `ORDER BY "spend"."title" DESC, "spend"."id"`),
+			desc: "sort by title (desc)",
 			args: common.SearchSpendsArgs{
 				Sort:  common.SortSpendsByTitle,
 				Order: common.OrderByDesc,
 			},
+			wantQuery: buildWhereQuery("", `ORDER BY spend.title DESC, spend.id`),
 		},
 		{
-			desc:     "sort by cost",
-			reqQuery: buildWhereQuery("", `ORDER BY "spend"."cost", "spend"."id"`),
+			desc: "sort by cost",
 			args: common.SearchSpendsArgs{
 				Sort: common.SortSpendsByCost,
 			},
+			wantQuery: buildWhereQuery("", `ORDER BY spend.cost, spend.id`),
 		},
 		{
-			desc:     "sql injection",
-			reqQuery: buildWhereQuery(`WHERE (LOWER(spend.title) LIKE 'title''; OR 1=1--')`, defaultOrderByQuery),
+			desc:      "sql injection",
+			wantQuery: buildWhereQuery(`WHERE LOWER(spend.title) LIKE ?`, defaultOrderByQuery),
 			args: common.SearchSpendsArgs{
 				Title:        "title'; OR 1=1--",
 				TitleExactly: true,
 			},
+			wantArgs: []interface{}{"title'; OR 1=1--"},
 		},
 	}
 	for _, tt := range tests {
@@ -239,13 +254,11 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 		t.Run(tt.desc, func(t *testing.T) {
 			// We can use zero values DB and pg.Tx because buildSearchSpendsQuery just builds query
 			// according to passed args
-			searchQuery := (&DB{}).buildSearchSpendsQuery(&pg.Tx{}, tt.args)
-
-			formatter := orm.NewFormatter()
-			formatter.WithModel(searchQuery)
-			query, err := searchQuery.AppendQuery(formatter, nil)
+			searchQuery := (&DB{}).buildSearchSpendsQuery(tt.args)
+			query, args, err := searchQuery.ToSql()
 			require.Nil(t, err)
-			require.Equal(t, tt.reqQuery, string(query))
+			require.Equal(t, tt.wantQuery, query)
+			require.Equal(t, tt.wantArgs, args)
 		})
 	}
 }
