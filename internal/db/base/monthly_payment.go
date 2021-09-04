@@ -14,12 +14,12 @@ import (
 )
 
 type MonthlyPayment struct {
-	ID      uint        `db:"id"`
-	MonthID uint        `db:"month_id"`
-	Title   string      `db:"title"`
-	TypeID  types.Uint  `db:"type_id"`
-	Notes   string      `db:"notes"`
-	Cost    money.Money `db:"cost"`
+	ID      uint         `db:"id"`
+	MonthID uint         `db:"month_id"`
+	Title   string       `db:"title"`
+	TypeID  types.Uint   `db:"type_id"`
+	Notes   types.String `db:"notes"`
+	Cost    money.Money  `db:"cost"`
 
 	Type *SpendType `db:"type"`
 }
@@ -33,7 +33,7 @@ func (mp MonthlyPayment) ToCommon(year int, month time.Month) common.MonthlyPaym
 		Month: month,
 		Title: mp.Title,
 		Type:  mp.Type.ToCommon(),
-		Notes: mp.Notes,
+		Notes: string(mp.Notes),
 		Cost:  mp.Cost,
 	}
 }

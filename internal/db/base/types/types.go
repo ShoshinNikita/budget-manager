@@ -37,7 +37,7 @@ func (v Uint) Value() (driver.Value, error) {
 	return int64(v), nil
 }
 
-// String represents optional string. It treats NULL as empty string
+// String represents optional string. It treats NULL as empty string and vice versa
 type String string
 
 var _ sql.Scanner = (*String)(nil)
@@ -57,4 +57,11 @@ func (v *String) Scan(src interface{}) error {
 		return errors.Errorf("couldn't scan string from %T", src)
 	}
 	return nil
+}
+
+func (v String) Value() (driver.Value, error) {
+	if v == "" {
+		return nil, nil
+	}
+	return string(v), nil
 }

@@ -8,16 +8,17 @@ import (
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
+	"github.com/ShoshinNikita/budget-manager/internal/db/base/types"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
 type Income struct {
-	ID      uint        `db:"id"`
-	MonthID uint        `db:"month_id"`
-	Title   string      `db:"title"`
-	Notes   string      `db:"notes"`
-	Income  money.Money `db:"income"`
+	ID      uint         `db:"id"`
+	MonthID uint         `db:"month_id"`
+	Title   string       `db:"title"`
+	Notes   types.String `db:"notes"`
+	Income  money.Money  `db:"income"`
 }
 
 // ToCommon converts Income to common Income structure from
@@ -28,7 +29,7 @@ func (in Income) ToCommon(year int, month time.Month) common.Income {
 		Year:   year,
 		Month:  month,
 		Title:  in.Title,
-		Notes:  in.Notes,
+		Notes:  string(in.Notes),
 		Income: in.Income,
 	}
 }

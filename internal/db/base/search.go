@@ -8,6 +8,7 @@ import (
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
+	"github.com/ShoshinNikita/budget-manager/internal/db/base/types"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
@@ -30,7 +31,7 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 			Day:   s.Day,
 			Title: s.Title,
 			Type:  s.Type.ToCommon(),
-			Notes: s.Notes,
+			Notes: string(s.Notes),
 			Cost:  s.Cost,
 		})
 	}
@@ -38,16 +39,15 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 }
 
 type searchSpendsModel struct {
-	ID uint
+	ID    uint         `db:"id"`
+	Year  int          `db:"year"`
+	Month time.Month   `db:"month"`
+	Day   int          `db:"day"`
+	Title string       `db:"title"`
+	Notes types.String `db:"notes"`
+	Cost  money.Money  `db:"cost"`
 
-	Year  int
-	Month time.Month
-	Day   int
-
-	Title string
-	Notes string
-	Cost  money.Money
-	Type  SpendType
+	Type SpendType `db:"type"`
 }
 
 // buildSearchSpendsQuery builds a query to search for spends

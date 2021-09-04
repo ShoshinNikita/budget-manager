@@ -16,12 +16,12 @@ import (
 
 // Spend represents spend entity in PostgreSQL db
 type Spend struct {
-	ID     uint        `db:"id"`
-	DayID  uint        `db:"day_id"`
-	Title  string      `db:"title"`
-	TypeID types.Uint  `db:"type_id"`
-	Notes  string      `db:"notes"`
-	Cost   money.Money `db:"cost"`
+	ID     uint         `db:"id"`
+	DayID  uint         `db:"day_id"`
+	Title  string       `db:"title"`
+	TypeID types.Uint   `db:"type_id"`
+	Notes  types.String `db:"notes"`
+	Cost   money.Money  `db:"cost"`
 
 	Type *SpendType `db:"type"`
 }
@@ -36,7 +36,7 @@ func (s Spend) ToCommon(year int, month time.Month, day int) common.Spend {
 		Day:   day,
 		Title: s.Title,
 		Type:  s.Type.ToCommon(),
-		Notes: s.Notes,
+		Notes: string(s.Notes),
 		Cost:  s.Cost,
 	}
 }
