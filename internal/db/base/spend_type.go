@@ -1,4 +1,4 @@
-package pg
+package base
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"github.com/Masterminds/squirrel"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg/types"
+	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
+	"github.com/ShoshinNikita/budget-manager/internal/db/base/types"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 

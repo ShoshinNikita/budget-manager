@@ -1,10 +1,10 @@
-package pg
+package base
 
 import (
 	"fmt"
 	"time"
 
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg/internal/sqlx"
+	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
 )
 
 // --------------------------------------------------
