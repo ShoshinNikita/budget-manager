@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-func addNotNullUp(tx *sql.Tx) error {
+func addNotNullMigration(tx *sql.Tx) error {
 	_, err := tx.Exec(`
 		ALTER TABLE months
 		    ALTER COLUMN year SET NOT NULL,

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-func initUp(tx *sql.Tx) error {
+func initMigration(tx *sql.Tx) error {
 	_, err := tx.Exec(`
 		CREATE TABLE IF NOT EXISTS months (
 			id bigserial PRIMARY KEY,

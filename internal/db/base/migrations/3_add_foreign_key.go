@@ -6,7 +6,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
-func addForeignKeysUp(tx *sql.Tx) error {
+func addForeignKeysMigration(tx *sql.Tx) error {
 	// Prepare for foreign key constraints
 
 	// Reset nonexistent spend type ids

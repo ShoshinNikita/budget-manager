@@ -59,17 +59,19 @@ func NewDB(driverName string, dataSourceName string, placeholder sqlx.Placeholde
 
 // Prepare runs the migrations
 func (db *DB) Prepare() error {
-	migrator, err := migrations.NewMigrator(db.log)
+	ctx := context.Background()
+
+	migrator, err := migrations.NewMigrator(db.db.GetInternalDB(), db.log)
 	if err != nil {
 		return errors.Wrap(err, "couldn't prepare migrator")
 	}
 
-	if err := migrator.Migrate(db.db.GetInternalDB()); err != nil {
+	if err := migrator.Migrate(ctx); err != nil {
 		return errors.Wrap(err, "couldn't apply migrations")
 	}
 
 	// Check the tables
-	if err := db.checkCreatedTables(); err != nil {
+	if err := db.checkCreatedTables(ctx); err != nil {
 		return errors.Wrap(err, "database schema is invalid")
 	}
 
@@ -79,11 +81,11 @@ func (db *DB) Prepare() error {
 // checkCreatedTables checks tables and their descriptions
 //
 //nolint:funlen
-func (db *DB) checkCreatedTables() error {
+func (db *DB) checkCreatedTables(ctx context.Context) error {
 	const tableNumber = 7
 
 	var n int
-	err := db.db.RunInTransaction(context.Background(), func(tx *sqlx.Tx) error {
+	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 		return tx.Get(&n, `SELECT COUNT(DISTINCT table_name) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'public'`)
 	})
 	if err != nil {
@@ -169,7 +171,7 @@ func (db *DB) checkCreatedTables() error {
 	}
 	for _, table := range tables {
 		var columnsInDB []column
-		err := db.db.RunInTransaction(context.Background(), func(tx *sqlx.Tx) error {
+		err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 			return tx.Select(
 				&columnsInDB,
 				`SELECT column_name, data_type, is_nullable::bool, column_default
