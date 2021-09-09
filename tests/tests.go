@@ -64,12 +64,11 @@ func RunTest(t *testing.T, test Test, opts ...TestEnvOption) {
 			Cfg:        getDefaultConfig("postgres"),
 			Components: []StartComponentFn{StartPostgreSQL},
 		},
-		// TODO: enable
-		// {
-		// 	Name:       "sqlite",
-		// 	Cfg:        getDefaultConfig("sqlite"),
-		// 	Components: []StartComponentFn{StartSQLite},
-		// },
+		{
+			Name:       "sqlite",
+			Cfg:        getDefaultConfig("sqlite"),
+			Components: []StartComponentFn{StartSQLite},
+		},
 	} {
 		env := env
 		for _, opt := range opts {
