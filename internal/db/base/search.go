@@ -13,7 +13,17 @@ import (
 )
 
 func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]common.Spend, error) {
-	var spends []searchSpendsModel
+	var spends []struct {
+		ID    uint         `db:"id"`
+		Year  int          `db:"year"`
+		Month time.Month   `db:"month"`
+		Day   int          `db:"day"`
+		Title string       `db:"title"`
+		Notes types.String `db:"notes"`
+		Cost  money.Money  `db:"cost"`
+
+		Type SpendType `db:"type"`
+	}
 	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
 		return tx.SelectQuery(&spends, db.buildSearchSpendsQuery(args))
 	})
@@ -38,44 +48,7 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 	return res, nil
 }
 
-type searchSpendsModel struct {
-	ID    uint         `db:"id"`
-	Year  int          `db:"year"`
-	Month time.Month   `db:"month"`
-	Day   int          `db:"day"`
-	Title string       `db:"title"`
-	Notes types.String `db:"notes"`
-	Cost  money.Money  `db:"cost"`
-
-	Type SpendType `db:"type"`
-}
-
 // buildSearchSpendsQuery builds a query to search for spends
-//
-// Full query looks like:
-//
-//  SELECT spend.id AS id, month.year AS year, month.month AS month, day.day AS day,
-//         spend.title AS title, spend.notes AS notes, spend.cost AS cost,
-//         spend_type.id AS type__id, spend_type.name AS type__name
-//
-//    FROM spends AS spend
-//         INNER JOIN days AS day
-//         ON day.id = spend.day_id
-//
-//         INNER JOIN months AS month
-//         ON month.id = day.month_id
-//
-//         LEFT JOIN spend_types AS spend_type
-//         ON spend_type.id = spend.type_id
-//
-//   WHERE spend.title LIKE ':title_pattern'
-//         AND spend.notes LIKE 'notes_pattern'
-//         AND make_date(month.year::int, month.month::int, day.day::int) BETWEEN ':after'::date AND ':before'::date
-//         AND spend.cost BETWEEN :min AND :max
-//         AND spend.type_id IN (:type_ids)
-//
-//   ORDER BY month.year, month.month, day.day, spend.id;
-//
 //nolint:funlen
 func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBuilder {
 	query := squirrel.Select(
@@ -112,16 +85,8 @@ func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBu
 		query = query.Where("LOWER(spend.notes) LIKE ?", notes)
 	}
 
-	switch {
-	case !args.After.IsZero() && !args.Before.IsZero():
-		query = query.Where(
-			"make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?",
-			formatTime(args.After), formatTime(args.Before),
-		)
-	case !args.After.IsZero():
-		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) >= ?", formatTime(args.After))
-	case !args.Before.IsZero():
-		query = query.Where("make_date(month.year::int, month.month::int, day.day::int) <= ?", formatTime(args.Before))
+	if q, args := getQueryToFilterByTime(args.After, args.Before); q != "" {
+		query = query.Where(q, args...)
 	}
 
 	switch {
@@ -178,8 +143,29 @@ func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBu
 	return query
 }
 
-func formatTime(t time.Time) string {
-	// TODO: should we use different layout? This layout is used by github.com/go-pg/pg
-	const layout = "2006-01-02 15:04:05.999999999-07:00:00"
-	return t.Format(layout)
+func getQueryToFilterByTime(after, before time.Time) (where string, args []interface{}) {
+	convertTime := func(t time.Time) int {
+		return t.Year()*10000 + int(t.Month())*100 + t.Day()
+	}
+
+	// It is a db-agnostic solution to compare dates
+	where = "month.year*10000 + month.month*100 + day.day"
+
+	switch {
+	case !after.IsZero() && !before.IsZero():
+		where += " BETWEEN ? AND ?"
+		args = []interface{}{convertTime(after), convertTime(before)}
+
+	case !after.IsZero():
+		where += " >= ?"
+		args = []interface{}{convertTime(after)}
+
+	case !before.IsZero():
+		where += " <= ?"
+		args = []interface{}{convertTime(before)}
+
+	default:
+		return "", nil
+	}
+	return where, args
 }

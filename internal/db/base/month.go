@@ -163,23 +163,28 @@ func (db DB) recomputeAndUpdateMonth(tx *sqlx.Tx, monthID uint) (err error) {
 		m.DailyBudget, m.TotalIncome, m.TotalSpend, m.Result, m.ID,
 	)
 
-	// Update Days
-
-	values := &bytes.Buffer{}
-	for i, day := range m.Days {
-		fmt.Fprintf(values, `(%d,%d)`, day.ID, int(day.Saldo))
-		if i+1 != len(m.Days) {
-			values.WriteByte(',')
-		}
-	}
-
-	_, err = tx.Exec(
-		fmt.Sprintf(
-			`UPDATE days SET saldo = v.saldo FROM (values %s) AS v(id, saldo) WHERE days.id = v.id`,
-			values.String(),
-		),
+	// Update Days with the following db-agnostic query:
+	//
+	//	UPDATE days SET saldo = CASE id
+	//		WHEN 1 THEN 100
+	//		WHEN 2 THEN 200
+	//		WHEN 3 THEN 300
+	//	END
+	//	WHERE id IN (1, 2, 3)
+	//
+	var (
+		query  = &bytes.Buffer{}
+		dayIDs = make([]int, 0, len(m.Days))
 	)
-	if err != nil {
+	query.WriteString("UPDATE days SET saldo = CASE id\n")
+	for _, day := range m.Days {
+		fmt.Fprintf(query, "WHEN %d THEN %d\n", day.ID, int(day.Saldo))
+		dayIDs = append(dayIDs, int(day.ID))
+	}
+	query.WriteString("END\n")
+	query.WriteString("WHERE id IN (?)")
+
+	if _, err := tx.ExecQuery(sqlx.In(query.String(), dayIDs)); err != nil {
 		return errors.Wrap(err, "couldn't update days")
 	}
 

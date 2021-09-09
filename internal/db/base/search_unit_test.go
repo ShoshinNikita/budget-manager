@@ -105,10 +105,10 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				After: time.Date(2018, time.January, 15, 15, 37, 0, 0, time.UTC),
 			},
 			wantQuery: buildWhereQuery(
-				`WHERE make_date(month.year::int, month.month::int, day.day::int) >= ?`,
+				`WHERE month.year*10000 + month.month*100 + day.day >= ?`,
 				defaultOrderByQuery,
 			),
-			wantArgs: []interface{}{"2018-01-15 15:37:00+00:00:00"},
+			wantArgs: []interface{}{20180115},
 		},
 		{
 			desc: "specify before",
@@ -116,10 +116,10 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				Before: time.Date(2018, time.July, 28, 15, 37, 18, 0, time.UTC),
 			},
 			wantQuery: buildWhereQuery(
-				`WHERE make_date(month.year::int, month.month::int, day.day::int) <= ?`,
+				`WHERE month.year*10000 + month.month*100 + day.day <= ?`,
 				defaultOrderByQuery,
 			),
-			wantArgs: []interface{}{"2018-07-28 15:37:18+00:00:00"},
+			wantArgs: []interface{}{20180728},
 		},
 		{
 			desc: "specify after and before",
@@ -128,10 +128,10 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 				Before: time.Date(2018, time.July, 28, 15, 37, 18, 0, time.UTC),
 			},
 			wantQuery: buildWhereQuery(
-				`WHERE make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?`,
+				`WHERE month.year*10000 + month.month*100 + day.day BETWEEN ? AND ?`,
 				defaultOrderByQuery,
 			),
-			wantArgs: []interface{}{"2018-01-15 15:37:00+00:00:00", "2018-07-28 15:37:18+00:00:00"},
+			wantArgs: []interface{}{20180115, 20180728},
 		},
 		{
 			desc: "specify min cost",
@@ -196,14 +196,14 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 			wantQuery: buildWhereQuery(`
 				WHERE LOWER(spend.title) LIKE ?
 					  AND LOWER(spend.notes) LIKE ?
-					  AND make_date(month.year::int, month.month::int, day.day::int) BETWEEN ? AND ?
+					  AND month.year*10000 + month.month*100 + day.day BETWEEN ? AND ?
 					  AND spend.cost BETWEEN ? AND ?
 					  AND (spend.type_id IS NULL OR spend.type_id IN (?,?))
 			`, defaultOrderByQuery),
 			wantArgs: []interface{}{
 				"%123%",
 				"some note",
-				"2020-01-01 00:00:00+00:00:00", "2020-02-01 00:00:00+00:00:00",
+				20200101, 20200201,
 				20000, 500000,
 				1, 7,
 			},
