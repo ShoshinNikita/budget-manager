@@ -37,7 +37,7 @@ func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
 
 	cfg.Server.Port = serverPort
 
-	app := app.NewApp(*cfg, logger.New(logger.Config{Level: "debug"}), "", "")
+	app := app.NewApp(*cfg, logger.New(cfg.Logger), "", "")
 	err := app.PrepareComponents()
 	require.NoError(err)
 

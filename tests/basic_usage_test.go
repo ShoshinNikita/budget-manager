@@ -1,50 +1,26 @@
 package tests
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ShoshinNikita/budget-manager/internal/app"
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/web"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
 func TestBasicUsage(t *testing.T) {
 	t.Parallel()
 
-	cfg := app.Config{
-		DBType:     "postgres",
-		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
-		Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
-	}
-	prepareApp(t, &cfg, StartPostgreSQL)
-
-	host := fmt.Sprintf("localhost:%d", cfg.Server.Port)
-
-	for _, tt := range []struct {
-		name string
-		f    func(t *testing.T, host string)
-	}{
-		{name: "spend types", f: testBasicUsage_SpendTypes},
-		{name: "incomes", f: testBasicUsage_Incomes},
-		{name: "monthly payments", f: testBasicUsage_MonthlyPayments},
-		{name: "spends", f: testBasicUsage_Spends},
-		{name: "search spends", f: testBasicUsage_SearchSpends},
-	} {
-		tt := tt
-		ok := t.Run(tt.name, func(t *testing.T) {
-			tt.f(t, host)
-		})
-		if !ok {
-			t.FailNow()
-		}
-	}
+	RunTest(t, TestCases{
+		{Name: "spend types", Fn: testBasicUsage_SpendTypes},
+		{Name: "incomes", Fn: testBasicUsage_Incomes},
+		{Name: "monthly payments", Fn: testBasicUsage_MonthlyPayments},
+		{Name: "spends", Fn: testBasicUsage_Spends},
+		{Name: "search spends", Fn: testBasicUsage_SearchSpends},
+	})
 }
 
 func testBasicUsage_SpendTypes(t *testing.T, host string) {
