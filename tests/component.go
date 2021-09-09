@@ -2,8 +2,12 @@ package tests
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,11 +17,16 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
-type StartComponentFn func(*testing.T, *app.Config) *Component
+type Component interface {
+	GetName() string
+	Cleanup() error
+}
+
+type StartComponentFn func(*testing.T, *app.Config) Component
 
 // StartPostgreSQL starts a fresh PostgreSQL instance in a docker container.
 // It updates PostgreSQL config with a chosen port
-func StartPostgreSQL(t *testing.T, cfg *app.Config) *Component {
+func StartPostgreSQL(t *testing.T, cfg *app.Config) Component {
 	require := require.New(t)
 
 	port := getFreePort(t)
@@ -25,7 +34,7 @@ func StartPostgreSQL(t *testing.T, cfg *app.Config) *Component {
 
 	t.Logf("use port %d for PostgreSQL container", port)
 
-	c := &Component{
+	c := &DockerComponent{
 		ImageName: "postgres:12-alpine",
 		Ports: [][2]int{
 			{port, 5432},
@@ -41,8 +50,48 @@ func StartPostgreSQL(t *testing.T, cfg *app.Config) *Component {
 	return c
 }
 
-// Component is a dependency (for example, db) that will be run with Docker
-type Component struct {
+// StartSQLite generates a random path and updates SQLite config
+func StartSQLite(t *testing.T, cfg *app.Config) Component {
+	require := require.New(t)
+
+	dbPath := func() string {
+		dir := os.TempDir()
+
+		b := make([]byte, 4)
+		_, err := rand.Read(b)
+		require.NoError(err)
+
+		filename := "budget-manager-" + hex.EncodeToString(b) + ".db"
+
+		return filepath.Join(dir, filename)
+	}()
+
+	cfg.SQLiteDB.Path = dbPath
+	t.Logf("use path %s for SQLite", dbPath)
+
+	return &CustomComponent{
+		Name: "SQLite (" + dbPath + ")",
+		CleanupFn: func() error {
+			return os.Remove(dbPath)
+		},
+	}
+}
+
+type CustomComponent struct {
+	Name      string
+	CleanupFn func() error
+}
+
+func (c *CustomComponent) GetName() string {
+	return c.Name
+}
+
+func (c *CustomComponent) Cleanup() error {
+	return c.CleanupFn()
+}
+
+// DockerComponent is a dependency (for example, db) that will be run with Docker
+type DockerComponent struct {
 	ImageName string
 	Ports     [][2]int
 	Env       []string
@@ -54,7 +103,7 @@ type Component struct {
 //
 //	docker run --rm -d [-e ...] [-p ...] image
 //
-func (c *Component) Run() error {
+func (c *DockerComponent) Run() error {
 	if err := checkDockerImage(c.ImageName); err != nil {
 		return err
 	}
@@ -88,8 +137,16 @@ func (c *Component) Run() error {
 	return nil
 }
 
-// Stop stops a component
-func (c *Component) Stop() error {
+func (c *DockerComponent) GetName() string {
+	name := c.ImageName
+	if c.containerID != "" {
+		name += " (" + c.containerID + ")"
+	}
+	return name
+}
+
+// Cleanup stops a docker container
+func (c *DockerComponent) Cleanup() error {
 	if c.containerID == "" {
 		return errors.Errorf("component %q is not run", c.ImageName)
 	}

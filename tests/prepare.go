@@ -24,9 +24,9 @@ func prepareApp(t *testing.T, cfg *app.Config, components ...StartComponentFn) {
 		component := fn(t, cfg)
 
 		t.Cleanup(func() {
-			t.Logf("stop component %q", component.ImageName)
+			t.Logf("stop component %q", component.GetName())
 
-			err := component.Stop()
+			err := component.Cleanup()
 			require.NoError(err)
 		})
 	}
