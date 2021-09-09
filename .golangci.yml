@@ -1,7 +1,6 @@
 run:
   concurrency: 4
-  build-tags:
-    - integration
+  timeout: 3m
   modules-download-mode: vendor
 
 linters:

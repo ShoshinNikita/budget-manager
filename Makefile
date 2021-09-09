@@ -8,7 +8,7 @@ default: build run
 # build builds a binary file
 build: export-ldflags
 	@ echo "Build Budget Manager..."
-	@ go build -ldflags "${LDFLAGS}" -mod vendor -o bin/budget-manager cmd/budget-manager/main.go
+	@ CGO_ENABLED=1 go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 # run runs built Budget Manager
 run: export-config
@@ -42,7 +42,7 @@ docker-clear:
 
 test: test-integ
 
-TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
+TEST_CMD=CGO_ENABLED=1 go test -v -mod=vendor ${TEST_FLAGS} \
 	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
 	./cmd/... ./internal/... ./tests/... && \
 	sed -i '/github.com\/ShoshinNikita\/budget-manager\/tests\//d' cover.out && \
@@ -115,11 +115,13 @@ export-config:
 define config
 	export DEBUG = true
 	export LOGGER_MODE = develop
+	# export DB_TYPE = sqlite
 	export DB_TYPE = postgres
 	export DB_PG_HOST = localhost
 	export DB_PG_PORT = 5432
 	export DB_PG_USER = postgres
 	export DB_PG_DATABASE = postgres
+	export DB_SQLITE_PATH = ./_var/sqlite/budget-manager.db
 	export SERVER_PORT = 8080
 	export SERVER_SKIP_AUTH = true
 	export SERVER_USE_EMBED = false
