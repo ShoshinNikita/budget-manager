@@ -25,33 +25,24 @@ type Migrator struct {
 }
 
 // NewMigrator creates a new migrator and registers all migrations
-func NewMigrator(db *sql.DB, log logger.Logger) (*Migrator, error) {
+func NewMigrator(db *sql.DB, log logger.Logger, migrations []*migrator.Migration) (*Migrator, error) {
 	m, err := migrator.New(
 		migrator.TableName(migrationTableV2),
 		migrator.WithLogger(migratorLogger{log}),
-		migrator.Migrations(
-			&migrator.Migration{
-				Name: "init",
-				Func: initMigration,
-			},
-			&migrator.Migration{
-				Name: "add NOT NULL constraints",
-				Func: addNotNullMigration,
-			},
-			&migrator.Migration{
-				Name: "add FOREIGN KEY constraints",
-				Func: addForeignKeysMigration,
-			},
-			&migrator.Migration{
-				Name: "add support of nested types",
-				Func: addParentIDToSpendTypesMigration,
-			},
-		),
+		migrator.Migrations(convertMigrations(migrations)...),
 	)
 	if err != nil {
 		return nil, err
 	}
 	return &Migrator{db, m}, nil
+}
+
+func convertMigrations(migrations []*migrator.Migration) []interface{} {
+	res := make([]interface{}, 0, len(migrations))
+	for _, m := range migrations {
+		res = append(res, m)
+	}
+	return res
 }
 
 func (m Migrator) Migrate(ctx context.Context) error {

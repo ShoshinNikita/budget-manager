@@ -7,6 +7,7 @@ import (
 	_ "github.com/lib/pq" // register PostgreSQL driver
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/base"
+	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 )
 
@@ -27,7 +28,7 @@ type DB struct {
 }
 
 func NewDB(config Config, log logger.Logger) (*DB, error) {
-	db, err := base.NewDB("postgres", config.toURL(), base.Dollar, log)
+	db, err := base.NewDB("postgres", config.toURL(), base.Dollar, migrations.GetMigrations(), log)
 	if err != nil {
 		return nil, err
 	}
