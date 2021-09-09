@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
+	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
@@ -25,6 +26,7 @@ func TestParseConfig(t *testing.T) {
 		{"DB_PG_USER", "user"},
 		{"DB_PG_PASSWORD", "qwerty"},
 		{"DB_PG_DATABASE", "db"},
+		{"DB_SQLITE_PATH", "./var/db.db"},
 		{"SERVER_PORT", "6666"},
 		{"SERVER_USE_EMBED", "false"},
 		{"SERVER_CREDENTIALS", "user:qwerty,admin:admin"},
@@ -45,6 +47,9 @@ func TestParseConfig(t *testing.T) {
 			User:     "user",
 			Password: "qwerty",
 			Database: "db",
+		},
+		SQLiteDB: sqlite.Config{
+			Path: "./var/db.db",
 		},
 		Server: web.Config{
 			Port:     6666,

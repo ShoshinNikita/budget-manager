@@ -35,6 +35,9 @@ github.com/lopezator/migrator
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
+# github.com/mattn/go-sqlite3 v1.14.8
+## explicit
+github.com/mattn/go-sqlite3
 # github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e
 ## explicit
 # github.com/pmezard/go-difflib v1.0.0
