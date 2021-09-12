@@ -71,21 +71,22 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 
 ## Configuration
 
-| Env Var                   | Default value | Description                                                                                                      |
-| ------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `LOGGER_MODE`             | `prod`        | Logging format. `dev` or `prod`                                                                                  |
-| `LOGGER_LEVEL`            | `info`        | Logging level. `debug`, `info`, `warn`, `error`, or `fatal`                                                      |
-| `DB_TYPE`                 | `postgres`    | Database type. `postgres`                                                                                        |
-| `DB_PG_HOST`              | `localhost`   | PostgreSQL host                                                                                                  |
-| `DB_PG_PORT`              | `5432`        | PostgreSQL port                                                                                                  |
-| `DB_PG_USER`              | `postgres`    | PostgreSQL username                                                                                              |
-| `DB_PG_PASSWORD`          |               | PostgreSQL password                                                                                              |
-| `DB_PG_DATABASE`          | `postgres`    | PostgreSQL database                                                                                              |
-| `SERVER_PORT`             | `8080`        |                                                                                                                  |
-| `SERVER_USE_EMBED`        | `true`        | Use the [embedded](https://pkg.go.dev/embed) templates and static files or read them from disk                   |
-| `SERVER_CREDENTIALS`      |               | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
-| `SERVER_SKIP_AUTH`        | `false`       | Disable authentication                                                                                           |
-| `SERVER_ENABLE_PROFILING` | `false`       | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go) |
+| Env Var                   | Default value             | Description                                                                                                      |
+| ------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `LOGGER_MODE`             | `prod`                    | Logging format. `dev` or `prod`                                                                                  |
+| `LOGGER_LEVEL`            | `info`                    | Logging level. `debug`, `info`, `warn`, `error`, or `fatal`                                                      |
+| `DB_TYPE`                 | `postgres`                | Database type. `postgres` or `sqlite`                                                                            |
+| `DB_PG_HOST`              | `localhost`               | PostgreSQL host                                                                                                  |
+| `DB_PG_PORT`              | `5432`                    | PostgreSQL port                                                                                                  |
+| `DB_PG_USER`              | `postgres`                | PostgreSQL username                                                                                              |
+| `DB_PG_PASSWORD`          |                           | PostgreSQL password                                                                                              |
+| `DB_PG_DATABASE`          | `postgres`                | PostgreSQL database                                                                                              |
+| `DB_SQLITE_PATH`          | `./var/budget-manager.db` | Path to the SQLite database                                                                                      |
+| `SERVER_PORT`             | `8080`                    |                                                                                                                  |
+| `SERVER_USE_EMBED`        | `true`                    | Use the [embedded](https://pkg.go.dev/embed) templates and static files or read them from disk                   |
+| `SERVER_CREDENTIALS`      |                           | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
+| `SERVER_SKIP_AUTH`        | `false`                   | Disable authentication                                                                                           |
+| `SERVER_ENABLE_PROFILING` | `false`                   | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go) |
 
 ## Development
 
