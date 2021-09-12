@@ -124,6 +124,7 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 
 	// Manage
 	for _, req := range []RequestOK{
+		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 1, TypeID: ptrUint(0)}},
 		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 2, Title: ptrStr("patreon"), Notes: ptrStr("with VAT")}},
 		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 3, TypeID: ptrUint(7), Notes: ptrStr(""), Cost: ptrFloat(30)}},
 		{DELETE, MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 4}},
@@ -135,7 +136,7 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 	month := getCurrentMonth(t, host)
 
 	expectedMonthlyPayments := []db.MonthlyPayment{
-		{ID: 1, Title: "rent", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(800)},
+		{ID: 1, Title: "rent", Cost: money.FromInt(800)},
 		{ID: 2, Title: "patreon", Notes: "with VAT", Cost: money.FromInt(50)},
 		{ID: 3, Title: "netflix", Type: &db.SpendType{ID: 7, Name: "entertainment"}, Cost: money.FromInt(30)},
 	}
@@ -165,7 +166,7 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "meat", TypeID: 1, Cost: 20}}, // 7
 		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "egg", TypeID: 1, Cost: 7}},   // 8
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 12, Title: "pizza", TypeID: 3, Cost: 100}}, // 9
+		{POST, SpendsPath, models.AddSpendReq{DayID: 12, Title: "pizza", Cost: 100}}, // 9
 		//
 		{POST, SpendsPath, models.AddSpendReq{DayID: 15, Title: "book American Gods", Notes: "as a gift", Cost: 30}}, // 10
 		//
@@ -182,6 +183,7 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	for _, req := range []RequestOK{
 		{PUT, SpendsPath, models.EditSpendReq{ID: 4, TypeID: ptrUint(0)}},
 		{PUT, SpendsPath, models.EditSpendReq{ID: 8, Title: ptrStr("eggs"), Notes: ptrStr("10 count"), Cost: ptrFloat(8)}},
+		{PUT, SpendsPath, models.EditSpendReq{ID: 9, TypeID: ptrUint(3)}},
 		{DELETE, SpendsPath, models.RemoveSpendReq{ID: 13}},
 	} {
 		req.Send(t, host, nil)
