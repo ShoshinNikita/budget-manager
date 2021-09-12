@@ -17,7 +17,6 @@ func TestParseConfig(t *testing.T) {
 	require := require.New(t)
 
 	envs := []struct{ key, value string }{
-		{"DEBUG", "true"},
 		{"LOGGER_MODE", "develop"},
 		{"LOGGER_LEVEL", "fatal"},
 		{"DB_TYPE", "mongodb"},
@@ -36,7 +35,6 @@ func TestParseConfig(t *testing.T) {
 
 	want := Config{
 		Logger: logger.Config{
-			Debug: true,
 			Level: "fatal",
 			Mode:  "develop",
 		},

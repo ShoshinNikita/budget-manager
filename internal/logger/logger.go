@@ -31,8 +31,6 @@ type Logger interface {
 type Fields logrus.Fields
 
 type Config struct {
-	Debug bool `env:"DEBUG" envDefault:"false"`
-
 	// Mode is a mode of Logger. Valid options: prod, production, dev, develop.
 	// Default value is prod
 	Mode string `env:"LOGGER_MODE" envDefault:"prod"`
@@ -46,12 +44,7 @@ func New(cnf Config) Logger {
 	log := logrus.New()
 	log.SetReportCaller(false)
 
-	logLevel := parseLogLevel(cnf.Level)
-	if cnf.Debug {
-		// Always use the debug level in the debug mode
-		logLevel = logrus.DebugLevel
-	}
-	log.SetLevel(logLevel)
+	log.SetLevel(parseLogLevel(cnf.Level))
 
 	switch cnf.Mode {
 	case "prod", "production":
