@@ -46,7 +46,7 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
           DB_PG_PASSWORD: very_strong_password
           DB_PG_DATABASE: postgres
           SERVER_PORT: 8080
-          SERVER_CREDENTIALS: your credentials # more info in 'Configuration' section
+          SERVER_CREDENTIALS: <your credentials> # more info in 'Configuration' section
         ports:
           - "8080:8080"
 
@@ -71,21 +71,21 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 
 ## Configuration
 
-| Env Var                   | Default value | Description                                                                                                                          |
-| ------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `LOGGER_MODE`             | `prod`        | Logger mode. Available options: `prod` (or `production`), `dev` (or `develop`).                                                      |
-| `LOGGER_LEVEL`            | `info`        | Min level of log messages. Available options: `debug`, `info`, `warn`, `error`, `fatal`                                              |
-| `DB_TYPE`                 | `postgres`    | Database type. Only `postgres` is available now                                                                                      |
-| `DB_PG_HOST`              | `localhost`   | Host for connection to the db                                                                                                        |
-| `DB_PG_PORT`              | `5432`        | Port for connection to the db                                                                                                        |
-| `DB_PG_USER`              | `postgres`    | Use for connection to the db                                                                                                         |
-| `DB_PG_PASSWORD`          |               | Password for connection to the db                                                                                                    |
-| `DB_PG_DATABASE`          | `postgres`    | Database for connection                                                                                                              |
-| `SERVER_PORT`             | `8080`        |                                                                                                                                      |
-| `SERVER_USE_EMBED`        | `true`        | Defines whether server should use embedded templates and static files<br><br>**Note:** `false` value won't work for Docker container |
-| `SERVER_CREDENTIALS`      |               | List of comma separated `login:password` pairs. Password must be hashed using BCrypt (`htpasswd -nB <user>`)                         |
-| `SERVER_SKIP_AUTH`        | `false`       | Disables authentication                                                                                                              |
-| `SERVER_ENABLE_PROFILING` | `false`       | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go)                     |
+| Env Var                   | Default value | Description                                                                                                      |
+| ------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `LOGGER_MODE`             | `prod`        | Logging format. `dev` or `prod`                                                                                  |
+| `LOGGER_LEVEL`            | `info`        | Logging level. `debug`, `info`, `warn`, `error`, or `fatal`                                                      |
+| `DB_TYPE`                 | `postgres`    | Database type. `postgres`                                                                                        |
+| `DB_PG_HOST`              | `localhost`   | PostgreSQL host                                                                                                  |
+| `DB_PG_PORT`              | `5432`        | PostgreSQL port                                                                                                  |
+| `DB_PG_USER`              | `postgres`    | PostgreSQL username                                                                                              |
+| `DB_PG_PASSWORD`          |               | PostgreSQL password                                                                                              |
+| `DB_PG_DATABASE`          | `postgres`    | PostgreSQL database                                                                                              |
+| `SERVER_PORT`             | `8080`        |                                                                                                                  |
+| `SERVER_USE_EMBED`        | `true`        | Use the [embedded](https://pkg.go.dev/embed) templates and static files or read them from disk                   |
+| `SERVER_CREDENTIALS`      |               | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
+| `SERVER_SKIP_AUTH`        | `false`       | Disable authentication                                                                                           |
+| `SERVER_ENABLE_PROFILING` | `false`       | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go) |
 
 ## Development
 
@@ -94,10 +94,10 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 #### Run
 
 ```bash
-# Run the app with installed Go and PostgreSQL in Docker container
+# Run the app with installed Go and PostgreSQL in a Docker container
 make
 
-# Or run both the app and PostgreSQL in Docker containers
+# Or run both the app and PostgreSQL in a Docker containers
 make docker
 ```
 
