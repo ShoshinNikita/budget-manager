@@ -14,7 +14,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
 )
 
-// Spend represents spend entity in PostgreSQL db
 type Spend struct {
 	ID     uint         `db:"id"`
 	DayID  uint         `db:"day_id"`

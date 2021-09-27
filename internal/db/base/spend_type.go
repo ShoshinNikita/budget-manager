@@ -12,7 +12,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
-// SpendType represents spend type entity in PostgreSQL db
 type SpendType struct {
 	ID       types.Uint   `db:"id"`
 	Name     types.String `db:"name"`

@@ -1,4 +1,4 @@
-// package base provides a PostgreSQL implementation for DB
+// package base provides a db-agnostic implementation of the storage
 package base
 
 import (
@@ -38,7 +38,7 @@ func NewDB(driverName string, dataSourceName string, placeholder sqlx.Placeholde
 		return nil, errors.Wrap(err, "couldn't open a connection to db")
 	}
 	db := &DB{
-		log:        log.WithField("db_type", "pg"),
+		log:        log,
 		db:         conn,
 		migrations: migrations,
 	}

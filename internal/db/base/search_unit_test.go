@@ -252,8 +252,6 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
-			// We can use zero values DB and pg.Tx because buildSearchSpendsQuery just builds query
-			// according to passed args
 			searchQuery := (&DB{}).buildSearchSpendsQuery(tt.args)
 			query, args, err := searchQuery.ToSql()
 			require.Nil(t, err)

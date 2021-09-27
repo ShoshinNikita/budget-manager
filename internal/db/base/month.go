@@ -89,7 +89,7 @@ func (db DB) GetMonthByDate(ctx context.Context, year int, month time.Month) (co
 	return m.ToCommon(), nil
 }
 
-// GetMonths returns months of passed years. Months doesn't contains relations (Incomes, Days and etc.)
+// GetMonths returns month overviews for passed years
 func (db DB) GetMonths(ctx context.Context, years ...int) ([]common.MonthOverview, error) {
 	var m []MonthOverview
 	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
