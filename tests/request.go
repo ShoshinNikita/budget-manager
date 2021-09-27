@@ -67,13 +67,12 @@ type Request struct {
 }
 
 func (r Request) Send(t *testing.T, host string, resp interface{}) {
-	rawResp := r.send(t, http.DefaultClient, host)
-	defer rawResp.Body.Close()
+	statusCode, body := r.send(t, http.DefaultClient, host)
 
-	r.checkResponse(t, rawResp, resp)
+	r.checkResponse(t, statusCode, body, resp)
 }
 
-func (r Request) send(t *testing.T, client *http.Client, host string) *http.Response {
+func (r Request) send(t *testing.T, client *http.Client, host string) (statusCode int, respBody []byte) {
 	require := require.New(t)
 
 	u := &url.URL{
@@ -109,24 +108,25 @@ func (r Request) send(t *testing.T, client *http.Client, host string) *http.Resp
 
 	resp, err := client.Do(req)
 	require.NoError(err, "request failed")
+	defer resp.Body.Close()
 
-	return resp
+	respBody, err = ioutil.ReadAll(resp.Body)
+	require.NoError(err, "couldn't read body")
+
+	return resp.StatusCode, respBody
 }
 
-func (r Request) checkResponse(t *testing.T, resp *http.Response, customResp interface{}) {
+func (r Request) checkResponse(t *testing.T, statusCode int, body []byte, customResp interface{}) {
 	require := require.New(t)
-
-	body, err := ioutil.ReadAll(resp.Body)
-	require.NoError(err, "couldn't read body")
 
 	var basicResp models.BaseResponse
 
-	err = json.Unmarshal(body, &basicResp)
+	err := json.Unmarshal(body, &basicResp)
 	require.NoError(err, "couldn't decode basic response")
 	require.NotEqual("", basicResp.RequestID)
 	require.Equal(r.Err, basicResp.Error)
 	require.Equal(r.Err == "", basicResp.Success)
-	require.Equal(r.StatusCode, resp.StatusCode)
+	require.Equal(r.StatusCode, statusCode)
 
 	if customResp != nil {
 		err = json.Unmarshal(body, customResp)
