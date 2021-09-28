@@ -32,7 +32,7 @@ RUN sed -i "s/tohtmlattr/toHTMLAttr/g" templates/month.html templates/months.htm
 # Build a binary file
 #
 
-FROM golang:1.16-alpine as backend-builder
+FROM golang:1.17-alpine as backend-builder
 
 ENV CGO_ENABLED=1
 

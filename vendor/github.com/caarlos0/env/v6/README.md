@@ -2,13 +2,19 @@
 
 [![Build Status](https://img.shields.io/github/workflow/status/caarlos0/env/build?style=for-the-badge)](https://github.com/caarlos0/env/actions?workflow=build)
 [![Coverage Status](https://img.shields.io/codecov/c/gh/caarlos0/env.svg?logo=codecov&style=for-the-badge)](https://codecov.io/gh/caarlos0/env)
-[![](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](http://godoc.org/github.com/caarlos0/env/v6)
+[![](http://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://pkg.go.dev/github.com/caarlos0/env/v6)
 
 Simple lib to parse envs to structs in Go.
 
 ## Example
 
-A very basic example:
+Get the module with:
+
+```sh
+go get github.com/caarlos0/env/v6
+```
+
+The usage looks like this:
 
 ```go
 package main
@@ -17,16 +23,13 @@ import (
 	"fmt"
 	"time"
 
-	// if using go modules
 	"github.com/caarlos0/env/v6"
-
-	// if using dep/others
-	"github.com/caarlos0/env"
 )
 
 type config struct {
 	Home         string        `env:"HOME"`
 	Port         int           `env:"PORT" envDefault:"3000"`
+	Password     string        `env:"PASSWORD,unset"`
 	IsProduction bool          `env:"PRODUCTION"`
 	Hosts        []string      `env:"HOSTS" envSeparator:":"`
 	Duration     time.Duration `env:"DURATION"`
@@ -49,6 +52,8 @@ You can run it like this:
 $ PRODUCTION=true HOSTS="host1:host2:host3" DURATION=1s go run main.go
 {Home:/your/home Port:3000 IsProduction:true Hosts:[host1 host2 host3] Duration:1s}
 ```
+
+⚠️⚠️⚠️ **Attention:** _unexported fields_ will be **ignored**.
 
 ## Supported types and defaults
 
@@ -91,8 +96,6 @@ If you set the `envExpand` tag, environment variables (either in `${var}` or
 `$var` format) in the string will be replaced according with the actual value
 of the variable.
 
-Unexported fields are ignored.
-
 ## Custom Parser Funcs
 
 If you have a type that is not supported out of the box by the lib, you are able
@@ -114,23 +117,67 @@ to facilitate the parsing of envs that are not basic types.
 Check the example in the [go doc](http://godoc.org/github.com/caarlos0/env)
 for more info.
 
-## Required fields
+### A note about `TextUnmarshaler` and `time.Time`
 
-The `env` tag option `required` (e.g., `env:"tagKey,required"`) can be added
-to ensure that some environment variable is set.  In the example above,
-an error is returned if the `config` struct is changed to:
+Env supports by default anything that implements the `TextUnmarshaler` interface.
+That includes things like `time.Time` for example.
+The upside is that depending on the format you need, you don't need to change anything.
+The downside is that if you do need time in another format, you'll need to create your own type.
 
+Its fairly straightforward:
 
 ```go
-type config struct {
-    Home         string   `env:"HOME"`
-    Port         int      `env:"PORT" envDefault:"3000"`
-    IsProduction bool     `env:"PRODUCTION"`
-    Hosts        []string `env:"HOSTS" envSeparator:":"`
-    SecretKey    string   `env:"SECRET_KEY,required"`
+type MyTime time.Time
+
+func (t *MyTime) UnmarshalText(text []byte) error {
+	tt, err := time.Parse("2006-01-02", string(text))
+	*t = MyTime(tt)
+	return err
+}
+
+type Config struct {
+	SomeTime MyTime `env:"SOME_TIME"`
 }
 ```
 
+And then you can parse `Config` with `env.Parse`.
+
+## Required fields
+
+The `env` tag option `required` (e.g., `env:"tagKey,required"`) can be added to ensure that some environment variable is set.
+In the example above, an error is returned if the `config` struct is changed to:
+
+```go
+type config struct {
+	SecretKey string `env:"SECRET_KEY,required"`
+}
+```
+
+## Not Empty fields
+
+While `required` demands the environment variable to be check, it doesn't check its value.
+If you want to make sure the environment is set and not empty, you need to use the `notEmpty` tag option instead (`env:"SOME_ENV,notEmpty"`).
+
+Example:
+
+```go
+type config struct {
+	SecretKey string `env:"SECRET_KEY,notEmpty"`
+}
+```
+
+## Unset environment variable after reading it
+
+The `env` tag option `unset` (e.g., `env:"tagKey,unset"`) can be added
+to ensure that some environment variable is unset after reading it.
+
+Example:
+
+```go
+type config struct {
+	SecretKey string `env:"SECRET_KEY,unset"`
+}
+```
 
 ## From file
 
@@ -145,7 +192,7 @@ package main
 import (
 	"fmt"
 	"time"
-	"github.com/caarlos0/env"
+	"github.com/caarlos0/env/v6"
 )
 
 type config struct {
@@ -175,7 +222,6 @@ $ SECRET=/tmp/secret  \
 {Secret:qwerty Password:dvorak Certificate:coleman}
 ```
 
-
 ## Options
 
 ### Environment
@@ -193,7 +239,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/caarlos0/env"
+	"github.com/caarlos0/env/v6"
 )
 
 type Config struct {
@@ -229,7 +275,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/caarlos0/env"
+	"github.com/caarlos0/env/v6"
 )
 
 type Config struct {
@@ -250,7 +296,80 @@ func main() {
 }
 ```
 
+
+### On set hooks
+
+You might want to listen to value sets and, for example, log something or do some other kind of logic.
+You can do this by passing a `OnSet` option:
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/caarlos0/env/v6"
+)
+
+type Config struct {
+	Username string `env:"USERNAME" envDefault:"admin"`
+	Password string `env:"PASSWORD"`
+}
+
+func main() {
+	cfg := &Config{}
+	opts := &env.Options{
+		OnSet: func(tag string, value interface{}, isDefault bool) {
+			fmt.Printf("Set %s to %v (default? %v)\n", tag, value, isDefault)
+		},
+	}
+
+	// Load env vars.
+	if err := env.Parse(cfg, opts); err != nil {
+		log.Fatal(err)
+	}
+
+	// Print the loaded data.
+	fmt.Printf("%+v\n", cfg.envData)
+}
+```
+
+## Making all fields to required
+
+You can make all fields that don't have a default value be required by setting the `RequiredIfNoDef: true` in the `Options`.
+
+For example
+
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/caarlos0/env/v6"
+)
+
+type Config struct {
+	Username string `env:"USERNAME" envDefault:"admin"`
+	Password string `env:"PASSWORD"`
+}
+
+func main() {
+	cfg := &Config{}
+	opts := &env.Options{RequiredIfNoDef: true}
+
+	// Load env vars.
+	if err := env.Parse(cfg, opts); err != nil {
+		log.Fatal(err)
+	}
+
+	// Print the loaded data.
+	fmt.Printf("%+v\n", cfg.envData)
+}
+```
+
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/caarlos0/env.svg)](https://starchart.cc/caarlos0/env)
-

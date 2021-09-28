@@ -16,7 +16,7 @@ import (
 // nolint: gochecknoglobals
 var (
 	// ErrNotAStructPtr is returned if you pass something that is not a pointer to a
-	// Struct to Parse
+	// Struct to Parse.
 	ErrNotAStructPtr = errors.New("env: expected a pointer to a Struct")
 
 	defaultBuiltInParsers = map[reflect.Kind]ParserFunc{
@@ -92,15 +92,25 @@ var (
 	}
 )
 
-// ParserFunc defines the signature of a function that can be used within `CustomParsers`
+// ParserFunc defines the signature of a function that can be used within `CustomParsers`.
 type ParserFunc func(v string) (interface{}, error)
+
+// OnSetFn is a hook that can be run when a value is set.
+type OnSetFn func(tag string, value interface{}, isDefault bool)
 
 // Options for the parser.
 type Options struct {
 	// Environment keys and values that will be accessible for the service.
 	Environment map[string]string
+
 	// TagName specifies another tagname to use rather than the default env.
 	TagName string
+
+	// RequiredIfNoDef automatically sets all env as required if they do not declare 'envDefault'
+	RequiredIfNoDef bool
+
+	// OnSet allows to run a function when a value is set
+	OnSet OnSetFn
 
 	// Sets to true if we have already configured once.
 	configured bool
@@ -130,18 +140,17 @@ func configure(opts []Options) []Options {
 		if item.TagName != "" {
 			opt.TagName = item.TagName
 		}
+		if item.OnSet != nil {
+			opt.OnSet = item.OnSet
+		}
+		opt.RequiredIfNoDef = item.RequiredIfNoDef
 	}
 
 	return []Options{opt}
 }
 
-func toMap(env []string) map[string]string {
-	r := map[string]string{}
-	for _, e := range env {
-		p := strings.SplitN(e, "=", 2)
-		r[p[0]] = p[1]
-	}
-	return r
+func getOnSetFn(opts []Options) OnSetFn {
+	return opts[0].OnSet
 }
 
 // getTagName returns the tag name.
@@ -173,7 +182,7 @@ func ParseWithFuncs(v interface{}, funcMap map[reflect.Type]ParserFunc, opts ...
 	if ref.Kind() != reflect.Struct {
 		return ErrNotAStructPtr
 	}
-	var parsers = defaultTypeParsers
+	parsers := defaultTypeParsers
 	for k, v := range funcMap {
 		parsers[k] = v
 	}
@@ -182,7 +191,7 @@ func ParseWithFuncs(v interface{}, funcMap map[reflect.Type]ParserFunc, opts ...
 }
 
 func doParse(ref reflect.Value, funcMap map[reflect.Type]ParserFunc, opts []Options) error {
-	var refType = ref.Type()
+	refType := ref.Type()
 
 	for i := 0; i < refType.NumField(); i++ {
 		refField := ref.Field(i)
@@ -224,35 +233,49 @@ func doParse(ref reflect.Value, funcMap map[reflect.Type]ParserFunc, opts []Opti
 }
 
 func get(field reflect.StructField, opts []Options) (val string, err error) {
-	var required bool
 	var exists bool
+	var isDefault bool
 	var loadFile bool
-	var expand = strings.EqualFold(field.Tag.Get("envExpand"), "true")
+	var unset bool
+	var notEmpty bool
 
+	required := opts[0].RequiredIfNoDef
 	key, tags := parseKeyForOption(field.Tag.Get(getTagName(opts)))
-
 	for _, tag := range tags {
 		switch tag {
 		case "":
-			break
+			continue
 		case "file":
 			loadFile = true
 		case "required":
 			required = true
+		case "unset":
+			unset = true
+		case "notEmpty":
+			notEmpty = true
 		default:
 			return "", fmt.Errorf("env: tag option %q not supported", tag)
 		}
 	}
 
+	expand := strings.EqualFold(field.Tag.Get("envExpand"), "true")
 	defaultValue, defExists := field.Tag.Lookup("envDefault")
-	val, exists = getOr(key, defaultValue, defExists, getEnvironment(opts))
+	val, exists, isDefault = getOr(key, defaultValue, defExists, getEnvironment(opts))
 
 	if expand {
 		val = os.ExpandEnv(val)
 	}
 
-	if required && !exists {
+	if unset {
+		defer os.Unsetenv(key)
+	}
+
+	if required && !exists && len(key) > 0 {
 		return "", fmt.Errorf(`env: required environment variable %q is not set`, key)
+	}
+
+	if notEmpty && val == "" {
+		return "", fmt.Errorf("env: environment variable %q should not be empty", key)
 	}
 
 	if loadFile && val != "" {
@@ -263,6 +286,9 @@ func get(field reflect.StructField, opts []Options) (val string, err error) {
 		}
 	}
 
+	if onSetFn := getOnSetFn(opts); onSetFn != nil {
+		onSetFn(key, val, isDefault)
+	}
 	return val, err
 }
 
@@ -277,29 +303,28 @@ func getFromFile(filename string) (value string, err error) {
 	return string(b), err
 }
 
-func getOr(key, defaultValue string, defExists bool, envs map[string]string) (value string, exists bool) {
-	value, exists = envs[key]
+func getOr(key, defaultValue string, defExists bool, envs map[string]string) (string, bool, bool) {
+	value, exists := envs[key]
 	switch {
 	case (!exists || key == "") && defExists:
-		return defaultValue, true
+		return defaultValue, true, true
 	case !exists:
-		return "", false
+		return "", false, false
 	}
 
-	return value, true
+	return value, true, false
 }
 
 func set(field reflect.Value, sf reflect.StructField, value string, funcMap map[reflect.Type]ParserFunc) error {
-	var tm = asTextUnmarshaler(field)
-	if tm != nil {
+	if tm := asTextUnmarshaler(field); tm != nil {
 		if err := tm.UnmarshalText([]byte(value)); err != nil {
 			return newParseError(sf, err)
 		}
 		return nil
 	}
 
-	var typee = sf.Type
-	var fieldee = field
+	typee := sf.Type
+	fieldee := field
 	if typee.Kind() == reflect.Ptr {
 		typee = typee.Elem()
 		fieldee = field.Elem()
@@ -335,13 +360,13 @@ func set(field reflect.Value, sf reflect.StructField, value string, funcMap map[
 }
 
 func handleSlice(field reflect.Value, value string, sf reflect.StructField, funcMap map[reflect.Type]ParserFunc) error {
-	var separator = sf.Tag.Get("envSeparator")
+	separator := sf.Tag.Get("envSeparator")
 	if separator == "" {
 		separator = ","
 	}
-	var parts = strings.Split(value, separator)
+	parts := strings.Split(value, separator)
 
-	var typee = sf.Type.Elem()
+	typee := sf.Type.Elem()
 	if typee.Kind() == reflect.Ptr {
 		typee = typee.Elem()
 	}
@@ -358,13 +383,13 @@ func handleSlice(field reflect.Value, value string, sf reflect.StructField, func
 		}
 	}
 
-	var result = reflect.MakeSlice(sf.Type, 0, len(parts))
+	result := reflect.MakeSlice(sf.Type, 0, len(parts))
 	for _, part := range parts {
 		r, err := parserFunc(part)
 		if err != nil {
 			return newParseError(sf, err)
 		}
-		var v = reflect.ValueOf(r).Convert(typee)
+		v := reflect.ValueOf(r).Convert(typee)
 		if sf.Type.Elem().Kind() == reflect.Ptr {
 			v = reflect.New(typee)
 			v.Elem().Set(reflect.ValueOf(r).Convert(typee))
