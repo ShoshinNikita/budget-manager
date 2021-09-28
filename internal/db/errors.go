@@ -12,4 +12,5 @@ var (
 	ErrMonthlyPaymentNotExist = errors.New("such Monthly Payment doesn't exist")
 	ErrSpendNotExist          = errors.New("such Spend doesn't exist")
 	ErrSpendTypeNotExist      = errors.New("such Spend Type doesn't exist")
+	ErrSpendTypeIsUsed        = errors.New("Spend Type is used by Monthly Payment or Spend")
 )

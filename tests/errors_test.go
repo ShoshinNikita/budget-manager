@@ -12,11 +12,29 @@ func TestBadRequests(t *testing.T) {
 	t.Parallel()
 
 	RunTest(t, TestCases{
+		{Name: "init", Fn: testErrors_InitData},
 		{Name: "get", Fn: testErrors_GetRequests},
 		{Name: "add", Fn: testErrors_AddRequests},
 		{Name: "edit", Fn: testErrors_EditRequests},
 		{Name: "remove", Fn: testErrors_RemoveRequests},
 	})
+}
+
+func testErrors_InitData(t *testing.T, host string) {
+	for _, req := range []RequestCreated{
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "#1"}},
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "#2", ParentID: 1}},
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "For monthly payments"}},
+		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "For spends"}},
+		//
+		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "title", Income: 100}},
+		//
+		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "title", TypeID: 3, Cost: 100}},
+		//
+		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "title", TypeID: 4, Cost: 100}},
+	} {
+		req.Send(t, host, nil)
+	}
 }
 
 func testErrors_GetRequests(t *testing.T, host string) {
@@ -80,17 +98,7 @@ func testErrors_EditRequests(t *testing.T, host string) {
 		Request{PUT, tt.path, tt.req, http.StatusNotFound, tt.err}.Send(t, host, nil)
 	}
 
-	// Add entities to edit
-	for _, req := range []RequestCreated{
-		{POST, IncomesPath, models.AddIncomeReq{MonthID: 1, Title: "title", Income: 100}},
-		{POST, MonthlyPaymentsPath, models.AddMonthlyPaymentReq{MonthID: 1, Title: "title", Cost: 100}},
-		{POST, SpendsPath, models.AddSpendReq{DayID: 1, Title: "title", Cost: 100}},
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "#1"}},
-		{POST, SpendTypesPath, models.AddSpendTypeReq{Name: "#2", ParentID: 1}},
-	} {
-		req.Send(t, host, nil)
-	}
-
+	// Bad Requests
 	for _, tt := range []struct {
 		path Path
 		req  interface{}
@@ -120,15 +128,20 @@ func testErrors_EditRequests(t *testing.T, host string) {
 
 func testErrors_RemoveRequests(t *testing.T, host string) {
 	for _, tt := range []struct {
-		path Path
-		req  interface{}
-		err  string
+		path   Path
+		req    interface{}
+		status int
+		err    string
 	}{
-		{IncomesPath, models.RemoveIncomeReq{ID: 10}, "such Income doesn't exist"},
-		{MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 10}, "such Monthly Payment doesn't exist"},
-		{SpendsPath, models.RemoveSpendReq{ID: 10}, "such Spend doesn't exist"},
-		{SpendTypesPath, models.RemoveSpendTypeReq{ID: 10}, "such Spend Type doesn't exist"},
+		// Not Found
+		{IncomesPath, models.RemoveIncomeReq{ID: 10}, http.StatusNotFound, "such Income doesn't exist"},
+		{MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 10}, http.StatusNotFound, "such Monthly Payment doesn't exist"},
+		{SpendsPath, models.RemoveSpendReq{ID: 10}, http.StatusNotFound, "such Spend doesn't exist"},
+		{SpendTypesPath, models.RemoveSpendTypeReq{ID: 10}, http.StatusNotFound, "such Spend Type doesn't exist"},
+		// Bad Request
+		{SpendTypesPath, models.RemoveSpendTypeReq{ID: 3}, http.StatusBadRequest, "Spend Type is used by Monthly Payment or Spend"},
+		{SpendTypesPath, models.RemoveSpendTypeReq{ID: 4}, http.StatusBadRequest, "Spend Type is used by Monthly Payment or Spend"},
 	} {
-		Request{DELETE, tt.path, tt.req, http.StatusNotFound, tt.err}.Send(t, host, nil)
+		Request{DELETE, tt.path, tt.req, tt.status, tt.err}.Send(t, host, nil)
 	}
 }

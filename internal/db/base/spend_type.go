@@ -3,6 +3,7 @@ package base
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/Masterminds/squirrel"
 
@@ -27,7 +28,7 @@ func (s *SpendType) ToCommon() *common.SpendType {
 		return nil
 	}
 	if s.ID == 0 {
-		// Valid Spend Type must have have id != 0
+		// Valid Spend Type must have id != 0
 		return nil
 	}
 
@@ -117,20 +118,20 @@ func (db DB) RemoveSpendType(ctx context.Context, id uint) error {
 			return common.ErrSpendTypeNotExist
 		}
 
-		// TODO: maybe we should return an error if the spend type is used?
-
-		// Reset Spend Type
-		_, err := tx.Exec(`UPDATE monthly_payments SET type_id = NULL WHERE type_id = ?`, id)
-		if err != nil {
-			return errors.Wrap(err, "couldn't reset Spend Type for Monthly Payments")
-		}
-		_, err = tx.Exec(`UPDATE spends SET type_id = NULL WHERE type_id = ?`, id)
-		if err != nil {
-			return errors.Wrap(err, "couldn't reset Spend Type for Spends")
+		// Don't remove Spend Type if it is used by Monthly Payment or Spend
+		for _, table := range []string{"monthly_payments", "spends"} {
+			var c int
+			err := tx.Get(&c, fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE type_id = ?", table), id)
+			if err != nil {
+				return errors.Wrapf(err, "couldn't count records in table %q", table)
+			}
+			if c != 0 {
+				return common.ErrSpendTypeIsUsed
+			}
 		}
 
 		// Remove Spend Type
-		_, err = tx.Exec(`DELETE FROM spend_types WHERE id = ?`, id)
+		_, err := tx.Exec(`DELETE FROM spend_types WHERE id = ?`, id)
 		if err != nil {
 			return err
 		}

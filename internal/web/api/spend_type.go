@@ -206,6 +206,8 @@ func (h SpendTypesHandlers) RemoveSpendType(w http.ResponseWriter, r *http.Reque
 		switch {
 		case errors.Is(err, db.ErrSpendTypeNotExist):
 			utils.EncodeError(ctx, w, log, err, http.StatusNotFound)
+		case errors.Is(err, db.ErrSpendTypeIsUsed):
+			utils.EncodeError(ctx, w, log, err, http.StatusBadRequest)
 		default:
 			utils.EncodeInternalError(ctx, w, log, "couldn't remove Spend Type", err)
 		}
