@@ -26,22 +26,10 @@ func TestCalculateSpentByDay(t *testing.T) {
 	}{
 		{
 			spends: []db.Spend{
-				{
-					Year: 2020, Month: 10, Day: 25,
-					Cost: money.FromInt(100),
-				},
-				{
-					Year: 2020, Month: 10, Day: 25,
-					Cost: money.FromInt(150),
-				},
-				{
-					Year: 2020, Month: 10, Day: 27,
-					Cost: money.FromInt(1),
-				},
-				{
-					Year: 2020, Month: 10, Day: 30,
-					Cost: money.FromInt(33),
-				},
+				{Year: 2020, Month: 10, Day: 25, Cost: money.FromInt(100)},
+				{Year: 2020, Month: 10, Day: 25, Cost: money.FromInt(150)},
+				{Year: 2020, Month: 10, Day: 27, Cost: money.FromInt(1)},
+				{Year: 2020, Month: 10, Day: 30, Cost: money.FromInt(33)},
 			},
 			startDate: date(2020, 10, 25),
 			endDate:   date(2020, 10, 30),
@@ -57,67 +45,49 @@ func TestCalculateSpentByDay(t *testing.T) {
 		},
 		{
 			spends: []db.Spend{
-				{
-					Year: 2020, Month: 10, Day: 30,
-					Cost: money.FromInt(33),
-				},
-				{
-					Year: 2020, Month: 11, Day: 03,
-					Cost: money.FromInt(55),
-				},
+				{Year: 2020, Month: 10, Day: 30, Cost: money.FromInt(33)},
+				{Year: 2020, Month: 11, Day: 3, Cost: money.FromInt(55)},
 			},
 			startDate: date(2020, 10, 28),
-			endDate:   date(2020, 11, 04),
+			endDate:   date(2020, 11, 4),
 			//
 			want: SpentByDayDataset{
 				{Year: 2020, Month: 10, Day: 28, Spent: 0},
 				{Year: 2020, Month: 10, Day: 29, Spent: 0},
 				{Year: 2020, Month: 10, Day: 30, Spent: money.FromInt(33)},
 				{Year: 2020, Month: 10, Day: 31, Spent: 0},
-				{Year: 2020, Month: 11, Day: 01, Spent: 0},
-				{Year: 2020, Month: 11, Day: 02, Spent: 0},
-				{Year: 2020, Month: 11, Day: 03, Spent: money.FromInt(55)},
-				{Year: 2020, Month: 11, Day: 04, Spent: 0},
+				{Year: 2020, Month: 11, Day: 1, Spent: 0},
+				{Year: 2020, Month: 11, Day: 2, Spent: 0},
+				{Year: 2020, Month: 11, Day: 3, Spent: money.FromInt(55)},
+				{Year: 2020, Month: 11, Day: 4, Spent: 0},
 			},
 		},
 		{
 			spends: []db.Spend{
-				{
-					Year: 2020, Month: 10, Day: 30,
-					Cost: money.FromInt(33),
-				},
-				{
-					Year: 2020, Month: 11, Day: 03,
-					Cost: money.FromInt(55),
-				},
+				{Year: 2020, Month: 10, Day: 30, Cost: money.FromInt(33)},
+				{Year: 2020, Month: 11, Day: 3, Cost: money.FromInt(55)},
 			},
 			//
 			want: SpentByDayDataset{
 				{Year: 2020, Month: 10, Day: 30, Spent: money.FromInt(33)},
-				{Year: 2020, Month: 10, Day: 31, Spent: 0},
-				{Year: 2020, Month: 11, Day: 01, Spent: 0},
-				{Year: 2020, Month: 11, Day: 02, Spent: 0},
-				{Year: 2020, Month: 11, Day: 03, Spent: money.FromInt(55)},
+				{Year: 2020, Month: 10, Day: 31},
+				{Year: 2020, Month: 11, Day: 1},
+				{Year: 2020, Month: 11, Day: 2},
+				{Year: 2020, Month: 11, Day: 3, Spent: money.FromInt(55)},
 			},
 		},
 		{
 			spends: []db.Spend{
-				{
-					Year: 2019, Month: 12, Day: 30,
-					Cost: money.FromInt(1000),
-				},
-				{
-					Year: 2020, Month: 01, Day: 03,
-					Cost: money.FromInt(99),
-				},
+				{Year: 2019, Month: 12, Day: 30, Cost: money.FromInt(1000)},
+				{Year: 2020, Month: 1, Day: 3, Cost: money.FromInt(99)},
 			},
 			//
 			want: SpentByDayDataset{
 				{Year: 2019, Month: 12, Day: 30, Spent: money.FromInt(1000)},
-				{Year: 2019, Month: 12, Day: 31, Spent: 0},
-				{Year: 2020, Month: 01, Day: 01, Spent: 0},
-				{Year: 2020, Month: 01, Day: 02, Spent: 0},
-				{Year: 2020, Month: 01, Day: 03, Spent: money.FromInt(99)},
+				{Year: 2019, Month: 12, Day: 31},
+				{Year: 2020, Month: 1, Day: 1},
+				{Year: 2020, Month: 1, Day: 2},
+				{Year: 2020, Month: 1, Day: 3, Spent: money.FromInt(99)},
 			},
 		},
 	}
