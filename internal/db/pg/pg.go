@@ -1,21 +1,14 @@
-// Package pg provides a PostgreSQL implementation for DB
 package pg
 
+//nolint:gci
 import (
-	"context"
-	"strconv"
-	"time"
+	"fmt"
 
-	"github.com/go-pg/pg/v10"
+	_ "github.com/lib/pq" // register PostgreSQL driver
 
+	"github.com/ShoshinNikita/budget-manager/internal/db/base"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-)
-
-const (
-	connectRetries      = 10
-	connectRetryTimeout = 500 * time.Millisecond
 )
 
 type Config struct {
@@ -26,203 +19,18 @@ type Config struct {
 	Database string `env:"DB_PG_DATABASE" envDefault:"postgres"`
 }
 
+func (c Config) toURL() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", c.User, c.Password, c.Host, c.Port, c.Database)
+}
+
 type DB struct {
-	db  *pg.DB
-	log logger.Logger
+	*base.DB
 }
 
-// NewDB creates a new connection to the db and pings it
 func NewDB(config Config, log logger.Logger) (*DB, error) {
-	db := &DB{
-		log: log.WithField("db_type", "pg"),
-		db: pg.Connect(&pg.Options{
-			Addr:     config.Host + ":" + strconv.Itoa(config.Port),
-			User:     config.User,
-			Password: config.Password,
-			Database: config.Database,
-		}),
-	}
-
-	// Try to ping the DB
-	for i := 0; i < connectRetries; i++ {
-		err := db.db.Ping(context.Background())
-		if err == nil {
-			break
-		}
-
-		log.WithError(err).WithField("try", i+1).Debug("couldn't ping DB")
-		if i+1 == connectRetries {
-			// Don't sleep extra time
-			return nil, errors.New("database is down")
-		}
-
-		time.Sleep(connectRetryTimeout)
-	}
-
-	return db, nil
-}
-
-// Prepare prepares the database:
-//   - create tables
-//   - init tables (add days for current month if needed)
-//   - run some subproccess
-//
-func (db *DB) Prepare() error {
-	// Create a new migrator
-	migrator := migrations.NewMigrator()
-
-	// Check number of migrations
-	if len(migrator.Migrations()) != migrations.MigrationNumber {
-		return errors.Errorf("invalid number of registered migrations: %d (want %d)",
-			len(migrator.Migrations()), migrations.MigrationNumber)
-	}
-
-	// Init migration table
-	if _, _, err := migrator.Run(db.db, "init"); err != nil {
-		return errors.Wrap(err, "couldn't init migration table")
-	}
-
-	// Run migrations
-	oldVersion, newVersion, err := migrator.Run(db.db, "up")
+	db, err := base.NewDB("postgres", config.toURL(), base.Dollar, migrations.GetMigrations(), log)
 	if err != nil {
-		return errors.Wrap(err, "couldn't run migrations")
+		return nil, err
 	}
-
-	db.log.WithFields(logger.Fields{
-		"old_version": oldVersion, "new_version": newVersion,
-	}).Debug("migration process was finished")
-
-	// Check the tables
-	if err := db.checkCreatedTables(); err != nil {
-		return errors.Wrap(err, "database schema is invalid")
-	}
-
-	return nil
-}
-
-// checkCreatedTables checks tables and their descriptions
-//
-//nolint:funlen
-func (db *DB) checkCreatedTables() error {
-	const tableNumber = 7
-	var n int
-	_, err := db.db.Query(pg.Scan(&n),
-		`SELECT COUNT(DISTINCT table_name) FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema = 'public'`,
-	)
-	if err != nil {
-		return errors.Wrap(err, "couldn't get number of tables")
-	}
-	if n != tableNumber {
-		return errors.Errorf("invalid number of tables: '%d', expected: '%d'", n, tableNumber)
-	}
-
-	type column struct {
-		Name    string `pg:"column_name"`
-		Type    string `pg:"data_type"`
-		IsNull  bool   `pg:"is_nullable"`
-		Default string `pg:"column_default"`
-	}
-	tables := []struct {
-		name    string
-		columns []column
-	}{
-		// Columns must be sorted by name
-		{
-			name: "months",
-			columns: []column{
-				{Name: "daily_budget", Type: "bigint", Default: "0"},
-				{Name: "id", Type: "bigint", Default: "nextval('months_id_seq'::regclass)"},
-				{Name: "month", Type: "bigint"},
-				{Name: "result", Type: "bigint", Default: "0"},
-				{Name: "total_income", Type: "bigint", Default: "0"},
-				{Name: "total_spend", Type: "bigint", Default: "0"},
-				{Name: "year", Type: "bigint"},
-			},
-		},
-		{
-			name: "days",
-			columns: []column{
-				{Name: "day", Type: "bigint"},
-				{Name: "id", Type: "bigint", Default: "nextval('days_id_seq'::regclass)"},
-				{Name: "month_id", Type: "bigint"},
-				{Name: "saldo", Type: "bigint", Default: "0"},
-			},
-		},
-		{
-			name: "incomes",
-			columns: []column{
-				{Name: "id", Type: "bigint", Default: "nextval('incomes_id_seq'::regclass)"},
-				{Name: "income", Type: "bigint"},
-				{Name: "month_id", Type: "bigint"},
-				{Name: "notes", Type: "text", IsNull: true},
-				{Name: "title", Type: "text"},
-			},
-		},
-		{
-			name: "monthly_payments",
-			columns: []column{
-				{Name: "cost", Type: "bigint"},
-				{Name: "id", Type: "bigint", Default: "nextval('monthly_payments_id_seq'::regclass)"},
-				{Name: "month_id", Type: "bigint"},
-				{Name: "notes", Type: "text", IsNull: true},
-				{Name: "title", Type: "text"},
-				{Name: "type_id", Type: "bigint", IsNull: true},
-			},
-		},
-		{
-			name: "spends",
-			columns: []column{
-				{Name: "cost", Type: "bigint"},
-				{Name: "day_id", Type: "bigint"},
-				{Name: "id", Type: "bigint", Default: "nextval('spends_id_seq'::regclass)"},
-				{Name: "notes", Type: "text", IsNull: true},
-				{Name: "title", Type: "text"},
-				{Name: "type_id", Type: "bigint", IsNull: true},
-			},
-		},
-		{
-			name: "spend_types",
-			columns: []column{
-				{Name: "id", Type: "bigint", Default: "nextval('spend_types_id_seq'::regclass)"},
-				{Name: "name", Type: "text"},
-				{Name: "parent_id", Type: "bigint", IsNull: true},
-			},
-		},
-		{
-			name: "migrations",
-			columns: []column{
-				{Name: "created_at", Type: "timestamp with time zone", IsNull: true},
-				{Name: "id", Type: "integer", Default: "nextval('migrations_id_seq'::regclass)"},
-				{Name: "version", Type: "bigint", IsNull: true},
-			},
-		},
-	}
-	var columnsInDB []column
-	for _, table := range tables {
-		_, err := db.db.Query(&columnsInDB,
-			`SELECT column_name, data_type, is_nullable::bool , column_default
-			   FROM INFORMATION_SCHEMA.COLUMNS
-			  WHERE table_name = ?
-			  ORDER BY column_name`, table.name,
-		)
-		if err != nil {
-			return errors.Wrapf(err, "couldn't get description of table '%s'", table.name)
-		}
-
-		err = errors.Errorf("table '%s' has wrong columns: '%+v', expected: '%+v'", table.name, columnsInDB, table.columns)
-		if len(table.columns) != len(columnsInDB) {
-			return err
-		}
-		for i := range table.columns {
-			if table.columns[i] != columnsInDB[i] {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-// Shutdown closes the connection to the db
-func (db *DB) Shutdown() error {
-	return db.db.Close()
+	return &DB{db}, nil
 }

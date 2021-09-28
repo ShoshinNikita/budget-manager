@@ -1,7 +1,6 @@
 run:
   concurrency: 4
-  build-tags:
-    - integration
+  timeout: 3m
   modules-download-mode: vendor
 
 linters:
@@ -44,6 +43,8 @@ issues:
     - "use underscores in Go names; (?:func|type) (?:T|t)est"
     # Ignore warnings about 'github.com/go-pg/pg' specific field 'tableName'
     - "`tableName` is unused"
+    # Method 'ToSql' is used by 'github.com/Masterminds/squirrel'
+    - "method ToSql should be ToSQL"
 
   exclude-rules:
     - linters:

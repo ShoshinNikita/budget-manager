@@ -1,46 +1,22 @@
 package tests
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/ShoshinNikita/budget-manager/internal/app"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
-	"github.com/ShoshinNikita/budget-manager/internal/web"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
 func TestBadRequests(t *testing.T) {
 	t.Parallel()
 
-	cfg := app.Config{
-		DBType:     "postgres",
-		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
-		Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
-	}
-	prepareApp(t, &cfg, StartPostgreSQL)
-
-	host := fmt.Sprintf("localhost:%d", cfg.Server.Port)
-
-	for _, tt := range []struct {
-		name string
-		f    func(t *testing.T, host string)
-	}{
-		{name: "get", f: testErrors_GetRequests},
-		{name: "add", f: testErrors_AddRequests},
-		{name: "edit", f: testErrors_EditRequests},
-		{name: "remove", f: testErrors_RemoveRequests},
-	} {
-		tt := tt
-		ok := t.Run(tt.name, func(t *testing.T) {
-			tt.f(t, host)
-		})
-		if !ok {
-			t.FailNow()
-		}
-	}
+	RunTest(t, TestCases{
+		{Name: "get", Fn: testErrors_GetRequests},
+		{Name: "add", Fn: testErrors_AddRequests},
+		{Name: "edit", Fn: testErrors_EditRequests},
+		{Name: "remove", Fn: testErrors_RemoveRequests},
+	})
 }
 
 func testErrors_GetRequests(t *testing.T, host string) {

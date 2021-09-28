@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
+	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
@@ -62,6 +63,11 @@ func (app *App) prepareDB() (err error) {
 	case "postgres", "postgresql":
 		app.log.Debug("db type is PostgreSQL")
 		app.db, err = pg.NewDB(app.config.PostgresDB, app.log)
+
+	case "sqlite", "sqlite3":
+		app.log.Debug("db type is SQLite")
+		app.db, err = sqlite.NewDB(app.config.SQLiteDB, app.log)
+
 	default:
 		err = errors.New("unsupported DB type")
 	}

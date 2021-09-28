@@ -1,15 +1,11 @@
 package migrations
 
 import (
-	"github.com/go-pg/migrations/v8"
+	"database/sql"
 )
 
-func registerAddNotNull(migrator *migrations.Collection) {
-	migrator.MustRegisterTx(addNotNullUp, addNotNullDown)
-}
-
-func addNotNullUp(db migrations.DB) error {
-	_, err := db.Exec(`
+func addNotNullMigration(tx *sql.Tx) error {
+	_, err := tx.Exec(`
 		ALTER TABLE months
 		    ALTER COLUMN year SET NOT NULL,
 		    ALTER COLUMN month SET NOT NULL,
@@ -45,46 +41,6 @@ func addNotNullUp(db migrations.DB) error {
 
 		ALTER TABLE spend_types
 		    ALTER COLUMN name SET NOT NULL;`,
-	)
-	return err
-}
-
-func addNotNullDown(db migrations.DB) error {
-	_, err := db.Exec(`
-		ALTER TABLE months
-		    ALTER COLUMN year DROP NOT NULL,
-		    ALTER COLUMN month DROP NOT NULL,
-		    ALTER COLUMN daily_budget DROP NOT NULL,
-		    ALTER COLUMN daily_budget DROP DEFAULT 0,
-		    ALTER COLUMN total_income DROP NOT NULL,
-		    ALTER COLUMN total_income DROP DEFAULT 0,
-		    ALTER COLUMN total_spend DROP NOT NULL,
-		    ALTER COLUMN total_spend DROP DEFAULT 0,
-		    ALTER COLUMN result DROP NOT NULL,
-		    ALTER COLUMN result DROP DEFAULT 0;
-
-		ALTER TABLE days
-		    ALTER COLUMN month_id DROP NOT NULL,
-		    ALTER COLUMN day DROP NOT NULL,
-		    ALTER COLUMN saldo DROP NOT NULL;
-
-		ALTER TABLE incomes
-		    ALTER COLUMN month_id DROP NOT NULL,
-		    ALTER COLUMN title DROP NOT NULL,
-		    ALTER COLUMN income DROP NOT NULL;
-
-		ALTER TABLE monthly_payments
-		    ALTER COLUMN month_id DROP NOT NULL,
-		    ALTER COLUMN title DROP NOT NULL,
-		    ALTER COLUMN cost DROP NOT NULL;
-
-		ALTER TABLE spends
-		    ALTER COLUMN day_id DROP NOT NULL,
-		    ALTER COLUMN title DROP NOT NULL,
-		    ALTER COLUMN cost DROP NOT NULL;
-
-		ALTER TABLE spend_types
-		    ALTER COLUMN name DROP NOT NULL;`,
 	)
 	return err
 }

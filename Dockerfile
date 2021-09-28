@@ -34,13 +34,17 @@ RUN sed -i "s/tohtmlattr/toHTMLAttr/g" templates/month.html templates/months.htm
 
 FROM golang:1.16-alpine as backend-builder
 
-ENV CGO_ENABLED=0
+ENV CGO_ENABLED=1
 
 WORKDIR /build/backend
 
 # Copy dependencies (for better caching)
 COPY go.mod go.sum ./
 COPY vendor ./vendor
+
+# Install go-sqlite3
+RUN apk add --update gcc musl-dev && \
+	GOOS=linux CC=gcc go install -v github.com/mattn/go-sqlite3
 
 # Copy code
 COPY cmd ./cmd
@@ -52,7 +56,7 @@ COPY --from=frontend-builder build/frontend/templates ./templates
 
 # Build
 ARG LDFLAGS
-RUN go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/main.go
+RUN GOOS=linux go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/main.go
 
 
 #

@@ -8,8 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ShoshinNikita/budget-manager/internal/app"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
@@ -17,21 +15,16 @@ import (
 func TestAuth(t *testing.T) {
 	t.Parallel()
 
-	cfg := app.Config{
-		DBType:     "postgres",
-		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
-		Server: web.Config{
-			UseEmbed: true,
-			SkipAuth: false,
-			Credentials: web.Credentials{
-				"user": "$2y$05$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC", // user:qwerty
-			},
-			EnableProfiling: false,
-		},
-	}
-	prepareApp(t, &cfg, StartPostgreSQL)
+	RunTest(t, TestFn(testAuth), func(env *TestEnv) {
+		env.Cfg.Server.SkipAuth = false
+		env.Cfg.Server.Credentials = web.Credentials{
+			"user": "$2y$05$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC", // user:qwerty
+		}
+	})
+}
 
-	url := fmt.Sprintf("http://localhost:%d/api/search/spends", cfg.Server.Port)
+func testAuth(t *testing.T, host string) {
+	url := fmt.Sprintf("http://%s/api/search/spends", host)
 
 	const (
 		User  = "user"

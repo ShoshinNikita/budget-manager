@@ -1,50 +1,26 @@
 package tests
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ShoshinNikita/budget-manager/internal/app"
 	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/internal/web"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
 )
 
 func TestBasicUsage(t *testing.T) {
 	t.Parallel()
 
-	cfg := app.Config{
-		DBType:     "postgres",
-		PostgresDB: pg.Config{Host: "localhost", Port: 5432, User: "postgres", Database: "postgres"},
-		Server:     web.Config{UseEmbed: true, SkipAuth: true, Credentials: nil, EnableProfiling: false},
-	}
-	prepareApp(t, &cfg, StartPostgreSQL)
-
-	host := fmt.Sprintf("localhost:%d", cfg.Server.Port)
-
-	for _, tt := range []struct {
-		name string
-		f    func(t *testing.T, host string)
-	}{
-		{name: "spend types", f: testBasicUsage_SpendTypes},
-		{name: "incomes", f: testBasicUsage_Incomes},
-		{name: "monthly payments", f: testBasicUsage_MonthlyPayments},
-		{name: "spends", f: testBasicUsage_Spends},
-		{name: "search spends", f: testBasicUsage_SearchSpends},
-	} {
-		tt := tt
-		ok := t.Run(tt.name, func(t *testing.T) {
-			tt.f(t, host)
-		})
-		if !ok {
-			t.FailNow()
-		}
-	}
+	RunTest(t, TestCases{
+		{Name: "spend types", Fn: testBasicUsage_SpendTypes},
+		{Name: "incomes", Fn: testBasicUsage_Incomes},
+		{Name: "monthly payments", Fn: testBasicUsage_MonthlyPayments},
+		{Name: "spends", Fn: testBasicUsage_Spends},
+		{Name: "search spends", Fn: testBasicUsage_SearchSpends},
+	})
 }
 
 func testBasicUsage_SpendTypes(t *testing.T, host string) {
@@ -148,6 +124,7 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 
 	// Manage
 	for _, req := range []RequestOK{
+		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 1, TypeID: ptrUint(0)}},
 		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 2, Title: ptrStr("patreon"), Notes: ptrStr("with VAT")}},
 		{PUT, MonthlyPaymentsPath, models.EditMonthlyPaymentReq{ID: 3, TypeID: ptrUint(7), Notes: ptrStr(""), Cost: ptrFloat(30)}},
 		{DELETE, MonthlyPaymentsPath, models.RemoveMonthlyPaymentReq{ID: 4}},
@@ -159,7 +136,7 @@ func testBasicUsage_MonthlyPayments(t *testing.T, host string) {
 	month := getCurrentMonth(t, host)
 
 	expectedMonthlyPayments := []db.MonthlyPayment{
-		{ID: 1, Title: "rent", Type: &db.SpendType{ID: 6, Name: "house"}, Cost: money.FromInt(800)},
+		{ID: 1, Title: "rent", Cost: money.FromInt(800)},
 		{ID: 2, Title: "patreon", Notes: "with VAT", Cost: money.FromInt(50)},
 		{ID: 3, Title: "netflix", Type: &db.SpendType{ID: 7, Name: "entertainment"}, Cost: money.FromInt(30)},
 	}
@@ -189,7 +166,7 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "meat", TypeID: 1, Cost: 20}}, // 7
 		{POST, SpendsPath, models.AddSpendReq{DayID: 11, Title: "egg", TypeID: 1, Cost: 7}},   // 8
 		//
-		{POST, SpendsPath, models.AddSpendReq{DayID: 12, Title: "pizza", TypeID: 3, Cost: 100}}, // 9
+		{POST, SpendsPath, models.AddSpendReq{DayID: 12, Title: "pizza", Cost: 100}}, // 9
 		//
 		{POST, SpendsPath, models.AddSpendReq{DayID: 15, Title: "book American Gods", Notes: "as a gift", Cost: 30}}, // 10
 		//
@@ -206,6 +183,7 @@ func testBasicUsage_Spends(t *testing.T, host string) {
 	for _, req := range []RequestOK{
 		{PUT, SpendsPath, models.EditSpendReq{ID: 4, TypeID: ptrUint(0)}},
 		{PUT, SpendsPath, models.EditSpendReq{ID: 8, Title: ptrStr("eggs"), Notes: ptrStr("10 count"), Cost: ptrFloat(8)}},
+		{PUT, SpendsPath, models.EditSpendReq{ID: 9, TypeID: ptrUint(3)}},
 		{DELETE, SpendsPath, models.RemoveSpendReq{ID: 13}},
 	} {
 		req.Send(t, host, nil)
