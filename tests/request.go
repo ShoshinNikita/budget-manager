@@ -83,7 +83,6 @@ func (r Request) send(t *testing.T, client *http.Client, host string) (statusCod
 
 	var body io.Reader
 	if r.Request != nil {
-		//nolint:exhaustive
 		switch r.Method {
 		case GET, HEAD:
 			query := url.Values{}

@@ -1,27 +1,75 @@
 package app
 
 import (
-	"github.com/caarlos0/env/v6"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/env"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
 )
 
 type Config struct {
 	Logger logger.Config
 
-	DBType     string `env:"DB_TYPE" envDefault:"postgres"`
+	DBType     string
 	PostgresDB pg.Config
 	SQLiteDB   sqlite.Config
 
 	Server web.Config
 }
 
-func ParseConfig() (cfg Config, err error) {
-	if err := env.Parse(&cfg); err != nil {
-		return Config{}, err
+func ParseConfig() (Config, error) {
+	cfg := Config{
+		Logger: logger.Config{
+			Mode:  "prod",
+			Level: "info",
+		},
+		//
+		DBType: "postgres",
+		PostgresDB: pg.Config{
+			Host:     "localhost",
+			Port:     5432,
+			User:     "postgres",
+			Password: "",
+			Database: "postgres",
+		},
+		SQLiteDB: sqlite.Config{
+			Path: "./var/budget-manager.db",
+		},
+		//
+		Server: web.Config{
+			Port:            8080,
+			UseEmbed:        true,
+			SkipAuth:        false,
+			Credentials:     nil,
+			EnableProfiling: false,
+		},
+	}
+
+	for _, v := range []struct {
+		key    string
+		target interface{}
+	}{
+		{"LOGGER_MODE", &cfg.Logger.Mode},
+		{"LOGGER_LEVEL", &cfg.Logger.Level},
+		//
+		{"DB_TYPE", &cfg.DBType},
+		{"DB_PG_HOST", &cfg.PostgresDB.Host},
+		{"DB_PG_PORT", &cfg.PostgresDB.Port},
+		{"DB_PG_USER", &cfg.PostgresDB.User},
+		{"DB_PG_PASSWORD", &cfg.PostgresDB.Password},
+		{"DB_PG_DATABASE", &cfg.PostgresDB.Database},
+		{"DB_SQLITE_PATH", &cfg.SQLiteDB.Path},
+		//
+		{"SERVER_PORT", &cfg.Server.Port},
+		{"SERVER_USE_EMBED", &cfg.Server.UseEmbed},
+		{"SERVER_SKIP_AUTH", &cfg.Server.SkipAuth},
+		{"SERVER_CREDENTIALS", &cfg.Server.Credentials},
+		{"SERVER_ENABLE_PROFILING", &cfg.Server.EnableProfiling},
+	} {
+		if err := env.Load(v.key, v.target); err != nil {
+			return Config{}, err
+		}
 	}
 	return cfg, nil
 }

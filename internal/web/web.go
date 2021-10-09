@@ -20,19 +20,19 @@ import (
 // -------------------------------------------------
 
 type Config struct { //nolint:maligned
-	Port int `env:"SERVER_PORT" envDefault:"8080"`
+	Port int
 
 	// UseEmbed defines whether server should use embedded templates and static files
-	UseEmbed bool `env:"SERVER_USE_EMBED" envDefault:"true"`
+	UseEmbed bool
 
 	// SkipAuth disables auth
-	SkipAuth bool `env:"SERVER_SKIP_AUTH"`
+	SkipAuth bool
 
 	// Credentials is a list of pairs 'login:password' separated by comma.
 	// Passwords must be hashed using BCrypt
-	Credentials Credentials `env:"SERVER_CREDENTIALS"`
+	Credentials Credentials
 
-	EnableProfiling bool `env:"SERVER_ENABLE_PROFILING" envDefault:"false"`
+	EnableProfiling bool
 }
 
 type Credentials map[string]string

@@ -6,6 +6,8 @@ run:
 linters:
   enable-all: true
   disable:
+    # Annoying
+    - exhaustive
     # Deprecated
     - maligned
     - scopelint

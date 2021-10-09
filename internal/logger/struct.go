@@ -55,7 +55,7 @@ func structToFields(i interface{}, namePrefix string) (fields Fields) {
 		}
 
 		// Fallback to basic types
-		switch f.Kind() { //nolint:exhaustive
+		switch f.Kind() {
 		case
 			reflect.Bool,
 			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,

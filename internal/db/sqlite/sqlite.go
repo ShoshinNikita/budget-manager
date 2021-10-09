@@ -14,7 +14,7 @@ type DB struct {
 }
 
 type Config struct {
-	Path string `env:"DB_SQLITE_PATH" envDefault:"./var/budget-manager.db"`
+	Path string
 }
 
 func NewDB(config Config, log logger.Logger) (*DB, error) {

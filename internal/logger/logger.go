@@ -33,11 +33,11 @@ type Fields logrus.Fields
 type Config struct {
 	// Mode is a mode of Logger. Valid options: prod, production, dev, develop.
 	// Default value is prod
-	Mode string `env:"LOGGER_MODE" envDefault:"prod"`
+	Mode string
 
 	// Level is a level of logger. Valid options: debug, info, warn, error, fatal.
 	// It is always debug, when debug mode is on
-	Level string `env:"LOGGER_LEVEL" envDefault:"info"`
+	Level string
 }
 
 func New(cnf Config) Logger {

@@ -29,7 +29,9 @@ func TestParseConfig(t *testing.T) {
 		{"DB_SQLITE_PATH", "./var/db.db"},
 		{"SERVER_PORT", "6666"},
 		{"SERVER_USE_EMBED", "false"},
+		{"SERVER_SKIP_AUTH", "true"},
 		{"SERVER_CREDENTIALS", "user:qwerty,admin:admin"},
+		{"SERVER_ENABLE_PROFILING", "true"},
 	}
 	for _, env := range envs {
 		os.Setenv(env.key, env.value)
@@ -54,10 +56,12 @@ func TestParseConfig(t *testing.T) {
 		Server: web.Config{
 			Port:     6666,
 			UseEmbed: false,
+			SkipAuth: true,
 			Credentials: web.Credentials{
 				"user":  "qwerty",
 				"admin": "admin",
 			},
+			EnableProfiling: true,
 		},
 	}
 
