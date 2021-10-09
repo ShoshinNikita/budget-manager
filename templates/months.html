@@ -188,7 +188,7 @@
 
 					{{ $attributes := `class="month card disabled noselect" title="No data for the month"` }}
 					{{ if ne .ID 0 }}
-					{{ $attributes = (printf `href="/%d-%02d" class="month card card--hover" title="Go to the month"` .Year .Month)}}
+					{{ $attributes = (printf `href="/months/month?year=%d&month=%d" class="month card card--hover" title="Go to the month"` .Year .Month)}}
 					{{ end }}
 
 					<a {{ toHTMLAttr $attributes }}>

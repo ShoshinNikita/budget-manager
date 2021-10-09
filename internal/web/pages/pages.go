@@ -74,7 +74,7 @@ func (h Handlers) IndexPage(w http.ResponseWriter, r *http.Request) {
 		WithFields(logger.Fields{"year": year, "month": int(month)}).
 		Debug("redirect to the current month")
 
-	url := fmt.Sprintf("/%d-%d", year, month)
+	url := fmt.Sprintf("/months/month?year=%d&month=%d", year, month)
 	http.Redirect(w, r, url, http.StatusSeeOther)
 }
 
@@ -202,21 +202,14 @@ func getLastTwelveMonths(endYear int, endMonth time.Month, months []db.MonthOver
 	return months
 }
 
-// GET /{year:[0-9]+}-{month:[0-9]+}
-//
-//nolint:funlen
+// GET /months/month?year={year}&month={month}
 func (h Handlers) MonthPage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := reqid.FromContextToLogger(ctx, h.log)
 
-	year, ok := getYear(r)
+	year, monthNumber, ok := getYearAndMonth(r)
 	if !ok {
-		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid year"), http.StatusBadRequest)
-		return
-	}
-	monthNumber, ok := getMonth(r)
-	if !ok {
-		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid month"), http.StatusBadRequest)
+		h.processErrorWithPage(ctx, log, w, newInvalidURLMessage("invalid date"), http.StatusBadRequest)
 		return
 	}
 

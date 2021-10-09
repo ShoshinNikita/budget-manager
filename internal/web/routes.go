@@ -1,64 +1,118 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/gorilla/mux"
-
+	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
+	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
 )
 
-type route struct {
-	methods string
-	path    string
-	handler http.HandlerFunc
-}
+//nolint:funlen
+func (s Server) addRoutes(mux *http.ServeMux) {
+	var (
+		errUnknownPath      = errors.New("unknown path")
+		errMethodNowAllowed = errors.New("method not allowed")
+	)
+	writeUnknownPathError := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		log := reqid.FromContextToLogger(ctx, s.log)
 
-func (s Server) addRoutes(router *mux.Router) {
+		utils.EncodeError(ctx, w, log, errUnknownPath, http.StatusNotFound)
+	}
+	writeMethodNowAllowedError := func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		log := reqid.FromContextToLogger(ctx, s.log)
+
+		utils.EncodeError(ctx, w, log, errMethodNowAllowed, http.StatusMethodNotAllowed)
+	}
+
 	pageHandlers := pages.NewHandlers(s.db, s.log, s.config.UseEmbed, s.version, s.gitHash)
+
+	// Register the main handler. It serves pages and handles all requests with an unrecognized pattern
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		var handler http.HandlerFunc
+		switch r.URL.Path {
+		case "/":
+			handler = pageHandlers.IndexPage
+		case "/months":
+			handler = pageHandlers.MonthsPage
+		case "/months/month":
+			handler = pageHandlers.MonthPage
+		case "/search/spends":
+			handler = pageHandlers.SearchSpendsPage
+		default:
+			writeUnknownPathError(w, r)
+			return
+		}
+
+		// Only GET requests are allowed
+		if r.Method != http.MethodGet {
+			writeMethodNowAllowedError(w, r)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
+	})
 
 	apiHandlers := api.NewHandlers(s.db, s.log)
 
-	routes := []route{
-		// Pages
-		{methods: "GET", path: "/", handler: pageHandlers.IndexPage},
-		{methods: "GET", path: "/months", handler: pageHandlers.MonthsPage},
-		{methods: "GET", path: "/{year:[0-9]+}-{month:[0-9]+}", handler: pageHandlers.MonthPage},
-		{methods: "GET", path: "/search/spends", handler: pageHandlers.SearchSpendsPage},
+	// Register API handlers
+	for pattern, routes := range map[string]map[string]http.HandlerFunc{
+		"/api/months/date": {
+			http.MethodGet: apiHandlers.GetMonthByDate,
+		},
+		"/api/incomes": {
+			http.MethodPost:   apiHandlers.AddIncome,
+			http.MethodPut:    apiHandlers.EditIncome,
+			http.MethodDelete: apiHandlers.RemoveIncome,
+		},
+		"/api/monthly-payments": {
+			http.MethodPost:   apiHandlers.AddMonthlyPayment,
+			http.MethodPut:    apiHandlers.EditMonthlyPayment,
+			http.MethodDelete: apiHandlers.RemoveMonthlyPayment,
+		},
+		"/api/spends": {
+			http.MethodPost:   apiHandlers.AddSpend,
+			http.MethodPut:    apiHandlers.EditSpend,
+			http.MethodDelete: apiHandlers.RemoveSpend,
+		},
+		"/api/spend-types": {
+			http.MethodGet:    apiHandlers.GetSpendTypes,
+			http.MethodPost:   apiHandlers.AddSpendType,
+			http.MethodPut:    apiHandlers.EditSpendType,
+			http.MethodDelete: apiHandlers.RemoveSpendType,
+		},
+		"/api/search/spends": {
+			http.MethodGet: apiHandlers.SearchSpends,
+		},
+	} {
+		pattern := pattern
+		routes := routes
+		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != pattern {
+				writeUnknownPathError(w, r)
+				return
+			}
 
-		// API
-		{methods: "GET", path: "/api/months/date", handler: apiHandlers.GetMonthByDate},
-		// Income
-		{methods: "POST", path: "/api/incomes", handler: apiHandlers.AddIncome},
-		{methods: "PUT", path: "/api/incomes", handler: apiHandlers.EditIncome},
-		{methods: "DELETE", path: "/api/incomes", handler: apiHandlers.RemoveIncome},
-		// Monthly Payment
-		{methods: "POST", path: "/api/monthly-payments", handler: apiHandlers.AddMonthlyPayment},
-		{methods: "PUT", path: "/api/monthly-payments", handler: apiHandlers.EditMonthlyPayment},
-		{methods: "DELETE", path: "/api/monthly-payments", handler: apiHandlers.RemoveMonthlyPayment},
-		// Spend
-		{methods: "POST", path: "/api/spends", handler: apiHandlers.AddSpend},
-		{methods: "PUT", path: "/api/spends", handler: apiHandlers.EditSpend},
-		{methods: "DELETE", path: "/api/spends", handler: apiHandlers.RemoveSpend},
-		// Spend Type
-		{methods: "GET", path: "/api/spend-types", handler: apiHandlers.GetSpendTypes},
-		{methods: "POST", path: "/api/spend-types", handler: apiHandlers.AddSpendType},
-		{methods: "PUT", path: "/api/spend-types", handler: apiHandlers.EditSpendType},
-		{methods: "DELETE", path: "/api/spend-types", handler: apiHandlers.RemoveSpendType},
-		// Other
-		{methods: "GET", path: "/api/search/spends", handler: apiHandlers.SearchSpends},
-	}
-	for _, r := range routes {
-		router.Methods(r.methods).Path(r.path).HandlerFunc(r.handler)
+			handler, ok := routes[r.Method]
+			if !ok {
+				writeMethodNowAllowedError(w, r)
+				return
+			}
+
+			handler.ServeHTTP(w, r)
+		})
 	}
 }
 
-func (Server) addPprofRoutes(router *mux.Router) {
-	router.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	router.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	router.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index)
+func (Server) addPprofRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }

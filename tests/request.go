@@ -110,6 +110,9 @@ func (r Request) send(t *testing.T, client *http.Client, host string) (statusCod
 	require.NoError(err, "request failed")
 	defer resp.Body.Close()
 
+	contentTypeHeader := resp.Header.Get("Content-Type")
+	require.Equal("application/json", contentTypeHeader, "wrong Content-Type header")
+
 	respBody, err = ioutil.ReadAll(resp.Body)
 	require.NoError(err, "couldn't read body")
 

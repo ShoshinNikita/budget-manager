@@ -526,7 +526,7 @@
 									</td>
 									<td class="spends__table__cost">{{ .Cost }}</td>
 									<td class="spends__table__link">
-										<a href="/{{ .Year }}-{{ printf `%02d` .Month }}#{{ .Day }}" class="feather-icon" title="View Day">
+										<a href="/months/month?year={{ .Year }}&month={{ printf `%d` .Month }}#{{ .Day }}" class="feather-icon" title="View Day">
 											{{ template "components/icon" "external-link" }}
 										</a>
 									</td>
