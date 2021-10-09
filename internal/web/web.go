@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
@@ -97,20 +95,10 @@ func NewServer(cnf Config, db Database, log logger.Logger, version, gitHash stri
 }
 
 func (s *Server) Prepare() {
-	router := mux.NewRouter()
-	router.StrictSlash(true)
+	router := http.NewServeMux()
 
 	if !s.config.UseEmbed {
 		s.log.Warn("don't use embedded templates and static files")
-	}
-
-	// Add middlewares
-	router.Use(s.requestIDMeddleware)
-	router.Use(s.loggingMiddleware)
-	if !s.config.SkipAuth {
-		router.Use(s.basicAuthMiddleware)
-	} else {
-		s.log.Warn("auth is disabled")
 	}
 
 	// Add API routes
@@ -125,11 +113,21 @@ func (s *Server) Prepare() {
 	fs := http.FS(static.New(s.config.UseEmbed))
 	fileHandler := http.StripPrefix("/static/", http.FileServer(fs))
 	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30, s.gitHash) // cache for 1 month
-	router.PathPrefix("/static/").Handler(fileHandler)
+	router.Handle("/static/", fileHandler)
+
+	// Wrap the handler in middlewares. The last middleware will be called first and so on
+	var handler http.Handler = router
+	if !s.config.SkipAuth {
+		handler = s.basicAuthMiddleware(handler)
+	} else {
+		s.log.Warn("auth is disabled")
+	}
+	handler = s.loggingMiddleware(handler)
+	handler = s.requestIDMeddleware(handler)
 
 	s.server = &http.Server{
 		Addr:    ":" + strconv.Itoa(s.config.Port),
-		Handler: router,
+		Handler: handler,
 	}
 }
 
