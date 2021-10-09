@@ -49,3 +49,8 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 
 	return nil
 }
+
+func (c Credentials) Get(username string) (secret string, ok bool) {
+	secret, ok = c[username]
+	return secret, ok
+}
