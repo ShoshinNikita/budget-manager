@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/money"
@@ -67,39 +65,20 @@ func sumSpendCosts(spends []db.Spend) money.Money {
 	return m
 }
 
-const yearKey = "year"
-
-func getYear(r *http.Request) (year int, ok bool) {
-	h, ok := mux.Vars(r)[yearKey]
-	if !ok {
-		return 0, false
-	}
-
-	year, err := strconv.Atoi(h)
+func getYearAndMonth(r *http.Request) (y int, month time.Month, ok bool) {
+	year, err := strconv.Atoi(r.FormValue("year"))
 	if err != nil {
-		return 0, false
+		return 0, 0, false
 	}
 
-	return year, true
-}
-
-const monthKey = "month"
-
-func getMonth(r *http.Request) (month time.Month, ok bool) {
-	monthStr, ok := mux.Vars(r)[monthKey]
-	if !ok {
-		return 0, false
-	}
-
-	monthInt, err := strconv.Atoi(monthStr)
+	m, err := strconv.Atoi(r.FormValue("month"))
 	if err != nil {
-		return 0, false
+		return 0, 0, false
 	}
-
-	month = time.Month(monthInt)
+	month = time.Month(m)
 	if !(time.January <= month && month <= time.December) {
-		return 0, false
+		return 0, 0, false
 	}
 
-	return month, true
+	return year, month, true
 }

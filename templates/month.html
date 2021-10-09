@@ -900,11 +900,13 @@
 				}
 			}
 
-			const match = window.location.pathname.match(/(\d+)-(\d+)/);
+			const urlParams = new URLSearchParams(window.location.search);
+			const year = urlParams.get("year");
+			const month = urlParams.get("month");
 
 			// Check whether we display the current month
 			const now = new Date();
-			if (match[1] == now.getFullYear() && match[2] == now.getMonth() + 1) {
+			if (year == now.getFullYear() && month == now.getMonth() + 1) {
 				// Select the current day
 				selectDay(now.getDate());
 				return;

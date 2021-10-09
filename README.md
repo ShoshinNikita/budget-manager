@@ -129,7 +129,7 @@ You can find more commands in [Makefile](./Makefile)
 You can find screenshots of pages [here](./docs/images/README.md)
 
 - `/months` - Last 12 months
-- `/{year}-{month}` - Month info
+- `/months/month?year={year}&month={month}` - Month info
 - `/search/spends` - Search for Spends
 
 #### API
