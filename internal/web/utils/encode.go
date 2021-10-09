@@ -55,8 +55,8 @@ func Encode(ctx context.Context, w http.ResponseWriter,
 		Error:     enc.respErrorMsg,
 	})
 
-	w.WriteHeader(enc.statusCode)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(enc.statusCode)
 	if err := json.NewEncoder(w).Encode(enc.resp); err != nil {
 		LogInternalError(log, "couldn't encode response", err)
 		return false
