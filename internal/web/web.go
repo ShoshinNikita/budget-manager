@@ -83,18 +83,24 @@ type Database interface {
 	pages.DB
 }
 
-func NewServer(cnf Config, db Database, log logger.Logger, version, gitHash string) *Server {
-	return &Server{
-		config: cnf,
+func NewServer(cfg Config, db Database, log logger.Logger, version, gitHash string) *Server {
+	s := &Server{
+		config: cfg,
 		db:     db,
 		log:    log,
 		//
 		version: version,
 		gitHash: gitHash,
 	}
+	s.server = &http.Server{
+		Addr:    ":" + strconv.Itoa(cfg.Port),
+		Handler: s.buildServerHandler(),
+	}
+
+	return s
 }
 
-func (s *Server) Prepare() {
+func (s *Server) buildServerHandler() http.Handler {
 	router := http.NewServeMux()
 
 	if !s.config.UseEmbed {
@@ -125,10 +131,7 @@ func (s *Server) Prepare() {
 	handler = s.loggingMiddleware(handler)
 	handler = s.requestIDMeddleware(handler)
 
-	s.server = &http.Server{
-		Addr:    ":" + strconv.Itoa(s.config.Port),
-		Handler: handler,
-	}
+	return handler
 }
 
 func (s Server) ListenAndServer() error {

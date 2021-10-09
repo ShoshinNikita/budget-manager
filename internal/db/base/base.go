@@ -12,59 +12,60 @@ import (
 )
 
 const (
-	connectRetries      = 10
-	connectRetryTimeout = 500 * time.Millisecond
-)
-
-const (
 	Question = sqlx.Question
 	Dollar   = sqlx.Dollar
 )
 
 type DB struct {
-	db         *sqlx.DB
-	log        logger.Logger
-	migrations []*migrator.Migration
+	db *sqlx.DB
 }
 
-// NewDB creates a new connection to the db and pings it
-func NewDB(driverName string, dataSourceName string, placeholder sqlx.Placeholder,
+// NewDB creates a new connection to the db and applies the migrations
+func NewDB(driverName, dataSourceName string, placeholder sqlx.Placeholder,
 	migrations []*migrator.Migration, log logger.Logger) (*DB, error) {
 
 	conn, err := sqlx.Open(driverName, dataSourceName, placeholder, log)
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't open a connection to db")
 	}
-	db := &DB{
-		log:        log,
-		db:         conn,
-		migrations: migrations,
+
+	ctx := context.Background()
+
+	if err := pingDB(ctx, conn, log); err != nil {
+		return nil, err
+	}
+	if err := applyMigrations(ctx, conn, migrations, log); err != nil {
+		return nil, err
 	}
 
-	// Try to ping the DB
-	for i := 0; i < connectRetries; i++ {
-		err := db.db.Ping(context.Background())
+	return &DB{conn}, nil
+}
+
+const (
+	pingRetries      = 10
+	pingRetryTimeout = 500 * time.Millisecond
+)
+
+func pingDB(ctx context.Context, db *sqlx.DB, log logger.Logger) error {
+	for i := 0; i < pingRetries; i++ {
+		err := db.Ping(ctx)
 		if err == nil {
 			break
 		}
 
 		log.WithError(err).WithField("try", i+1).Debug("couldn't ping DB")
-		if i+1 == connectRetries {
+		if i+1 == pingRetries {
 			// Don't sleep extra time
-			return nil, errors.New("database is down")
+			return errors.New("database is down")
 		}
 
-		time.Sleep(connectRetryTimeout)
+		time.Sleep(pingRetryTimeout)
 	}
-
-	return db, nil
+	return nil
 }
 
-// Prepare runs the migrations
-func (db *DB) Prepare() error {
-	ctx := context.Background()
-
-	migrator, err := migrator.NewMigrator(db.db.GetInternalDB(), db.log, db.migrations)
+func applyMigrations(ctx context.Context, db *sqlx.DB, migrations []*migrator.Migration, log logger.Logger) error {
+	migrator, err := migrator.NewMigrator(db.GetInternalDB(), log, migrations)
 	if err != nil {
 		return errors.Wrap(err, "couldn't prepare migrator")
 	}

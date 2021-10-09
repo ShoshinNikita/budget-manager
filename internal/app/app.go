@@ -24,7 +24,6 @@ type App struct {
 }
 
 type Database interface {
-	Prepare() error
 	InitMonth(ctx context.Context, year int, month time.Month) error
 	Shutdown() error
 
@@ -52,7 +51,9 @@ func (app *App) PrepareComponents() error {
 	}
 
 	app.log.Debug("prepare web server")
-	app.prepareWebServer()
+	if err := app.prepareWebServer(); err != nil {
+		return errors.Wrap(err, "couldn't prepare web server")
+	}
 
 	return nil
 }
@@ -75,11 +76,6 @@ func (app *App) prepareDB() (err error) {
 		return errors.Wrap(err, "couldn't create DB connection")
 	}
 
-	// Prepare the db
-	if err := app.db.Prepare(); err != nil {
-		return errors.Wrap(err, "couldn't prepare the db")
-	}
-
 	// Init the current month
 	if err := app.initMonth(time.Now()); err != nil {
 		return errors.Wrap(err, "couldn't init the current month")
@@ -88,9 +84,10 @@ func (app *App) prepareDB() (err error) {
 	return nil
 }
 
-func (app *App) prepareWebServer() {
+//nolint:unparam
+func (app *App) prepareWebServer() error {
 	app.server = web.NewServer(app.config.Server, app.db, app.log, app.version, app.gitHash)
-	app.server.Prepare()
+	return nil
 }
 
 // Run runs web server. This method should be called in a goroutine
