@@ -1,4 +1,4 @@
-package migrations
+package migrator
 
 import (
 	"context"
@@ -18,6 +18,8 @@ const (
 	// migrationTableV2 is a new migration table used by 'github.com/lopezator/migrator'
 	migrationTableV2 = "migrations_v2"
 )
+
+type Migration = migrator.Migration
 
 type Migrator struct {
 	db *sql.DB

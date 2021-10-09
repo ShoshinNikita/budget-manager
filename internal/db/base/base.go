@@ -5,9 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/lopezator/migrator"
-
-	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/migrations"
+	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/migrator"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
@@ -66,7 +64,7 @@ func NewDB(driverName string, dataSourceName string, placeholder sqlx.Placeholde
 func (db *DB) Prepare() error {
 	ctx := context.Background()
 
-	migrator, err := migrations.NewMigrator(db.db.GetInternalDB(), db.log, db.migrations)
+	migrator, err := migrator.NewMigrator(db.db.GetInternalDB(), db.log, db.migrations)
 	if err != nil {
 		return errors.Wrap(err, "couldn't prepare migrator")
 	}
