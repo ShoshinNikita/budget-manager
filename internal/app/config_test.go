@@ -29,9 +29,11 @@ func TestParseConfig(t *testing.T) {
 		{"DB_SQLITE_PATH", "./var/db.db"},
 		{"SERVER_PORT", "6666"},
 		{"SERVER_USE_EMBED", "false"},
-		{"SERVER_SKIP_AUTH", "true"},
-		{"SERVER_CREDENTIALS", "user:qwerty,admin:admin"},
 		{"SERVER_ENABLE_PROFILING", "true"},
+		{"SERVER_AUTH_DISABLE", "true"},
+		{"SERVER_AUTH_TYPE", "email"},
+		{"SERVER_AUTH_BASIC_CREDS", "user:qwerty,admin:admin"},
+		{"SERVER_AUTH_TOTP_SECRETS", "user:xyz,admin:abc"},
 	}
 	for _, env := range envs {
 		os.Setenv(env.key, env.value)
@@ -54,14 +56,21 @@ func TestParseConfig(t *testing.T) {
 			Path: "./var/db.db",
 		},
 		Server: web.Config{
-			Port:     6666,
-			UseEmbed: false,
-			SkipAuth: true,
-			Credentials: web.Credentials{
-				"user":  "qwerty",
-				"admin": "admin",
-			},
+			Port:            6666,
+			UseEmbed:        false,
 			EnableProfiling: true,
+			Auth: web.AuthConfig{
+				Disable: true,
+				Type:    "email",
+				BasicAuthCreds: web.Credentials{
+					"user":  "qwerty",
+					"admin": "admin",
+				},
+				TOTPAuthSecrets: web.Credentials{
+					"user":  "xyz",
+					"admin": "abc",
+				},
+			},
 		},
 	}
 

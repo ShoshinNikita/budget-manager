@@ -30,7 +30,7 @@ type Database interface {
 	pages.DB
 }
 
-func NewServer(cfg Config, db Database, log logger.Logger, version, gitHash string) *Server {
+func NewServer(cfg Config, db Database, log logger.Logger, version, gitHash string) (*Server, error) {
 	s := &Server{
 		config: cfg,
 		db:     db,
@@ -39,15 +39,20 @@ func NewServer(cfg Config, db Database, log logger.Logger, version, gitHash stri
 		version: version,
 		gitHash: gitHash,
 	}
+
+	handler, err := s.buildServerHandler()
+	if err != nil {
+		return nil, err
+	}
 	s.server = &http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.Port),
-		Handler: s.buildServerHandler(),
+		Handler: handler,
 	}
 
-	return s
+	return s, nil
 }
 
-func (s *Server) buildServerHandler() http.Handler {
+func (s *Server) buildServerHandler() (http.Handler, error) {
 	router := http.NewServeMux()
 
 	if !s.config.UseEmbed {
@@ -70,15 +75,30 @@ func (s *Server) buildServerHandler() http.Handler {
 
 	// Wrap the handler in middlewares. The last middleware will be called first and so on
 	var handler http.Handler = router
-	if !s.config.SkipAuth {
-		handler = middlewares.BasicAuthMiddleware(handler, s.config.Credentials, s.log)
+	if !s.config.Auth.Disable {
+		switch s.config.Auth.Type {
+		case "basic":
+			handler = middlewares.BasicAuthMiddleware(handler, s.config.Auth.BasicAuthCreds, s.log)
+			if len(s.config.Auth.BasicAuthCreds) == 0 {
+				s.log.Warn("auth is enabled, but list of creds is empty")
+			}
+
+		case "totp":
+			handler = middlewares.TOTPAuthMiddleware(handler, s.config.Auth.TOTPAuthSecrets, s.log)
+			if len(s.config.Auth.TOTPAuthSecrets) == 0 {
+				s.log.Warn("auth is enabled, but list of secrets is empty")
+			}
+
+		default:
+			return nil, errors.Errorf("invalid auth type %q", s.config.Auth.Type)
+		}
 	} else {
 		s.log.Warn("auth is disabled")
 	}
 	handler = middlewares.LoggingMiddleware(handler, s.log)
 	handler = middlewares.RequestIDMeddleware(handler)
 
-	return handler
+	return handler, nil
 }
 
 func (s Server) ListenAndServer() error {

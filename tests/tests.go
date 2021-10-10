@@ -106,9 +106,10 @@ func getDefaultConfig(dbType string) app.Config {
 		//
 		Server: web.Config{
 			UseEmbed:        true,
-			SkipAuth:        true,
-			Credentials:     nil,
 			EnableProfiling: false,
+			Auth: web.AuthConfig{
+				Disable: true,
+			},
 		},
 	}
 }

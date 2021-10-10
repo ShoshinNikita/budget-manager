@@ -84,9 +84,11 @@ func (app *App) prepareDB() (err error) {
 	return nil
 }
 
-//nolint:unparam
-func (app *App) prepareWebServer() error {
-	app.server = web.NewServer(app.config.Server, app.db, app.log, app.version, app.gitHash)
+func (app *App) prepareWebServer() (err error) {
+	app.server, err = web.NewServer(app.config.Server, app.db, app.log, app.version, app.gitHash)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
