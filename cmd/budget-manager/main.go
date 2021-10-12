@@ -4,6 +4,7 @@ import (
 	stdlog "log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
@@ -41,6 +42,20 @@ func main() {
 	}
 	log := logger.New(cfg.Logger)
 
+	switch args := os.Args[1:]; {
+	case len(args) == 0: // budget-manager
+		runApp(cfg, log)
+
+	case len(args) == 2 && args[0] == "totp-qr": // budget-manager totp-qr <username>
+		username := args[1]
+		printQRForTOTP(cfg, log, username)
+
+	default:
+		log.Errorf("invalid args: %q", strings.Join(args, " "))
+	}
+}
+
+func runApp(cfg app.Config, log logger.Logger) {
 	app := app.NewApp(cfg, log, version, gitHash)
 
 	if err := app.PrepareComponents(); err != nil {

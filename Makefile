@@ -8,7 +8,7 @@ default: build run
 # build builds a binary file
 build: export-ldflags
 	@ echo "Build Budget Manager..."
-	@ CGO_ENABLED=1 go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/main.go
+	@ CGO_ENABLED=1 go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/*
 
 # run runs built Budget Manager
 run: export-config

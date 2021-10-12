@@ -56,7 +56,7 @@ COPY --from=frontend-builder build/frontend/templates ./templates
 
 # Build
 ARG LDFLAGS
-RUN GOOS=linux go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/main.go
+RUN GOOS=linux go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./cmd/budget-manager/*
 
 
 #
