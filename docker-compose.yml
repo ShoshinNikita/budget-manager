@@ -4,17 +4,18 @@ services:
   budget-manager:
     image: budget-manager:latest
     container_name: budget-manager
+    env_file:
+      - .env
+    # Overwrite env variables from .env
     environment:
-      DEBUG: "true"
-      DB_TYPE: postgres # sqlite or postgres
-      DB_SQLITE_PATH: /srv/var/budget-manager.db
       DB_PG_HOST: postgres
       DB_PG_PORT: 5432
       DB_PG_USER: postgres
       DB_PG_PASSWORD: postgres
       DB_PG_DATABASE: postgres
-      SERVER_PORT: 8080
-      SERVER_SKIP_AUTH: "true"
+      DB_SQLITE_PATH: /srv/var/budget-manager.db
+      #
+      SERVER_USE_EMBED: "true"
     volumes:
       - ./_var/sqlite:/srv/var # store SQLite db in ./_var/sqlite
     ports:

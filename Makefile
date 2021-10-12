@@ -1,3 +1,6 @@
+include .env
+export
+
 SHELL := /bin/bash
 
 # Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
@@ -107,31 +110,6 @@ export-ldflags: VERSION?=unknown
 export-ldflags:
 	$(eval export LDFLAGS=-s -w -X 'main.version=${VERSION}' -X 'main.gitHash=${GIT_HASH}')
 	@ echo Use this ldflags: ${LDFLAGS}
-
-# export-config exports configuration env variables
-export-config:
-	$(eval ${config})
-
-define config
-	export DEBUG = true
-	export LOGGER_MODE = develop
-	export LOGGER_LEVEL = debug
-	# export DB_TYPE = sqlite
-	export DB_TYPE = postgres
-	export DB_PG_HOST = localhost
-	export DB_PG_PORT = 5432
-	export DB_PG_USER = postgres
-	export DB_PG_DATABASE = postgres
-	export DB_SQLITE_PATH = ./_var/sqlite/budget-manager.db
-	export SERVER_PORT = 8080
-	export SERVER_USE_EMBED = false
-	export SERVER_ENABLE_PROFILING = true
-	export SERVER_AUTH_DISABLE = true
-	export SERVER_AUTH_TYPE = basic
-	# user:qwerty
-	export SERVER_AUTH_BASIC_CREDS = user:$$$$2y$$$$05$$$$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC
-	export SERVER_AUTH_TOTP_SECRETS = user:2801e371e2bdf66708b50c584838296fd3e2366c
-endef
 
 #
 # Other
