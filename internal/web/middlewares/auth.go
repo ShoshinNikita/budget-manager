@@ -20,9 +20,10 @@ type Credentials interface {
 
 func TOTPAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) http.Handler {
 	return authMiddleware{
-		next:  h,
-		log:   log,
-		creds: creds,
+		rateLimiter: newRateLimiterForAuthMiddleware(),
+		next:        h,
+		log:         log,
+		creds:       creds,
 		checkAuth: func(d basicAuthData) bool {
 			secret := d.secretFromCreds
 			reqPass := d.secretFromRequest
@@ -33,9 +34,10 @@ func TOTPAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) ht
 
 func BasicAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) http.Handler {
 	return authMiddleware{
-		next:  h,
-		log:   log,
-		creds: creds,
+		rateLimiter: newRateLimiterForAuthMiddleware(),
+		next:        h,
+		log:         log,
+		creds:       creds,
 		checkAuth: func(d basicAuthData) bool {
 			hashedPass := []byte(d.secretFromCreds)
 			reqPass := []byte(d.secretFromRequest)
@@ -44,16 +46,26 @@ func BasicAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) h
 	}
 }
 
+func newRateLimiterForAuthMiddleware() *rateLimiter {
+	return newRateLimiter(rateLimiterConfig{
+		interval:        10 * time.Second,
+		burst:           3,
+		maxAge:          5 * time.Minute,
+		cleanupInterval: 15 * time.Second,
+	})
+}
+
 const (
 	sessionCookieName = "session"
 	sessionTime       = time.Hour
 )
 
 type authMiddleware struct {
-	next      http.Handler
-	log       logger.Logger
-	creds     Credentials
-	checkAuth func(basicAuthData) bool
+	rateLimiter *rateLimiter
+	next        http.Handler
+	log         logger.Logger
+	creds       Credentials
+	checkAuth   func(basicAuthData) bool
 }
 
 func (m authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +80,11 @@ func (m authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch cookie, err := r.Cookie(sessionCookieName); {
 	case err != nil:
-		// TODO: rate limit the number of auth requests?
+		// Limit requests that try to crack the password
+		if !m.rateLimiter.Allow(r) {
+			utils.EncodeError(ctx, w, log, errors.New("too many requests"), http.StatusTooManyRequests)
+			return
+		}
 
 		if !m.checkAuth(authData) {
 			m.writeUnauthorizedError(ctx, w, log)
@@ -76,6 +92,8 @@ func (m authMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Info("successful auth request")
+
+		m.rateLimiter.Reset(r)
 
 		if err := m.setSessionCookie(w, authData); err != nil {
 			utils.LogInternalError(log, "auth failed", err)

@@ -74,7 +74,7 @@ type authTest struct {
 }
 
 func (at authTest) Test(t *testing.T, host string) {
-	url := fmt.Sprintf("http://%s/api/search/spends", host)
+	url := fmt.Sprintf("http://%s%s", host, SearchSpendsPath)
 
 	jar, _ := cookiejar.New(nil)
 
@@ -83,7 +83,8 @@ func (at authTest) Test(t *testing.T, host string) {
 		getUserFn func() string
 		getPassFn func() string
 		//
-		wantAuthorized bool
+		wantAuthorized      bool
+		wantTooManyRequests bool
 	}{
 		{name: "no auth"},
 		{name: "wrong username and password", getUserFn: at.getWrongUser, getPassFn: at.getWrongPass},
@@ -93,10 +94,14 @@ func (at authTest) Test(t *testing.T, host string) {
 		// Password doesn't matter anymore. Repeat two times just in case
 		{name: "auth by cookie", getUserFn: at.getCorrectUser, wantAuthorized: true},
 		{name: "auth by cookie", getUserFn: at.getCorrectUser, wantAuthorized: true},
-		// Cookie shouldn't work for another user
+		// Cookie shouldn't work for another user, and it has to be removed
 		{name: "try to auth by another user", getUserFn: at.getSecondUser},
-		// Cookie should be deleted
-		{name: "cookie should be deleted", getUserFn: at.getCorrectUser},
+		// Rate limiter
+		{name: "rate limit", getUserFn: at.getCorrectUser},                                   // 2 tokens left
+		{name: "rate limit", getUserFn: at.getCorrectUser},                                   // 1 token left
+		{name: "rate limit", getUserFn: at.getCorrectUser},                                   // 0 tokens left
+		{name: "too many requests", getUserFn: at.getCorrectUser, wantTooManyRequests: true}, // too many requests
+		{name: "too many requests", getUserFn: at.getCorrectUser, wantTooManyRequests: true}, // too many requests #2
 	}
 	for _, tt := range tests {
 		tt := tt
@@ -135,9 +140,14 @@ func (at authTest) Test(t *testing.T, host string) {
 				wantError              = "unauthorized"
 				wantAuthenticateHeader = `Basic realm="Budget Manager"`
 			)
-			if tt.wantAuthorized {
+			switch {
+			case tt.wantAuthorized:
 				wantStatusCode = http.StatusOK
 				wantError = ""
+				wantAuthenticateHeader = ""
+			case tt.wantTooManyRequests:
+				wantStatusCode = http.StatusTooManyRequests
+				wantError = "too many requests"
 				wantAuthenticateHeader = ""
 			}
 

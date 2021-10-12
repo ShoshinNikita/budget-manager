@@ -12,6 +12,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	rsc.io/qr v0.2.0
 )
 
