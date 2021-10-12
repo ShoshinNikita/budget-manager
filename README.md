@@ -20,6 +20,7 @@ You can find more screenshots [here](./docs/images/README.md)
 
 - [Install](#install)
 - [Configuration](#configuration)
+  - [TOTP](#totp)
 - [Development](#development)
   - [Commands](#commands)
   - [Tools](#tools)
@@ -43,10 +44,9 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
           DB_PG_HOST: postgres
           DB_PG_PORT: 5432
           DB_PG_USER: postgres
-          DB_PG_PASSWORD: very_strong_password
+          DB_PG_PASSWORD: <db password>
           DB_PG_DATABASE: postgres
-          SERVER_PORT: 8080
-          SERVER_CREDENTIALS: <your credentials> # more info in 'Configuration' section
+          SERVER_AUTH_BASIC_CREDS: <your credentials> # more info in 'Configuration' section
         ports:
           - "8080:8080"
 
@@ -55,14 +55,13 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
         container_name: budget-manager_postgres
         environment:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: very_strong_password
+          POSTGRES_PASSWORD: <db password>
           POSTGRES_DB: postgres
         volumes:
           # Store data in ./var/pg_data directory
           - type: bind
             source: ./var/pg_data
             target: /var/lib/postgresql/data
-        command: -c "log_statement=all"
     ```
 
 2. Run `docker-compose up -d`
@@ -71,22 +70,41 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 
 ## Configuration
 
-| Env Var                   | Default value             | Description                                                                                                      |
-| ------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `LOGGER_MODE`             | `prod`                    | Logging format. `dev` or `prod`                                                                                  |
-| `LOGGER_LEVEL`            | `info`                    | Logging level. `debug`, `info`, `warn`, `error`, or `fatal`                                                      |
-| `DB_TYPE`                 | `postgres`                | Database type. `postgres` or `sqlite`                                                                            |
-| `DB_PG_HOST`              | `localhost`               | PostgreSQL host                                                                                                  |
-| `DB_PG_PORT`              | `5432`                    | PostgreSQL port                                                                                                  |
-| `DB_PG_USER`              | `postgres`                | PostgreSQL username                                                                                              |
-| `DB_PG_PASSWORD`          |                           | PostgreSQL password                                                                                              |
-| `DB_PG_DATABASE`          | `postgres`                | PostgreSQL database                                                                                              |
-| `DB_SQLITE_PATH`          | `./var/budget-manager.db` | Path to the SQLite database                                                                                      |
-| `SERVER_PORT`             | `8080`                    |                                                                                                                  |
-| `SERVER_USE_EMBED`        | `true`                    | Use the [embedded](https://pkg.go.dev/embed) templates and static files or read them from disk                   |
-| `SERVER_CREDENTIALS`      |                           | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
-| `SERVER_SKIP_AUTH`        | `false`                   | Disable authentication                                                                                           |
-| `SERVER_ENABLE_PROFILING` | `false`                   | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go) |
+| Env Var                    | Default value             | Description                                                                                                                                                    |
+| -------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LOGGER_MODE`              | `prod`                    | Logging format. `dev` or `prod`                                                                                                                                |
+| `LOGGER_LEVEL`             | `info`                    | Logging level. `debug`, `info`, `warn`, `error`, or `fatal`                                                                                                    |
+| `DB_TYPE`                  | `postgres`                | Database type. `postgres` or `sqlite`                                                                                                                          |
+| `DB_PG_HOST`               | `localhost`               | PostgreSQL host                                                                                                                                                |
+| `DB_PG_PORT`               | `5432`                    | PostgreSQL port                                                                                                                                                |
+| `DB_PG_USER`               | `postgres`                | PostgreSQL username                                                                                                                                            |
+| `DB_PG_PASSWORD`           |                           | PostgreSQL password                                                                                                                                            |
+| `DB_PG_DATABASE`           | `postgres`                | PostgreSQL database                                                                                                                                            |
+| `DB_SQLITE_PATH`           | `./var/budget-manager.db` | Path to the SQLite database                                                                                                                                    |
+| `SERVER_PORT`              | `8080`                    |                                                                                                                                                                |
+| `SERVER_USE_EMBED`         | `true`                    | Use the [embedded](https://pkg.go.dev/embed) templates and static files or read them from disk                                                                 |
+| `SERVER_ENABLE_PROFILING`  | `false`                   | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go)                                               |
+| `SERVER_AUTH_DISABLE`      | `false`                   | Disable authentication                                                                                                                                         |
+| `SERVER_AUTH_TYPE`         | `basic`                   | Auth type. [`basic`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication) or [`totp`](https://en.wikipedia.org/wiki/Time-based_One-Time_Password) |
+| `SERVER_AUTH_BASIC_CREDS`  |                           | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)                                                  |
+| `SERVER_AUTH_TOTP_SECRETS` |                           | List of comma separated `login:secret` pairs. Secrets are used to generate TOTP                                                                                |
+
+### TOTP
+
+You can use one-time passwords to log into **Budget Manager**:
+
+1. Generate a secret with this command `openssl rand -hex 16`
+2. Add a pair `<username>:<generated secret>` to `SERVER_AUTH_TOTP_SECRETS`
+3. Change `SERVER_AUTH_TYPE` to `totp`
+4. Run the app
+
+You can generate a QR code for [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2) or any other app:
+
+```bash
+docker exec budget-manager ./budget-manager totp-qr <username>
+```
+
+The QR code will be displayed in your terminal.
 
 ## Development
 
