@@ -252,9 +252,7 @@ func TestBuildSearchSpendsQuery(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
-			searchQuery := (&DB{}).buildSearchSpendsQuery(tt.args)
-			query, args, err := searchQuery.ToSql()
-			require.Nil(t, err)
+			query, args := (&DB{}).buildSearchSpendsQuery(tt.args)
 			require.Equal(t, tt.wantQuery, query)
 			require.Equal(t, tt.wantArgs, args)
 		})

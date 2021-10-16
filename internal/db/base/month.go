@@ -5,9 +5,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
-
-	"github.com/Masterminds/squirrel"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
@@ -130,13 +129,16 @@ func (db *DB) InitMonth(ctx context.Context, year int, month time.Month) error {
 			return errors.Wrap(err, "couldn't init the current month")
 		}
 
-		query := squirrel.Insert("days").Columns("month_id", "day")
-
 		daysNumber := daysInMonth(year, month)
+
+		query := `INSERT INTO days(month_id, day) VALUES ` + strings.Repeat("(?, ?), ", daysNumber)
+		query = query[:len(query)-2]
+
+		sqlArgs := make([]interface{}, 0, daysNumber*2)
 		for i := 0; i < daysNumber; i++ {
-			query = query.Values(monthID, i+1)
+			sqlArgs = append(sqlArgs, monthID, i+1)
 		}
-		if _, err = tx.ExecQuery(query); err != nil {
+		if _, err = tx.Exec(query, sqlArgs...); err != nil {
 			return errors.Wrap(err, "couldn't insert days for the current month")
 		}
 		return nil

@@ -1,7 +1,9 @@
 package base
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
@@ -64,4 +66,35 @@ func daysInMonth(year int, month time.Month) int {
 	days := int64(nextMonth.Sub(currentMonth)) / (int64(time.Hour) * 24)
 
 	return int(days)
+}
+
+type updateQueryBuilder struct {
+	table string
+
+	sets    []string
+	setArgs []interface{}
+
+	whereID uint
+}
+
+func newUpdateQueryBuilder(table string, whereID uint) *updateQueryBuilder {
+	return &updateQueryBuilder{
+		table:   table,
+		whereID: whereID,
+	}
+}
+
+func (b *updateQueryBuilder) Set(column string, v interface{}) {
+	b.sets = append(b.sets, column+" = ?")
+	b.setArgs = append(b.setArgs, v)
+}
+
+func (b *updateQueryBuilder) ToSQL() (string, []interface{}, error) {
+	if len(b.sets) == 0 {
+		return "", nil, errors.New("list of SETs is empty")
+	}
+
+	query := fmt.Sprintf(`UPDATE %s SET %s WHERE id = ?`, b.table, strings.Join(b.sets, ", "))
+	args := append(b.setArgs, b.whereID) //nolint:gocritic
+	return query, args, nil
 }

@@ -2,9 +2,8 @@ package base
 
 import (
 	"context"
+	"strings"
 	"time"
-
-	"github.com/Masterminds/squirrel"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
@@ -25,7 +24,8 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 		Type SpendType `db:"type"`
 	}
 	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
-		return tx.SelectQuery(&spends, db.buildSearchSpendsQuery(args))
+		query, sqlArgs := db.buildSearchSpendsQuery(args)
+		return tx.Select(&spends, query, sqlArgs...)
 	})
 	if err != nil {
 		return nil, err
@@ -50,8 +50,19 @@ func (db DB) SearchSpends(ctx context.Context, args common.SearchSpendsArgs) ([]
 
 // buildSearchSpendsQuery builds a query to search for spends
 //nolint:funlen
-func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBuilder {
-	query := squirrel.Select(
+func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) (string, []interface{}) {
+	var (
+		wheres    []string
+		whereArgs []interface{}
+	)
+	addWhere := func(where string, args ...interface{}) {
+		wheres = append(wheres, where)
+		whereArgs = append(whereArgs, args...)
+	}
+
+	query := "SELECT "
+
+	query += strings.Join([]string{
 		`spend.id AS id`,
 		`month.year AS year`,
 		`month.month AS month`,
@@ -62,19 +73,22 @@ func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBu
 		`spend_type.id AS "type.id"`,
 		`spend_type.name AS "type.name"`,
 		`spend_type.parent_id AS "type.parent_id"`,
-	).
-		From("spends AS spend").
-		//
-		InnerJoin("days AS day ON day.id = spend.day_id").
-		InnerJoin("months AS month ON month.id = day.month_id").
-		LeftJoin("spend_types AS spend_type ON spend_type.id = spend.type_id")
+	}, ", ")
+
+	query += " FROM spends AS spend "
+
+	query += strings.Join([]string{
+		`INNER JOIN days AS day ON day.id = spend.day_id`,
+		`INNER JOIN months AS month ON month.id = day.month_id`,
+		`LEFT JOIN spend_types AS spend_type ON spend_type.id = spend.type_id`,
+	}, " ")
 
 	if args.Title != "" {
 		title := "%" + args.Title + "%"
 		if args.TitleExactly {
 			title = args.Title
 		}
-		query = query.Where("LOWER(spend.title) LIKE ?", title)
+		addWhere("LOWER(spend.title) LIKE ?", title)
 	}
 
 	if args.Notes != "" {
@@ -82,45 +96,49 @@ func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBu
 		if args.NotesExactly {
 			notes = args.Notes
 		}
-		query = query.Where("LOWER(spend.notes) LIKE ?", notes)
+		addWhere("LOWER(spend.notes) LIKE ?", notes)
 	}
 
 	if q, args := getQueryToFilterByTime(args.After, args.Before); q != "" {
-		query = query.Where(q, args...)
+		addWhere(q, args...)
 	}
 
 	switch {
 	case args.MinCost != 0 && args.MaxCost != 0:
-		query = query.Where("spend.cost BETWEEN ? AND ?", int(args.MinCost), int(args.MaxCost))
+		addWhere("spend.cost BETWEEN ? AND ?", int(args.MinCost), int(args.MaxCost))
 	case args.MinCost != 0:
-		query = query.Where("spend.cost >= ?", int(args.MinCost))
+		addWhere("spend.cost >= ?", int(args.MinCost))
 	case args.MaxCost != 0:
-		query = query.Where("spend.cost <= ?", int(args.MaxCost))
+		addWhere("spend.cost <= ?", int(args.MaxCost))
 	}
 
 	if len(args.TypeIDs) != 0 {
-		query = query.Where(func() (or squirrel.Or) {
-			// We have to convert []uint to []int because the limitation of github.com/Masterminds/squirrel:
-			// https://github.com/Masterminds/squirrel/issues/114
-			typeIDs := make([]int, 0, len(args.TypeIDs))
-			for _, id := range args.TypeIDs {
-				typeIDs = append(typeIDs, int(id))
-			}
+		var (
+			orWheres    []string
+			typeIDsArgs []interface{}
+		)
 
-			for i, id := range typeIDs {
-				if id == 0 {
-					// Search for spends without type
-					or = append(or, squirrel.Eq{"spend.type_id": nil})
-					typeIDs = append(typeIDs[:i], typeIDs[i+1:]...)
-					break
-				}
+		typeIDs := args.TypeIDs
+		for i, id := range typeIDs {
+			if id == 0 {
+				// Search for spends without type
+				orWheres = append(orWheres, "spend.type_id IS NULL")
+				typeIDs = append(typeIDs[:i], typeIDs[i+1:]...)
+				break
 			}
+		}
 
-			if len(typeIDs) != 0 {
-				or = append(or, squirrel.Eq{"spend.type_id": typeIDs})
+		if len(typeIDs) != 0 {
+			inPlaceholders := strings.Repeat("?,", len(typeIDs))
+			inPlaceholders = inPlaceholders[:len(inPlaceholders)-1]
+
+			orWheres = append(orWheres, "spend.type_id IN ("+inPlaceholders+")")
+			for _, id := range typeIDs {
+				typeIDsArgs = append(typeIDsArgs, int(id))
 			}
-			return or
-		}())
+		}
+
+		addWhere("("+strings.Join(orWheres, " OR ")+")", typeIDsArgs...)
 	}
 
 	var orders []string
@@ -138,9 +156,14 @@ func (DB) buildSearchSpendsQuery(args common.SearchSpendsArgs) squirrel.SelectBu
 		}
 	}
 	orders = append(orders, "spend.id")
-	query = query.OrderBy(orders...)
 
-	return query
+	// Build the final query
+	if len(wheres) != 0 {
+		query += " WHERE " + strings.Join(wheres, " AND ")
+	}
+	query += " ORDER BY " + strings.Join(orders, ", ")
+
+	return query, whereArgs
 }
 
 func getQueryToFilterByTime(after, before time.Time) (where string, args []interface{}) {

@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Masterminds/squirrel"
-
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/types"
@@ -87,22 +85,22 @@ func (db DB) EditSpend(ctx context.Context, args common.EditSpendArgs) error {
 			return err
 		}
 
-		query := squirrel.Update("spends").Where("id = ?", args.ID)
+		query := newUpdateQueryBuilder("spends", args.ID)
 		if args.Title != nil {
-			query = query.Set("title", *args.Title)
+			query.Set("title", *args.Title)
 		}
 		if args.TypeID != nil {
 			if *args.TypeID == 0 {
-				query = query.Set("type_id", nil)
+				query.Set("type_id", nil)
 			} else {
-				query = query.Set("type_id", *args.TypeID)
+				query.Set("type_id", *args.TypeID)
 			}
 		}
 		if args.Notes != nil {
-			query = query.Set("notes", *args.Notes)
+			query.Set("notes", *args.Notes)
 		}
 		if args.Cost != nil {
-			query = query.Set("cost", *args.Cost)
+			query.Set("cost", *args.Cost)
 		}
 		if _, err := tx.ExecQuery(query); err != nil {
 			return err

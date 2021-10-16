@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -92,7 +91,11 @@ func (tx Tx) Exec(query string, args ...interface{}) (sql.Result, error) {
 	return tx.ExecQuery(newRawQuery(query, args...))
 }
 
-func (tx Tx) GetQuery(dest interface{}, query squirrel.Sqlizer) error {
+type Sqlizer interface {
+	ToSQL() (query string, args []interface{}, err error)
+}
+
+func (tx Tx) GetQuery(dest interface{}, query Sqlizer) error {
 	sql, args, err := tx.prepareQuery(query)
 	if err != nil {
 		return err
@@ -100,7 +103,7 @@ func (tx Tx) GetQuery(dest interface{}, query squirrel.Sqlizer) error {
 	return tx.tx.Get(dest, sql, args...)
 }
 
-func (tx Tx) SelectQuery(dest interface{}, query squirrel.Sqlizer) error {
+func (tx Tx) SelectQuery(dest interface{}, query Sqlizer) error {
 	sql, args, err := tx.prepareQuery(query)
 	if err != nil {
 		return err
@@ -108,7 +111,7 @@ func (tx Tx) SelectQuery(dest interface{}, query squirrel.Sqlizer) error {
 	return tx.tx.Select(dest, sql, args...)
 }
 
-func (tx Tx) ExecQuery(query squirrel.Sqlizer) (sql.Result, error) {
+func (tx Tx) ExecQuery(query Sqlizer) (sql.Result, error) {
 	sql, args, err := tx.prepareQuery(query)
 	if err != nil {
 		return nil, err
@@ -116,8 +119,8 @@ func (tx Tx) ExecQuery(query squirrel.Sqlizer) (sql.Result, error) {
 	return tx.tx.Exec(sql, args...)
 }
 
-func (tx Tx) prepareQuery(query squirrel.Sqlizer) (sql string, args []interface{}, err error) {
-	sql, args, err = query.ToSql()
+func (tx Tx) prepareQuery(query Sqlizer) (sql string, args []interface{}, err error) {
+	sql, args, err = query.ToSQL()
 	if err != nil {
 		return "", nil, errors.Wrap(err, "ToSql method failed")
 	}
@@ -126,7 +129,7 @@ func (tx Tx) prepareQuery(query squirrel.Sqlizer) (sql string, args []interface{
 	case Question:
 		// Questions is used by default
 	case Dollar:
-		sql, err = squirrel.Dollar.ReplacePlaceholders(sql)
+		sql = sqlx.Rebind(sqlx.DOLLAR, sql)
 	default:
 		err = errors.Errorf("unexpected placeholder: %v", tx.placeholder)
 	}
@@ -141,11 +144,11 @@ type rawQuery struct {
 	args  []interface{}
 }
 
-func (q rawQuery) ToSql() (string, []interface{}, error) {
+func (q rawQuery) ToSQL() (string, []interface{}, error) {
 	return q.query, q.args, nil
 }
 
-func newRawQuery(query string, args ...interface{}) squirrel.Sqlizer {
+func newRawQuery(query string, args ...interface{}) Sqlizer {
 	return rawQuery{
 		query: query,
 		args:  args,
@@ -157,10 +160,10 @@ type inQuery struct {
 	args  []interface{}
 }
 
-func (q inQuery) ToSql() (string, []interface{}, error) {
+func (q inQuery) ToSQL() (string, []interface{}, error) {
 	return sqlx.In(q.query, q.args...)
 }
 
-func In(query string, args ...interface{}) squirrel.Sqlizer {
+func In(query string, args ...interface{}) Sqlizer {
 	return inQuery{query: query, args: args}
 }

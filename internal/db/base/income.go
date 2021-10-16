@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/Masterminds/squirrel"
-
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/types"
@@ -70,15 +68,15 @@ func (db DB) EditIncome(ctx context.Context, args common.EditIncomeArgs) error {
 			return err
 		}
 
-		query := squirrel.Update("incomes").Where("id = ?", args.ID)
+		query := newUpdateQueryBuilder("incomes", args.ID)
 		if args.Title != nil {
-			query = query.Set("title", *args.Title)
+			query.Set("title", *args.Title)
 		}
 		if args.Notes != nil {
-			query = query.Set("notes", *args.Notes)
+			query.Set("notes", *args.Notes)
 		}
 		if args.Income != nil {
-			query = query.Set("income", *args.Income)
+			query.Set("income", *args.Income)
 		}
 		if _, err := tx.ExecQuery(query); err != nil {
 			return err

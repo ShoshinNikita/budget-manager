@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/Masterminds/squirrel"
-
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/internal/sqlx"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base/types"
@@ -95,15 +93,15 @@ func (db DB) EditSpendType(ctx context.Context, args common.EditSpendTypeArgs) e
 			return common.ErrSpendTypeNotExist
 		}
 
-		query := squirrel.Update("spend_types").Where("id = ?", args.ID)
+		query := newUpdateQueryBuilder("spend_types", args.ID)
 		if args.Name != nil {
-			query = query.Set("name", *args.Name)
+			query.Set("name", *args.Name)
 		}
 		if args.ParentID != nil {
 			if *args.ParentID == 0 {
-				query = query.Set("parent_id", nil)
+				query.Set("parent_id", nil)
 			} else {
-				query = query.Set("parent_id", *args.ParentID)
+				query.Set("parent_id", *args.ParentID)
 			}
 		}
 		_, err := tx.ExecQuery(query)
