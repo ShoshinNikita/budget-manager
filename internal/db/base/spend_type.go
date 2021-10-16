@@ -2,7 +2,6 @@ package base
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	common "github.com/ShoshinNikita/budget-manager/internal/db"
@@ -35,22 +34,6 @@ func (s *SpendType) ToCommon() *common.SpendType {
 		Name:     string(s.Name),
 		ParentID: uint(s.ParentID),
 	}
-}
-
-// GetSpendType returns Spend Type with passed id
-func (db DB) GetSpendType(ctx context.Context, id uint) (common.SpendType, error) {
-	var spendType SpendType
-	err := db.db.RunInTransaction(ctx, func(tx *sqlx.Tx) error {
-		return tx.Get(&spendType, `SELECT * from spend_types WHERE id = ?`, id)
-	})
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			err = common.ErrSpendTypeNotExist
-		}
-		return common.SpendType{}, err
-	}
-
-	return *spendType.ToCommon(), nil
 }
 
 // GetSpendTypes returns all Spend Types
