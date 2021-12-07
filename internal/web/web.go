@@ -11,6 +11,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/web/api"
+	"github.com/ShoshinNikita/budget-manager/internal/web/middlewares"
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
 	"github.com/ShoshinNikita/budget-manager/static"
 )
@@ -61,6 +62,11 @@ func (c *Credentials) UnmarshalText(text []byte) error {
 	*c = m
 
 	return nil
+}
+
+func (c Credentials) Get(username string) (secret string, ok bool) {
+	secret, ok = c[username]
+	return secret, ok
 }
 
 // -------------------------------------------------
@@ -118,18 +124,21 @@ func (s *Server) buildServerHandler() http.Handler {
 	// Add File Handler
 	fs := http.FS(static.New(s.config.UseEmbed))
 	fileHandler := http.StripPrefix("/static/", http.FileServer(fs))
-	fileHandler = cacheMiddleware(fileHandler, time.Hour*24*30, s.gitHash) // cache for 1 month
+	fileHandler = middlewares.CachingMiddleware(fileHandler, time.Hour*24*30, s.gitHash) // cache for 1 month
 	router.Handle("/static/", fileHandler)
 
 	// Wrap the handler in middlewares. The last middleware will be called first and so on
 	var handler http.Handler = router
 	if !s.config.SkipAuth {
-		handler = s.basicAuthMiddleware(handler)
+		handler = middlewares.BasicAuthMiddleware(handler, s.config.Credentials, s.log)
+		if len(s.config.Credentials) == 0 {
+			s.log.Warn("auth is enabled, but list of creds is empty")
+		}
 	} else {
 		s.log.Warn("auth is disabled")
 	}
-	handler = s.loggingMiddleware(handler)
-	handler = s.requestIDMeddleware(handler)
+	handler = middlewares.LoggingMiddleware(handler, s.log)
+	handler = middlewares.RequestIDMeddleware(handler)
 
 	return handler
 }
