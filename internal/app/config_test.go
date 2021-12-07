@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -42,7 +43,7 @@ func TestParseConfig(t *testing.T) {
 			Level: "fatal",
 			Mode:  "develop",
 		},
-		DBType: "mongodb",
+		DBType: db.Unknown,
 		PostgresDB: pg.Config{
 			Host:     "example.com",
 			Port:     8888,

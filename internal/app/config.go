@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -11,7 +12,7 @@ import (
 type Config struct {
 	Logger logger.Config
 
-	DBType     string
+	DBType     db.Type
 	PostgresDB pg.Config
 	SQLiteDB   sqlite.Config
 
@@ -25,7 +26,7 @@ func ParseConfig() (Config, error) {
 			Level: "info",
 		},
 		//
-		DBType: "postgres",
+		DBType: db.Postgres,
 		PostgresDB: pg.Config{
 			Host:     "localhost",
 			Port:     5432,

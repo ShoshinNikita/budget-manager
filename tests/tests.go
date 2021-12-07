@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/ShoshinNikita/budget-manager/internal/app"
+	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -61,12 +62,12 @@ func RunTest(t *testing.T, test Test, opts ...TestEnvOption) {
 	for _, env := range []TestEnv{
 		{
 			Name:       "postgres",
-			Cfg:        getDefaultConfig("postgres"),
+			Cfg:        getDefaultConfig(db.Postgres),
 			Components: []StartComponentFn{StartPostgreSQL},
 		},
 		{
 			Name:       "sqlite",
-			Cfg:        getDefaultConfig("sqlite"),
+			Cfg:        getDefaultConfig(db.Sqlite3),
 			Components: []StartComponentFn{StartSQLite},
 		},
 	} {
@@ -86,7 +87,7 @@ func RunTest(t *testing.T, test Test, opts ...TestEnvOption) {
 	}
 }
 
-func getDefaultConfig(dbType string) app.Config {
+func getDefaultConfig(dbType db.Type) app.Config {
 	return app.Config{
 		Logger: logger.Config{
 			Mode:  "dev",
