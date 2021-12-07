@@ -1,7 +1,10 @@
+include .env
+export
+
 SHELL := /bin/bash
 
 # Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
-.PHONY: build check default docker docker-build docker-clear docker-run export-config export-ldflags generate-docs lint run run-pg run-pg-test stop-pg stop-pg-test test test-integ test-unit
+.PHONY: build check default docker docker-build docker-clear docker-run export-ldflags generate-docs lint run run-pg run-pg-test stop-pg stop-pg-test test test-integ test-unit
 
 default: build run
 
@@ -11,7 +14,7 @@ build: export-ldflags
 	@ CGO_ENABLED=1 go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 # run runs built Budget Manager
-run: export-config
+run:
 	@ echo "Run Budget Manager..."
 	@ ./bin/budget-manager
 
@@ -107,28 +110,6 @@ export-ldflags: VERSION?=unknown
 export-ldflags:
 	$(eval export LDFLAGS=-s -w -X 'main.version=${VERSION}' -X 'main.gitHash=${GIT_HASH}')
 	@ echo Use this ldflags: ${LDFLAGS}
-
-# export-config exports configuration env variables
-export-config:
-	$(eval ${config})
-
-define config
-	export DEBUG = true
-	export LOGGER_MODE = develop
-	# export DB_TYPE = sqlite
-	export DB_TYPE = postgres
-	export DB_PG_HOST = localhost
-	export DB_PG_PORT = 5432
-	export DB_PG_USER = postgres
-	export DB_PG_DATABASE = postgres
-	export DB_SQLITE_PATH = ./_var/sqlite/budget-manager.db
-	export SERVER_PORT = 8080
-	export SERVER_SKIP_AUTH = true
-	export SERVER_USE_EMBED = false
-	# user:qwerty
-	export SERVER_CREDENTIALS = user:$$$$2y$$$$05$$$$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC
-	export SERVER_ENABLE_PROFILING = true
-endef
 
 #
 # Other

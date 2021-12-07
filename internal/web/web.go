@@ -2,10 +2,8 @@ package web
 
 import (
 	"context"
-	"encoding"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -15,63 +13,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
 	"github.com/ShoshinNikita/budget-manager/static"
 )
-
-// -------------------------------------------------
-// Config
-// -------------------------------------------------
-
-type Config struct { //nolint:maligned
-	Port int
-
-	// UseEmbed defines whether server should use embedded templates and static files
-	UseEmbed bool
-
-	// SkipAuth disables auth
-	SkipAuth bool
-
-	// Credentials is a list of pairs 'login:password' separated by comma.
-	// Passwords must be hashed using BCrypt
-	Credentials Credentials
-
-	EnableProfiling bool
-}
-
-type Credentials map[string]string
-
-var _ encoding.TextUnmarshaler = &Credentials{}
-
-func (c *Credentials) UnmarshalText(text []byte) error {
-	m := make(Credentials)
-
-	pairs := strings.Split(string(text), ",")
-	for _, pair := range pairs {
-		split := strings.Split(pair, ":")
-		if len(split) != 2 {
-			return errors.New("invalid credential pair")
-		}
-
-		login := split[0]
-		password := split[1]
-		if login == "" || password == "" {
-			return errors.New("login and password can't be empty")
-		}
-
-		m[login] = password
-	}
-
-	*c = m
-
-	return nil
-}
-
-func (c Credentials) Get(username string) (secret string, ok bool) {
-	secret, ok = c[username]
-	return secret, ok
-}
-
-// -------------------------------------------------
-// Server
-// -------------------------------------------------
 
 type Server struct {
 	config Config
@@ -129,9 +70,9 @@ func (s *Server) buildServerHandler() http.Handler {
 
 	// Wrap the handler in middlewares. The last middleware will be called first and so on
 	var handler http.Handler = router
-	if !s.config.SkipAuth {
-		handler = middlewares.BasicAuthMiddleware(handler, s.config.Credentials, s.log)
-		if len(s.config.Credentials) == 0 {
+	if !s.config.Auth.Disable {
+		handler = middlewares.BasicAuthMiddleware(handler, s.config.Auth.BasicAuthCreds, s.log)
+		if len(s.config.Auth.BasicAuthCreds) == 0 {
 			s.log.Warn("auth is enabled, but list of creds is empty")
 		}
 	} else {

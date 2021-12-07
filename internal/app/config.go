@@ -40,9 +40,11 @@ func ParseConfig() (Config, error) {
 		Server: web.Config{
 			Port:            8080,
 			UseEmbed:        true,
-			SkipAuth:        false,
-			Credentials:     nil,
 			EnableProfiling: false,
+			Auth: web.AuthConfig{
+				Disable:        false,
+				BasicAuthCreds: nil,
+			},
 		},
 	}
 
@@ -63,9 +65,9 @@ func ParseConfig() (Config, error) {
 		//
 		{"SERVER_PORT", &cfg.Server.Port},
 		{"SERVER_USE_EMBED", &cfg.Server.UseEmbed},
-		{"SERVER_SKIP_AUTH", &cfg.Server.SkipAuth},
-		{"SERVER_CREDENTIALS", &cfg.Server.Credentials},
 		{"SERVER_ENABLE_PROFILING", &cfg.Server.EnableProfiling},
+		{"SERVER_AUTH_DISABLE", &cfg.Server.Auth.Disable},
+		{"SERVER_AUTH_BASIC_CREDS", &cfg.Server.Auth.BasicAuthCreds},
 	} {
 		if err := env.Load(v.key, v.target); err != nil {
 			return Config{}, err

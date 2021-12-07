@@ -16,8 +16,8 @@ func TestAuth(t *testing.T) {
 	t.Parallel()
 
 	RunTest(t, TestFn(testAuth), func(env *TestEnv) {
-		env.Cfg.Server.SkipAuth = false
-		env.Cfg.Server.Credentials = web.Credentials{
+		env.Cfg.Server.Auth.Disable = false
+		env.Cfg.Server.Auth.BasicAuthCreds = web.Credentials{
 			"user": "$2y$05$wK5Ad.qdY.ZLPsfEv3rc/.uO.8SkbD6r2ptiuZefMUOX0wgGK/1rC", // user:qwerty
 		}
 	})

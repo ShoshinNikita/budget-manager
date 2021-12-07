@@ -43,10 +43,9 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
           DB_PG_HOST: postgres
           DB_PG_PORT: 5432
           DB_PG_USER: postgres
-          DB_PG_PASSWORD: very_strong_password
+          DB_PG_PASSWORD: <db password>
           DB_PG_DATABASE: postgres
-          SERVER_PORT: 8080
-          SERVER_CREDENTIALS: <your credentials> # more info in 'Configuration' section
+          SERVER_AUTH_BASIC_CREDS: <your credentials> # more info in 'Configuration' section
         ports:
           - "8080:8080"
 
@@ -55,14 +54,13 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
         container_name: budget-manager_postgres
         environment:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: very_strong_password
+          POSTGRES_PASSWORD: <db password>
           POSTGRES_DB: postgres
         volumes:
           # Store data in ./var/pg_data directory
           - type: bind
             source: ./var/pg_data
             target: /var/lib/postgresql/data
-        command: -c "log_statement=all"
     ```
 
 2. Run `docker-compose up -d`
@@ -84,8 +82,8 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 | `DB_SQLITE_PATH`          | `./var/budget-manager.db` | Path to the SQLite database                                                                                      |
 | `SERVER_PORT`             | `8080`                    |                                                                                                                  |
 | `SERVER_USE_EMBED`        | `true`                    | Use the [embedded](https://pkg.go.dev/embed) templates and static files or read them from disk                   |
-| `SERVER_CREDENTIALS`      |                           | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
-| `SERVER_SKIP_AUTH`        | `false`                   | Disable authentication                                                                                           |
+| `SERVER_AUTH_DISABLE`     | `false`                   | Disable authentication                                                                                           |
+| `SERVER_AUTH_BASIC_CREDS` |                           | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
 | `SERVER_ENABLE_PROFILING` | `false`                   | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go) |
 
 ## Development
