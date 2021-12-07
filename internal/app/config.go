@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -10,12 +11,14 @@ import (
 
 type Config struct {
 	Logger logger.Config
-
-	DBType     string
-	PostgresDB pg.Config
-	SQLiteDB   sqlite.Config
-
+	DB     DBConfig
 	Server web.Config
+}
+
+type DBConfig struct {
+	Type     db.Type
+	Postgres pg.Config
+	SQLite   sqlite.Config
 }
 
 func ParseConfig() (Config, error) {
@@ -24,17 +27,18 @@ func ParseConfig() (Config, error) {
 			Mode:  "prod",
 			Level: "info",
 		},
-		//
-		DBType: "postgres",
-		PostgresDB: pg.Config{
-			Host:     "localhost",
-			Port:     5432,
-			User:     "postgres",
-			Password: "",
-			Database: "postgres",
-		},
-		SQLiteDB: sqlite.Config{
-			Path: "./var/budget-manager.db",
+		DB: DBConfig{
+			Type: db.Postgres,
+			Postgres: pg.Config{
+				Host:     "localhost",
+				Port:     5432,
+				User:     "postgres",
+				Password: "",
+				Database: "postgres",
+			},
+			SQLite: sqlite.Config{
+				Path: "./var/budget-manager.db",
+			},
 		},
 		//
 		Server: web.Config{
@@ -55,13 +59,13 @@ func ParseConfig() (Config, error) {
 		{"LOGGER_MODE", &cfg.Logger.Mode},
 		{"LOGGER_LEVEL", &cfg.Logger.Level},
 		//
-		{"DB_TYPE", &cfg.DBType},
-		{"DB_PG_HOST", &cfg.PostgresDB.Host},
-		{"DB_PG_PORT", &cfg.PostgresDB.Port},
-		{"DB_PG_USER", &cfg.PostgresDB.User},
-		{"DB_PG_PASSWORD", &cfg.PostgresDB.Password},
-		{"DB_PG_DATABASE", &cfg.PostgresDB.Database},
-		{"DB_SQLITE_PATH", &cfg.SQLiteDB.Path},
+		{"DB_TYPE", &cfg.DB.Type},
+		{"DB_PG_HOST", &cfg.DB.Postgres.Host},
+		{"DB_PG_PORT", &cfg.DB.Postgres.Port},
+		{"DB_PG_USER", &cfg.DB.Postgres.User},
+		{"DB_PG_PASSWORD", &cfg.DB.Postgres.Password},
+		{"DB_PG_DATABASE", &cfg.DB.Postgres.Database},
+		{"DB_SQLITE_PATH", &cfg.DB.SQLite.Path},
 		//
 		{"SERVER_PORT", &cfg.Server.Port},
 		{"SERVER_USE_EMBED", &cfg.Server.UseEmbed},
