@@ -5,10 +5,15 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 )
 
+//nolint:gochecknoglobals
+var durationType = reflect.TypeOf((*time.Duration)(nil)).Elem()
+
+//nolint:funlen
 func Load(key string, target interface{}) error {
 	envValue, ok := os.LookupEnv(key)
 	if !ok {
@@ -31,6 +36,17 @@ func Load(key string, target interface{}) error {
 	wrapParseErr := func(err error) error {
 		return errors.Wrapf(err, "value for %q is invalid", key)
 	}
+
+	// Special cases
+	if value.Type() == durationType {
+		duration, err := time.ParseDuration(envValue)
+		if err != nil {
+			return wrapParseErr(err)
+		}
+		value.SetInt(int64(duration))
+		return nil
+	}
+
 	switch value.Kind() {
 	case reflect.Bool:
 		v, err := strconv.ParseBool(envValue)

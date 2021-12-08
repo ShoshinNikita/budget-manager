@@ -3,9 +3,11 @@ package app
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/ShoshinNikita/budget-manager/internal/backup"
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
@@ -33,6 +35,10 @@ func TestParseConfig(t *testing.T) {
 		{"SERVER_ENABLE_PROFILING", "true"},
 		{"SERVER_AUTH_DISABLE", "true"},
 		{"SERVER_AUTH_BASIC_CREDS", "user:qwerty,admin:admin"},
+		{"BACKUP_DISABLE", "true"},
+		{"BACKUP_DIR", "/srv"},
+		{"BACKUP_INTERVAL", "30m"},
+		{"BACKUP_EXIT_ON_ERROR", "false"},
 	}
 	for _, env := range envs {
 		os.Setenv(env.key, env.value)
@@ -43,16 +49,18 @@ func TestParseConfig(t *testing.T) {
 			Level: "fatal",
 			Mode:  "develop",
 		},
-		DBType: db.Unknown,
-		PostgresDB: pg.Config{
-			Host:     "example.com",
-			Port:     8888,
-			User:     "user",
-			Password: "qwerty",
-			Database: "db",
-		},
-		SQLiteDB: sqlite.Config{
-			Path: "./var/db.db",
+		DB: DBConfig{
+			Type: db.Unknown,
+			Postgres: pg.Config{
+				Host:     "example.com",
+				Port:     8888,
+				User:     "user",
+				Password: "qwerty",
+				Database: "db",
+			},
+			SQLite: sqlite.Config{
+				Path: "./var/db.db",
+			},
 		},
 		Server: web.Config{
 			Port:            6666,
@@ -64,6 +72,14 @@ func TestParseConfig(t *testing.T) {
 					"user":  "qwerty",
 					"admin": "admin",
 				},
+			},
+		},
+		Backup: BackupConfig{
+			Disable: true,
+			Config: backup.Config{
+				Dir:         "/srv",
+				Interval:    30 * time.Minute,
+				ExitOnError: false,
 			},
 		},
 	}

@@ -30,7 +30,7 @@ func StartPostgreSQL(t *testing.T, cfg *app.Config) Component {
 	require := require.New(t)
 
 	port := getFreePort(t)
-	cfg.PostgresDB.Port = port
+	cfg.DB.Postgres.Port = port
 
 	t.Logf("use port %d for PostgreSQL container", port)
 
@@ -66,7 +66,7 @@ func StartSQLite(t *testing.T, cfg *app.Config) Component {
 		return filepath.Join(dir, filename)
 	}()
 
-	cfg.SQLiteDB.Path = dbPath
+	cfg.DB.SQLite.Path = dbPath
 	t.Logf("use path %s for SQLite", dbPath)
 
 	return &CustomComponent{

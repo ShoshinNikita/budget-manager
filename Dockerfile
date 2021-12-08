@@ -71,6 +71,8 @@ LABEL \
 
 WORKDIR /srv
 
+RUN apk add --no-cache postgresql-client sqlite
+
 COPY --from=backend-builder build/backend/bin .
 
 ENTRYPOINT [ "/srv/budget-manager" ]

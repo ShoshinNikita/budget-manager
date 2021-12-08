@@ -93,24 +93,27 @@ func getDefaultConfig(dbType db.Type) app.Config {
 			Mode:  "dev",
 			Level: "error",
 		},
-		//
-		DBType: dbType,
-		PostgresDB: pg.Config{
-			Host:     "localhost",
-			Port:     0,
-			User:     "postgres",
-			Database: "postgres",
+		DB: app.DBConfig{
+			Type: dbType,
+			Postgres: pg.Config{
+				Host:     "localhost",
+				Port:     0,
+				User:     "postgres",
+				Database: "postgres",
+			},
+			SQLite: sqlite.Config{
+				Path: "",
+			},
 		},
-		SQLiteDB: sqlite.Config{
-			Path: "",
-		},
-		//
 		Server: web.Config{
 			UseEmbed:        true,
 			EnableProfiling: false,
 			Auth: web.AuthConfig{
 				Disable: true,
 			},
+		},
+		Backup: app.BackupConfig{
+			Disable: true,
 		},
 	}
 }

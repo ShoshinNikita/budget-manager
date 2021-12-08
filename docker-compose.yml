@@ -3,7 +3,6 @@ version: "2.4"
 services:
   budget-manager:
     image: budget-manager:latest
-    container_name: budget-manager
     env_file:
       - .env
     # Overwrite env variables from .env
@@ -16,14 +15,16 @@ services:
       DB_SQLITE_PATH: /srv/var/budget-manager.db
       #
       SERVER_USE_EMBED: "true"
+      #
+      BACKUP_DIR: /srv/backups
     volumes:
       - ./_var/sqlite:/srv/var # store SQLite db in ./_var/sqlite
+      - ./_var/backups:/srv/backups # store backups in ./_var/backups
     ports:
       - "8080:8080"
 
   postgres:
     image: postgres:12-alpine
-    container_name: budget-manager_pg
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres

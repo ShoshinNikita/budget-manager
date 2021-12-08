@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ShoshinNikita/budget-manager/internal/backup"
 	"github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
 	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
@@ -17,9 +18,10 @@ type App struct {
 	version string
 	gitHash string
 
-	db     Database
-	log    logger.Logger
-	server *web.Server
+	db       Database
+	log      logger.Logger
+	server   *web.Server
+	backuper Backuper
 
 	shutdownSignal chan struct{}
 }
@@ -29,6 +31,12 @@ type Database interface {
 	Shutdown() error
 
 	web.Database
+	backup.Database
+}
+
+type Backuper interface {
+	Start() error
+	Shutdown() error
 }
 
 // NewApp returns a new instance of App
@@ -45,7 +53,7 @@ func NewApp(cfg Config, log logger.Logger, version, gitHash string) *App {
 }
 
 // PrepareComponents prepares logger, db and web server
-func (app *App) PrepareComponents() error {
+func (app *App) PrepareComponents() (err error) {
 	app.log.Debug("prepare database")
 	if err := app.prepareDB(); err != nil {
 		return errors.Wrap(err, "couldn't prepare database")
@@ -56,19 +64,24 @@ func (app *App) PrepareComponents() error {
 		return errors.Wrap(err, "couldn't prepare web server")
 	}
 
+	app.log.Debug("prepare backuper")
+	if err := app.prepareBackuper(); err != nil {
+		return errors.Wrap(err, "couldn't prepare backuper")
+	}
+
 	return nil
 }
 
 func (app *App) prepareDB() (err error) {
 	// Connect
-	switch app.config.DBType {
+	switch app.config.DB.Type {
 	case db.Postgres:
 		app.log.Debug("db type is PostgreSQL")
-		app.db, err = pg.NewDB(app.config.PostgresDB, app.log)
+		app.db, err = pg.NewDB(app.config.DB.Postgres, app.log)
 
 	case db.Sqlite3:
 		app.log.Debug("db type is SQLite")
-		app.db, err = sqlite.NewDB(app.config.SQLiteDB, app.log)
+		app.db, err = sqlite.NewDB(app.config.DB.SQLite, app.log)
 
 	default:
 		err = errors.New("unsupported DB type")
@@ -91,6 +104,20 @@ func (app *App) prepareWebServer() error {
 	return nil
 }
 
+func (app *App) prepareBackuper() (err error) {
+	if app.config.Backup.Disable {
+		app.backuper = backup.NewNoopBackuper()
+		app.log.Warn("backuper is disabled")
+		return nil
+	}
+
+	app.backuper, err = backup.NewBackuper(app.config.Backup.Config, app.db, app.log)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Run runs web server. This method should be called in a goroutine
 func (app *App) Run() error {
 	app.log.WithFields(logger.Fields{
@@ -110,6 +137,7 @@ func (app *App) Run() error {
 	}
 	startBackroundJob("web server failed", app.server.ListenAndServer)
 	startBackroundJob("month init failed", app.startMonthInit)
+	startBackroundJob("backuper failed", app.backuper.Start)
 
 	return <-errCh
 }
@@ -122,6 +150,11 @@ func (app *App) Shutdown() {
 	app.log.Debug("shutdown web server")
 	if err := app.server.Shutdown(); err != nil {
 		app.log.WithError(err).Error("couldn't shutdown the server gracefully")
+	}
+
+	app.log.Debug("shutdown backuper")
+	if err := app.backuper.Shutdown(); err != nil {
+		app.log.WithError(err).Error("couldn't shutdown the backuper gracefully")
 	}
 
 	app.log.Debug("shutdown the database")
