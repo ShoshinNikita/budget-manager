@@ -2,10 +2,13 @@ package pg
 
 //nolint:gci
 import (
+	"context"
 	"fmt"
+	"os/exec"
 
 	_ "github.com/lib/pq" // register PostgreSQL driver
 
+	common "github.com/ShoshinNikita/budget-manager/internal/db"
 	"github.com/ShoshinNikita/budget-manager/internal/db/base"
 	"github.com/ShoshinNikita/budget-manager/internal/db/pg/migrations"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
@@ -25,6 +28,8 @@ func (c Config) toURL() string {
 
 type DB struct {
 	*base.DB
+
+	cfg Config
 }
 
 func NewDB(config Config, log logger.Logger) (*DB, error) {
@@ -32,5 +37,16 @@ func NewDB(config Config, log logger.Logger) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db}, nil
+	return &DB{db, config}, nil
+}
+
+func (db *DB) GetType() common.Type {
+	return common.Postgres
+}
+
+func (db *DB) Backup(ctx context.Context) ([]byte, error) {
+	args := []string{
+		"--dbname=" + db.cfg.toURL(),
+	}
+	return exec.CommandContext(ctx, "pg_dump", args...).Output()
 }

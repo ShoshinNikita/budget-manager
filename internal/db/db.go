@@ -9,6 +9,17 @@ const (
 	Sqlite3
 )
 
+func (t Type) String() string {
+	switch t {
+	case Postgres:
+		return "postgres"
+	case Sqlite3:
+		return "sqlite"
+	default:
+		return "unknown"
+	}
+}
+
 func (t *Type) UnmarshalText(text []byte) error {
 	switch string(text) {
 	case "postgres", "postgresql":
