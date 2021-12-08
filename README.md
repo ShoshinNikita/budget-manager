@@ -21,9 +21,9 @@ You can find more screenshots [here](./docs/images/README.md)
 - [Install](#install)
 - [Configuration](#configuration)
 - [Development](#development)
-  - [Commands](#commands)
-  - [Tools](#tools)
-  - [Endpoints](#endpoints)
+	- [Commands](#commands)
+	- [Tools](#tools)
+	- [Endpoints](#endpoints)
 
 ## Install
 
@@ -85,6 +85,10 @@ You need [Docker](https://docs.docker.com/install/) and [docker-compose](https:/
 | `SERVER_AUTH_DISABLE`     | `false`                   | Disable authentication                                                                                           |
 | `SERVER_AUTH_BASIC_CREDS` |                           | List of comma separated `login:password` pairs. Passwords must be hashed using BCrypt (`htpasswd -nB <user>`)    |
 | `SERVER_ENABLE_PROFILING` | `false`                   | Enable [pprof](https://blog.golang.org/pprof) handlers. You can find handler urls [here](internal/web/routes.go) |
+| `BACKUP_DISABLE`          | `false`                   | Don't backup data as `.sql` files. Note, that backups for `postgres` can't be used for `sqlite` and vice versa   |
+| `BACKUP_DIR`              | `./var/backups`           | Directory for backups (backups are rotated)                                                                      |
+| `BACKUP_INTERVAL`         | `24h`                     | Backup interval (backups are also automatically created on startup and on shutdown)                              |
+| `BACKUP_EXIT_ON_ERROR`    | `true`                    | Should an error during the backup process terminate the service                                                  |
 
 ## Development
 
