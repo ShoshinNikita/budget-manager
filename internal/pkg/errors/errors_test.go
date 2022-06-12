@@ -16,8 +16,8 @@ func TestErrors(t *testing.T) {
 		ErrNew = New("new error")
 	)
 
-	require.Nil(Wrap(ErrNil, "wrap"))
-	require.Nil(Wrapf(ErrNil, "wrap %s", "1"))
+	require.NotNil(Wrap(ErrNil, "wrap"))
+	require.NotNil(Wrapf(ErrNil, "wrap %s", "1"))
 
 	for _, tt := range []struct {
 		err      error

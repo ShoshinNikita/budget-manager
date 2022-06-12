@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+var ErrNilErrorWrap = errors.New("<nil error wrap>")
+
 func New(text string) error {
 	return errors.New(text)
 }
@@ -18,7 +20,7 @@ func Errorf(format string, args ...interface{}) error {
 // Wrap wraps an error using fmt.Errorf function. If err is nil, Wrap returns nil.
 func Wrap(err error, msg string) error {
 	if err == nil {
-		return nil
+		return ErrNilErrorWrap
 	}
 	return fmt.Errorf("%s: %w", msg, err)
 }
@@ -26,11 +28,15 @@ func Wrap(err error, msg string) error {
 // Wrapf wraps an error using fmt.Errorf function. If err is nil, Wrapf returns nil.
 func Wrapf(err error, format string, args ...interface{}) error {
 	if err == nil {
-		return nil
+		return ErrNilErrorWrap
 	}
 	return Wrap(err, fmt.Sprintf(format, args...))
 }
 
 func Is(err, target error) bool {
 	return errors.Is(err, target)
+}
+
+func As(err error, target interface{}) bool {
+	return errors.As(err, target)
 }
