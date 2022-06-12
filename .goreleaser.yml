@@ -24,8 +24,6 @@ dockers:
       # Dirs
       - cmd/
       - internal/
-      - static/
-      - templates/
       - vendor/
       # Files
       - go.mod

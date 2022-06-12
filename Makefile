@@ -4,14 +4,14 @@ export
 SHELL := /bin/bash
 
 # Make all targets phony. Get list of all targets: 'cat Makefile | grep -P -o "^[\w-]+:" | rev | cut -c 2- | rev | sort | uniq'
-.PHONY: build check default docker docker-build docker-clear docker-run export-ldflags generate-docs lint run run-pg run-pg-test stop-pg stop-pg-test test test-integ test-unit
+.PHONY: build check default docker docker-build docker-clear docker-run export-ldflags generate-docs lint run test test-integ test-unit
 
 default: build run
 
 # build builds a binary file
 build: export-ldflags
 	@ echo "Build Budget Manager..."
-	@ CGO_ENABLED=1 go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/main.go
+	@ go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/main.go
 
 # run runs built Budget Manager
 run:
@@ -19,36 +19,14 @@ run:
 	@ ./bin/budget-manager
 
 #
-# Docker
-#
-
-docker: docker-build docker-run
-
-# docker-build builds a Docker image
-docker-build: TAG?=budget-manager:latest
-docker-build: export-ldflags
-	@ echo "Build Docker image for Budget Manager..."
-	@ docker build -t ${TAG} --build-arg LDFLAGS="${LDFLAGS}" .
-
-# docker-run runs both Budget Manager and PostgreSQL in containers
-docker-run:
-	@ echo "Run Budget Manager in Docker container..."
-	@ docker-compose up --exit-code-from budget-manager
-
-# docker-clear downs containers and removes volumes
-docker-clear:
-	@ docker-compose down -v || true
-
-#
 # Tests
 #
 
 test: test-integ
 
-TEST_CMD=CGO_ENABLED=1 go test -v -mod=vendor ${TEST_FLAGS} \
+TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
 	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
-	./cmd/... ./internal/... ./tests/... && \
-	sed -i '/github.com\/ShoshinNikita\/budget-manager\/tests\//d' cover.out && \
+	./cmd/... ./internal/... && \
 	go tool cover -func=cover.out && rm cover.out
 
 # test-unit runs unit tests
@@ -66,28 +44,6 @@ test-integ: TEST_FLAGS=-p=1
 test-integ:
 	@ echo "Run integration tests..."
 	${TEST_CMD}
-
-#
-# PostgreSQL
-#
-
-PG_ENV=-e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -e POSTGRES_HOST_AUTH_METHOD=trust
-PG_CONAINER_NAME=budget-manager_pg
-
-# run-pg runs develop PostgreSQL instance with mounted '_var/pg_data' directory
-run-pg: stop-pg
-	@ echo "Run develop PostgreSQL instance..."
-	@ docker run --rm -d \
-		--name ${PG_CONAINER_NAME} \
-		-p "5432:5432" \
-		-v $(shell pwd)/_var/pg_data:/var/lib/postgresql/data \
-		${PG_ENV} \
-		postgres:12-alpine -c "log_statement=all"
-
-# stop-pg stops develop PostgreSQL instance
-stop-pg:
-	@ echo "Stop develop PostgreSQL instance..."
-	@ docker stop ${PG_CONAINER_NAME} > /dev/null 2>&1 || true
 
 #
 # Configuration

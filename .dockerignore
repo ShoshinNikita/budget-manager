@@ -4,8 +4,6 @@
 # Except dirs
 !/cmd/*
 !/internal/*
-!/static/*
-!/templates/*
 !/vendor/*
 
 # Except files
