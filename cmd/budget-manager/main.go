@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		stdlog.Fatalf("couldn't parse config: %s\n", err)
 	}
-	log := logger.New(cfg.Logger)
+	log := logger.New()
 
 	app := app.NewApp(cfg, log, version, gitHash)
 

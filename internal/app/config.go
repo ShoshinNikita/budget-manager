@@ -1,13 +1,11 @@
 package app
 
 import (
-	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/env"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web"
 )
 
 type Config struct {
-	Logger logger.Config
 	DB     DBConfig
 	Server web.Config
 }
@@ -16,10 +14,6 @@ type DBConfig struct{}
 
 func ParseConfig() (Config, error) {
 	cfg := Config{
-		Logger: logger.Config{
-			Mode:  "prod",
-			Level: "info",
-		},
 		DB: DBConfig{},
 		//
 		Server: web.Config{
@@ -37,9 +31,6 @@ func ParseConfig() (Config, error) {
 		key    string
 		target interface{}
 	}{
-		{"LOGGER_MODE", &cfg.Logger.Mode},
-		{"LOGGER_LEVEL", &cfg.Logger.Level},
-		//
 		{"SERVER_PORT", &cfg.Server.Port},
 		{"SERVER_USE_EMBED", &cfg.Server.UseEmbed},
 		{"SERVER_ENABLE_PROFILING", &cfg.Server.EnableProfiling},

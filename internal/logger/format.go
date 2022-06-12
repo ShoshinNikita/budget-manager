@@ -4,24 +4,23 @@ import (
 	"bytes"
 	"fmt"
 	"reflect"
+	"runtime"
 	"sort"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
-
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/caller"
 )
 
 // {year}-{month}-{day} {hour}:{minute}:{second}
 const timeLayout = "2006-01-02 15:04:05"
 
-// devFormatter is used as a log formatter in the developer mode
-type devFormatter struct{}
+type formatter struct{}
 
-var _ logrus.Formatter = devFormatter{}
+var _ logrus.Formatter = formatter{}
 
 // Format formats '*logrus.Entry'
-func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+func (formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	buff := &bytes.Buffer{}
 	if entry.Buffer != nil {
 		buff = entry.Buffer
@@ -43,7 +42,7 @@ func (devFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	// Add the caller to fields
 	if entry.HasCaller() {
-		entry.Data["func"] = caller.FormatCaller(entry.Caller.Func)
+		entry.Data["func"] = formatCaller(entry.Caller.Func)
 	}
 
 	// Sort field keys
@@ -135,4 +134,20 @@ func logLevelToPrintfFunction(lvl logrus.Level) func(format string, a ...interfa
 func isEmptyString(i interface{}) bool {
 	v := reflect.ValueOf(i)
 	return v.Kind() == reflect.String && v.String() == ""
+}
+
+// FormatCaller returns formatted '*runtime.Func': something like 'some/package/path.Struct.Func'
+func formatCaller(details *runtime.Func) string {
+	const (
+		packageNameToTrim  = "github.com/ShoshinNikita/budget-manager/v2/"
+		internalPathToTrim = "internal/"
+	)
+
+	// funcName looks like "github.com/username/project/internal/web.Service.Func"
+	funcName := details.Name()
+
+	funcName = strings.TrimPrefix(funcName, packageNameToTrim)
+	funcName = strings.TrimPrefix(funcName, internalPathToTrim)
+
+	return funcName
 }
