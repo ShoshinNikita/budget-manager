@@ -31,7 +31,7 @@ linters:
 
 linters-settings:
   gci:
-    local-prefixes: github.com/ShoshinNikita/budget-manager
+    local-prefixes: github.com/ShoshinNikita/budget-manager/v2
   funlen:
     lines: 80
   tagliatelle:

@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 )
 
 const requestIDHeader = "X-Request-ID"

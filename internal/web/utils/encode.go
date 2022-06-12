@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ShoshinNikita/budget-manager/internal/logger"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
-	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/api/models"
 )
 
 type responseEncoder struct {

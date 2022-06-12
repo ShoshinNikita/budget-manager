@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	. "github.com/ShoshinNikita/budget-manager/internal/pkg/money"
+	. "github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
 )
 
 func TestConvertMoney(t *testing.T) {

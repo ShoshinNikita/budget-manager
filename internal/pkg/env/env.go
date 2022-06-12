@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 )
 
 func Load(key string, target interface{}) error {

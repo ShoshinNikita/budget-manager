@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/caller"
 )
 
 // {year}-{month}-{day} {hour}:{minute}:{second}

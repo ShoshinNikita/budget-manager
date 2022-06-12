@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	packageNameToTrim  = "github.com/ShoshinNikita/budget-manager/"
+	packageNameToTrim  = "github.com/ShoshinNikita/budget-manager/v2/"
 	internalPathToTrim = "internal/"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
-	"github.com/ShoshinNikita/budget-manager/internal/web/utils"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/utils"
 )
 
 func (s Server) addRoutes(mux *http.ServeMux) {

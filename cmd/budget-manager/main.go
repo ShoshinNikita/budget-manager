@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ShoshinNikita/budget-manager/internal/app"
-	"github.com/ShoshinNikita/budget-manager/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
 )
 
 //nolint:gochecknoglobals
@@ -24,14 +24,14 @@ var (
 //
 // @title Budget Manager API
 // @version v0.2
-// @description Easy-to-use, lightweight and self-hosted solution to track your finances - [GitHub](https://github.com/ShoshinNikita/budget-manager)
+// @description Easy-to-use, lightweight and self-hosted solution to track your finances - [GitHub](https://github.com/ShoshinNikita/budget-manager/v2)
 //
 // @BasePath /api
 //
 // @securityDefinitions.basic BasicAuth
 //
 // @license.name MIT
-// @license.url https://github.com/ShoshinNikita/budget-manager/blob/master/LICENSE
+// @license.url https://github.com/ShoshinNikita/budget-manager/v2/blob/master/LICENSE
 //
 
 func main() {

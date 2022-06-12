@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/ShoshinNikita/budget-manager/internal/logger"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/web/utils/schema"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/utils/schema"
 )
 
 type Request interface {

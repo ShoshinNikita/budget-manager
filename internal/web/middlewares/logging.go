@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ShoshinNikita/budget-manager/internal/logger"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/reqid"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 )
 
 // LoggingMiddleware logs HTTP requests. Logs include execution time, content length and status code

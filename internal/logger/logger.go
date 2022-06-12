@@ -5,8 +5,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/caller"
-	"github.com/ShoshinNikita/budget-manager/internal/web/api/models"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/caller"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/api/models"
 )
 
 type Logger interface {

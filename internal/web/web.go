@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ShoshinNikita/budget-manager/internal/logger"
-	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/web/middlewares"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/middlewares"
 )
 
 type Server struct {
