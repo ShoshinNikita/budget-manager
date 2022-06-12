@@ -1,12 +1,6 @@
 package app
 
 import (
-	"context"
-	"time"
-
-	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
-	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
@@ -25,7 +19,6 @@ type App struct {
 }
 
 type Database interface {
-	InitMonth(ctx context.Context, year int, month time.Month) error
 	Shutdown() error
 
 	web.Database
@@ -60,27 +53,6 @@ func (app *App) PrepareComponents() error {
 }
 
 func (app *App) prepareDB() (err error) {
-	switch app.config.DB.Type {
-	case db.Postgres:
-		app.log.Debug("db type is PostgreSQL")
-		app.db, err = pg.NewDB(app.config.DB.Postgres, app.log)
-
-	case db.Sqlite3:
-		app.log.Debug("db type is SQLite")
-		app.db, err = sqlite.NewDB(app.config.DB.SQLite, app.log)
-
-	default:
-		err = errors.New("unsupported DB type")
-	}
-	if err != nil {
-		return errors.Wrap(err, "couldn't create DB connection")
-	}
-
-	// Init the current month
-	if err := app.initMonth(time.Now()); err != nil {
-		return errors.Wrap(err, "couldn't init the current month")
-	}
-
 	return nil
 }
 
@@ -97,7 +69,7 @@ func (app *App) Run() error {
 		"git_hash": app.gitHash,
 	}).Info("start app")
 
-	errCh := make(chan error, 2)
+	errCh := make(chan error, 1)
 	startBackroundJob := func(errorMsg string, f func() error) {
 		go func() {
 			err := f()
@@ -108,7 +80,6 @@ func (app *App) Run() error {
 		}()
 	}
 	startBackroundJob("web server failed", app.server.ListenAndServer)
-	startBackroundJob("month init failed", app.startMonthInit)
 
 	return <-errCh
 }
@@ -127,34 +98,4 @@ func (app *App) Shutdown() {
 	if err := app.db.Shutdown(); err != nil {
 		app.log.WithError(err).Error("couldn't shutdown the db gracefully")
 	}
-}
-
-func (app *App) startMonthInit() error {
-	for {
-		after := calculateTimeToNextMonthInit(time.Now())
-
-		select {
-		case now := <-time.After(after):
-			app.log.WithField("date", now.Format("2006-01-02")).Info("init a new month")
-
-			if err := app.initMonth(now); err != nil {
-				return errors.Wrap(err, "couldn't init a new month")
-			}
-
-		case <-app.shutdownSignal:
-			return nil
-		}
-	}
-}
-
-// calculateTimeToNextMonthInit returns time left to the start (00:00) of the next month
-func calculateTimeToNextMonthInit(now time.Time) time.Duration {
-	nextMonth := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
-	return nextMonth.Sub(now)
-}
-
-// initMonth inits month for the passed date
-func (app *App) initMonth(t time.Time) error {
-	year, month, _ := t.Date()
-	return app.db.InitMonth(context.Background(), year, month)
 }

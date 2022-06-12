@@ -1,13 +1,6 @@
 // Package models contains models of requests and responses
 package models
 
-import (
-	"errors"
-	"time"
-
-	"github.com/ShoshinNikita/budget-manager/internal/db"
-)
-
 // All requests implement the Request interface
 type Request interface {
 	request()
@@ -35,31 +28,4 @@ type BaseResponse struct {
 
 func (r *BaseResponse) SetBaseResponse(newResp BaseResponse) {
 	*r = newResp
-}
-
-// -------------------------------------------------
-// Month
-// -------------------------------------------------
-
-type GetMonthByDateReq struct {
-	BaseRequest
-
-	Year  int        `json:"year" validate:"required" example:"2020"`
-	Month time.Month `json:"month" validate:"required" swaggertype:"integer" example:"7"`
-}
-
-func (req *GetMonthByDateReq) SanitizeAndCheck() error {
-	if req.Year == 0 {
-		return emptyOrZeroFieldError("year")
-	}
-	if !(time.January <= req.Month && req.Month <= time.December) {
-		return errors.New("invalid month")
-	}
-	return nil
-}
-
-type GetMonthResp struct {
-	BaseResponse
-
-	Month db.Month `json:"month"`
 }

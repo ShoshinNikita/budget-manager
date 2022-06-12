@@ -1,6 +1,0 @@
-{{ define "components/icon" }}
-<svg>
-	{{ $url := printf `/static/vendor/feather/feather-sprite.svg#%s` $ }}
-	<use xlink:href="{{ asStaticURL $url }}" />
-</svg>
-{{ end }}

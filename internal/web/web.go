@@ -8,10 +8,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/internal/web/middlewares"
-	"github.com/ShoshinNikita/budget-manager/internal/web/pages"
-	"github.com/ShoshinNikita/budget-manager/static"
 )
 
 type Server struct {
@@ -25,10 +22,7 @@ type Server struct {
 	gitHash string
 }
 
-type Database interface {
-	api.DB
-	pages.DB
-}
+type Database interface{}
 
 func NewServer(cfg Config, db Database, log logger.Logger, version, gitHash string) *Server {
 	s := &Server{
@@ -61,12 +55,6 @@ func (s *Server) buildServerHandler() http.Handler {
 		s.log.Warn("pprof handlers are enabled")
 		s.addPprofRoutes(router)
 	}
-
-	// Add File Handler
-	fs := http.FS(static.New(s.config.UseEmbed))
-	fileHandler := http.StripPrefix("/static/", http.FileServer(fs))
-	fileHandler = middlewares.CachingMiddleware(fileHandler, time.Hour*24*30, s.gitHash) // cache for 1 month
-	router.Handle("/static/", fileHandler)
 
 	// Wrap the handler in middlewares. The last middleware will be called first and so on
 	var handler http.Handler = router

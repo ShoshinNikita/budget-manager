@@ -1,9 +1,6 @@
 package app
 
 import (
-	"github.com/ShoshinNikita/budget-manager/internal/db"
-	"github.com/ShoshinNikita/budget-manager/internal/db/pg"
-	"github.com/ShoshinNikita/budget-manager/internal/db/sqlite"
 	"github.com/ShoshinNikita/budget-manager/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/internal/pkg/env"
 	"github.com/ShoshinNikita/budget-manager/internal/web"
@@ -15,11 +12,7 @@ type Config struct {
 	Server web.Config
 }
 
-type DBConfig struct {
-	Type     db.Type
-	Postgres pg.Config
-	SQLite   sqlite.Config
-}
+type DBConfig struct{}
 
 func ParseConfig() (Config, error) {
 	cfg := Config{
@@ -27,19 +20,7 @@ func ParseConfig() (Config, error) {
 			Mode:  "prod",
 			Level: "info",
 		},
-		DB: DBConfig{
-			Type: db.Postgres,
-			Postgres: pg.Config{
-				Host:     "localhost",
-				Port:     5432,
-				User:     "postgres",
-				Password: "",
-				Database: "postgres",
-			},
-			SQLite: sqlite.Config{
-				Path: "./var/budget-manager.db",
-			},
-		},
+		DB: DBConfig{},
 		//
 		Server: web.Config{
 			Port:            8080,
@@ -58,14 +39,6 @@ func ParseConfig() (Config, error) {
 	}{
 		{"LOGGER_MODE", &cfg.Logger.Mode},
 		{"LOGGER_LEVEL", &cfg.Logger.Level},
-		//
-		{"DB_TYPE", &cfg.DB.Type},
-		{"DB_PG_HOST", &cfg.DB.Postgres.Host},
-		{"DB_PG_PORT", &cfg.DB.Postgres.Port},
-		{"DB_PG_USER", &cfg.DB.Postgres.User},
-		{"DB_PG_PASSWORD", &cfg.DB.Postgres.Password},
-		{"DB_PG_DATABASE", &cfg.DB.Postgres.Database},
-		{"DB_SQLITE_PATH", &cfg.DB.SQLite.Path},
 		//
 		{"SERVER_PORT", &cfg.Server.Port},
 		{"SERVER_USE_EMBED", &cfg.Server.UseEmbed},
