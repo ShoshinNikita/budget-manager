@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 )
 
 // RequestID is a random hex string. It doesn't correspond to UUID RFC 4122 format because it would be

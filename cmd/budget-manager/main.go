@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 )
 
 //nolint:gochecknoglobals

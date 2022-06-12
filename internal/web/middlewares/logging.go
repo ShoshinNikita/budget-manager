@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 )
 

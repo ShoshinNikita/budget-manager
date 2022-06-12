@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web/api/models"
 )

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/ShoshinNikita/budget-manager/v2/internal/logger"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web"
 )
 
