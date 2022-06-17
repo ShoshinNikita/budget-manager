@@ -14,7 +14,6 @@ import (
 type Server struct {
 	config Config
 	log    logger.Logger
-	db     Database
 
 	server *http.Server
 
@@ -22,12 +21,9 @@ type Server struct {
 	gitHash string
 }
 
-type Database interface{}
-
-func NewServer(cfg Config, db Database, log logger.Logger, version, gitHash string) *Server {
+func NewServer(cfg Config, log logger.Logger, version, gitHash string) *Server {
 	s := &Server{
 		config: cfg,
-		db:     db,
 		log:    log,
 		//
 		version: version,

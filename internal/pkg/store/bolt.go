@@ -38,7 +38,10 @@ func NewBaseBolt[T Entity](
 func (base *BaseBolt[T]) Init() (err error) {
 	return base.Store.Update(func(tx *bbolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(base.BucketName)
-		return errors.Wrapf(err, "couldn't create bucket %q", base.BucketName)
+		if err != nil {
+			return errors.Wrapf(err, "couldn't create bucket %q", base.BucketName)
+		}
+		return nil
 	})
 }
 

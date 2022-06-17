@@ -6,15 +6,25 @@ import (
 )
 
 type Config struct {
-	DB     DBConfig
+	Store  StoreConfig
 	Server web.Config
 }
 
-type DBConfig struct{}
+type StoreConfig struct {
+	Bolt BoltConfig
+}
+
+type BoltConfig struct {
+	Path string
+}
 
 func ParseConfig() (Config, error) {
 	cfg := Config{
-		DB: DBConfig{},
+		Store: StoreConfig{
+			Bolt: BoltConfig{
+				Path: "./var/budget-manager.db",
+			},
+		},
 		//
 		Server: web.Config{
 			Port:            8080,
@@ -31,6 +41,8 @@ func ParseConfig() (Config, error) {
 		key    string
 		target interface{}
 	}{
+		{"STORE_BOLT_PATH", &cfg.Store.Bolt.Path},
+		//
 		{"SERVER_PORT", &cfg.Server.Port},
 		{"SERVER_USE_EMBED", &cfg.Server.UseEmbed},
 		{"SERVER_ENABLE_PROFILING", &cfg.Server.EnableProfiling},

@@ -36,14 +36,13 @@ var (
 func main() {
 	cfg, err := app.ParseConfig()
 	if err != nil {
-		stdlog.Fatalf("couldn't parse config: %s\n", err)
+		stdlog.Fatalf("couldn't parse config: %s", err)
 	}
 	log := logger.New()
 
-	app := app.NewApp(cfg, log, version, gitHash)
-
-	if err := app.PrepareComponents(); err != nil {
-		stdlog.Fatalf("couldn't prepare components: %s\n", err)
+	app, err := app.NewApp(cfg, log, version, gitHash)
+	if err != nil {
+		stdlog.Fatalf("couldn't prepare app: %s", err)
 	}
 
 	appErrCh := make(chan error, 1)

@@ -15,8 +15,8 @@ func TestParseConfig(t *testing.T) {
 	require := require.New(t)
 
 	envs := []struct{ key, value string }{
-		{"LOGGER_MODE", "develop"},
-		{"LOGGER_LEVEL", "fatal"},
+		{"STORE_BOLT_PATH", "./db.db"},
+		//
 		{"SERVER_PORT", "6666"},
 		{"SERVER_USE_EMBED", "false"},
 		{"SERVER_ENABLE_PROFILING", "true"},
@@ -28,7 +28,11 @@ func TestParseConfig(t *testing.T) {
 	}
 
 	want := Config{
-		DB: DBConfig{},
+		Store: StoreConfig{
+			Bolt: BoltConfig{
+				Path: "./db.db",
+			},
+		},
 		Server: web.Config{
 			Port:            6666,
 			UseEmbed:        false,
