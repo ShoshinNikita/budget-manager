@@ -2,7 +2,7 @@
 # Build a binary file
 #
 
-FROM golang:1.17-alpine as backend-builder
+FROM golang:1.18-alpine as backend-builder
 
 
 WORKDIR /build/backend
