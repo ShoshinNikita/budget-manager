@@ -40,7 +40,9 @@ func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
 	return bolt.base.GetAll(
 		func(t transactions.Transaction) bool {
-			// TODO: apply filters
+			if !args.IncludeDeleted && t.DeletedAt != nil {
+				return false
+			}
 			return true
 		},
 		func(transactions []transactions.Transaction) {
@@ -51,8 +53,16 @@ func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs)
 	)
 }
 
+func (bolt Bolt) GetByID(ctx context.Context, id uuid.UUID) (transactions.Transaction, error) {
+	return bolt.base.GetByID(id)
+}
+
 func (bolt Bolt) Create(ctx context.Context, transactions ...transactions.Transaction) error {
 	return bolt.base.Create(transactions...)
+}
+
+func (bolt Bolt) Update(ctx context.Context, transaction transactions.Transaction) error {
+	return bolt.base.Update(transaction)
 }
 
 type boltTransaction struct {
@@ -64,6 +74,7 @@ type boltTransaction struct {
 	Extra      transactions.TransactionExtra `json:"extra,omitempty"`
 	CategoryID uuid.UUID                     `json:"category_id"`
 	CreatedAt  time.Time                     `json:"created_at"`
+	DeletedAt  *time.Time                    `json:"deleted_at"`
 }
 
 func marshalBoltTransaction(t transactions.Transaction) []byte {
@@ -76,6 +87,7 @@ func marshalBoltTransaction(t transactions.Transaction) []byte {
 		Extra:      t.Extra,
 		CategoryID: t.CategoryID,
 		CreatedAt:  t.CreatedAt,
+		DeletedAt:  t.DeletedAt,
 	})
 	if err != nil {
 		panic(fmt.Sprintf("error during transaction marshal: %s", err))
@@ -98,5 +110,6 @@ func unmarshalBoltTransaction(data []byte) (transactions.Transaction, error) {
 		Extra:      t.Extra,
 		CategoryID: t.CategoryID,
 		CreatedAt:  t.CreatedAt,
+		DeletedAt:  t.DeletedAt,
 	}, nil
 }

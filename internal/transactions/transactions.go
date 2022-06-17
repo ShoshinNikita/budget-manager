@@ -17,15 +17,21 @@ type Service interface {
 
 	CreateTransaction(ctx context.Context, args CreateTransactionArgs) (Transaction, error)
 	CreateTransferTransactions(ctx context.Context, args CreateTransferTransactionsArgs) ([2]Transaction, error)
+
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type Store interface {
 	Get(ctx context.Context, args GetTransactionsArgs) ([]Transaction, error)
+	GetByID(ctx context.Context, id uuid.UUID) (Transaction, error)
 	Create(ctx context.Context, transactions ...Transaction) error
+	Update(ctx context.Context, transaction Transaction) error
 }
 
 // TODO: add filters and limit, offset
-type GetTransactionsArgs struct{}
+type GetTransactionsArgs struct {
+	IncludeDeleted bool
+}
 
 type CreateTransactionArgs struct {
 	AccountID  uuid.UUID
@@ -51,6 +57,7 @@ type Transaction struct {
 	Extra      TransactionExtra `json:"extra,omitempty"`
 	CategoryID uuid.UUID        `json:"category_id"`
 	CreatedAt  time.Time        `json:"created_at"`
+	DeletedAt  *time.Time       `json:"deleted_at"`
 }
 
 type TransactionType string

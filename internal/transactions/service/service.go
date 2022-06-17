@@ -32,7 +32,9 @@ func (s Service) CalculateAccountBalances(
 ) (map[uuid.UUID]money.Money, error) {
 
 	// TODO: use filter to get transactions only for required accounts?
-	allTransaction, err := s.Get(ctx, transactions.GetTransactionsArgs{})
+	allTransaction, err := s.Get(ctx, transactions.GetTransactionsArgs{
+		IncludeDeleted: false,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't get transactions")
 	}
@@ -110,4 +112,18 @@ func (s Service) CreateTransferTransactions(
 		return [2]transactions.Transaction{}, errors.Wrap(err, "couldn't save new transactions")
 	}
 	return transferTransactions, nil
+}
+
+func (s Service) Delete(ctx context.Context, id uuid.UUID) error {
+	transaction, err := s.store.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	transaction.DeletedAt = &now
+
+	if err := s.store.Update(ctx, transaction); err != nil {
+		return errors.Wrap(err, "couldn't update transaction for deletion")
+	}
+	return nil
 }
