@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/google/uuid"
 	"go.etcd.io/bbolt"
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/categories"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/store"
-	"github.com/google/uuid"
 )
 
 const bucketName = "categories"

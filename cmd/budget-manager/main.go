@@ -10,7 +10,6 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 )
 
-//nolint:gochecknoglobals
 var (
 	// version is a version of the app. It must be set during the build process with -ldflags flag
 	version = "unknown"

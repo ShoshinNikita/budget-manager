@@ -30,7 +30,6 @@ type CurrencyInfo struct {
 	Prec int `json:"precision"`
 }
 
-//nolint:gochecknoglobals
 var currenciesInfo = map[Currency]CurrencyInfo{
 	// Fiat currencies, source: https://en.wikipedia.org/wiki/List_of_circulating_currencies
 	"AED": {Name: "United Arab Emirates dirham", Prec: 2},

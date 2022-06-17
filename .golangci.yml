@@ -4,40 +4,54 @@ run:
   modules-download-mode: vendor
 
 linters:
-  enable-all: true
-  disable:
-    # Annoying
-    - exhaustive
-    # Deprecated
-    - maligned
-    - scopelint
-    - golint
-    - interfacer
-    # Useless
-    - cyclop
-    - dupl
-    - exhaustivestruct
-    - godot
-    - godox
-    - gomnd
-    - nlreturn
-    - paralleltest
-    - testpackage
-    - tparallel
-    - thelper
-    - whitespace
-    - wrapcheck
-    - wsl
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - asciicheck
+    - bodyclose
+    - dogsled
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exportloopref
+    - gci
+    - goconst
+    - gocritic
+    - goerr113
+    - gofmt
+    - goimports
+    - goprintffuncname
+    - gosec
+    - misspell
+    - nestif
+    - nilerr
+    - nilnil
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - wastedassign
 
 linters-settings:
   gci:
-    local-prefixes: github.com/ShoshinNikita/budget-manager/v2
-  funlen:
-    lines: 80
-  tagliatelle:
-    case:
-      rules:
-        json: snake
+    sections:
+      - standard
+      - default
+      - prefix(github.com/ShoshinNikita/budget-manager/v2)
 
 issues:
   exclude:
@@ -48,11 +62,6 @@ issues:
     - linters:
         - goerr113
       text: "do not define dynamic errors"
-
-    - linters:
-        - funlen
-        - lll
-      path: _test\.go
 
   # Display all issues
   max-issues-per-linter: 0

@@ -37,9 +37,7 @@ func EncodeStatusCode(statusCode int) EncodeOption {
 // encodes a base response by default. The fields of the base response are automatically filled
 // with values for a "successful" response. Use encode options or other Encode... functions
 // to change this behavior
-func Encode(ctx context.Context, w http.ResponseWriter,
-	log logger.Logger, options ...EncodeOption) (ok bool) {
-
+func Encode(ctx context.Context, w http.ResponseWriter, log logger.Logger, options ...EncodeOption) (ok bool) {
 	enc := &responseEncoder{
 		resp:       &models.BaseResponse{},
 		statusCode: http.StatusOK,
@@ -65,8 +63,10 @@ func Encode(ctx context.Context, w http.ResponseWriter,
 }
 
 // EncodeError is a wrapper for Encode that encodes error response
-func EncodeError(ctx context.Context, w http.ResponseWriter, log logger.Logger,
-	err error, statusCode int, options ...EncodeOption) bool {
+func EncodeError(
+	ctx context.Context, w http.ResponseWriter, log logger.Logger,
+	err error, statusCode int, options ...EncodeOption,
+) bool {
 
 	options = append(options, func(enc *responseEncoder) {
 		enc.statusCode = statusCode
@@ -77,8 +77,10 @@ func EncodeError(ctx context.Context, w http.ResponseWriter, log logger.Logger,
 }
 
 // EncodeInternalError is a wrapper for Encode that logs and encodes an internal error
-func EncodeInternalError(ctx context.Context, w http.ResponseWriter, log logger.Logger,
-	respMsg string, err error, options ...EncodeOption) bool {
+func EncodeInternalError(
+	ctx context.Context, w http.ResponseWriter, log logger.Logger,
+	respMsg string, err error, options ...EncodeOption,
+) bool {
 
 	LogInternalError(log, respMsg, err)
 

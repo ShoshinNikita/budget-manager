@@ -1,4 +1,3 @@
-//nolint:gochecknoglobals,gochecknoinits
 package schema
 
 import (
