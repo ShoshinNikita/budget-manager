@@ -2,6 +2,7 @@ package accounts
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,13 +10,16 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
 )
 
+var ErrAccountNotExist = errors.New("account doesn't exist")
+
 type Service interface {
 	GetAll(ctx context.Context) ([]AccountWithBalance, error)
-	Create(ctx context.Context, currency money.Currency, initialAmount money.Money) error
+	Create(ctx context.Context, currency money.Currency) (Account, error)
 	Close(ctx context.Context, id uuid.UUID) error
 }
 
 type Store interface {
+	GetByID(ctx context.Context, id uuid.UUID) (Account, error)
 	GetAll(ctx context.Context) ([]Account, error)
 	Create(ctx context.Context, acc Account) error
 	Update(ctx context.Context, acc Account) error
@@ -35,18 +39,6 @@ const (
 	AccountStatusOpen   AccountStatus = "open"
 	AccountStatusClosed AccountStatus = "closed"
 )
-
-func NewAccount(currency money.Currency) Account {
-	now := time.Now()
-
-	return Account{
-		ID:        uuid.New(),
-		Currency:  currency,
-		Status:    AccountStatusOpen,
-		CreatedAt: now,
-		UpdatedAt: now,
-	}
-}
 
 type AccountWithBalance struct {
 	Account
