@@ -23,3 +23,7 @@ type Category struct {
 	ParentID uuid.UUID `json:"parent_id"`
 	Name     string    `json:"name"`
 }
+
+func (category Category) GetID() uuid.UUID {
+	return category.ID
+}
