@@ -12,76 +12,47 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/store"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/transactions"
 )
 
 const bucketName = "transactions"
 
 type Bolt struct {
-	store *bbolt.DB
+	base *store.BaseBolt[transactions.Transaction]
 }
 
 var _ transactions.Store = (*Bolt)(nil)
 
 func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 	store := &Bolt{
-		store: boltStore,
+		base: store.NewBaseBolt(
+			boltStore, bucketName, marshalBoltTransaction, unmarshalBoltTransaction,
+		),
 	}
 
-	if err := store.init(); err != nil {
+	if err := store.base.Init(); err != nil {
 		return nil, errors.Wrap(err, "couldn't init store")
 	}
 	return store, nil
 }
 
-func (s Bolt) init() error {
-	return s.store.Update(func(tx *bbolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucketName))
-		return errors.Wrapf(err, "couldn't create bucket %q", bucketName)
-	})
-}
-
-func (s Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
-	var res []transactions.Transaction
-
-	err := s.store.View(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte(bucketName))
-
-		return b.ForEach(func(k, v []byte) error {
-			t, err := unmarshalBoltTransaction(v)
-			if err != nil {
-				return err
-			}
-
+func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
+	return bolt.base.GetAll(
+		func(t transactions.Transaction) bool {
 			// TODO: apply filters
-
-			res = append(res, t)
-			return nil
-		})
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	sort.Slice(res, func(i, j int) bool {
-		return res[i].CreatedAt.Before(res[j].CreatedAt)
-	})
-
-	return res, nil
+			return true
+		},
+		func(transactions []transactions.Transaction) {
+			sort.Slice(transactions, func(i, j int) bool {
+				return transactions[i].CreatedAt.Before(transactions[j].CreatedAt)
+			})
+		},
+	)
 }
 
-func (s Bolt) Create(ctx context.Context, transactions ...transactions.Transaction) error {
-	return s.store.Update(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte(bucketName))
-
-		for _, t := range transactions {
-			transactionData := marshalBoltTransaction(t)
-			if err := b.Put(t.ID[:], transactionData); err != nil {
-				return errors.Wrapf(err, "couldn't put transaction %#v", t)
-			}
-		}
-		return nil
-	})
+func (bolt Bolt) Create(ctx context.Context, transactions ...transactions.Transaction) error {
+	return bolt.base.Create(transactions...)
 }
 
 type boltTransaction struct {

@@ -13,109 +13,51 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/store"
 )
 
 const bucketName = "accounts"
 
 type Bolt struct {
-	store *bbolt.DB
+	base *store.BaseBolt[accounts.Account]
 }
 
 var _ accounts.Store = (*Bolt)(nil)
 
 func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 	store := &Bolt{
-		store: boltStore,
+		base: store.NewBaseBolt(
+			boltStore, bucketName, marshalBoltAccount, unmarshalBoltAccount,
+		),
 	}
 
-	if err := store.init(); err != nil {
+	if err := store.base.Init(); err != nil {
 		return nil, errors.Wrap(err, "couldn't init store")
 	}
 	return store, nil
 }
 
-func (s Bolt) init() error {
-	return s.store.Update(func(tx *bbolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(bucketName))
-		return errors.Wrapf(err, "couldn't create bucket %q", bucketName)
-	})
+func (bolt Bolt) GetByID(ctx context.Context, id uuid.UUID) (accounts.Account, error) {
+	return bolt.base.GetByID(id)
 }
 
-func (s Bolt) GetByID(ctx context.Context, id uuid.UUID) (accounts.Account, error) {
-	var res accounts.Account
-
-	err := s.store.View(func(tx *bbolt.Tx) (err error) {
-		b := tx.Bucket([]byte(bucketName))
-
-		accountData := b.Get(id[:])
-		if accountData == nil {
-			return accounts.ErrAccountNotExist
-		}
-		res, err = unmarshalBoltAccount(accountData)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if err != nil {
-		return accounts.Account{}, err
-	}
-	return res, nil
+func (bolt Bolt) GetAll(ctx context.Context) ([]accounts.Account, error) {
+	return bolt.base.GetAll(
+		nil,
+		func(accs []accounts.Account) {
+			sort.Slice(accs, func(i, j int) bool {
+				return accs[i].CreatedAt.Before(accs[j].CreatedAt)
+			})
+		},
+	)
 }
 
-func (s Bolt) GetAll(ctx context.Context) (res []accounts.Account, err error) {
-	err = s.store.View(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte(bucketName))
-
-		return b.ForEach(func(k, v []byte) error {
-			acc, err := unmarshalBoltAccount(v)
-			if err != nil {
-				return err
-			}
-			res = append(res, acc)
-			return nil
-		})
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	sort.Slice(res, func(i, j int) bool {
-		return res[i].CreatedAt.Before(res[j].CreatedAt)
-	})
-
-	return res, nil
+func (bolt Bolt) Create(ctx context.Context, acc accounts.Account) error {
+	return bolt.base.Create(acc)
 }
 
-func (s Bolt) Create(ctx context.Context, acc accounts.Account) error {
-	data := marshalBoltAccount(acc)
-
-	return s.store.Update(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte(bucketName))
-
-		if err := b.Put(acc.ID[:], data); err != nil {
-			return errors.Wrap(err, "couldn't put marshalled account")
-		}
-		return nil
-	})
-}
-
-func (s Bolt) Update(ctx context.Context, acc accounts.Account) error {
-	data := marshalBoltAccount(acc)
-
-	return s.store.Update(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte(bucketName))
-
-		prevValue := b.Get(acc.ID[:])
-		if prevValue == nil {
-			return accounts.ErrAccountNotExist
-		}
-
-		if err := b.Put(acc.ID[:], data); err != nil {
-			return errors.Wrap(err, "couldn't put marshalled account")
-		}
-		return nil
-	})
+func (bolt Bolt) Update(ctx context.Context, acc accounts.Account) error {
+	return bolt.base.Update(acc)
 }
 
 type boltAccount struct {

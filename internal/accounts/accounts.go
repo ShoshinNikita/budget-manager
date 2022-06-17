@@ -40,6 +40,10 @@ const (
 	AccountStatusClosed AccountStatus = "closed"
 )
 
+func (acc Account) GetID() uuid.UUID {
+	return acc.ID
+}
+
 type AccountWithBalance struct {
 	Account
 

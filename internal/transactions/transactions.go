@@ -95,3 +95,7 @@ func UnmarshalTransactionExtra(data []byte, flag TransactionFlag) (TransactionEx
 
 	return extra, nil
 }
+
+func (t Transaction) GetID() uuid.UUID {
+	return t.ID
+}
