@@ -86,8 +86,8 @@ func (app *App) prepareStores() error {
 }
 
 func (app *App) prepareServices() {
-	app.transactionsService = pkgTransactionsService.NewService(app.transactionsStore)
-	app.accountsService = pkgAccountsService.NewService(app.accountsStore, app.transactionsService)
+	app.accountsService = pkgAccountsService.NewService(app.accountsStore)
+	app.transactionsService = pkgTransactionsService.NewService(app.transactionsStore, app.accountsService)
 	app.categoriesService = pkgCategoriesService.NewService(app.categoriesStore)
 }
 

@@ -62,6 +62,7 @@ func (bolt Bolt) Update(ctx context.Context, acc accounts.Account) error {
 
 type boltAccount struct {
 	ID        uuid.UUID              `json:"id"`
+	Name      string                 `json:"name"`
 	Currency  money.Currency         `json:"currency"`
 	Status    accounts.AccountStatus `json:"status"`
 	CreatedAt time.Time              `json:"created_at"`
@@ -71,6 +72,7 @@ type boltAccount struct {
 func marshalBoltAccount(acc accounts.Account) []byte {
 	data, err := json.Marshal(boltAccount{
 		ID:        acc.ID,
+		Name:      acc.Name,
 		Currency:  acc.Currency,
 		Status:    acc.Status,
 		CreatedAt: acc.CreatedAt,
@@ -90,6 +92,7 @@ func unmarshalBoltAccount(data []byte) (accounts.Account, error) {
 
 	return accounts.Account{
 		ID:        acc.ID,
+		Name:      acc.Name,
 		Currency:  acc.Currency,
 		Status:    acc.Status,
 		CreatedAt: acc.CreatedAt,

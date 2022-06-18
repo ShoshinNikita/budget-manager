@@ -9,58 +9,37 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/transactions"
 )
 
 type Service struct {
-	store               accounts.Store
-	transactionsService transactions.Service
+	store accounts.Store
 }
 
 var _ accounts.Service = (*Service)(nil)
 
-func NewService(store accounts.Store, transactionsService transactions.Service) *Service {
+func NewService(store accounts.Store) *Service {
 	return &Service{
-		store:               store,
-		transactionsService: transactionsService,
+		store: store,
 	}
 }
 
-func (s Service) GetAll(ctx context.Context) ([]accounts.AccountWithBalance, error) {
-	allAccounts, err := s.store.GetAll(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "couldn't get all accounts from store")
-	}
-
-	allIDs := make([]uuid.UUID, 0, len(allAccounts))
-	for _, acc := range allAccounts {
-		allIDs = append(allIDs, acc.ID)
-	}
-
-	balances, err := s.transactionsService.CalculateAccountBalances(ctx, allIDs)
-	if err != nil {
-		return nil, errors.Wrap(err, "couldn't calculate account balances")
-	}
-
-	res := make([]accounts.AccountWithBalance, 0, len(allAccounts))
-	for _, acc := range allAccounts {
-		balance, ok := balances[acc.ID]
-		if !ok {
-			return nil, errors.Errorf("transaction service return no balance for account %s", acc.ID)
-		}
-
-		res = append(res, accounts.AccountWithBalance{
-			Account: acc,
-			Balance: balance,
-		})
-	}
-	return res, nil
+func (s Service) GetByID(ctx context.Context, id uuid.UUID) (accounts.Account, error) {
+	return s.store.GetByID(ctx, id)
 }
 
-func (s Service) Create(ctx context.Context, currency money.Currency) (accounts.Account, error) {
+func (s Service) GetAll(ctx context.Context) ([]accounts.Account, error) {
+	return s.store.GetAll(ctx)
+}
+
+func (s Service) Create(ctx context.Context, name string, currency money.Currency) (accounts.Account, error) {
+	if name == "" {
+		name = string(currency) + " account"
+	}
+
 	now := time.Now()
 	acc := accounts.Account{
 		ID:        uuid.New(),
+		Name:      name,
 		Currency:  currency,
 		Status:    accounts.AccountStatusOpen,
 		CreatedAt: now,

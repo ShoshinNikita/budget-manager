@@ -13,8 +13,9 @@ import (
 var ErrAccountNotExist = errors.New("account doesn't exist")
 
 type Service interface {
-	GetAll(ctx context.Context) ([]AccountWithBalance, error)
-	Create(ctx context.Context, currency money.Currency) (Account, error)
+	GetByID(ctx context.Context, id uuid.UUID) (Account, error)
+	GetAll(ctx context.Context) ([]Account, error)
+	Create(ctx context.Context, name string, currency money.Currency) (Account, error)
 	Close(ctx context.Context, id uuid.UUID) error
 }
 
@@ -27,6 +28,7 @@ type Store interface {
 
 type Account struct {
 	ID        uuid.UUID      `json:"id"`
+	Name      string         `json:"name"`
 	Currency  money.Currency `json:"currency"`
 	Status    AccountStatus  `json:"status"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -42,10 +44,4 @@ const (
 
 func (acc Account) GetID() uuid.UUID {
 	return acc.ID
-}
-
-type AccountWithBalance struct {
-	Account
-
-	Balance money.Money `json:"balance"`
 }

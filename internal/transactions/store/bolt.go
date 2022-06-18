@@ -66,28 +66,32 @@ func (bolt Bolt) Update(ctx context.Context, transaction transactions.Transactio
 }
 
 type boltTransaction struct {
-	ID         uuid.UUID                     `json:"id"`
-	AccountID  uuid.UUID                     `json:"account_id"`
-	Type       transactions.TransactionType  `json:"type"`
-	Flags      transactions.TransactionFlag  `json:"flags"`
-	Amount     money.Money                   `json:"amount"`
-	Extra      transactions.TransactionExtra `json:"extra,omitempty"`
-	CategoryID uuid.UUID                     `json:"category_id"`
-	CreatedAt  time.Time                     `json:"created_at"`
-	DeletedAt  *time.Time                    `json:"deleted_at"`
+	ID          uuid.UUID                     `json:"id"`
+	AccountID   uuid.UUID                     `json:"account_id"`
+	Type        transactions.TransactionType  `json:"type"`
+	Flags       transactions.TransactionFlag  `json:"flags"`
+	Name        string                        `json:"name"`
+	Description string                        `json:"description"`
+	Amount      money.Money                   `json:"amount"`
+	Extra       transactions.TransactionExtra `json:"extra,omitempty"`
+	CategoryID  uuid.UUID                     `json:"category_id"`
+	CreatedAt   time.Time                     `json:"created_at"`
+	DeletedAt   *time.Time                    `json:"deleted_at"`
 }
 
 func marshalBoltTransaction(t transactions.Transaction) []byte {
 	data, err := json.Marshal(boltTransaction{
-		ID:         t.ID,
-		AccountID:  t.AccountID,
-		Type:       t.Type,
-		Flags:      t.Flags,
-		Amount:     t.Amount,
-		Extra:      t.Extra,
-		CategoryID: t.CategoryID,
-		CreatedAt:  t.CreatedAt,
-		DeletedAt:  t.DeletedAt,
+		ID:          t.ID,
+		AccountID:   t.AccountID,
+		Type:        t.Type,
+		Flags:       t.Flags,
+		Name:        t.Name,
+		Description: t.Description,
+		Amount:      t.Amount,
+		Extra:       t.Extra,
+		CategoryID:  t.CategoryID,
+		CreatedAt:   t.CreatedAt,
+		DeletedAt:   t.DeletedAt,
 	})
 	if err != nil {
 		panic(fmt.Sprintf("error during transaction marshal: %s", err))
@@ -102,14 +106,16 @@ func unmarshalBoltTransaction(data []byte) (transactions.Transaction, error) {
 	}
 
 	return transactions.Transaction{
-		ID:         t.ID,
-		AccountID:  t.AccountID,
-		Type:       t.Type,
-		Flags:      t.Flags,
-		Amount:     t.Amount,
-		Extra:      t.Extra,
-		CategoryID: t.CategoryID,
-		CreatedAt:  t.CreatedAt,
-		DeletedAt:  t.DeletedAt,
+		ID:          t.ID,
+		AccountID:   t.AccountID,
+		Type:        t.Type,
+		Flags:       t.Flags,
+		Name:        t.Name,
+		Description: t.Description,
+		Amount:      t.Amount,
+		Extra:       t.Extra,
+		CategoryID:  t.CategoryID,
+		CreatedAt:   t.CreatedAt,
+		DeletedAt:   t.DeletedAt,
 	}, nil
 }
