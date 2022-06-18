@@ -41,9 +41,9 @@ func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs)
 	return bolt.base.GetAll(
 		func(t transactions.Transaction) bool {
 			if !args.IncludeDeleted && t.IsDeleted() {
-				return false
+				return true
 			}
-			return true
+			return false
 		},
 		func(transactions []transactions.Transaction) {
 			sort.Slice(transactions, func(i, j int) bool {
