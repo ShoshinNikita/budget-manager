@@ -66,20 +66,25 @@ func (bolt Bolt) Update(ctx context.Context, transaction transactions.Transactio
 }
 
 type boltTransaction struct {
-	ID          uuid.UUID                     `json:"id"`
-	AccountID   uuid.UUID                     `json:"account_id"`
-	Type        transactions.TransactionType  `json:"type"`
-	Flags       transactions.TransactionFlag  `json:"flags"`
-	Name        string                        `json:"name"`
-	Description string                        `json:"description"`
-	Amount      money.Money                   `json:"amount"`
-	Extra       transactions.TransactionExtra `json:"extra,omitempty"`
-	CategoryID  uuid.UUID                     `json:"category_id"`
-	CreatedAt   time.Time                     `json:"created_at"`
-	DeletedAt   *time.Time                    `json:"deleted_at"`
+	ID          uuid.UUID                    `json:"id"`
+	AccountID   uuid.UUID                    `json:"account_id"`
+	Type        transactions.TransactionType `json:"type"`
+	Flags       transactions.TransactionFlag `json:"flags"`
+	Name        string                       `json:"name"`
+	Description string                       `json:"description"`
+	Amount      money.Money                  `json:"amount"`
+	Extra       json.RawMessage              `json:"extra"`
+	CategoryID  uuid.UUID                    `json:"category_id"`
+	CreatedAt   time.Time                    `json:"created_at"`
+	DeletedAt   *time.Time                   `json:"deleted_at"`
 }
 
 func marshalBoltTransaction(t transactions.Transaction) []byte {
+	rawExtra, err := json.Marshal(t.Extra)
+	if err != nil {
+		panic(fmt.Sprintf("error during transaction extra marshal: %s", err))
+	}
+
 	data, err := json.Marshal(boltTransaction{
 		ID:          t.ID,
 		AccountID:   t.AccountID,
@@ -88,7 +93,7 @@ func marshalBoltTransaction(t transactions.Transaction) []byte {
 		Name:        t.Name,
 		Description: t.Description,
 		Amount:      t.Amount,
-		Extra:       t.Extra,
+		Extra:       rawExtra,
 		CategoryID:  t.CategoryID,
 		CreatedAt:   t.CreatedAt,
 		DeletedAt:   t.DeletedAt,
@@ -104,6 +109,10 @@ func unmarshalBoltTransaction(data []byte) (transactions.Transaction, error) {
 	if err := json.Unmarshal(data, &t); err != nil {
 		return transactions.Transaction{}, errors.Wrap(err, "couldn't unmarshal transaction")
 	}
+	extra, err := transactions.UnmarshalTransactionExtra(t.Extra, t.Flags)
+	if err != nil {
+		return transactions.Transaction{}, errors.Wrap(err, "couldn't unmarshal extra")
+	}
 
 	return transactions.Transaction{
 		ID:          t.ID,
@@ -113,7 +122,7 @@ func unmarshalBoltTransaction(data []byte) (transactions.Transaction, error) {
 		Name:        t.Name,
 		Description: t.Description,
 		Amount:      t.Amount,
-		Extra:       t.Extra,
+		Extra:       extra,
 		CategoryID:  t.CategoryID,
 		CreatedAt:   t.CreatedAt,
 		DeletedAt:   t.DeletedAt,
