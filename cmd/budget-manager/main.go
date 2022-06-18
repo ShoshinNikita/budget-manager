@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app/config"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 )
 
@@ -34,7 +35,7 @@ var (
 //
 
 func main() {
-	cfg, err := app.ParseConfig()
+	cfg, err := config.ParseConfig()
 	if err != nil {
 		stdlog.Fatalf("couldn't parse config: %s", err)
 	}

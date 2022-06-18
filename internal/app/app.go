@@ -8,6 +8,7 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
 	pkgAccountsService "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/service"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app/config"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/categories"
 	pkgCategoriesService "github.com/ShoshinNikita/budget-manager/v2/internal/categories/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
@@ -19,7 +20,7 @@ import (
 )
 
 type App struct {
-	config  Config
+	config  config.Config
 	version string
 	gitHash string
 
@@ -40,7 +41,7 @@ type App struct {
 }
 
 // NewApp returns a new instance of App
-func NewApp(cfg Config, log logger.Logger, version, gitHash string) (*App, error) {
+func NewApp(cfg config.Config, log logger.Logger, version, gitHash string) (*App, error) {
 	app := &App{
 		config:  cfg,
 		version: version,
