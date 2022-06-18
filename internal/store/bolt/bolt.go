@@ -1,13 +1,14 @@
-package store
+package bolt
 
 import (
 	"github.com/google/uuid"
 	"go.etcd.io/bbolt"
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/store"
 )
 
-type BaseBolt[T Entity] struct {
+type BaseStore[T Entity] struct {
 	Store      *bbolt.DB
 	BucketName []byte
 
@@ -21,14 +22,14 @@ type Entity interface {
 	IsDeleted() bool
 }
 
-func NewBaseBolt[T Entity](
+func NewBaseStore[T Entity](
 	store *bbolt.DB,
 	bucketName string,
 	marshalFn func(T) []byte,
 	unmarshalFn func([]byte) (T, error),
-) *BaseBolt[T] {
+) *BaseStore[T] {
 
-	return &BaseBolt[T]{
+	return &BaseStore[T]{
 		Store:       store,
 		BucketName:  []byte(bucketName),
 		marshalFn:   marshalFn,
@@ -37,7 +38,7 @@ func NewBaseBolt[T Entity](
 }
 
 // Init creates a bucket if needed
-func (base *BaseBolt[T]) Init() (err error) {
+func (base *BaseStore[T]) Init() (err error) {
 	return base.Store.Update(func(tx *bbolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(base.BucketName)
 		if err != nil {
@@ -49,13 +50,13 @@ func (base *BaseBolt[T]) Init() (err error) {
 
 // GetByID returns an entity with passed id. If there's no such entity or it was deleted,
 // the function returns NotFoundError
-func (base *BaseBolt[T]) GetByID(id uuid.UUID) (res T, err error) {
+func (base *BaseStore[T]) GetByID(id uuid.UUID) (res T, err error) {
 	err = base.Store.View(func(tx *bbolt.Tx) (err error) {
 		b := tx.Bucket(base.BucketName)
 
 		value := b.Get(id[:])
 		if value == nil {
-			return &NotFoundError{
+			return &store.NotFoundError{
 				EntityName: base.getEntityName(),
 				ID:         id,
 			}
@@ -65,7 +66,7 @@ func (base *BaseBolt[T]) GetByID(id uuid.UUID) (res T, err error) {
 			return err
 		}
 		if res.IsDeleted() {
-			return &NotFoundError{
+			return &store.NotFoundError{
 				EntityName: base.getEntityName(),
 				ID:         id,
 			}
@@ -76,7 +77,7 @@ func (base *BaseBolt[T]) GetByID(id uuid.UUID) (res T, err error) {
 }
 
 // GetAll returns all entities in a bucket filtered with 'shouldSkipFn' and sorted with 'sortFn'.
-func (base *BaseBolt[T]) GetAll(shouldSkipFn func(T) bool, sortFn func([]T)) ([]T, error) {
+func (base *BaseStore[T]) GetAll(shouldSkipFn func(T) bool, sortFn func([]T)) ([]T, error) {
 	var res []T
 	err := base.Store.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(base.BucketName)
@@ -105,7 +106,7 @@ func (base *BaseBolt[T]) GetAll(shouldSkipFn func(T) bool, sortFn func([]T)) ([]
 
 // Create saves the marshalled entities using their ids as the keys.
 // It returns AlreadyExistError if a caller tries to overwrite an existing value.
-func (base *BaseBolt[T]) Create(entities ...T) error {
+func (base *BaseStore[T]) Create(entities ...T) error {
 	return base.Store.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(base.BucketName)
 
@@ -114,7 +115,7 @@ func (base *BaseBolt[T]) Create(entities ...T) error {
 			data := base.marshalFn(entity)
 
 			if b.Get(id[:]) != nil {
-				return &AlreadyExistError{
+				return &store.AlreadyExistError{
 					EntityName: base.getEntityName(),
 					ID:         id,
 				}
@@ -129,7 +130,7 @@ func (base *BaseBolt[T]) Create(entities ...T) error {
 }
 
 // Update overwrites the value for entity id. It returns NotFoundError if there's no previous value.
-func (base *BaseBolt[T]) Update(entity T) error {
+func (base *BaseStore[T]) Update(entity T) error {
 	id := entity.GetID()
 	data := base.marshalFn(entity)
 
@@ -137,7 +138,7 @@ func (base *BaseBolt[T]) Update(entity T) error {
 		b := tx.Bucket(base.BucketName)
 
 		if b.Get(id[:]) == nil {
-			return &NotFoundError{
+			return &store.NotFoundError{
 				EntityName: base.getEntityName(),
 				ID:         id,
 			}
@@ -150,7 +151,7 @@ func (base *BaseBolt[T]) Update(entity T) error {
 	})
 }
 
-func (*BaseBolt[T]) getEntityName() string {
+func (*BaseStore[T]) getEntityName() string {
 	var zero T
 	return zero.GetEntityName()
 }

@@ -1,4 +1,4 @@
-package store
+package bolt
 
 import (
 	"context"
@@ -12,22 +12,19 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/store"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/transactions"
 )
 
-const bucketName = "transactions"
-
-type Bolt struct {
-	base *store.BaseBolt[transactions.Transaction]
+type TransactionsStore struct {
+	base *BaseStore[transactions.Transaction]
 }
 
-var _ transactions.Store = (*Bolt)(nil)
+var _ transactions.Store = (*TransactionsStore)(nil)
 
-func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
-	store := &Bolt{
-		base: store.NewBaseBolt(
-			boltStore, bucketName, marshalBoltTransaction, unmarshalBoltTransaction,
+func NewTransactionsStore(boltStore *bbolt.DB) (*TransactionsStore, error) {
+	store := &TransactionsStore{
+		base: NewBaseStore(
+			boltStore, "transactions", marshalBoltTransaction, unmarshalBoltTransaction,
 		),
 	}
 
@@ -37,7 +34,7 @@ func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 	return store, nil
 }
 
-func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
+func (bolt TransactionsStore) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
 	return bolt.base.GetAll(
 		func(t transactions.Transaction) bool {
 			if !args.IncludeDeleted && t.IsDeleted() {
@@ -53,15 +50,15 @@ func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs)
 	)
 }
 
-func (bolt Bolt) GetByID(ctx context.Context, id uuid.UUID) (transactions.Transaction, error) {
+func (bolt TransactionsStore) GetByID(ctx context.Context, id uuid.UUID) (transactions.Transaction, error) {
 	return bolt.base.GetByID(id)
 }
 
-func (bolt Bolt) Create(ctx context.Context, transactions ...transactions.Transaction) error {
+func (bolt TransactionsStore) Create(ctx context.Context, transactions ...transactions.Transaction) error {
 	return bolt.base.Create(transactions...)
 }
 
-func (bolt Bolt) Update(ctx context.Context, transaction transactions.Transaction) error {
+func (bolt TransactionsStore) Update(ctx context.Context, transaction transactions.Transaction) error {
 	return bolt.base.Update(transaction)
 }
 

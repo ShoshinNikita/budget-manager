@@ -8,15 +8,13 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
 	pkgAccountsService "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/service"
-	pkgAccountsStore "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/store"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/categories"
 	pkgCategoriesService "github.com/ShoshinNikita/budget-manager/v2/internal/categories/service"
-	pkgCategoriesStore "github.com/ShoshinNikita/budget-manager/v2/internal/categories/store"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/store/bolt"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/transactions"
 	pkgTransactionsService "github.com/ShoshinNikita/budget-manager/v2/internal/transactions/service"
-	pkgTransactionsStore "github.com/ShoshinNikita/budget-manager/v2/internal/transactions/store"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web"
 )
 
@@ -73,13 +71,13 @@ func (app *App) prepareStores() error {
 
 	app.storeConn = boltConn
 
-	if app.accountsStore, err = pkgAccountsStore.NewBolt(boltConn); err != nil {
+	if app.accountsStore, err = bolt.NewAccountsStore(boltConn); err != nil {
 		return errors.Wrap(err, "couldn't create accounts store")
 	}
-	if app.transactionsStore, err = pkgTransactionsStore.NewBolt(boltConn); err != nil {
+	if app.transactionsStore, err = bolt.NewTransactionsStore(boltConn); err != nil {
 		return errors.Wrap(err, "couldn't create transactions store")
 	}
-	if app.categoriesStore, err = pkgCategoriesStore.NewBolt(boltConn); err != nil {
+	if app.categoriesStore, err = bolt.NewCategoriesStore(boltConn); err != nil {
 		return errors.Wrap(err, "couldn't create categories store")
 	}
 	return nil

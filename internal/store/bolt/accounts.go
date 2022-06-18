@@ -13,21 +13,18 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/store"
 )
 
-const bucketName = "accounts"
-
-type Bolt struct {
-	base *store.BaseBolt[accounts.Account]
+type AccountsStore struct {
+	base *BaseStore[accounts.Account]
 }
 
-var _ accounts.Store = (*Bolt)(nil)
+var _ accounts.Store = (*AccountsStore)(nil)
 
-func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
-	store := &Bolt{
-		base: store.NewBaseBolt(
-			boltStore, bucketName, marshalBoltAccount, unmarshalBoltAccount,
+func NewAccountsStore(boltStore *bbolt.DB) (*AccountsStore, error) {
+	store := &AccountsStore{
+		base: NewBaseStore(
+			boltStore, "accounts", marshalBoltAccount, unmarshalBoltAccount,
 		),
 	}
 
@@ -37,12 +34,12 @@ func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 	return store, nil
 }
 
-func (bolt Bolt) GetByID(ctx context.Context, id uuid.UUID) (accounts.Account, error) {
-	return bolt.base.GetByID(id)
+func (store AccountsStore) GetByID(ctx context.Context, id uuid.UUID) (accounts.Account, error) {
+	return store.base.GetByID(id)
 }
 
-func (bolt Bolt) GetAll(ctx context.Context) ([]accounts.Account, error) {
-	return bolt.base.GetAll(
+func (store AccountsStore) GetAll(ctx context.Context) ([]accounts.Account, error) {
+	return store.base.GetAll(
 		nil,
 		func(accs []accounts.Account) {
 			sort.Slice(accs, func(i, j int) bool {
@@ -52,12 +49,12 @@ func (bolt Bolt) GetAll(ctx context.Context) ([]accounts.Account, error) {
 	)
 }
 
-func (bolt Bolt) Create(ctx context.Context, acc accounts.Account) error {
-	return bolt.base.Create(acc)
+func (store AccountsStore) Create(ctx context.Context, acc accounts.Account) error {
+	return store.base.Create(acc)
 }
 
-func (bolt Bolt) Update(ctx context.Context, acc accounts.Account) error {
-	return bolt.base.Update(acc)
+func (store AccountsStore) Update(ctx context.Context, acc accounts.Account) error {
+	return store.base.Update(acc)
 }
 
 type boltAccount struct {

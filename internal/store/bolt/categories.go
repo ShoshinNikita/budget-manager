@@ -11,21 +11,18 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/categories"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/store"
 )
 
-const bucketName = "categories"
-
-type Bolt struct {
-	base *store.BaseBolt[categories.Category]
+type CategoriesStore struct {
+	base *BaseStore[categories.Category]
 }
 
-var _ categories.Store = (*Bolt)(nil)
+var _ categories.Store = (*CategoriesStore)(nil)
 
-func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
-	store := &Bolt{
-		base: store.NewBaseBolt(
-			boltStore, bucketName, marshalBoltCategory, unmarshalBoltCategory,
+func NewCategoriesStore(boltStore *bbolt.DB) (*CategoriesStore, error) {
+	store := &CategoriesStore{
+		base: NewBaseStore(
+			boltStore, "categories", marshalBoltCategory, unmarshalBoltCategory,
 		),
 	}
 
@@ -35,7 +32,7 @@ func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 	return store, nil
 }
 
-func (bolt Bolt) GetAll(ctx context.Context) ([]categories.Category, error) {
+func (bolt CategoriesStore) GetAll(ctx context.Context) ([]categories.Category, error) {
 	return bolt.base.GetAll(
 		nil,
 		func(categories []categories.Category) {
@@ -49,11 +46,11 @@ func (bolt Bolt) GetAll(ctx context.Context) ([]categories.Category, error) {
 	)
 }
 
-func (bolt Bolt) Create(ctx context.Context, category categories.Category) error {
+func (bolt CategoriesStore) Create(ctx context.Context, category categories.Category) error {
 	return bolt.base.Create(category)
 }
 
-func (bolt Bolt) Update(ctx context.Context, category categories.Category) error {
+func (bolt CategoriesStore) Update(ctx context.Context, category categories.Category) error {
 	return bolt.base.Update(category)
 }
 
