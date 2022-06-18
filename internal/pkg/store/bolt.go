@@ -17,6 +17,7 @@ type BaseBolt[T Entity] struct {
 
 type Entity interface {
 	GetID() uuid.UUID
+	GetEntityName() string
 }
 
 func NewBaseBolt[T Entity](
@@ -52,9 +53,9 @@ func (base *BaseBolt[T]) GetByID(id uuid.UUID) (res T, err error) {
 
 		value := b.Get(id[:])
 		if value == nil {
-			return NotFoundError{
-				Source: string(base.BucketName),
-				ID:     id,
+			return &NotFoundError{
+				EntityName: base.getEntityName(),
+				ID:         id,
 			}
 		}
 		res, err = base.unmarshalFn(value)
@@ -103,9 +104,9 @@ func (base *BaseBolt[T]) Create(entities ...T) error {
 			data := base.marshalFn(entity)
 
 			if b.Get(id[:]) != nil {
-				return AlreadyExistError{
-					Source: string(base.BucketName),
-					ID:     id,
+				return &AlreadyExistError{
+					EntityName: base.getEntityName(),
+					ID:         id,
 				}
 			}
 
@@ -126,9 +127,9 @@ func (base *BaseBolt[T]) Update(entity T) error {
 		b := tx.Bucket(base.BucketName)
 
 		if b.Get(id[:]) == nil {
-			return NotFoundError{
-				Source: string(base.BucketName),
-				ID:     id,
+			return &NotFoundError{
+				EntityName: base.getEntityName(),
+				ID:         id,
 			}
 		}
 
@@ -137,4 +138,9 @@ func (base *BaseBolt[T]) Update(entity T) error {
 		}
 		return nil
 	})
+}
+
+func (*BaseBolt[T]) getEntityName() string {
+	var zero T
+	return zero.GetEntityName()
 }

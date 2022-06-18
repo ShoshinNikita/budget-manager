@@ -45,3 +45,7 @@ const (
 func (acc Account) GetID() uuid.UUID {
 	return acc.ID
 }
+
+func (Account) GetEntityName() string {
+	return "account"
+}

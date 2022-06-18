@@ -110,3 +110,7 @@ func UnmarshalTransactionExtra(data []byte, flag TransactionFlag) (TransactionEx
 func (t Transaction) GetID() uuid.UUID {
 	return t.ID
 }
+
+func (Transaction) GetEntityName() string {
+	return "transaction"
+}

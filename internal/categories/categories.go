@@ -27,3 +27,7 @@ type Category struct {
 func (category Category) GetID() uuid.UUID {
 	return category.ID
 }
+
+func (Category) GetEntityName() string {
+	return "category"
+}
