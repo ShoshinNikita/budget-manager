@@ -111,7 +111,7 @@ func (s Service) CreateTransferTransactions(
 	name := fmt.Sprintf("Transfer %s", extra.TransferID)
 	// TODO: format amount
 	desc := fmt.Sprintf(
-		"Transfer of %d %s to %d %s",
+		"Transfer of %s %s to %s %s",
 		args.FromAmount, fromAccount.Currency, args.ToAmount, toAccount.Currency,
 	)
 
@@ -150,6 +150,10 @@ func (s Service) Delete(ctx context.Context, id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
+	if transaction.Flags.IsTransferTransaction() {
+		return errors.New("transfer transactions can't be deleted")
+	}
+
 	now := time.Now()
 	transaction.DeletedAt = &now
 
