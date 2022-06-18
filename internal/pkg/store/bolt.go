@@ -18,6 +18,7 @@ type BaseBolt[T Entity] struct {
 type Entity interface {
 	GetID() uuid.UUID
 	GetEntityName() string
+	IsDeleted() bool
 }
 
 func NewBaseBolt[T Entity](
@@ -46,7 +47,8 @@ func (base *BaseBolt[T]) Init() (err error) {
 	})
 }
 
-// GetByID returns an entity with passed id. If there's to such entity, it returns NotFoundError
+// GetByID returns an entity with passed id. If there's no such entity or it was deleted,
+// the function returns NotFoundError
 func (base *BaseBolt[T]) GetByID(id uuid.UUID) (res T, err error) {
 	err = base.Store.View(func(tx *bbolt.Tx) (err error) {
 		b := tx.Bucket(base.BucketName)
@@ -61,6 +63,12 @@ func (base *BaseBolt[T]) GetByID(id uuid.UUID) (res T, err error) {
 		res, err = base.unmarshalFn(value)
 		if err != nil {
 			return err
+		}
+		if res.IsDeleted() {
+			return &NotFoundError{
+				EntityName: base.getEntityName(),
+				ID:         id,
+			}
 		}
 		return nil
 	})

@@ -114,3 +114,7 @@ func (t Transaction) GetID() uuid.UUID {
 func (Transaction) GetEntityName() string {
 	return "transaction"
 }
+
+func (t Transaction) IsDeleted() bool {
+	return t.DeletedAt != nil
+}

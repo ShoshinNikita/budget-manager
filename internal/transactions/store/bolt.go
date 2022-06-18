@@ -40,7 +40,7 @@ func NewBolt(boltStore *bbolt.DB) (*Bolt, error) {
 func (bolt Bolt) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
 	return bolt.base.GetAll(
 		func(t transactions.Transaction) bool {
-			if !args.IncludeDeleted && t.DeletedAt != nil {
+			if !args.IncludeDeleted && t.IsDeleted() {
 				return false
 			}
 			return true

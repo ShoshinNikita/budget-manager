@@ -31,3 +31,7 @@ func (category Category) GetID() uuid.UUID {
 func (Category) GetEntityName() string {
 	return "category"
 }
+
+func (Category) IsDeleted() bool {
+	return false
+}
