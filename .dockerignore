@@ -2,10 +2,10 @@
 *
 
 # Except dirs
-!/cmd/*
 !/internal/*
 !/vendor/*
 
 # Except files
+!main.go
 !go.mod
 !go.sum

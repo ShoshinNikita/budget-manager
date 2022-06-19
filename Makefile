@@ -11,7 +11,7 @@ default: build run
 # build builds a binary file
 build: export-ldflags
 	@ echo "Build Budget Manager..."
-	@ go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager cmd/budget-manager/main.go
+	@ go build -ldflags "${LDFLAGS}" -mod=vendor -o bin/budget-manager main.go
 
 # run runs built Budget Manager
 run:
@@ -26,7 +26,7 @@ test: test-integ
 
 TEST_CMD=go test -v -mod=vendor ${TEST_FLAGS} \
 	-cover -coverprofile=cover.out -coverpkg=github.com/ShoshinNikita/budget-manager/...\
-	./cmd/... ./internal/... && \
+	./... && \
 	go tool cover -func=cover.out && rm cover.out
 
 # test-unit runs unit tests
@@ -93,6 +93,6 @@ check: build lint test
 # generate-docs generates Swagger API documentation with swag - https://github.com/swaggo/swag
 generate-docs:
 	@ echo "Clear Swagger API docs..."
-	@ swag init --generalInfo cmd/budget-manager/main.go --output docs
+	@ swag init --generalInfo main.go --output docs
 	@ echo "Generate Swagger API docs..."
 	@ rm ./docs/swagger.json ./docs/docs.go
