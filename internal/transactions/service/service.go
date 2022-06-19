@@ -7,27 +7,25 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
+	pkgAccountService "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/service"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/transactions"
 )
 
 type Service struct {
-	store           transactions.Store
-	accountsService accounts.Service
+	store           app.TransactionStore
+	accountsService *pkgAccountService.Service
 }
 
-var _ transactions.Service = (*Service)(nil)
-
-func NewService(store transactions.Store, accountsService accounts.Service) *Service {
+func NewService(store app.TransactionStore, accountsService *pkgAccountService.Service) *Service {
 	return &Service{
 		store:           store,
 		accountsService: accountsService,
 	}
 }
 
-func (s Service) Get(ctx context.Context, args transactions.GetTransactionsArgs) ([]transactions.Transaction, error) {
+func (s Service) Get(ctx context.Context, args app.GetTransactionsArgs) ([]app.Transaction, error) {
 	return s.store.Get(ctx, args)
 }
 
@@ -36,7 +34,7 @@ func (s Service) CalculateAccountBalances(
 ) (map[uuid.UUID]money.Money, error) {
 
 	// TODO: use filter to get transactions only for required accounts?
-	allTransaction, err := s.Get(ctx, transactions.GetTransactionsArgs{
+	allTransaction, err := s.Get(ctx, app.GetTransactionsArgs{
 		IncludeDeleted: false,
 	})
 	if err != nil {
@@ -55,9 +53,9 @@ func (s Service) CalculateAccountBalances(
 		}
 
 		switch t.Type {
-		case transactions.TransactionTypeAdd:
+		case app.TransactionTypeAdd:
 			balance = balance.Add(t.Amount)
-		case transactions.TransactionTypeWithdraw:
+		case app.TransactionTypeWithdraw:
 			balance = balance.Sub(t.Amount)
 		}
 		res[t.AccountID] = balance
@@ -66,15 +64,15 @@ func (s Service) CalculateAccountBalances(
 }
 
 func (s Service) CreateTransaction(
-	ctx context.Context, args transactions.CreateTransactionArgs,
-) (transactions.Transaction, error) {
+	ctx context.Context, args app.CreateTransactionArgs,
+) (app.Transaction, error) {
 
 	_, err := s.accountsService.GetByID(ctx, args.AccountID)
 	if err != nil {
-		return transactions.Transaction{}, errors.Wrap(err, "couldn't get account by id")
+		return app.Transaction{}, errors.Wrap(err, "couldn't get account by id")
 	}
 
-	t := transactions.Transaction{
+	t := app.Transaction{
 		ID:          uuid.New(),
 		AccountID:   args.AccountID,
 		Type:        args.Type,
@@ -85,25 +83,25 @@ func (s Service) CreateTransaction(
 		CreatedAt:   time.Now(),
 	}
 	if err := s.store.Create(ctx, t); err != nil {
-		return transactions.Transaction{}, errors.Wrap(err, "couldn't save new transaction")
+		return app.Transaction{}, errors.Wrap(err, "couldn't save new transaction")
 	}
 	return t, nil
 }
 
 func (s Service) CreateTransferTransactions(
-	ctx context.Context, args transactions.CreateTransferTransactionsArgs,
-) ([2]transactions.Transaction, error) {
+	ctx context.Context, args app.CreateTransferTransactionsArgs,
+) ([2]app.Transaction, error) {
 
 	fromAccount, err := s.accountsService.GetByID(ctx, args.FromAccountID)
 	if err != nil {
-		return [2]transactions.Transaction{}, errors.Wrap(err, "couldn't get 'from' account")
+		return [2]app.Transaction{}, errors.Wrap(err, "couldn't get 'from' account")
 	}
 	toAccount, err := s.accountsService.GetByID(ctx, args.ToAccountID)
 	if err != nil {
-		return [2]transactions.Transaction{}, errors.Wrap(err, "couldn't get 'to account")
+		return [2]app.Transaction{}, errors.Wrap(err, "couldn't get 'to account")
 	}
 
-	extra := &transactions.TransferTransactionExtra{
+	extra := &app.TransferTransactionExtra{
 		TransferID: uuid.New(),
 	}
 	now := time.Now()
@@ -115,12 +113,12 @@ func (s Service) CreateTransferTransactions(
 		args.FromAmount, fromAccount.Currency, args.ToAmount, toAccount.Currency,
 	)
 
-	transferTransactions := [2]transactions.Transaction{
+	transferTransactions := [2]app.Transaction{
 		{
 			ID:          uuid.New(),
 			AccountID:   args.FromAccountID,
-			Type:        transactions.TransactionTypeWithdraw,
-			Flags:       transactions.TransactionFlagTransfer,
+			Type:        app.TransactionTypeWithdraw,
+			Flags:       app.TransactionFlagTransfer,
 			Name:        name,
 			Description: desc,
 			Amount:      args.FromAmount,
@@ -130,8 +128,8 @@ func (s Service) CreateTransferTransactions(
 		{
 			ID:          uuid.New(),
 			AccountID:   args.ToAccountID,
-			Type:        transactions.TransactionTypeAdd,
-			Flags:       transactions.TransactionFlagTransfer,
+			Type:        app.TransactionTypeAdd,
+			Flags:       app.TransactionFlagTransfer,
 			Name:        name,
 			Description: desc,
 			Amount:      args.ToAmount,
@@ -140,7 +138,7 @@ func (s Service) CreateTransferTransactions(
 		},
 	}
 	if err := s.store.Create(ctx, transferTransactions[:]...); err != nil {
-		return [2]transactions.Transaction{}, errors.Wrap(err, "couldn't save new transactions")
+		return [2]app.Transaction{}, errors.Wrap(err, "couldn't save new transactions")
 	}
 	return transferTransactions, nil
 }

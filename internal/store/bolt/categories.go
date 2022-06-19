@@ -9,15 +9,13 @@ import (
 	"github.com/google/uuid"
 	"go.etcd.io/bbolt"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/categories"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 )
 
 type CategoriesStore struct {
-	base *BaseStore[categories.Category]
+	base *BaseStore[app.Category]
 }
-
-var _ categories.Store = (*CategoriesStore)(nil)
 
 func NewCategoriesStore(boltStore *bbolt.DB) (*CategoriesStore, error) {
 	store := &CategoriesStore{
@@ -32,10 +30,10 @@ func NewCategoriesStore(boltStore *bbolt.DB) (*CategoriesStore, error) {
 	return store, nil
 }
 
-func (bolt CategoriesStore) GetAll(ctx context.Context) ([]categories.Category, error) {
+func (bolt CategoriesStore) GetAll(ctx context.Context) ([]app.Category, error) {
 	return bolt.base.GetAll(
 		nil,
-		func(categories []categories.Category) {
+		func(categories []app.Category) {
 			sort.Slice(categories, func(i, j int) bool {
 				if categories[i].ParentID == categories[j].ParentID {
 					return categories[i].Name < categories[j].Name
@@ -46,11 +44,11 @@ func (bolt CategoriesStore) GetAll(ctx context.Context) ([]categories.Category, 
 	)
 }
 
-func (bolt CategoriesStore) Create(ctx context.Context, category categories.Category) error {
+func (bolt CategoriesStore) Create(ctx context.Context, category app.Category) error {
 	return bolt.base.Create(category)
 }
 
-func (bolt CategoriesStore) Update(ctx context.Context, category categories.Category) error {
+func (bolt CategoriesStore) Update(ctx context.Context, category app.Category) error {
 	return bolt.base.Update(category)
 }
 
@@ -60,7 +58,7 @@ type boltCategory struct {
 	Name     string    `json:"name"`
 }
 
-func marshalBoltCategory(category categories.Category) []byte {
+func marshalBoltCategory(category app.Category) []byte {
 	data, err := json.Marshal(boltCategory{
 		ID:       category.ID,
 		ParentID: category.ParentID,
@@ -72,13 +70,13 @@ func marshalBoltCategory(category categories.Category) []byte {
 	return data
 }
 
-func unmarshalBoltCategory(data []byte) (categories.Category, error) {
+func unmarshalBoltCategory(data []byte) (app.Category, error) {
 	var category boltCategory
 	if err := json.Unmarshal(data, &category); err != nil {
-		return categories.Category{}, errors.Wrap(err, "couldn't unmarshal category")
+		return app.Category{}, errors.Wrap(err, "couldn't unmarshal category")
 	}
 
-	return categories.Category{
+	return app.Category{
 		ID:       category.ID,
 		ParentID: category.ParentID,
 		Name:     category.Name,

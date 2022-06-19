@@ -6,15 +6,13 @@ import (
 
 	"go.etcd.io/bbolt"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/accounts"
 	pkgAccountsService "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/service"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/categories"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	pkgCategoriesService "github.com/ShoshinNikita/budget-manager/v2/internal/categories/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/env"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/store/bolt"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/transactions"
 	pkgTransactionsService "github.com/ShoshinNikita/budget-manager/v2/internal/transactions/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web"
 )
@@ -72,14 +70,14 @@ type BudgetManagerCommand struct {
 	server    *web.Server
 	storeConn io.Closer
 
-	accountsStore   accounts.Store
-	categoriesStore categories.Store
+	accountStore     app.AccountStore
+	transactionStore app.TransactionStore
+	categoryStore    app.CategoryStore
 
-	transactionsStore   transactions.Store
-	transactionsService transactions.Service
-
-	accountsService   accounts.Service
-	categoriesService categories.Service
+	// TODO: move to a single service
+	transactionsService *pkgTransactionsService.Service
+	accountsService     *pkgAccountsService.Service
+	categoriesService   *pkgCategoriesService.Service
 
 	shutdownSignal chan struct{}
 }
@@ -112,22 +110,22 @@ func (cmd *BudgetManagerCommand) prepareStores() error {
 
 	cmd.storeConn = boltConn
 
-	if cmd.accountsStore, err = bolt.NewAccountsStore(boltConn); err != nil {
+	if cmd.accountStore, err = bolt.NewAccountsStore(boltConn); err != nil {
 		return errors.Wrap(err, "couldn't create accounts store")
 	}
-	if cmd.transactionsStore, err = bolt.NewTransactionsStore(boltConn); err != nil {
+	if cmd.transactionStore, err = bolt.NewTransactionsStore(boltConn); err != nil {
 		return errors.Wrap(err, "couldn't create transactions store")
 	}
-	if cmd.categoriesStore, err = bolt.NewCategoriesStore(boltConn); err != nil {
+	if cmd.categoryStore, err = bolt.NewCategoriesStore(boltConn); err != nil {
 		return errors.Wrap(err, "couldn't create categories store")
 	}
 	return nil
 }
 
 func (cmd *BudgetManagerCommand) prepareServices() {
-	cmd.accountsService = pkgAccountsService.NewService(cmd.accountsStore)
-	cmd.transactionsService = pkgTransactionsService.NewService(cmd.transactionsStore, cmd.accountsService)
-	cmd.categoriesService = pkgCategoriesService.NewService(cmd.categoriesStore)
+	cmd.accountsService = pkgAccountsService.NewService(cmd.accountStore)
+	cmd.transactionsService = pkgTransactionsService.NewService(cmd.transactionStore, cmd.accountsService)
+	cmd.categoriesService = pkgCategoriesService.NewService(cmd.categoryStore)
 }
 
 func (cmd *BudgetManagerCommand) prepareWebServer() {

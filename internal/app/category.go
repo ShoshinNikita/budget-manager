@@ -1,4 +1,4 @@
-package categories
+package app
 
 import (
 	"context"
@@ -6,13 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Service interface {
-	GetAll(ctx context.Context) ([]Category, error)
-	Create(ctx context.Context, name string, parentID uuid.UUID) (Category, error)
-	Update(ctx context.Context, category Category) error
-}
-
-type Store interface {
+type CategoryStore interface {
 	GetAll(ctx context.Context) ([]Category, error)
 	Create(ctx context.Context, category Category) error
 	Update(ctx context.Context, category Category) error

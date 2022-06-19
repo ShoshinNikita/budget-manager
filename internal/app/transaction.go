@@ -1,4 +1,4 @@
-package transactions
+package app
 
 import (
 	"context"
@@ -11,17 +11,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
 )
 
-type Service interface {
-	Get(ctx context.Context, args GetTransactionsArgs) ([]Transaction, error)
-	CalculateAccountBalances(ctx context.Context, accountIDs []uuid.UUID) (map[uuid.UUID]money.Money, error)
-
-	CreateTransaction(ctx context.Context, args CreateTransactionArgs) (Transaction, error)
-	CreateTransferTransactions(ctx context.Context, args CreateTransferTransactionsArgs) ([2]Transaction, error)
-
-	Delete(ctx context.Context, id uuid.UUID) error
-}
-
-type Store interface {
+type TransactionStore interface {
 	Get(ctx context.Context, args GetTransactionsArgs) ([]Transaction, error)
 	GetByID(ctx context.Context, id uuid.UUID) (Transaction, error)
 	Create(ctx context.Context, transactions ...Transaction) error
