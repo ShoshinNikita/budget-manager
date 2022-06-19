@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 	"go.etcd.io/bbolt"
 
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/store"
 )
 
 type BaseStore[T Entity] struct {
@@ -17,8 +17,9 @@ type BaseStore[T Entity] struct {
 }
 
 type Entity interface {
+	app.Entity
+
 	GetID() uuid.UUID
-	GetEntityName() string
 }
 
 func NewBaseStore[T Entity](
@@ -54,10 +55,7 @@ func (base *BaseStore[T]) GetByID(id uuid.UUID) (res T, err error) {
 
 		value := b.Get(id[:])
 		if value == nil {
-			return &store.NotFoundError{
-				EntityName: base.getEntityName(),
-				ID:         id,
-			}
+			return app.NewNotFoundError(base.getZeroEntity(), id)
 		}
 		res, err = base.unmarshalFn(value)
 		if err != nil {
@@ -107,10 +105,7 @@ func (base *BaseStore[T]) Create(entities ...T) error {
 			data := base.marshalFn(entity)
 
 			if b.Get(id[:]) != nil {
-				return &store.AlreadyExistError{
-					EntityName: base.getEntityName(),
-					ID:         id,
-				}
+				return app.NewAlreadyExistError(base.getZeroEntity(), id)
 			}
 
 			if err := b.Put(id[:], data); err != nil {
@@ -130,10 +125,7 @@ func (base *BaseStore[T]) Update(entity T) error {
 		b := tx.Bucket(base.BucketName)
 
 		if b.Get(id[:]) == nil {
-			return &store.NotFoundError{
-				EntityName: base.getEntityName(),
-				ID:         id,
-			}
+			return app.NewNotFoundError(base.getZeroEntity(), id)
 		}
 
 		if err := b.Put(id[:], data); err != nil {
@@ -143,7 +135,6 @@ func (base *BaseStore[T]) Update(entity T) error {
 	})
 }
 
-func (*BaseStore[T]) getEntityName() string {
-	var zero T
-	return zero.GetEntityName()
+func (*BaseStore[T]) getZeroEntity() (zero T) {
+	return zero
 }

@@ -8,7 +8,6 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/store"
 )
 
 func (s Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (app.Category, error) {
@@ -17,10 +16,7 @@ func (s Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (app.Categor
 		return app.Category{}, err
 	}
 	if category.IsDeleted() {
-		return app.Category{}, &store.NotFoundError{
-			EntityName: category.GetEntityName(),
-			ID:         id,
-		}
+		return app.Category{}, app.NewNotFoundError(category, id)
 	}
 	return category, nil
 }
@@ -59,7 +55,7 @@ func (s Service) DeleteCategory(ctx context.Context, id uuid.UUID) error {
 		return errors.Wrap(err, "couldn't check if there are any transactions with category to delete")
 	}
 	if len(transactions) > 0 {
-		return errors.Errorf("%d transactions have this category", len(transactions))
+		return app.NewUserError(errors.Errorf("%d transactions have this category", len(transactions)))
 	}
 
 	now := time.Now()

@@ -142,7 +142,7 @@ func (s Service) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 	if transaction.Flags.IsTransferTransaction() {
-		return errors.New("transfer transactions can't be deleted")
+		return app.NewUserError(errors.New("transfer transactions can't be deleted"))
 	}
 
 	now := time.Now()
