@@ -7,26 +7,13 @@ import (
 
 	"github.com/google/uuid"
 
-	pkgAccountService "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
 )
 
-type Service struct {
-	store           app.TransactionStore
-	accountsService *pkgAccountService.Service
-}
-
-func NewService(store app.TransactionStore, accountsService *pkgAccountService.Service) *Service {
-	return &Service{
-		store:           store,
-		accountsService: accountsService,
-	}
-}
-
-func (s Service) Get(ctx context.Context, args app.GetTransactionsArgs) ([]app.Transaction, error) {
-	return s.store.Get(ctx, args)
+func (s Service) GetTransactions(ctx context.Context, args app.GetTransactionsArgs) ([]app.Transaction, error) {
+	return s.transactionStore.Get(ctx, args)
 }
 
 func (s Service) CalculateAccountBalances(
@@ -34,7 +21,7 @@ func (s Service) CalculateAccountBalances(
 ) (map[uuid.UUID]money.Money, error) {
 
 	// TODO: use filter to get transactions only for required accounts?
-	allTransaction, err := s.Get(ctx, app.GetTransactionsArgs{
+	allTransaction, err := s.GetTransactions(ctx, app.GetTransactionsArgs{
 		IncludeDeleted: false,
 	})
 	if err != nil {
@@ -67,7 +54,7 @@ func (s Service) CreateTransaction(
 	ctx context.Context, args app.CreateTransactionArgs,
 ) (app.Transaction, error) {
 
-	_, err := s.accountsService.GetByID(ctx, args.AccountID)
+	_, err := s.GetAccountByID(ctx, args.AccountID)
 	if err != nil {
 		return app.Transaction{}, errors.Wrap(err, "couldn't get account by id")
 	}
@@ -82,7 +69,7 @@ func (s Service) CreateTransaction(
 		CategoryID:  args.CategoryID,
 		CreatedAt:   time.Now(),
 	}
-	if err := s.store.Create(ctx, t); err != nil {
+	if err := s.transactionStore.Create(ctx, t); err != nil {
 		return app.Transaction{}, errors.Wrap(err, "couldn't save new transaction")
 	}
 	return t, nil
@@ -92,11 +79,11 @@ func (s Service) CreateTransferTransactions(
 	ctx context.Context, args app.CreateTransferTransactionsArgs,
 ) ([2]app.Transaction, error) {
 
-	fromAccount, err := s.accountsService.GetByID(ctx, args.FromAccountID)
+	fromAccount, err := s.GetAccountByID(ctx, args.FromAccountID)
 	if err != nil {
 		return [2]app.Transaction{}, errors.Wrap(err, "couldn't get 'from' account")
 	}
-	toAccount, err := s.accountsService.GetByID(ctx, args.ToAccountID)
+	toAccount, err := s.GetAccountByID(ctx, args.ToAccountID)
 	if err != nil {
 		return [2]app.Transaction{}, errors.Wrap(err, "couldn't get 'to account")
 	}
@@ -137,14 +124,14 @@ func (s Service) CreateTransferTransactions(
 			CreatedAt:   now,
 		},
 	}
-	if err := s.store.Create(ctx, transferTransactions[:]...); err != nil {
+	if err := s.transactionStore.Create(ctx, transferTransactions[:]...); err != nil {
 		return [2]app.Transaction{}, errors.Wrap(err, "couldn't save new transactions")
 	}
 	return transferTransactions, nil
 }
 
-func (s Service) Delete(ctx context.Context, id uuid.UUID) error {
-	transaction, err := s.store.GetByID(ctx, id)
+func (s Service) DeleteTransaction(ctx context.Context, id uuid.UUID) error {
+	transaction, err := s.transactionStore.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -155,7 +142,7 @@ func (s Service) Delete(ctx context.Context, id uuid.UUID) error {
 	now := time.Now()
 	transaction.DeletedAt = &now
 
-	if err := s.store.Update(ctx, transaction); err != nil {
+	if err := s.transactionStore.Update(ctx, transaction); err != nil {
 		return errors.Wrap(err, "couldn't update transaction for deletion")
 	}
 	return nil

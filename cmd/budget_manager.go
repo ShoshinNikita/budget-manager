@@ -6,14 +6,12 @@ import (
 
 	"go.etcd.io/bbolt"
 
-	pkgAccountsService "github.com/ShoshinNikita/budget-manager/v2/internal/accounts/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
-	pkgCategoriesService "github.com/ShoshinNikita/budget-manager/v2/internal/categories/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/env"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/store/bolt"
-	pkgTransactionsService "github.com/ShoshinNikita/budget-manager/v2/internal/transactions/service"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web"
 )
 
@@ -66,18 +64,16 @@ func ParseBudgetManagerConfig(defaultCfg DefaultConfig) (BudgetManagerConfig, er
 type BudgetManagerCommand struct {
 	config BudgetManagerConfig
 
-	log       logger.Logger
-	server    *web.Server
-	storeConn io.Closer
+	log logger.Logger
 
+	storeConn        io.Closer
 	accountStore     app.AccountStore
 	transactionStore app.TransactionStore
 	categoryStore    app.CategoryStore
 
-	// TODO: move to a single service
-	transactionsService *pkgTransactionsService.Service
-	accountsService     *pkgAccountsService.Service
-	categoriesService   *pkgCategoriesService.Service
+	service app.Service
+
+	server *web.Server
 
 	shutdownSignal chan struct{}
 }
@@ -93,7 +89,7 @@ func NewBudgetManagerCommand(cfg BudgetManagerConfig, log logger.Logger) (*Budge
 	if err := cmd.prepareStores(); err != nil {
 		return nil, errors.Wrap(err, "couldn't prepare stores")
 	}
-	cmd.prepareServices()
+	cmd.prepareService()
 	cmd.prepareWebServer()
 
 	return cmd, nil
@@ -122,10 +118,8 @@ func (cmd *BudgetManagerCommand) prepareStores() error {
 	return nil
 }
 
-func (cmd *BudgetManagerCommand) prepareServices() {
-	cmd.accountsService = pkgAccountsService.NewService(cmd.accountStore)
-	cmd.transactionsService = pkgTransactionsService.NewService(cmd.transactionStore, cmd.accountsService)
-	cmd.categoriesService = pkgCategoriesService.NewService(cmd.categoryStore)
+func (cmd *BudgetManagerCommand) prepareService() {
+	cmd.service = service.NewService(cmd.accountStore, cmd.transactionStore, cmd.categoryStore)
 }
 
 func (cmd *BudgetManagerCommand) prepareWebServer() {
