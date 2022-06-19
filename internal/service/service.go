@@ -1,3 +1,4 @@
+// Package service contains all domain logic
 package service
 
 import "github.com/ShoshinNikita/budget-manager/v2/internal/app"
