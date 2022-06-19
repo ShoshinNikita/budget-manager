@@ -32,8 +32,8 @@ func NewTransactionsStore(boltStore *bbolt.DB) (*TransactionsStore, error) {
 	return store, nil
 }
 
-func (bolt TransactionsStore) Get(ctx context.Context, args app.GetTransactionsArgs) ([]app.Transaction, error) {
-	return bolt.base.GetAll(
+func (store TransactionsStore) Get(ctx context.Context, args app.GetTransactionsArgs) ([]app.Transaction, error) {
+	return store.base.GetAll(
 		func(t app.Transaction) bool {
 			if !args.IncludeDeleted && t.IsDeleted() {
 				return true
@@ -48,16 +48,16 @@ func (bolt TransactionsStore) Get(ctx context.Context, args app.GetTransactionsA
 	)
 }
 
-func (bolt TransactionsStore) GetByID(ctx context.Context, id uuid.UUID) (app.Transaction, error) {
-	return bolt.base.GetByID(id)
+func (store TransactionsStore) GetByID(ctx context.Context, id uuid.UUID) (app.Transaction, error) {
+	return store.base.GetByID(id)
 }
 
-func (bolt TransactionsStore) Create(ctx context.Context, transactions ...app.Transaction) error {
-	return bolt.base.Create(transactions...)
+func (store TransactionsStore) Create(ctx context.Context, transactions ...app.Transaction) error {
+	return store.base.Create(transactions...)
 }
 
-func (bolt TransactionsStore) Update(ctx context.Context, transaction app.Transaction) error {
-	return bolt.base.Update(transaction)
+func (store TransactionsStore) Update(ctx context.Context, transaction app.Transaction) error {
+	return store.base.Update(transaction)
 }
 
 type boltTransaction struct {

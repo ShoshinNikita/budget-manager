@@ -7,6 +7,7 @@ import (
 )
 
 type CategoryStore interface {
+	GetByID(ctx context.Context, id uuid.UUID) (Category, error)
 	GetAll(ctx context.Context) ([]Category, error)
 	Create(ctx context.Context, category Category) error
 	Update(ctx context.Context, category Category) error

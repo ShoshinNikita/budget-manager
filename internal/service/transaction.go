@@ -58,6 +58,12 @@ func (s Service) CreateTransaction(
 	if err != nil {
 		return app.Transaction{}, errors.Wrap(err, "couldn't get account by id")
 	}
+	if args.CategoryID != uuid.Nil {
+		_, err := s.GetCategoryByID(ctx, args.CategoryID)
+		if err != nil {
+			return app.Transaction{}, errors.Wrap(err, "couldn't get category by id")
+		}
+	}
 
 	t := app.Transaction{
 		ID:          uuid.New(),

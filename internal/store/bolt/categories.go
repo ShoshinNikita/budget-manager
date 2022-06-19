@@ -30,8 +30,12 @@ func NewCategoriesStore(boltStore *bbolt.DB) (*CategoriesStore, error) {
 	return store, nil
 }
 
-func (bolt CategoriesStore) GetAll(ctx context.Context) ([]app.Category, error) {
-	return bolt.base.GetAll(
+func (store CategoriesStore) GetByID(ctx context.Context, id uuid.UUID) (app.Category, error) {
+	return store.base.GetByID(id)
+}
+
+func (store CategoriesStore) GetAll(ctx context.Context) ([]app.Category, error) {
+	return store.base.GetAll(
 		nil,
 		func(categories []app.Category) {
 			sort.Slice(categories, func(i, j int) bool {
@@ -44,12 +48,12 @@ func (bolt CategoriesStore) GetAll(ctx context.Context) ([]app.Category, error) 
 	)
 }
 
-func (bolt CategoriesStore) Create(ctx context.Context, category app.Category) error {
-	return bolt.base.Create(category)
+func (store CategoriesStore) Create(ctx context.Context, category app.Category) error {
+	return store.base.Create(category)
 }
 
-func (bolt CategoriesStore) Update(ctx context.Context, category app.Category) error {
-	return bolt.base.Update(category)
+func (store CategoriesStore) Update(ctx context.Context, category app.Category) error {
+	return store.base.Update(category)
 }
 
 type boltCategory struct {

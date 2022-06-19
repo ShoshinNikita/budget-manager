@@ -9,6 +9,10 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 )
 
+func (s Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (app.Category, error) {
+	return s.categoryStore.GetByID(ctx, id)
+}
+
 func (s Service) GetCategories(ctx context.Context) ([]app.Category, error) {
 	return s.categoryStore.GetAll(ctx)
 }
