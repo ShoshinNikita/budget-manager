@@ -1,4 +1,4 @@
-package config
+package cmd
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web"
 )
 
-func TestParseConfig(t *testing.T) {
+func TestParseBudgetManagerConfig(t *testing.T) {
 	t.Parallel()
 
 	require := require.New(t)
@@ -27,12 +27,7 @@ func TestParseConfig(t *testing.T) {
 		os.Setenv(env.key, env.value)
 	}
 
-	want := Config{
-		Store: StoreConfig{
-			Bolt: BoltConfig{
-				Path: "./db.db",
-			},
-		},
+	want := BudgetManagerConfig{
 		Server: web.Config{
 			Port:            6666,
 			UseEmbed:        false,
@@ -46,8 +41,9 @@ func TestParseConfig(t *testing.T) {
 			},
 		},
 	}
+	want.Store.Bolt.Path = "./db.db"
 
-	cfg, err := ParseConfig()
+	cfg, err := ParseBudgetManagerConfig(DefaultConfig{})
 	require.Nil(err)
 	require.Equal(want, cfg)
 }

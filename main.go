@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/app/config"
+	"github.com/ShoshinNikita/budget-manager/v2/cmd"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
 )
 
@@ -35,32 +35,59 @@ var (
 //
 
 func main() {
-	cfg, err := config.ParseConfig()
-	if err != nil {
-		stdlog.Fatalf("couldn't parse config: %s", err)
+	defaultConfig := cmd.DefaultConfig{
+		Version: version,
+		GitHash: gitHash,
 	}
 	log := logger.New()
 
-	app, err := app.NewApp(cfg, log, version, gitHash)
+	command, err := getCommand(defaultConfig, log)
 	if err != nil {
-		stdlog.Fatalf("couldn't prepare app: %s", err)
+		stdlog.Fatal(err)
 	}
 
-	appErrCh := make(chan error, 1)
+	errCh := make(chan error, 1)
 	go func() {
-		appErrCh <- app.Run()
+		errCh <- command.Run()
 	}()
 
 	term := make(chan os.Signal, 1)
 	signal.Notify(term, syscall.SIGINT, syscall.SIGTERM)
 
-	// Wait for an interrupt signal or an app error
+	// Wait for an interrupt signal or a command error
 	select {
 	case <-term:
 		log.Warn("got an interrupt signal")
-	case err := <-appErrCh:
-		log.WithError(err).Error("app finished with error")
+	case err := <-errCh:
+		if err != nil {
+			log.WithError(err).Error("command finished with error")
+		} else {
+			log.Info("command finished successfully")
+		}
 	}
 
-	app.Shutdown()
+	command.Shutdown()
+}
+
+func getCommand(defaultCfg cmd.DefaultConfig, log logger.Logger) (res cmd.Command, err error) {
+	var command string
+	if args := os.Args[1:]; len(args) > 0 {
+		command = args[0]
+	}
+
+	switch command {
+	case "", "budget-manager":
+		cfg, err := cmd.ParseBudgetManagerConfig(defaultCfg)
+		if err != nil {
+			return nil, errors.Wrapf(err, "couldn't parse config for command %q", command)
+		}
+		res, err = cmd.NewBudgetManagerCommand(cfg, log)
+		if err != nil {
+			return nil, errors.Wrapf(err, "couldn't prepare command %q", command)
+		}
+	default:
+		return nil, errors.Errorf("invalid command %q", command)
+	}
+
+	return res, nil
 }
