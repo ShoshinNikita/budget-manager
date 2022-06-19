@@ -21,6 +21,7 @@ type TransactionStore interface {
 // TODO: add filters and limit, offset
 type GetTransactionsArgs struct {
 	IncludeDeleted bool
+	CategoryIDs    []uuid.UUID
 }
 
 type CreateTransactionArgs struct {

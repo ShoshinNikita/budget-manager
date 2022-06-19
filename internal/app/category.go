@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -14,9 +15,10 @@ type CategoryStore interface {
 }
 
 type Category struct {
-	ID       uuid.UUID `json:"id"`
-	ParentID uuid.UUID `json:"parent_id"`
-	Name     string    `json:"name"`
+	ID        uuid.UUID  `json:"id"`
+	ParentID  uuid.UUID  `json:"parent_id"`
+	Name      string     `json:"name"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func (category Category) GetID() uuid.UUID {
@@ -27,6 +29,6 @@ func (Category) GetEntityName() string {
 	return "category"
 }
 
-func (Category) IsDeleted() bool {
-	return false
+func (category Category) IsDeleted() bool {
+	return category.DeletedAt != nil
 }

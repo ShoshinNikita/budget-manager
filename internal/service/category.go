@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -32,4 +33,29 @@ func (s Service) CreateCategory(ctx context.Context, name string, parentID uuid.
 
 func (s Service) UpdateCategory(ctx context.Context, category app.Category) error {
 	return s.categoryStore.Update(ctx, category)
+}
+
+func (s Service) DeleteCategory(ctx context.Context, id uuid.UUID) error {
+	category, err := s.GetCategoryByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	transactions, err := s.GetTransactions(ctx, app.GetTransactionsArgs{
+		CategoryIDs: []uuid.UUID{category.ID},
+	})
+	if err != nil {
+		return errors.Wrap(err, "couldn't check if there are any transactions with category to delete")
+	}
+	if len(transactions) > 0 {
+		return errors.Errorf("%d transactions have this category", len(transactions))
+	}
+
+	now := time.Now()
+	category.DeletedAt = &now
+
+	if err := s.categoryStore.Update(ctx, category); err != nil {
+		return errors.Wrap(err, "couldn't update category for deletion")
+	}
+	return nil
 }

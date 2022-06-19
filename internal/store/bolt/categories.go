@@ -36,7 +36,9 @@ func (store CategoriesStore) GetByID(ctx context.Context, id uuid.UUID) (app.Cat
 
 func (store CategoriesStore) GetAll(ctx context.Context) ([]app.Category, error) {
 	return store.base.GetAll(
-		nil,
+		func(category app.Category) bool {
+			return category.IsDeleted()
+		},
 		func(categories []app.Category) {
 			sort.Slice(categories, func(i, j int) bool {
 				if categories[i].ParentID == categories[j].ParentID {

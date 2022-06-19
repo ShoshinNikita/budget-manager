@@ -23,4 +23,5 @@ type Service interface {
 	GetCategories(ctx context.Context) ([]Category, error)
 	CreateCategory(ctx context.Context, name string, parentID uuid.UUID) (Category, error)
 	UpdateCategory(ctx context.Context, category Category) error
+	DeleteCategory(ctx context.Context, id uuid.UUID) error
 }

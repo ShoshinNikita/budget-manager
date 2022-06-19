@@ -33,9 +33,17 @@ func NewTransactionsStore(boltStore *bbolt.DB) (*TransactionsStore, error) {
 }
 
 func (store TransactionsStore) Get(ctx context.Context, args app.GetTransactionsArgs) ([]app.Transaction, error) {
+	categoryIDs := make(map[uuid.UUID]bool, len(args.CategoryIDs))
+	for _, id := range args.CategoryIDs {
+		categoryIDs[id] = true
+	}
+
 	return store.base.GetAll(
 		func(t app.Transaction) bool {
 			if !args.IncludeDeleted && t.IsDeleted() {
+				return true
+			}
+			if len(categoryIDs) > 0 && !categoryIDs[t.CategoryID] {
 				return true
 			}
 			return false
