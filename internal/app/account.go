@@ -39,7 +39,3 @@ func (acc Account) GetID() uuid.UUID {
 func (Account) GetEntityName() string {
 	return "account"
 }
-
-func (Account) IsDeleted() bool {
-	return false
-}

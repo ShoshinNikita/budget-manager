@@ -8,10 +8,21 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/store"
 )
 
 func (s Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (app.Category, error) {
-	return s.categoryStore.GetByID(ctx, id)
+	category, err := s.categoryStore.GetByID(ctx, id)
+	if err != nil {
+		return app.Category{}, err
+	}
+	if category.IsDeleted() {
+		return app.Category{}, &store.NotFoundError{
+			EntityName: category.GetEntityName(),
+			ID:         id,
+		}
+	}
+	return category, nil
 }
 
 func (s Service) GetCategories(ctx context.Context) ([]app.Category, error) {
