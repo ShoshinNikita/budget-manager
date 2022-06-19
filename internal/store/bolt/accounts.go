@@ -36,8 +36,8 @@ func (store AccountsStore) GetByID(ctx context.Context, id uuid.UUID) (app.Accou
 	return store.base.GetByID(id)
 }
 
-func (store AccountsStore) GetAll(ctx context.Context) ([]app.Account, error) {
-	return store.base.GetAll(
+func (store AccountsStore) Get(ctx context.Context) ([]app.Account, error) {
+	return store.base.Get(
 		nil,
 		func(accs []app.Account) {
 			sort.Slice(accs, func(i, j int) bool {

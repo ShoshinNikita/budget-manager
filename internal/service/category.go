@@ -22,7 +22,7 @@ func (s Service) GetCategoryByID(ctx context.Context, id uuid.UUID) (app.Categor
 }
 
 func (s Service) GetCategories(ctx context.Context) ([]app.Category, error) {
-	return s.categoryStore.GetAll(ctx)
+	return s.categoryStore.Get(ctx)
 }
 
 func (s Service) CreateCategory(ctx context.Context, name string, parentID uuid.UUID) (app.Category, error) {

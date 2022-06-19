@@ -16,7 +16,7 @@ func (s Service) GetAccountByID(ctx context.Context, id uuid.UUID) (app.Account,
 }
 
 func (s Service) GetAccounts(ctx context.Context) ([]app.Account, error) {
-	return s.accountStore.GetAll(ctx)
+	return s.accountStore.Get(ctx)
 }
 
 func (s Service) CreateAccount(ctx context.Context, name string, currency money.Currency) (app.Account, error) {

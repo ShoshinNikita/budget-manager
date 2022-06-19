@@ -11,7 +11,7 @@ import (
 
 type AccountStore interface {
 	GetByID(ctx context.Context, id uuid.UUID) (Account, error)
-	GetAll(ctx context.Context) ([]Account, error)
+	Get(ctx context.Context) ([]Account, error)
 	Create(ctx context.Context, acc Account) error
 	Update(ctx context.Context, acc Account) error
 }

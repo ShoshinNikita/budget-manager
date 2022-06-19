@@ -38,7 +38,7 @@ func (store TransactionsStore) Get(ctx context.Context, args app.GetTransactions
 		categoryIDs[id] = true
 	}
 
-	return store.base.GetAll(
+	return store.base.Get(
 		func(t app.Transaction) bool {
 			if !args.IncludeDeleted && t.IsDeleted() {
 				return true

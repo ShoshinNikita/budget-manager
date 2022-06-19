@@ -66,8 +66,8 @@ func (base *BaseStore[T]) GetByID(id uuid.UUID) (res T, err error) {
 	return res, err
 }
 
-// GetAll returns all entities in a bucket filtered with 'shouldSkipFn' and sorted with 'sortFn'.
-func (base *BaseStore[T]) GetAll(shouldSkipFn func(T) bool, sortFn func([]T)) ([]T, error) {
+// Get returns all entities in a bucket filtered with 'shouldSkipFn' and sorted with 'sortFn'.
+func (base *BaseStore[T]) Get(shouldSkipFn func(T) bool, sortFn func([]T)) ([]T, error) {
 	var res []T
 	err := base.Store.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(base.BucketName)
@@ -77,7 +77,7 @@ func (base *BaseStore[T]) GetAll(shouldSkipFn func(T) bool, sortFn func([]T)) ([
 			if err != nil {
 				return err
 			}
-			if !shouldSkipFn(entity) {
+			if shouldSkipFn == nil || !shouldSkipFn(entity) {
 				res = append(res, entity)
 			}
 			return nil

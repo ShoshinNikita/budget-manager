@@ -34,8 +34,8 @@ func (store CategoriesStore) GetByID(ctx context.Context, id uuid.UUID) (app.Cat
 	return store.base.GetByID(id)
 }
 
-func (store CategoriesStore) GetAll(ctx context.Context) ([]app.Category, error) {
-	return store.base.GetAll(
+func (store CategoriesStore) Get(ctx context.Context) ([]app.Category, error) {
+	return store.base.Get(
 		func(category app.Category) bool {
 			return category.IsDeleted()
 		},
