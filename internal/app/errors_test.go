@@ -12,11 +12,11 @@ func TestIsError(t *testing.T) {
 	var err error
 
 	err = NewNotFoundError(Account{}, uuid.New())
-	require.True(t, IsNotFound(err))
+	require.NotNil(t, AsNotFound(err))
 
 	err = NewAlreadyExistError(Account{}, uuid.New())
-	require.True(t, IsAlreadyExist(err))
+	require.NotNil(t, AsAlreadyExist(err))
 
 	err = NewUserError(errors.New("qwerty"))
-	require.True(t, IsUserError(err))
+	require.NotNil(t, AsUserError(err))
 }

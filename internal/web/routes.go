@@ -1,27 +1,15 @@
 package web
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"net/http/pprof"
-
-	"github.com/ShoshinNikita/budget-manager/v2/internal/web/utils"
 )
 
 func (s Server) addRoutes(mux *http.ServeMux) {
-	var (
-		errUnknownPath      = errors.New("unknown path")
-		errMethodNowAllowed = errors.New("method not allowed")
-	)
-	writeUnknownPathError := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		utils.EncodeError(ctx, w, s.log, errUnknownPath, http.StatusNotFound)
-	}
-	writeMethodNowAllowedError := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		utils.EncodeError(ctx, w, s.log, errMethodNowAllowed, http.StatusMethodNotAllowed)
+	writeError := func(w http.ResponseWriter, statusCode int) {
+		w.WriteHeader(statusCode)
+		fmt.Fprint(w, http.StatusText(statusCode))
 	}
 
 	// Register API handlers
@@ -30,13 +18,13 @@ func (s Server) addRoutes(mux *http.ServeMux) {
 		routes := routes
 		mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != pattern {
-				writeUnknownPathError(w, r)
+				writeError(w, http.StatusNotFound)
 				return
 			}
 
 			handler, ok := routes[r.Method]
 			if !ok {
-				writeMethodNowAllowedError(w, r)
+				writeError(w, http.StatusMethodNotAllowed)
 				return
 			}
 

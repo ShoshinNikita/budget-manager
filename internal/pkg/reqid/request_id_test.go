@@ -13,7 +13,7 @@ func TestRequestID(t *testing.T) {
 	reqID := New()
 
 	// Insert and extract request id
-	ctx := ToContext(context.Background(), reqID)
+	ctx := reqID.ToContext(context.Background())
 	reqIDFromCtx := FromContext(ctx)
 	require.Equal(t, reqID, reqIDFromCtx)
 

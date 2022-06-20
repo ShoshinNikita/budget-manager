@@ -27,9 +27,11 @@ func (err *NotFoundError) Error() string {
 	return fmt.Sprintf("%s with id %s is not found", err.EntityName, err.ID)
 }
 
-func IsNotFound(err error) bool {
-	var notFoundError *NotFoundError
-	return errors.As(err, &notFoundError)
+func AsNotFound(err error) (res *NotFoundError) {
+	if errors.As(err, &res) {
+		return res
+	}
+	return nil
 }
 
 type AlreadyExistError struct {
@@ -48,9 +50,11 @@ func (err *AlreadyExistError) Error() string {
 	return fmt.Sprintf("%s with id %s already exist", err.EntityName, err.ID)
 }
 
-func IsAlreadyExist(err error) bool {
-	var alreadyExistError *AlreadyExistError
-	return errors.As(err, &alreadyExistError)
+func AsAlreadyExist(err error) (res *AlreadyExistError) {
+	if errors.As(err, &res) {
+		return res
+	}
+	return nil
 }
 
 type UserError struct {
@@ -71,7 +75,9 @@ func (err *UserError) Unwrap() error {
 	return err.Err
 }
 
-func IsUserError(err error) bool {
-	var userError *UserError
-	return errors.As(err, &userError)
+func AsUserError(err error) (res *UserError) {
+	if errors.As(err, &res) {
+		return res
+	}
+	return nil
 }

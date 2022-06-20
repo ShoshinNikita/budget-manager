@@ -7,9 +7,6 @@ github.com/fatih/color
 # github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
-# github.com/gorilla/schema v1.2.0
-## explicit
-github.com/gorilla/schema
 # github.com/mattn/go-colorable v0.1.10
 ## explicit; go 1.13
 github.com/mattn/go-colorable

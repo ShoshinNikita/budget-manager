@@ -1,13 +1,12 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/web/utils"
 )
 
 type Credentials interface {
@@ -15,8 +14,6 @@ type Credentials interface {
 }
 
 func BasicAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) http.Handler {
-	errUnauthorized := errors.New("unauthorized")
-
 	checkAuth := func(r *http.Request) bool {
 		username, password, ok := r.BasicAuth()
 		if !ok {
@@ -38,7 +35,8 @@ func BasicAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) h
 			log.Warn("invalid auth request")
 
 			w.Header().Set("WWW-Authenticate", `Basic realm="Budget Manager"`)
-			utils.EncodeError(ctx, w, log, errUnauthorized, http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Fprint(w, http.StatusText(http.StatusUnauthorized))
 			return
 		}
 
