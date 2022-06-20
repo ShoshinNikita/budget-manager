@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 )
 
 // LoggingMiddleware logs HTTP requests. Logs include execution time, content length and status code
@@ -21,7 +20,7 @@ func LoggingMiddleware(h http.Handler, log logger.Logger) http.Handler {
 			return
 		}
 
-		log := reqid.FromContextToLogger(r.Context(), log)
+		log := logger.FromContext(r.Context(), log)
 		log = log.WithFields(logger.Fields{"method": r.Method, "url": r.URL.Path})
 
 		log.Debug("start request")

@@ -7,7 +7,6 @@ import (
 
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web/utils"
 )
 
@@ -33,8 +32,7 @@ func BasicAuthMiddleware(h http.Handler, creds Credentials, log logger.Logger) h
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		log := reqid.FromContextToLogger(ctx, log)
-		log = log.WithFields(logger.Fields{"ip": r.RemoteAddr})
+		log := logger.FromContext(ctx, log).WithField("ip", r.RemoteAddr)
 
 		if !checkAuth(r) {
 			log.Warn("invalid auth request")

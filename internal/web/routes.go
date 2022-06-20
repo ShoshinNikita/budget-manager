@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/reqid"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web/utils"
 )
 
@@ -16,15 +15,13 @@ func (s Server) addRoutes(mux *http.ServeMux) {
 	)
 	writeUnknownPathError := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		log := reqid.FromContextToLogger(ctx, s.log)
 
-		utils.EncodeError(ctx, w, log, errUnknownPath, http.StatusNotFound)
+		utils.EncodeError(ctx, w, s.log, errUnknownPath, http.StatusNotFound)
 	}
 	writeMethodNowAllowedError := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		log := reqid.FromContextToLogger(ctx, s.log)
 
-		utils.EncodeError(ctx, w, log, errMethodNowAllowed, http.StatusMethodNotAllowed)
+		utils.EncodeError(ctx, w, s.log, errMethodNowAllowed, http.StatusMethodNotAllowed)
 	}
 
 	// Register API handlers

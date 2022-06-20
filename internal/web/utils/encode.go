@@ -48,7 +48,7 @@ func Encode(ctx context.Context, w http.ResponseWriter, log logger.Logger, optio
 	}
 
 	enc.resp.SetBaseResponse(models.BaseResponse{
-		RequestID: reqid.FromContext(ctx).ToString(),
+		RequestID: reqid.FromContext(ctx),
 		Success:   enc.success,
 		Error:     enc.respErrorMsg,
 	})
