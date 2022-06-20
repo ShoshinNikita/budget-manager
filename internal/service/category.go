@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,6 +27,18 @@ func (s Service) GetCategories(ctx context.Context) ([]app.Category, error) {
 }
 
 func (s Service) CreateCategory(ctx context.Context, name string, parentID uuid.UUID) (app.Category, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return app.Category{}, app.NewUserError(errors.New("category name can't be empty"))
+	}
+
+	if parentID != uuid.Nil {
+		_, err := s.GetCategoryByID(ctx, parentID)
+		if err != nil {
+			return app.Category{}, errors.Wrap(err, "couldn't get category by parent id")
+		}
+	}
+
 	category := app.Category{
 		ID:       uuid.New(),
 		ParentID: parentID,

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/money"
 )
 
@@ -31,6 +32,13 @@ const (
 	AccountStatusOpen   AccountStatus = "open"
 	AccountStatusClosed AccountStatus = "closed"
 )
+
+func (status AccountStatus) IsValid() error {
+	if status == AccountStatusOpen || status == AccountStatusClosed {
+		return nil
+	}
+	return errors.Errorf("invalid account status %q", status)
+}
 
 func (acc Account) GetID() uuid.UUID {
 	return acc.ID

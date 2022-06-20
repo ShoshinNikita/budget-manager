@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,6 +21,7 @@ func (s Service) GetAccounts(ctx context.Context) ([]app.Account, error) {
 }
 
 func (s Service) CreateAccount(ctx context.Context, name string, currency money.Currency) (app.Account, error) {
+	name = strings.TrimSpace(name)
 	if name == "" {
 		name = string(currency) + " account"
 	}
@@ -33,6 +35,7 @@ func (s Service) CreateAccount(ctx context.Context, name string, currency money.
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
+
 	if err := s.accountStore.Create(ctx, acc); err != nil {
 		return app.Account{}, errors.New("couldn't save new account")
 	}

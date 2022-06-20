@@ -62,6 +62,13 @@ const (
 	TransactionTypeWithdraw TransactionType = "withdraw"
 )
 
+func (t TransactionType) IsValid() error {
+	if t == TransactionTypeAdd || t == TransactionTypeWithdraw {
+		return nil
+	}
+	return errors.Errorf("invalid transaction type %q", t)
+}
+
 type TransactionFlag int
 
 const (

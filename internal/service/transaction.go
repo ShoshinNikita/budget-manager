@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -54,9 +55,23 @@ func (s Service) CreateTransaction(
 	ctx context.Context, args app.CreateTransactionArgs,
 ) (app.Transaction, error) {
 
-	_, err := s.GetAccountByID(ctx, args.AccountID)
+	args.Name = strings.TrimSpace(args.Name)
+	if args.Name == "" {
+		return app.Transaction{}, app.NewUserError(errors.New("transaction name can't be empty"))
+	}
+
+	args.Description = strings.TrimSpace(args.Description)
+
+	if args.Amount.LessThan(money.FromInt(0)) {
+		return app.Transaction{}, app.NewUserError(errors.New("transaction amount can't be less than 0"))
+	}
+
+	acc, err := s.GetAccountByID(ctx, args.AccountID)
 	if err != nil {
 		return app.Transaction{}, errors.Wrap(err, "couldn't get account by id")
+	}
+	if acc.Status == app.AccountStatusClosed {
+		return app.Transaction{}, app.NewUserError(errors.New("couldn't create transaction for closed account"))
 	}
 	if args.CategoryID != uuid.Nil {
 		_, err := s.GetCategoryByID(ctx, args.CategoryID)

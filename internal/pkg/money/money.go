@@ -64,6 +64,26 @@ func (m Money) Div(n int64) Money {
 	return Money{m.v.Div(decimal.NewFromInt(n))}
 }
 
+// LessThan returns true when m < m1
+func (m Money) LessThan(m1 Money) bool {
+	return m.v.LessThan(m1.v)
+}
+
+// LessThanOrEqual returns true when m <= m1
+func (m Money) LessThanOrEqual(m1 Money) bool {
+	return m.v.LessThanOrEqual(m1.v)
+}
+
+// GreaterThan returns true when m > m1
+func (m Money) GreaterThan(m1 Money) bool {
+	return m.v.GreaterThan(m1.v)
+}
+
+// GreaterThanOrEqual returns true when m >= m1
+func (m Money) GreaterThanOrEqual(m1 Money) bool {
+	return m.v.GreaterThanOrEqual(m1.v)
+}
+
 var (
 	_ json.Marshaler   = (*Money)(nil)
 	_ json.Unmarshaler = (*Money)(nil)

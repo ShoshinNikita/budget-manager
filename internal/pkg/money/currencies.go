@@ -1,28 +1,10 @@
 package money
 
 import (
-	"bytes"
-	"encoding/json"
-	"strings"
-
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 )
 
 type Currency string
-
-var _ json.Unmarshaler = (*Currency)(nil)
-
-func (c *Currency) UnmarshalJSON(data []byte) error {
-	data = bytes.TrimPrefix(data, []byte(`"`))
-	data = bytes.TrimSuffix(data, []byte(`"`))
-
-	currency, ok := ValidateCurrency(string(data))
-	if !ok {
-		return errors.Errorf("invalid currency %q", string(data))
-	}
-	*c = currency
-	return nil
-}
 
 type CurrencyInfo struct {
 	Name string `json:"name"`
@@ -200,11 +182,9 @@ var currenciesInfo = map[Currency]CurrencyInfo{
 	"ETC":  {Name: "Ethereum Classic", Prec: 18},
 }
 
-func ValidateCurrency(s string) (Currency, bool) {
-	currency := Currency(strings.ToUpper(s))
-
-	if _, ok := currenciesInfo[currency]; !ok {
-		return "", false
+func (c Currency) IsValid() error {
+	if _, ok := currenciesInfo[c]; ok {
+		return nil
 	}
-	return currency, true
+	return errors.Errorf("invalid currency %q", c)
 }
