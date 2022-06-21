@@ -35,8 +35,21 @@ func (api API) RegisterHandlers(mux *http.ServeMux) {
 		fmt.Fprint(w, http.StatusText(statusCode))
 	}
 
-	for pattern, handler := range map[string]http.HandlerFunc{
-		"/api/info/get": api.getInfo,
+	for pattern, handler := range map[string]http.Handler{
+		"/api/info/get": NewHandler(api.log, api.getInfo),
+		//
+		"/api/accounts/get":    NewHandler(api.log, api.getAccounts),
+		"/api/accounts/create": NewHandler(api.log, api.createAccount),
+		"/api/accounts/close":  NewHandler(api.log, api.closeAccount),
+		//
+		"/api/transactions/get":             NewHandler(api.log, api.getTransactions),
+		"/api/transactions/create":          NewHandler(api.log, api.createTransaction),
+		"/api/transactions/create/transfer": NewHandler(api.log, api.createTransferTransaction),
+		"/api/transactions/delete":          NewHandler(api.log, api.deleteTransactions),
+		//
+		"/api/categories/get":    NewHandler(api.log, api.getCategories),
+		"/api/categories/create": NewHandler(api.log, api.createCategory),
+		"/api/categories/delete": NewHandler(api.log, api.deleteCategory),
 	} {
 		pattern := pattern
 		handler := handler
@@ -54,17 +67,4 @@ func (api API) RegisterHandlers(mux *http.ServeMux) {
 			handler.ServeHTTP(w, r)
 		})
 	}
-}
-
-func (api API) getInfo(w http.ResponseWriter, r *http.Request) {
-	resp := struct {
-		Version string `json:"version"`
-		GitHash string `json:"gitHash"`
-		Uptime  string `json:"uptime"`
-	}{
-		Version: api.version,
-		GitHash: api.gitHash,
-		Uptime:  time.Since(api.startTime).String(),
-	}
-	api.encodeResponse(r.Context(), w, http.StatusOK, resp)
 }
