@@ -6,28 +6,33 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ShoshinNikita/budget-manager/v2/internal/app"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/errors"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/pkg/logger"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/api"
 	"github.com/ShoshinNikita/budget-manager/v2/internal/web/middlewares"
+	"github.com/ShoshinNikita/budget-manager/v2/internal/web/pprof"
 )
 
 type Server struct {
-	config Config
-	log    logger.Logger
-
-	server *http.Server
-
+	config  Config
 	version string
 	gitHash string
+
+	log     logger.Logger
+	service app.Service
+
+	server *http.Server
 }
 
-func NewServer(cfg Config, log logger.Logger, version, gitHash string) *Server {
+func NewServer(cfg Config, log logger.Logger, service app.Service, version, gitHash string) *Server {
 	s := &Server{
-		config: cfg,
-		log:    log,
-		//
+		config:  cfg,
 		version: version,
 		gitHash: gitHash,
+		//
+		log:     log,
+		service: service,
 	}
 	s.server = &http.Server{
 		Addr:    ":" + strconv.Itoa(cfg.Port),
@@ -44,12 +49,12 @@ func (s *Server) buildServerHandler() http.Handler {
 		s.log.Warn("don't use embedded templates and static files")
 	}
 
-	// Add API routes
-	s.addRoutes(router)
+	api.New(s.service, s.log, s.version, s.gitHash).RegisterHandlers(router)
+
 	if s.config.EnableProfiling {
-		// Enable pprof handlers
 		s.log.Warn("pprof handlers are enabled")
-		s.addPprofRoutes(router)
+
+		pprof.New().RegisterHandlers(router)
 	}
 
 	// Wrap the handler in middlewares. The last middleware will be called first and so on

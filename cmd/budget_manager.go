@@ -123,7 +123,7 @@ func (cmd *BudgetManagerCommand) prepareService() {
 }
 
 func (cmd *BudgetManagerCommand) prepareWebServer() {
-	cmd.server = web.NewServer(cmd.config.Server, cmd.log, cmd.config.Version, cmd.config.GitHash)
+	cmd.server = web.NewServer(cmd.config.Server, cmd.log, cmd.service, cmd.config.Version, cmd.config.GitHash)
 }
 
 // Run runs web server. This method should be called in a goroutine
