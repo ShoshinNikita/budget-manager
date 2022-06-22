@@ -3,6 +3,8 @@
 .vscode/
 bin/
 var/
+frontend/node_modules
+frontend/dist
 
 # Files
 /_*
