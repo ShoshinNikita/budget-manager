@@ -18,6 +18,7 @@ dockers:
       - "--build-arg=LDFLAGS=-s -w -X 'main.version=dev' -X 'main.gitHash={{ .ShortCommit }}'"
     extra_files:
       # Dirs
+      - cmd/
       - internal/
       - vendor/
       # Files
