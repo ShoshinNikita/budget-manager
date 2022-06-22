@@ -89,10 +89,3 @@ lint:
 		golangci/golangci-lint:v1.46-alpine golangci-lint run --config .golangci.yml -v
 
 check: build lint test
-
-# generate-docs generates Swagger API documentation with swag - https://github.com/swaggo/swag
-generate-docs:
-	@ echo "Clear Swagger API docs..."
-	@ swag init --generalInfo main.go --output docs
-	@ echo "Generate Swagger API docs..."
-	@ rm ./docs/swagger.json ./docs/docs.go
