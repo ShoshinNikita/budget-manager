@@ -25,8 +25,10 @@ type GetTransactionsArgs struct {
 }
 
 type CreateTransactionArgs struct {
-	AccountID   uuid.UUID
-	Type        TransactionType
+	AccountID uuid.UUID
+	Type      TransactionType
+
+	Date        Date
 	Name        string
 	Description string
 	Amount      money.Money
@@ -34,6 +36,8 @@ type CreateTransactionArgs struct {
 }
 
 type CreateTransferTransactionsArgs struct {
+	Date Date
+
 	FromAccountID uuid.UUID
 	FromAmount    money.Money
 
@@ -42,17 +46,20 @@ type CreateTransferTransactionsArgs struct {
 }
 
 type Transaction struct {
-	ID          uuid.UUID        `json:"id"`
-	AccountID   uuid.UUID        `json:"account_id"`
-	Type        TransactionType  `json:"type"`
-	Flags       TransactionFlag  `json:"flags"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Amount      money.Money      `json:"amount"`
-	Extra       TransactionExtra `json:"extra,omitempty"`
-	CategoryID  uuid.UUID        `json:"category_id"`
-	CreatedAt   time.Time        `json:"created_at"`
-	DeletedAt   *time.Time       `json:"deleted_at"`
+	ID        uuid.UUID        `json:"id"`
+	AccountID uuid.UUID        `json:"account_id"`
+	Type      TransactionType  `json:"type"`
+	Flags     TransactionFlag  `json:"flags"`
+	Extra     TransactionExtra `json:"extra,omitempty"`
+
+	Date        Date        `json:"date"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Amount      money.Money `json:"amount"`
+	CategoryID  uuid.UUID   `json:"category_id"`
+
+	CreatedAt time.Time  `json:"created_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 type TransactionType string

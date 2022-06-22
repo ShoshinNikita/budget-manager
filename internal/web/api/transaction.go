@@ -37,6 +37,7 @@ type (
 	createTransactionReq struct {
 		AccountID   uuid.UUID                            `json:"accountID"`
 		Type        validator.Valid[app.TransactionType] `json:"type"`
+		Date        validator.Valid[app.Date]            `json:"date"`
 		Name        string                               `json:"name"`
 		Description string                               `json:"description"`
 		Amount      money.Money                          `json:"amount"`
@@ -51,6 +52,7 @@ func (api API) createTransaction(ctx context.Context, req *createTransactionReq)
 	args := app.CreateTransactionArgs{
 		AccountID:   req.AccountID,
 		Type:        req.Type.Get(),
+		Date:        req.Date.Get(),
 		Name:        req.Name,
 		Description: req.Description,
 		Amount:      req.Amount,
@@ -67,10 +69,11 @@ func (api API) createTransaction(ctx context.Context, req *createTransactionReq)
 
 type (
 	createTransferTransactionReq struct {
-		FromAccountID uuid.UUID   `json:"fromAccountID"`
-		FromAmount    money.Money `json:"fromAmount"`
-		ToAccountID   uuid.UUID   `json:"toAccountID"`
-		ToAmount      money.Money `json:"toAmount"`
+		Date          validator.Valid[app.Date] `json:"date"`
+		FromAccountID uuid.UUID                 `json:"fromAccountID"`
+		FromAmount    money.Money               `json:"fromAmount"`
+		ToAccountID   uuid.UUID                 `json:"toAccountID"`
+		ToAmount      money.Money               `json:"toAmount"`
 	}
 	createTransferTransactionResp struct {
 		NewTransactions []app.Transaction `json:"newTransactions"`
@@ -82,6 +85,7 @@ func (api API) createTransferTransaction(
 ) (*createTransferTransactionResp, error) {
 
 	args := app.CreateTransferTransactionsArgs{
+		Date:          req.Date.Get(),
 		FromAccountID: req.FromAccountID,
 		FromAmount:    req.FromAmount,
 		ToAccountID:   req.ToAccountID,

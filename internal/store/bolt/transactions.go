@@ -69,17 +69,20 @@ func (store TransactionsStore) Update(ctx context.Context, transaction app.Trans
 }
 
 type boltTransaction struct {
-	ID          uuid.UUID           `json:"id"`
-	AccountID   uuid.UUID           `json:"account_id"`
-	Type        app.TransactionType `json:"type"`
-	Flags       app.TransactionFlag `json:"flags"`
-	Name        string              `json:"name"`
-	Description string              `json:"description"`
-	Amount      money.Money         `json:"amount"`
-	Extra       json.RawMessage     `json:"extra"`
-	CategoryID  uuid.UUID           `json:"category_id"`
-	CreatedAt   time.Time           `json:"created_at"`
-	DeletedAt   *time.Time          `json:"deleted_at"`
+	ID        uuid.UUID           `json:"id"`
+	AccountID uuid.UUID           `json:"account_id"`
+	Type      app.TransactionType `json:"type"`
+	Flags     app.TransactionFlag `json:"flags"`
+	Extra     json.RawMessage     `json:"extra"`
+
+	Date        app.Date    `json:"date"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Amount      money.Money `json:"amount"`
+	CategoryID  uuid.UUID   `json:"category_id"`
+
+	CreatedAt time.Time  `json:"created_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
 }
 
 func marshalBoltTransaction(t app.Transaction) []byte {
@@ -93,6 +96,7 @@ func marshalBoltTransaction(t app.Transaction) []byte {
 		AccountID:   t.AccountID,
 		Type:        t.Type,
 		Flags:       t.Flags,
+		Date:        t.Date,
 		Name:        t.Name,
 		Description: t.Description,
 		Amount:      t.Amount,
@@ -122,6 +126,7 @@ func unmarshalBoltTransaction(data []byte) (app.Transaction, error) {
 		AccountID:   t.AccountID,
 		Type:        t.Type,
 		Flags:       t.Flags,
+		Date:        t.Date,
 		Name:        t.Name,
 		Description: t.Description,
 		Amount:      t.Amount,
