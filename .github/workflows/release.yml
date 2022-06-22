@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - v2
     tags:
       - 'v*'
 
@@ -11,7 +11,7 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     env:
-      GORELEASER_CONFIG: ".goreleaser.master.yml"
+      GORELEASER_CONFIG: ".goreleaser.dev.yml"
     steps:
       - name: Checkout
         uses: actions/checkout@v2

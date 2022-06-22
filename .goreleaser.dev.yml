@@ -1,4 +1,4 @@
-# This config is used to build code and publish Docker images on push to the master branch
+# This config is used to build code and publish Docker images on push to the default branch
 project_name: budget-manager
 
 release:
@@ -13,9 +13,9 @@ builds:
 dockers:
   - dockerfile: Dockerfile
     image_templates:
-      - "ghcr.io/shoshinnikita/{{ .ProjectName }}:master"
+      - "ghcr.io/shoshinnikita/{{ .ProjectName }}:dev"
     build_flag_templates:
-      - "--build-arg=LDFLAGS=-s -w -X 'main.version=master' -X 'main.gitHash={{ .ShortCommit }}'"
+      - "--build-arg=LDFLAGS=-s -w -X 'main.version=dev' -X 'main.gitHash={{ .ShortCommit }}'"
     extra_files:
       # Dirs
       - internal/
