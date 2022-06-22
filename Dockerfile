@@ -12,19 +12,20 @@ COPY go.mod go.sum ./
 COPY vendor ./vendor
 
 # Copy code
+COPY main.go main.go
 COPY cmd ./cmd
 COPY internal ./internal
 
 # Build
 ARG LDFLAGS
-RUN GOOS=linux go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager main.go
+RUN go build -ldflags "${LDFLAGS}" -o ./bin/budget-manager ./main.go
 
 
 #
 # Build the final image
 #
 
-FROM alpine:3.11
+FROM alpine:3.16
 
 LABEL \
 	org.opencontainers.image.url=https://github.com/users/ShoshinNikita/packages/container/package/budget-manager \

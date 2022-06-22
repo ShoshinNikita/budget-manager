@@ -1,0 +1,15 @@
+version: "2.4"
+
+services:
+  budget-manager:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: budget-manager
+    environment:
+      STORE_BOLT_PATH: ./var/budget-manager.db
+      SERVER_AUTH_DISABLE: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./_var:/srv/var
