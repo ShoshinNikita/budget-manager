@@ -11,7 +11,7 @@ import (
 )
 
 type getAccountsResp struct {
-	Accounts []app.Account `json:"accounts"`
+	Accounts []app.AccountWithBalance `json:"accounts"`
 }
 
 func (api API) getAccounts(ctx context.Context, req *emptyReq) (*getAccountsResp, error) {

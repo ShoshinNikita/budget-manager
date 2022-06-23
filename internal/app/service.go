@@ -9,8 +9,8 @@ import (
 )
 
 type Service interface {
-	GetAccountByID(ctx context.Context, id uuid.UUID) (Account, error)
-	GetAccounts(ctx context.Context) ([]Account, error)
+	GetAccountByID(ctx context.Context, id uuid.UUID) (AccountWithBalance, error)
+	GetAccounts(ctx context.Context) ([]AccountWithBalance, error)
 	CreateAccount(ctx context.Context, name string, currency money.Currency) (Account, error)
 	CloseAccount(ctx context.Context, id uuid.UUID) error
 

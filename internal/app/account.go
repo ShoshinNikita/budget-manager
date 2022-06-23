@@ -47,3 +47,9 @@ func (acc Account) GetID() uuid.UUID {
 func (Account) GetEntityName() string {
 	return "account"
 }
+
+type AccountWithBalance struct {
+	Account
+
+	Balance money.Money `json:"balance"`
+}
