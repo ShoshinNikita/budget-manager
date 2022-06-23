@@ -7,7 +7,7 @@ import (
 
 type getInfoResp struct {
 	Version string `json:"version"`
-	GitHash string `json:"gitHash"`
+	GitHash string `json:"git_hash"`
 	Uptime  string `json:"uptime"`
 }
 

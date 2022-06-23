@@ -35,16 +35,16 @@ func (api API) getTransactions(ctx context.Context, req *getTransactionsReq) (*g
 
 type (
 	createTransactionReq struct {
-		AccountID   uuid.UUID                            `json:"accountID"`
+		AccountID   uuid.UUID                            `json:"account_id"`
 		Type        validator.Valid[app.TransactionType] `json:"type"`
 		Date        validator.Valid[app.Date]            `json:"date"`
 		Name        string                               `json:"name"`
 		Description string                               `json:"description"`
 		Amount      money.Money                          `json:"amount"`
-		CategoryID  uuid.UUID                            `json:"categoryID"`
+		CategoryID  uuid.UUID                            `json:"category_id"`
 	}
 	createTransactionResp struct {
-		NewTransaction app.Transaction `json:"newTransaction"`
+		NewTransaction app.Transaction `json:"new_transaction"`
 	}
 )
 
@@ -70,13 +70,13 @@ func (api API) createTransaction(ctx context.Context, req *createTransactionReq)
 type (
 	createTransferTransactionReq struct {
 		Date          validator.Valid[app.Date] `json:"date"`
-		FromAccountID uuid.UUID                 `json:"fromAccountID"`
-		FromAmount    money.Money               `json:"fromAmount"`
-		ToAccountID   uuid.UUID                 `json:"toAccountID"`
-		ToAmount      money.Money               `json:"toAmount"`
+		FromAccountID uuid.UUID                 `json:"from_account_id"`
+		FromAmount    money.Money               `json:"from_amount"`
+		ToAccountID   uuid.UUID                 `json:"to_account_id"`
+		ToAmount      money.Money               `json:"to_amount"`
 	}
 	createTransferTransactionResp struct {
-		NewTransactions []app.Transaction `json:"newTransactions"`
+		NewTransactions []app.Transaction `json:"new_transactions"`
 	}
 )
 

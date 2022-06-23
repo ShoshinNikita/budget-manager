@@ -9,6 +9,8 @@ type Currency string
 type CurrencyInfo struct {
 	Name string `json:"name"`
 	// Prec is a maximum number of digits after the decimal point
+	//
+	//nolint:tagliatelle
 	Prec int `json:"precision"`
 }
 

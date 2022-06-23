@@ -25,10 +25,10 @@ func (api API) getCategories(ctx context.Context, req *emptyReq) (*getCategories
 type (
 	createCategoryReq struct {
 		Name     string    `json:"name"`
-		ParentID uuid.UUID `json:"parentID"`
+		ParentID uuid.UUID `json:"parent_id"`
 	}
 	createCategoryResp struct {
-		NewCategory app.Category `json:"newCategory"`
+		NewCategory app.Category `json:"new_category"`
 	}
 )
 

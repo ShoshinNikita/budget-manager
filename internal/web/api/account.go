@@ -30,7 +30,7 @@ type (
 		Currency validator.Valid[money.Currency] `json:"currency"`
 	}
 	createAccountsResp struct {
-		NewAccount app.Account `json:"newAccount"`
+		NewAccount app.Account `json:"new_account"`
 	}
 )
 

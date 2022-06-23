@@ -42,6 +42,7 @@ linters:
     - predeclared
     - revive
     - sqlclosecheck
+    - tagliatelle
     - unconvert
     - unparam
     - wastedassign
@@ -52,6 +53,11 @@ linters-settings:
       - standard
       - default
       - prefix(github.com/ShoshinNikita/budget-manager/v2)
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake
 
 issues:
   exclude:
