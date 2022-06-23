@@ -1,7 +1,9 @@
 <script lang="ts">
-	import type * as types from "@src/types";
+	import * as types from "@src/types";
 
 	export let account: types.AccountWithBalance;
+
+	const isAccountOpen = account.status === types.AccountStatus.Open;
 </script>
 
 <div class="account">
@@ -12,8 +14,8 @@
 		<span>{account.balance}&nbsp;{account.currency}</span>
 	</div>
 	<div class="actions">
-		<button>Edit</button>
-		<button>Close</button>
+		<button disabled={!isAccountOpen}>Edit</button>
+		<button disabled={!isAccountOpen}>Close</button>
 	</div>
 </div>
 

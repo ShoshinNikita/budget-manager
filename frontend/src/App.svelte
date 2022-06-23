@@ -16,8 +16,8 @@
 <style global lang="scss">
 	* {
 		box-sizing: border-box;
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-			Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+			"Helvetica Neue", sans-serif;
 		font-weight: normal;
 	}
 
@@ -52,5 +52,9 @@
 
 	button {
 		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+		}
 	}
 </style>
