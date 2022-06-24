@@ -1,12 +1,13 @@
 <script lang="ts">
 	import * as types from "@src/types";
+	import Button from "@src/components/Button.svelte";
 
 	export let account: types.AccountWithBalance;
 
 	const isAccountOpen = account.status === types.AccountStatus.Open;
 </script>
 
-<div class="account">
+<div class="account" class:closed={!isAccountOpen}>
 	<div class="name">
 		<span>{account.name}</span>
 	</div>
@@ -14,8 +15,8 @@
 		<span>{account.balance}&nbsp;{account.currency}</span>
 	</div>
 	<div class="actions">
-		<button disabled={!isAccountOpen}>Edit</button>
-		<button disabled={!isAccountOpen}>Close</button>
+		<Button icon="edit" disabled={!isAccountOpen} title="Edit" />
+		<Button icon="x" disabled={!isAccountOpen} title="Close" />
 	</div>
 </div>
 
@@ -27,6 +28,11 @@
 		column-gap: 15px;
 		margin: 5px 0;
 	}
+
+	.closed > .name {
+		text-decoration: line-through;
+	}
+
 	.balance {
 		text-align: right;
 	}

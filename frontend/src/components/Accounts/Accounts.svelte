@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import Button, { ButtonSize } from "@src/components/Button.svelte";
 	import * as accountStore from "@src/stores/accounts";
 	import type * as types from "@src/types";
 	import Account from "./Account.svelte";
@@ -15,6 +16,9 @@
 	});
 
 	let showClosedAccounts = false;
+	const reverseShowClosedAccounts = () => {
+		showClosedAccounts = !showClosedAccounts;
+	};
 
 	// Init on creation
 	onMount(async () => {
@@ -33,17 +37,21 @@
 
 	{#if closedAccounts.length > 0}
 		<div class="show-closed-accounts-button">
-			<button
-				on:click={() => {
-					showClosedAccounts = !showClosedAccounts;
-				}}
-			>
-				{#if showClosedAccounts}
-					Hide Closed Accs
-				{:else}
-					Show Closed Accs
-				{/if}
-			</button>
+			{#if showClosedAccounts}
+				<Button
+					icon={"chevron-up"}
+					size={ButtonSize.Medium}
+					title="Hide Closed Accounts"
+					onClick={reverseShowClosedAccounts}
+				/>
+			{:else}
+				<Button
+					icon={"chevron-down"}
+					size={ButtonSize.Medium}
+					title="Show Closed Accounts"
+					onClick={reverseShowClosedAccounts}
+				/>
+			{/if}
 		</div>
 	{/if}
 
@@ -54,12 +62,12 @@
 	{/if}
 
 	<div class="actions">
-		<button>Add</button>
-		<button>Transfer</button>
+		<Button icon="plus" size={ButtonSize.Large} title="Add" />
+		<Button icon="transfer" size={ButtonSize.Large} title="Transfer" />
 	</div>
 </div>
 
-<style>
+<style lang="scss">
 	.accounts {
 		height: 100%;
 		position: relative;
@@ -71,7 +79,13 @@
 	}
 
 	.actions {
-		text-align: center;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		position: absolute;
+		column-gap: 20px;
+		bottom: 50px;
+		left: 50%;
+		transform: translateX(-50%);
 		margin-top: 50px;
 	}
 </style>
