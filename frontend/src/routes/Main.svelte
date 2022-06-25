@@ -11,7 +11,7 @@
 <style lang="scss">
 	.main {
 		display: grid;
-		grid-template-columns: 2fr 6fr;
+		grid-template-columns: 2fr 7fr;
 		column-gap: 15px;
 		height: 100%;
 	}

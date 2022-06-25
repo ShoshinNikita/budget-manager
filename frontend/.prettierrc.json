@@ -3,6 +3,6 @@
 	"semi": true,
 	"trailingComma": "es5",
 	"singleQuote": false,
-	"printWidth": 110,
+	"printWidth": 120,
 	"plugins": ["prettier-plugin-svelte"]
 }

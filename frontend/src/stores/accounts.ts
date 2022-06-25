@@ -1,13 +1,15 @@
 import { writable } from "svelte/store";
 import { getAccounts } from "@src/api";
 import * as types from "@src/types";
+import * as api from "@src/api";
 
 const openAccountStore = writable<types.AccountWithBalance[]>([]);
 const closedAccountStore = writable<types.AccountWithBalance[]>([]);
 
 export const fetchAccounts = async () => {
 	const accounts = await getAccounts();
-	if (!accounts) {
+	if (accounts instanceof api.Error) {
+		// TODO: show error?
 		return;
 	}
 

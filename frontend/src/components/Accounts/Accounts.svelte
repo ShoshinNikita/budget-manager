@@ -29,40 +29,43 @@
 <div class="card accounts">
 	<h2 class="card-title">Accounts</h2>
 
-	{#each openAccounts as account}
-		<Account {account} />
-	{:else}
-		<span>No Accounts Yet</span>
-	{/each}
-
-	{#if closedAccounts.length > 0}
-		<div class="show-closed-accounts-button">
-			{#if showClosedAccounts}
-				<Button
-					icon={"chevron-up"}
-					size={ButtonSize.Medium}
-					title="Hide Closed Accounts"
-					onClick={reverseShowClosedAccounts}
-				/>
-			{:else}
-				<Button
-					icon={"chevron-down"}
-					size={ButtonSize.Medium}
-					title="Show Closed Accounts"
-					onClick={reverseShowClosedAccounts}
-				/>
-			{/if}
-		</div>
-	{/if}
-
-	{#if showClosedAccounts}
-		{#each closedAccounts as account}
+	<table class="accounts-list">
+		{#each openAccounts as account}
 			<Account {account} />
 		{/each}
-	{/if}
+
+		<Account isNewAccountForm={true} />
+
+		{#if closedAccounts.length > 0}
+			<tr class="show-closed-accounts-button">
+				<td colspan="3">
+					{#if showClosedAccounts}
+						<Button
+							icon={"chevron-up"}
+							size={ButtonSize.Medium}
+							title="Hide Closed Accounts"
+							onClick={reverseShowClosedAccounts}
+						/>
+					{:else}
+						<Button
+							icon={"chevron-down"}
+							size={ButtonSize.Medium}
+							title="Show Closed Accounts"
+							onClick={reverseShowClosedAccounts}
+						/>
+					{/if}
+				</td>
+			</tr>
+		{/if}
+
+		{#if showClosedAccounts}
+			{#each closedAccounts as account}
+				<Account {account} />
+			{/each}
+		{/if}
+	</table>
 
 	<div class="actions">
-		<Button icon="plus" size={ButtonSize.Large} title="Add" />
 		<Button icon="transfer" size={ButtonSize.Large} title="Transfer" />
 	</div>
 </div>
@@ -73,19 +76,19 @@
 		position: relative;
 	}
 
+	.accounts-list {
+		width: 100%;
+	}
+
 	.show-closed-accounts-button {
-		margin-top: 20px;
 		text-align: center;
 	}
 
 	.actions {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
+		text-align: center;
 		position: absolute;
-		column-gap: 20px;
 		bottom: 50px;
 		left: 50%;
 		transform: translateX(-50%);
-		margin-top: 50px;
 	}
 </style>

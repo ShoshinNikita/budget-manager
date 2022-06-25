@@ -16,8 +16,8 @@
 <style global lang="scss">
 	* {
 		box-sizing: border-box;
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,
-			"Helvetica Neue", sans-serif;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue",
+			sans-serif;
 		font-weight: normal;
 	}
 
@@ -55,6 +55,23 @@
 
 		&:disabled {
 			cursor: default;
+		}
+	}
+
+	input {
+		font-size: inherit;
+		border: none;
+		border-bottom: 1px solid rgba($color: #000000, $alpha: 0.3);
+		padding: 0;
+		width: 100%;
+
+		&:disabled {
+			border-color: rgba($color: #000000, $alpha: 0);
+			color: #000000;
+		}
+
+		&:focus {
+			border-bottom: 1px solid rgba($color: #000000, $alpha: 0.6);
 		}
 	}
 </style>
