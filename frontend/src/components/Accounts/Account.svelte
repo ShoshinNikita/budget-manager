@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as types from "@src/types";
 	import Button from "@src/components/Button.svelte";
-	import * as api from "@src/api";
+	import { accountService } from "@src/services";
 
 	export let account: types.AccountWithBalance | undefined = undefined;
 	export let isNewAccountForm = false;
@@ -10,20 +10,14 @@
 	let newAccountName = "",
 		newAccountCurreny = "USD";
 
-	// TODO: get from store
 	const currencies = ["USD", "RUB", "EUR"];
 
-	const createAccount = () => {
-		if (newAccountName === "") {
-			return;
+	const createAccount = async () => {
+		const ok = await accountService.createAccount(newAccountName, newAccountCurreny);
+		if (ok) {
+			newAccountName = "";
+			newAccountCurreny = "USD";
 		}
-
-		const resp = api.createAccount(newAccountName, newAccountCurreny);
-		if (resp instanceof api.Error) {
-			handleError(resp);
-		}
-
-		// TODO: trigger accounts refresh
 	};
 
 	// For existing account
@@ -35,31 +29,14 @@
 		accountName = account.name;
 	}
 
-	const editAccount = () => {
+	const editAccount = async () => {
 		isEditMode = false;
-		if (accountName === account!.name) {
-			return;
-		}
 
-		const resp = api.editAccount();
-		if (resp instanceof api.Error) {
-			handleError(resp);
-		}
-
-		// TODO: trigger accounts refresh
+		await accountService.editAccount(account!.id, accountName);
 	};
 
-	const closeAccount = () => {
-		if (!confirm(`Do you really want to close account "${account!.name}"`)) {
-			return;
-		}
-
-		const resp = api.closeAccount(account!.id);
-		if (resp instanceof api.Error) {
-			handleError(resp);
-		}
-
-		// TODO: trigger accounts refresh
+	const closeAccount = async () => {
+		await accountService.closeAccount(account!);
 	};
 
 	const resetChanges = () => {
@@ -73,17 +50,17 @@
 			f();
 		}
 	};
-
-	// TODO: show notification
-	const handleError = (err: api.Error) => {
-		console.log(err);
-	};
 </script>
 
 <tr class="account">
 	<td class="name">
 		{#if isNewAccountForm}
-			<input type="text" bind:value={newAccountName} on:keypress={onEnter(createAccount)} placeholder="Name" />
+			<input
+				type="text"
+				bind:value={newAccountName}
+				on:keypress={onEnter(createAccount)}
+				placeholder="{newAccountCurreny} account"
+			/>
 		{:else}
 			<input type="text" bind:value={accountName} disabled={!isEditMode} on:keypress={onEnter(editAccount)} />
 		{/if}

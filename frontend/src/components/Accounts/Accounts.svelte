@@ -1,17 +1,16 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import Button, { ButtonSize } from "@src/components/Button.svelte";
-	import * as accountStore from "@src/stores/accounts";
 	import type * as types from "@src/types";
+	import { accountService } from "@src/services";
 	import Account from "./Account.svelte";
 
 	let openAccounts: types.AccountWithBalance[] = [];
-	accountStore.subscribeToOpenAccountUpdates((accs) => {
+	accountService.getOpenAccounts((accs) => {
 		openAccounts = accs;
 	});
 
 	let closedAccounts: types.AccountWithBalance[] = [];
-	accountStore.subscribeToClosedAccountUpdates((accs) => {
+	accountService.getClosedAccounts((accs) => {
 		closedAccounts = accs;
 	});
 
@@ -19,18 +18,13 @@
 	const reverseShowClosedAccounts = () => {
 		showClosedAccounts = !showClosedAccounts;
 	};
-
-	// Init on creation
-	onMount(async () => {
-		await accountStore.fetchAccounts();
-	});
 </script>
 
 <div class="card accounts">
 	<h2 class="card-title">Accounts</h2>
 
 	<table class="accounts-list">
-		{#each openAccounts as account}
+		{#each openAccounts as account (account.id)}
 			<Account {account} />
 		{/each}
 
@@ -59,7 +53,7 @@
 		{/if}
 
 		{#if showClosedAccounts}
-			{#each closedAccounts as account}
+			{#each closedAccounts as account (account.id)}
 				<Account {account} />
 			{/each}
 		{/if}
