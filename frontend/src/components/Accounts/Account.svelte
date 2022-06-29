@@ -113,23 +113,9 @@
 		}
 	}
 
-	// TODO: move to global
-	input {
-		width: 100%;
-		font-size: inherit;
-		border: none;
-		border-bottom: 1px solid rgba($color: #000000, $alpha: 0.6);
-		padding: 0;
-
-		&:disabled {
-			border-color: rgba($color: #000000, $alpha: 0);
-		}
-	}
-
-	select {
-		background-color: white;
-		border: none;
-		border-bottom: 1px solid black;
+	input:disabled {
+		border-color: rgba($color: #000000, $alpha: 0);
+		color: #000000;
 	}
 
 	.name {

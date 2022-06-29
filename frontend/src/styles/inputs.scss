@@ -1,0 +1,51 @@
+$color: rgba(
+	$color: #000000,
+	$alpha: 0.3,
+);
+$accent-color: rgba(
+	$color: #000000,
+	$alpha: 0.6,
+);
+$disabled-color: rgba(
+	$color: #000000,
+	$alpha: 0.1,
+);
+
+button {
+	cursor: pointer;
+
+	&:disabled {
+		cursor: default;
+	}
+}
+
+input,
+select {
+	background-color: white;
+	border: none;
+	border-bottom: 1px solid $color;
+	font-size: inherit;
+	width: 100%;
+
+	&:disabled {
+		border-color: $disabled-color;
+	}
+
+	&:focus {
+		border-color: $accent-color;
+	}
+}
+
+// Hide arrows from input[type="number"]
+//
+// Source: https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"] {
+	-moz-appearance: textfield;
+}

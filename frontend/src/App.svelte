@@ -1,4 +1,9 @@
 <script>
+	import "@src/styles/card.scss";
+	import "@src/styles/global.scss";
+	import "@src/styles/inputs.scss";
+	import "@src/styles/scrollbar.scss";
+
 	import { Router, Route } from "svelte-routing";
 	import Main from "@src/routes/Main.svelte";
 	import Statistics from "@src/routes/Statistics.svelte";
@@ -13,65 +18,8 @@
 	</div>
 </Router>
 
-<style global lang="scss">
-	* {
-		box-sizing: border-box;
-		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue",
-			sans-serif;
-		font-weight: normal;
-	}
-
-	body {
-		height: 100vh;
-		margin: 0;
-		padding: 0;
-		width: 100vw;
-	}
-
-	#app {
-		margin: 0;
-		padding: 10px;
-		height: 100%;
-	}
-
+<style lang="scss">
 	#router {
 		height: 100%;
-	}
-
-	.card {
-		border: 1px solid black;
-		padding: 10px;
-	}
-
-	h2.card-title {
-		border-bottom: 1px solid rgb(211, 211, 211);
-		margin: 0 0 10px;
-		padding-left: 5px;
-		text-align: left;
-	}
-
-	button {
-		cursor: pointer;
-
-		&:disabled {
-			cursor: default;
-		}
-	}
-
-	input {
-		font-size: inherit;
-		border: none;
-		border-bottom: 1px solid rgba($color: #000000, $alpha: 0.3);
-		padding: 0;
-		width: 100%;
-
-		&:disabled {
-			border-color: rgba($color: #000000, $alpha: 0);
-			color: #000000;
-		}
-
-		&:focus {
-			border-bottom: 1px solid rgba($color: #000000, $alpha: 0.6);
-		}
 	}
 </style>
