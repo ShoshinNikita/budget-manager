@@ -23,7 +23,6 @@ export class AccountService {
 	createAccount = async (name: string, currency: types.Currency): Promise<boolean> => {
 		const resp = await api.createAccount(name, currency);
 		if (resp instanceof api.Error) {
-			resp.cause;
 			this.notificationService.notify(`couldn't create account: ${resp.cause}`);
 			return false;
 		}
@@ -38,7 +37,7 @@ export class AccountService {
 	};
 
 	closeAccount = async (account: types.AccountWithBalance) => {
-		if (!confirm(`Do you really want to close account "${account!.name}"`)) {
+		if (!confirm(`Do you really want to close account "${account.name}"`)) {
 			return;
 		}
 

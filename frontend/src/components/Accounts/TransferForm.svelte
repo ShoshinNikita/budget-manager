@@ -46,7 +46,7 @@
 	<div class="from">
 		<span class="amount">
 			<input type="number" bind:value={fromAmount} />
-			<span>{fromCurrency}</span>
+			<span title="Currency">{fromCurrency}</span>
 		</span>
 
 		<select bind:value={fromAccountID} title="From">
@@ -64,7 +64,7 @@
 	<div class="to">
 		<span class="amount">
 			<input type="number" bind:value={toAmount} />
-			<span>{toCurrency}</span>
+			<span title="Currency">{toCurrency}</span>
 		</span>
 
 		<select bind:value={toAccountID} title="To">

@@ -118,6 +118,10 @@
 		color: #000000;
 	}
 
+	select {
+		width: auto;
+	}
+
 	.name {
 		min-width: 100px;
 
