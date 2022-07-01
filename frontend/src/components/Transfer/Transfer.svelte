@@ -42,48 +42,53 @@
 	};
 </script>
 
-<div class="transfer-window">
-	<div class="from">
-		<span class="amount">
-			<input type="number" bind:value={fromAmount} />
-			<span title="Currency">{fromCurrency}</span>
-		</span>
+<div class="card">
+	<h2 class="card-title">Transfer</h2>
 
-		<select bind:value={fromAccountID} title="From">
-			<option value="" disabled selected>From Account</option>
-			{#each accounts as account (account.id)}
-				<option value={account.id}>{account.name}</option>
-			{/each}
-		</select>
-	</div>
+	<div class="transfer-form">
+		<div class="from">
+			<span class="amount">
+				<input type="number" bind:value={fromAmount} />
+				<span title="Currency">{fromCurrency}</span>
+			</span>
 
-	<div class="transfer-button">
-		<Button icon="arrow-right" size={ButtonSize.Medium} title="Transfer" onClick={transfer} />
-	</div>
+			<select bind:value={fromAccountID} title="From">
+				<option value="" disabled selected>From Account</option>
+				{#each accounts as account (account.id)}
+					<option value={account.id}>{account.name}</option>
+				{/each}
+			</select>
+		</div>
 
-	<div class="to">
-		<span class="amount">
-			<input type="number" bind:value={toAmount} />
-			<span title="Currency">{toCurrency}</span>
-		</span>
+		<div class="transfer-button">
+			<Button icon="arrow-right" size={ButtonSize.Medium} title="Transfer" onClick={transfer} />
+		</div>
 
-		<select bind:value={toAccountID} title="To">
-			<option value="" disabled selected>To Account</option>
+		<div class="to">
+			<span class="amount">
+				<input type="number" bind:value={toAmount} />
+				<span title="Currency">{toCurrency}</span>
+			</span>
 
-			{#each accounts as account (account.id)}
-				<option value={account.id}>{account.name}</option>
-			{/each}
-		</select>
+			<select bind:value={toAccountID} title="To">
+				<option value="" disabled selected>To Account</option>
+
+				{#each accounts as account (account.id)}
+					<option value={account.id}>{account.name}</option>
+				{/each}
+			</select>
+		</div>
 	</div>
 </div>
 
 <style lang="scss">
-	.transfer-window {
+	.transfer-form {
 		column-gap: 20px;
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
 		margin: auto;
-		padding: 30px;
+		overflow: auto;
+		padding: 20px;
 	}
 
 	.from,
@@ -91,6 +96,7 @@
 		column-gap: 10px;
 		display: grid;
 		grid-template-rows: 1fr 1fr;
+		min-width: 100px;
 
 		> .amount {
 			display: grid;

@@ -3,7 +3,6 @@
 	import type * as types from "@src/types";
 	import { accountService } from "@src/services";
 	import Account from "./Account.svelte";
-	import TransferForm from "./TransferForm.svelte";
 
 	let openAccounts: types.AccountWithBalance[] = [];
 	accountService.getOpenAccounts((accs) => {
@@ -61,18 +60,15 @@
 			{/if}
 		</table>
 	</div>
-
-	<TransferForm />
 </div>
 
 <style lang="scss">
 	.accounts {
 		display: grid;
-		grid-template-rows: min-content auto min-content;
+		grid-template-rows: min-content auto;
 		height: 100%;
 		max-height: 100%;
 		overflow: auto;
-		position: relative;
 	}
 
 	.accounts-list {
