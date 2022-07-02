@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button, { Size as ButtonSize } from "@src/components/Button.svelte";
 	import type * as types from "@src/types";
-	import { accountService } from "@src/services";
+	import { accountService, transactionService } from "@src/services";
 
 	let accounts: types.AccountWithBalance[] = [];
 	let accountsByID = new Map<string, types.AccountWithBalance>();
@@ -32,13 +32,19 @@
 	$: fromCurrency = getCurrency(fromAccountID);
 	$: toCurrency = getCurrency(toAccountID);
 
-	const transfer = () => {
-		console.log("TODO: transfer");
-
-		fromAmount = 0;
-		fromAccountID = "";
-		toAmount = 0;
-		toAccountID = "";
+	const transfer = async () => {
+		const resp = await transactionService.createTransferTransaction({
+			fromAccountID: fromAccountID,
+			fromAmount: fromAmount,
+			toAccountID: toAccountID,
+			toAmount: toAmount,
+		});
+		if (resp) {
+			fromAmount = 0;
+			fromAccountID = "";
+			toAmount = 0;
+			toAccountID = "";
+		}
 	};
 </script>
 
@@ -102,6 +108,10 @@
 			display: grid;
 			grid-template-columns: auto min-content;
 			column-gap: 3px;
+
+			input {
+				text-align: right;
+			}
 		}
 	}
 

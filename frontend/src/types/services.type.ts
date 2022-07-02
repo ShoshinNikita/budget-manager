@@ -13,3 +13,15 @@ export interface AccountService {
 	editAccount(id: string, newName?: string): Promise<void>;
 	closeAccount(acc: AccountWithBalance): Promise<void>;
 }
+
+export interface TransactionService {
+	createTransferTransaction(args: CreateTransferTransactionArgs): Promise<boolean>;
+}
+
+export type CreateTransferTransactionArgs = {
+	fromAccountID: string;
+	fromAmount: number;
+
+	toAccountID: string;
+	toAmount: number;
+};
