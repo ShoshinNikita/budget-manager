@@ -1,4 +1,6 @@
-# WIP: Budget Manager
+# WIP: Budget Manager v2
+
+❗ This is WIP v2 version. Check out the [`master` branch](https://github.com/ShoshinNikita/budget-manager/tree/master) to see docs for the stable v1 version.
 
 **Budger Manager** is an easy-to-use, lightweight and self-hosted solution to track your finances
 
